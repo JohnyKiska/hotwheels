@@ -464,8 +464,8 @@
 
 
 
-                        <button onclick="event.stopPropagation(); deleteCar(${car.id});" style="position: absolute; top: 8px; left: 8px; background: rgba(255,51,55,0.8); color: white; border: none; border-radius: 50%; width: 22px; height: 22px; font-size: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 20;">×</button>
-                        <!-- ИСПРАВЛЕНО: Плашка теперь использует динамические цвета редкости -->
+                        <button onclick="event.stopPropagation(); resetCarStatus(${car.id});" style="position: absolute; top: 8px; left: 8px; background: rgba(255,51,55,0.8); color: white; border: none; border-radius: 50%; width: 22px; height: 22px; font-size: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 20;">×</button>
+ <!-- ИСПРАВЛЕНО: Плашка теперь использует динамические цвета редкости -->
                         <div style="background: ${bottomBarBg}; border-top: ${bottomBarBorder}; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center;">
 
                             <div style="display: flex; flex-direction: column; max-width: 65%; text-align: left;">
