@@ -519,6 +519,18 @@
 // Пересохраняем базу данных в localStorage и обновляем витрину
             saveToStorage();
         }
+                // ФУНКЦИЯ СБРОСА СТАТУСА МОДЕЛИ (Переводит обратно в поиск)
+        function resetCarStatus(carId) {
+            const car = cars.find(c => c.id === carId);
+            if (!car) return;
+
+            if (confirm(`Вы действительно хотите перевести модель ${car.name} обратно в статус 'В поиске'?`)) {
+                car.status = 'missing';
+                car.price = 0;
+                saveToStorage(); // Пересохраняем локальные изменения и обновляем дашборд
+            }
+        }
+
 
         if (searchInput) searchInput.addEventListener('input', updateDashboard);
         if (filterSelect) filterSelect.addEventListener('change', updateDashboard);
