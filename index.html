@@ -219,6 +219,10 @@
 
         function updateDashboard() {
             if (!collectionGrid) return;
+            
+            // Находим ID группы, которая развернута прямо сейчас (у которой display равен 'grid')
+            const activeGridEl = document.querySelector('[id^="grid-"]:not([style*="display: none"])');
+            const activeGridId = activeGridEl ? activeGridEl.id : null;
             collectionGrid.innerHTML = ''; 
             
             let totalSpent = 0, ownedCount = 0;
@@ -404,9 +408,14 @@
                 tileWrapper.appendChild(carsGrid);
                 collectionGrid.appendChild(tileWrapper);
             });
+// ИСПРАВЛЕНО: Если до обновления была открыта группа, возвращаем ей режим отображения 'grid'
+            if (activeGridId) {
+                const restoreGrid = document.getElementById(activeGridId);
+                if (restoreGrid) restoreGrid.style.display = 'grid';
+            }
         }
 
-        // ФУНКЦИЯ БЫСТРОЙ ПОКУПКИ МОДЕЛИ ВНУТРИ АЛЬБОМА
+ // ФУНКЦИЯ БЫСТРОЙ ПОКУПКИ МОДЕЛИ ВНУТРИ АЛЬБОМА
         function buyCarInline(carId) {
             const car = cars.find(c => c.id === carId);
             if (!car) return;
