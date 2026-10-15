@@ -127,12 +127,34 @@
         </div>
     </div>
     <script>
-        let cars = JSON.parse(localStorage.getItem('hw_dashboard_album')) || [];
+        // Автоматическая загрузка базы данных прямо из твоего репозитория GitHub
+        let cars = [];
 
+        async function loadDatabase() {
+            try {
+                // Скрипт сам берет файл collection.json, лежащий в этой же папке на хостинге
+                const response = await fetch('collection.json');
+                if (response.ok) {
+                    cars = await response.json();
+                    console.log('База данных Hot Wheels успешно загружена из GitHub!');
+                } else {
+                    // Если файла на сервере нет, подтягиваем локальный бэкап
+                    cars = JSON.parse(localStorage.getItem('hw_dashboard_album')) || [];
+                }
+            } catch (e) {
+                cars = JSON.parse(localStorage.getItem('hw_dashboard_album')) || [];
+            }
+            // Запускаем пересчет дашборда и витрины
+            updateDashboard();
+        }
+
+        // Заменяем стандартную функцию сохранения, чтобы она обновляла локальную память при инлайн-покупках
         function saveToStorage() {
             localStorage.setItem('hw_dashboard_album', JSON.stringify(cars));
             updateDashboard();
+            console.log('Внимание: изменения сохранены локально. Не забудьте обновить collection.json на GitHub!');
         }
+
 
         const btnImport = document.getElementById('btn-import-json');
         const jsonDataArea = document.getElementById('car-json-data');
@@ -405,7 +427,8 @@
         if (searchInput) searchInput.addEventListener('input', updateDashboard);
         if (filterSelect) filterSelect.addEventListener('change', updateDashboard);
 
-        updateDashboard();
+        // Вместо простой отрисовки запускаем сетевое чтение файла базы данных
+        loadDatabase();
     </script>
 </body>
 </html>
