@@ -7,6 +7,16 @@
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #f4f4f9; padding: 20px; margin: 0; }
         .main-layout { display: grid; grid-template-columns: 320px 1fr; gap: 20px; }
+/* АДАПТИВНАЯ ВЕРСТКА ДЛЯ ТЕЛЕФОНОВ: перестраиваем панели в один вертикальный ряд */
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            .main-layout { 
+                grid-template-columns: 1fr; /* Переключаем в одну колонку */
+                gap: 15px; 
+            }
+            .form-container { width: 100%; box-sizing: border-box; }
+            input[type="text"], select { width: 100% !important; }
+        }
         .form-container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); height: fit-content; }
         .form-group { margin-bottom: 12px; }
         .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
