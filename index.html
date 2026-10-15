@@ -281,7 +281,31 @@
             });
 
             // ОТРИСОВКА НАСТОЯЩИХ КВАДРАТНЫХ ПЛИТОК
-            Object.keys(groups).sort().forEach(sName => {
+            // УМНАЯ СОРТИРОВКА ПЛИТОК: Начатые (Желтые) -> Собранные (Зеленые) -> Пустые (Черные)
+            Object.keys(groups).sort((a, b) => {
+                const groupA = groups[a];
+                const groupB = groups[b];
+
+                // Присваиваем веса статусам: Начата = 3, Собрана = 2, Пустая = 1
+                let weightA = 1;
+                if (groupA.ownedCount > 0) {
+                    weightA = (groupA.ownedCount === groupA.totalInSeries) ? 2 : 3;
+                }
+
+                let weightB = 1;
+                if (groupB.ownedCount > 0) {
+                    weightB = (groupB.ownedCount === groupB.totalInSeries) ? 2 : 3;
+                }
+
+                // Сначала сортируем по весу (от большего к меньшему)
+                if (weightA !== weightB) {
+                    return weightB - weightA;
+                }
+
+                // Если статус одинаковый, сортируем по алфавиту
+                return a.localeCompare(b);
+            }).forEach(sName => {
+
                 const group = groups[sName];
                 group.items.sort((a, b) => (parseInt(a.seriesNum || a.carNum) || 0) - (parseInt(b.seriesNum || b.carNum) || 0));
 
