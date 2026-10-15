@@ -13,7 +13,8 @@
         .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
         button { background: #ff5000; color: white; border: none; padding: 12px; border-radius: 4px; cursor: pointer; width: 100%; font-size: 16px; font-weight: bold; margin-top: 5px; }
         button:hover { background: #e04500; }
-        /* ИСПРАВЛЕНО: Главная витрина теперь выстраивает сами плитки серий в ряд */
+        
+/* ИСПРАВЛЕНО: Главная витрина теперь выстраивает сами плитки серий в ряд */
         .collection-grid { 
             display: grid; 
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
@@ -127,28 +128,28 @@
         </div>
     </div>
     <script>
-        // Автоматическая загрузка базы данных прямо из твоего репозитория GitHub
+// Автоматическая загрузка базы данных прямо из твоего репозитория GitHub
         let cars = [];
 
         async function loadDatabase() {
             try {
-                // Скрипт сам берет файл collection.json, лежащий в этой же папке на хостинге
+// Скрипт сам берет файл collection.json, лежащий в этой же папке на хостинге
                 const response = await fetch('collection.json');
                 if (response.ok) {
                     cars = await response.json();
                     console.log('База данных Hot Wheels успешно загружена из GitHub!');
                 } else {
-                    // Если файла на сервере нет, подтягиваем локальный бэкап
+// Если файла на сервере нет, подтягиваем локальный бэкап
                     cars = JSON.parse(localStorage.getItem('hw_dashboard_album')) || [];
                 }
             } catch (e) {
                 cars = JSON.parse(localStorage.getItem('hw_dashboard_album')) || [];
             }
-            // Запускаем пересчет дашборда и витрины
+// Запускаем пересчет дашборда и витрины
             updateDashboard();
         }
 
-        // Заменяем стандартную функцию сохранения, чтобы она обновляла локальную память при инлайн-покупках
+// Заменяем стандартную функцию сохранения, чтобы она обновляла локальную память при инлайн-покупках
         function saveToStorage() {
             localStorage.setItem('hw_dashboard_album', JSON.stringify(cars));
             updateDashboard();
@@ -220,7 +221,7 @@
         function updateDashboard() {
             if (!collectionGrid) return;
             
-            // Находим ID группы, которая развернута прямо сейчас (у которой display равен 'grid')
+// Находим ID группы, которая развернута прямо сейчас (у которой display равен 'grid')
             const activeGridEl = document.querySelector('[id^="grid-"]:not([style*="display: none"])');
             const activeGridId = activeGridEl ? activeGridEl.id : null;
             collectionGrid.innerHTML = ''; 
@@ -231,7 +232,7 @@
             const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
             const filterType = filterSelect ? filterSelect.value : 'all';
 
-            // Глобальный подсчет статистики для верхнего дашборда
+// Глобальный подсчет статистики для верхнего дашборда
             cars.forEach(car => {
                 if (car.status === 'owned') {
                     const carPrice = parseFloat(car.price) || 0;
@@ -242,7 +243,7 @@
                 }
             });
 
-            // Обновляем циферки на верхнем дашборде
+// Обновляем циферки на верхнем дашборде
             const tCars = document.getElementById('dash-total-cars');
             const oCars = document.getElementById('dash-owned-cars');
             const tSpent = document.getElementById('dash-total-spent');
@@ -258,12 +259,15 @@
             if (yChart) yChart.innerHTML = Object.keys(spendByYear).map(y => `<div>${y} г.: <b>${spendByYear[y]} ₽</b></div>`).join('');
             if (sChart) sChart.innerHTML = Object.keys(spendBySeries).map(s => `<div>${s}: <b>${spendBySeries[s]} ₽</b></div>`).join('');
 
-            // Группировка машинок по сериям
+// Группировка машинок по сериям
             let groups = {};
             cars.forEach(car => {
                 const sName = car.seriesName || car.series || 'Общая серия';
                 
-                if (query && !car.name.toLowerCase().includes(query) && !sName.toLowerCase().includes(query)) return;
+// УМНЫЙ ПОИСК: Ищет совпадения по названию, серии или уникальному артикулу модели [Toy #]
+                const carToyNum = (car.toyNum || '').toLowerCase();
+                if (query && !car.name.toLowerCase().includes(query) && !sName.toLowerCase().includes(query) && !carToyNum.includes(query)) return;
+
                 if (filterType === 'owned' && car.status !== 'owned') return;
                 if (filterType === 'missing' && car.status !== 'missing') return;
 
@@ -271,22 +275,25 @@
                     groups[sName] = {
                         name: sName,
                         year: car.year || '—',
-                        totalInSeries: parseInt(car.seriesTotal || car.carTotal) || 1,
+                        totalInSeries: 0, // Сбрасываем жесткий индекс каталога
                         ownedCount: 0,
                         items: []
                     };
                 }
+// Увеличиваем общее число моделей в этой серии на единицу за каждую найденную карточку вариации
+                groups[sName].totalInSeries++; 
+                
                 if (car.status === 'owned') groups[sName].ownedCount++;
                 groups[sName].items.push(car);
             });
 
-            // ОТРИСОВКА НАСТОЯЩИХ КВАДРАТНЫХ ПЛИТОК
-            // УМНАЯ СОРТИРОВКА ПЛИТОК: Начатые (Желтые) -> Собранные (Зеленые) -> Пустые (Черные)
+// ОТРИСОВКА НАСТОЯЩИХ КВАДРАТНЫХ ПЛИТОК
+// УМНАЯ СОРТИРОВКА ПЛИТОК: Начатые (Желтые) -> Собранные (Зеленые) -> Пустые (Черные)
             Object.keys(groups).sort((a, b) => {
                 const groupA = groups[a];
                 const groupB = groups[b];
 
-                // Присваиваем веса статусам: Начата = 3, Собрана = 2, Пустая = 1
+// Присваиваем веса статусам: Начата = 3, Собрана = 2, Пустая = 1
                 let weightA = 1;
                 if (groupA.ownedCount > 0) {
                     weightA = (groupA.ownedCount === groupA.totalInSeries) ? 2 : 3;
@@ -297,12 +304,12 @@
                     weightB = (groupB.ownedCount === groupB.totalInSeries) ? 2 : 3;
                 }
 
-                // Сначала сортируем по весу (от большего к меньшему)
+// Сначала сортируем по весу (от большего к меньшему)
                 if (weightA !== weightB) {
                     return weightB - weightA;
                 }
 
-                // Если статус одинаковый, сортируем по алфавиту
+// Если статус одинаковый, сортируем по алфавиту
                 return a.localeCompare(b);
             }).forEach(sName => {
 
@@ -323,13 +330,13 @@
                 const percentDone = Math.round((group.ownedCount / group.totalInSeries) * 100) || 0;
                 const gridId = `grid-${sName.replace(/[^a-zA-Z0-9]/g, '-')}`;
                 
-                // Обертка-контейнер для плитки (grid-column убран, чтобы плитки ложились в ряд по несколько штук)
+// Обертка-контейнер для плитки (grid-column убран, чтобы плитки ложились в ряд по несколько штук)
                 const tileWrapper = document.createElement('div');
                 
-                // ИСПРАВЛЕНО: Задаем жесткое позиционирование для всего контейнера серии, чтобы плитки не косило
+// ИСПРАВЛЕНО: Задаем жесткое позиционирование для всего контейнера серии, чтобы плитки не косило
                 tileWrapper.style.cssText = "grid-column: 1 / -1 !important; width: 100%; display: flex; flex-direction: column; box-sizing: border-box; margin-top: 10px; margin-bottom: 5px;";
                 
-                // Компактная квадратная плитка
+// Компактная квадратная плитка
                 const mainTile = document.createElement('div');
                 mainTile.style.cssText = `background: ${tileBg}; color: ${tileColor}; padding: 15px; border-radius: 12px; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; user-select: none; box-shadow: 0 4px 10px rgba(0,0,0,0.08); height: 130px; transition: transform 0.1s; box-sizing: border-box;`;
                 mainTile.innerHTML = `
@@ -347,15 +354,15 @@
                     </div>
                 `;
 
-                // Автономная скрытая сетка для машинок (Растягивается на всю ширину под плитками через grid-column: 1 / -1)
+// Автономная скрытая сетка для машинок (Растягивается на всю ширину под плитками через grid-column: 1 / -1)
                 const carsGrid = document.createElement('div');
                 carsGrid.id = gridId;
-                // ИСПРАВЛЕНО: Сетка машин теперь раздвигает общие колонки и ложится ровно в ряд под плитками
+// ИСПРАВЛЕНО: Сетка машин теперь раздвигает общие колонки и ложится ровно в ряд под плитками
                 carsGrid.style.cssText = "display: none; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important; gap: 15px; margin-top: 12px; padding: 15px; background: #f8fafc; border-radius: 8px; box-shadow: inset 0 2px 5px rgba(0,0,0,0.05); grid-column: 1 / -1 !important; width: 100%; box-sizing: border-box;";
 
                 mainTile.addEventListener('click', function() {
                     const isHidden = carsGrid.style.display === 'none';
-                    // Прячем другие открытые сетки серий, чтобы не захламлять интерфейс
+// Прячем другие открытые сетки серий, чтобы не захламлять интерфейс
                     document.querySelectorAll('[id^="grid-"]').forEach(el => el.style.display = 'none');
                     carsGrid.style.display = isHidden ? 'grid' : 'none';
                 });
@@ -390,7 +397,7 @@
                         ${!carIsOwned ? 'filter: grayscale(0.6); opacity: 0.9;' : ''}
                     `;
 
-                    // ИСПРАВЛЕНО: Убран неэкранированный косой слэш перед car.toyNum
+// ИСПРАВЛЕНО: Убран неэкранированный косой слэш перед car.toyNum
                     card.innerHTML = `
                         <div style="display: flex; flex-direction: column; align-items: flex-end; padding: 8px; gap: 4px; pointer-events: none;">
                             <div style="background: ${carIsOwned ? yearColor : 'rgba(255,255,255,0.8)'}; color: ${carIsOwned ? 'white' : '#64748b'}; padding: 2px 10px; font-weight: bold; font-size: 11px; border-radius: 6px;">
@@ -417,7 +424,7 @@
                                         💰 ${car.price} ₽
                                     </div>
                                 ` : `
-                                    <!-- ИСПРАВЛЕНО: Интерактивная кнопка покупки по клику прямо в альбоме -->
+<!-- ИСПРАВЛЕНО: Интерактивная кнопка покупки по клику прямо в альбоме -->
                                     <button type="button" onclick="event.stopPropagation(); buyCarInline(${car.id});" style="font-size: 12px; font-weight: 900; color: #1e293b; background: #cbd5e1; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; transition: background 0.1s;">
                                         Купить
                                     </button>
@@ -439,28 +446,28 @@
             }
         }
 
- // ФУНКЦИЯ БЫСТРОЙ ПОКУПКИ МОДЕЛИ ВНУТРИ АЛЬБОМА
+// ФУНКЦИЯ БЫСТРОЙ ПОКУПКИ МОДЕЛИ ВНУТРИ АЛЬБОМА
         function buyCarInline(carId) {
             const car = cars.find(c => c.id === carId);
             if (!car) return;
 
             const userPrice = prompt(`Поздравляем с покупкой модели ${car.name}! Укажите цену приобретения (₽):`, "250");
             
-            // Если пользователь отменил диалоговое окно, прерываем функцию
+// Если пользователь отменил диалоговое окно, прерываем функцию
             if (userPrice === null) return;
 
-            // Переводим машинку в статус купленной и сохраняем цену
+// Переводим машинку в статус купленной и сохраняем цену
             car.status = 'owned';
             car.price = parseFloat(userPrice) || 0;
 
-            // Пересохраняем базу данных в localStorage и обновляем витрину
+// Пересохраняем базу данных в localStorage и обновляем витрину
             saveToStorage();
         }
 
         if (searchInput) searchInput.addEventListener('input', updateDashboard);
         if (filterSelect) filterSelect.addEventListener('change', updateDashboard);
 
-        // Вместо простой отрисовки запускаем сетевое чтение файла базы данных
+// Вместо простой отрисовки запускаем сетевое чтение файла базы данных
         loadDatabase();
     </script>
 </body>
