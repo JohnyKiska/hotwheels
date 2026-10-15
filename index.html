@@ -459,14 +459,15 @@
                             </div>
                         <!-- ИСПРАВЛЕНО: Плашка теперь использует динамические цвета редкости -->
                             <div style="background: ${bottomBarBg}; border-top: ${bottomBarBorder}; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center;">
-                               { ${car.seriesNum || car.carNum || 1}/${car.seriesTotal || car.carTotal || 1}
+                               ${car.seriesNum || car.carNum || 1}/${car.seriesTotal || car.carTotal || 1}
                             </div>
                         </div>
 
 
                         <button onclick="event.stopPropagation(); deleteCar(${car.id});" style="position: absolute; top: 8px; left: 8px; background: rgba(255,51,55,0.8); color: white; border: none; border-radius: 50%; width: 22px; height: 22px; font-size: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 20;">×</button>
+                        <!-- ИСПРАВЛЕНО: Плашка теперь использует динамические цвета редкости -->
+                        <div style="background: ${bottomBarBg}; border-top: ${bottomBarBorder}; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center;">
 
-                        <div style="background: rgba(255, 255, 255, 0.9); padding: 10px 12px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(0,0,0,0.05);">
                             <div style="display: flex; flex-direction: column; max-width: 65%; text-align: left;">
                                 <span style="font-size: 13px; font-weight: bold; color: ${textColor}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase;">${car.name}</span>
 
