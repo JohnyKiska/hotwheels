@@ -265,8 +265,20 @@
                 const sName = car.seriesName || car.series || 'Общая серия';
                 
 // УМНЫЙ ПОИСК: Ищет совпадения по названию, серии или уникальному артикулу модели [Toy #]
-                const carToyNum = (car.toyNum || '').toLowerCase();
-                if (query && !car.name.toLowerCase().includes(query) && !sName.toLowerCase().includes(query) && !carToyNum.includes(query)) return;
+// УМНЫЙ ПОИСК: Приводим всё к нижнему регистру, чтобы поиск 'jjj40' находил 'JJJ40'
+                const nameClean = (car.name || '').toLowerCase();
+                const seriesClean = (sName || '').toLowerCase();
+                const toyNumClean = (car.toyNum || '').toLowerCase();
+
+                if (query) {
+                    const hasName = nameClean.includes(query);
+                    const hasSeries = seriesClean.includes(query);
+                    const hasToyNum = toyNumClean.includes(query);
+                    
+// Если ни одного совпадения нет, скрываем карточку
+                    if (!hasName && !hasSeries && !hasToyNum) return;
+                }
+
 
                 if (filterType === 'owned' && car.status !== 'owned') return;
                 if (filterType === 'missing' && car.status !== 'missing') return;
@@ -340,19 +352,19 @@
                 const mainTile = document.createElement('div');
                 mainTile.style.cssText = `background: ${tileBg}; color: ${tileColor}; padding: 15px; border-radius: 12px; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; user-select: none; box-shadow: 0 4px 10px rgba(0,0,0,0.08); height: 130px; transition: transform 0.1s; box-sizing: border-box;`;
                 mainTile.innerHTML = `
-                    <div style="display: flex; flex-direction: column; gap: 4px; text-align: left;">
-                        <h3 style="margin: 0; font-size: 15px; text-transform: uppercase; font-weight: 900; letter-spacing: 0.5px; line-height: 1.2;">${group.name}</h3>
+                    <div style="text-align: left;">
+                        <h3 style="margin: 0; font-size: 16px; text-transform: uppercase; font-weight: 900; letter-spacing: 0.5px;">${group.name}</h3>
                         <span style="font-size: 10px; opacity: 0.7;">Релиз: ${group.year} г.</span>
                     </div>
-                    <div style="display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 10px;">
-                        <span style="font-size: 11px; font-weight: bold; background: rgba(255,255,255,0.2); padding: 3px 8px; border-radius: 12px;">
-                            ${group.ownedCount}/${group.totalInSeries} шт.
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <span style="font-size: 12px; font-weight: bold; background: rgba(255,255,255,0.2); padding: 3px 10px; border-radius: 12px;">
+                            ${group.ownedCount} из ${group.totalInSeries} шт.
                         </span>
-                        <span style="font-size: 13px; font-weight: 900; letter-spacing: -0.5px;">
-                            ${percentDone}%
-                        </span>
+                        <span style="font-size: 14px; font-weight: 900;">${percentDone}%</span>
+                        <span style="font-size: 11px; opacity: 0.6;">▼</span>
                     </div>
                 `;
+
 
 // Автономная скрытая сетка для машинок (Растягивается на всю ширину под плитками через grid-column: 1 / -1)
                 const carsGrid = document.createElement('div');
@@ -404,7 +416,7 @@
                                 ${car.year || '—'}
                             </div>
                             <div style="background: rgba(255, 255, 255, 0.85); color: #1e293b; padding: 2px 8px; font-weight: 800; font-size: 11px; border-radius: 6px;">
-                                ${car.seriesNum || car.carNum || 1}/${car.seriesTotal || car.carTotal || 1}
+                                ${car.seriesNum || car.carNum || 1}${car.seriesTotal || car.carTotal || 1}
                             </div>
                         </div>
 
