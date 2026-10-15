@@ -454,12 +454,13 @@
 // ИСПРАВЛЕНО: Убран неэкранированный косой слэш перед car.toyNum
                     card.innerHTML = `
                                                 <div style="display: flex; flex-direction: column; align-items: flex-end; padding: 8px; gap: 4px; pointer-events: none;">
-<!-- ИСПРАВЛЕНО: Плашка теперь использует динамические цвета редкости -->
-                        <div style="background: ${bottomBarBg}; border-top: ${bottomBarBorder}; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center;">
+<div style="background: rgba(255, 255, 255, 0.85); color: #1e293b; padding: 2px 8px; font-weight: 800; font-size: 11px; border-radius: 6px;">
 
                                 ${car.year || '—'}
                             </div>
-                            <div style="background: rgba(255, 255, 255, 0.85); color: #1e293b; padding: 2px 8px; font-weight: 800; font-size: 11px; border-radius: 6px;">
+                        <!-- ИСПРАВЛЕНО: Плашка теперь использует динамические цвета редкости -->
+                        <div style="background: ${bottomBarBg}; border-top: ${bottomBarBorder}; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center;">
+
                                 ${car.seriesNum || car.carNum || 1}/${car.seriesTotal || car.carTotal || 1}
                             </div>
                         </div>
