@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Умный Конвертер Базы Hot Wheels</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f4f9; padding: 20px; margin: 0; }
+        .converter-layout { display: grid; grid-template-columns: 350px 1fr; gap: 20px; }
+        .panel { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); height: fit-content; }
+        textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-family: monospace; font-size: 12px; resize: vertical; }
+        button { background: #3182ce; color: white; border: none; padding: 12px; border-radius: 4px; cursor: pointer; width: 100%; font-size: 15px; font-weight: bold; margin-top: 10px; }
+        button:hover { background: #2b6cb0; }
+        .btn-success { background: #2ec4b6; }
+        .btn-success:hover { background: #20a396; }
+        
+        .preview-table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); font-size: 13px; }
+        .preview-table th { background: #1a1a1a; color: white; padding: 12px; text-align: left; font-weight: 600; }
+        .preview-table td { padding: 10px 12px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
+        .preview-table tr:hover { background: #f8fafc; }
+        
+        .badge { padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; text-transform: uppercase; color: white; }
+        .badge-th { background: #ff9f1c; }
+        .badge-main { background: #64748b; }
+        .badge-excl { background: #9b5de5; }
+
+        .row-thumb {
+            width: 70px; height: 45px; object-fit: contain; background: #f1f5f9;
+            border: 2px dashed #cbd5e1; border-radius: 4px; cursor: pointer; transition: all 0.2s;
+        }
+        .row-thumb:hover { border-color: #ff3333; filter: brightness(0.8); }
+    </style>
+    <script src="https://cloudflare.com"></script>
+</head>
+<body>
+
+    <header style="background: #1a1a1a; color: white; padding: 20px; border-radius: 10px; text-align: center; margin-bottom: 20px; border-bottom: 5px solid #ff5000;">
+        <h1 style="margin: 0;">Парсер & Конвертер Базы Hot Wheels 🛠️</h1>
+    </header>
+
+    <div class="converter-layout">
+        <div class="panel">
+            <h2 style="margin-top:0; font-size:18px;">Шаг 1: Вставьте текст с сайта</h2>
+            <div style="margin-bottom: 15px;">
+                <label for="import-year" style="display:block; font-size:13px; font-weight:bold; margin-bottom:5px; color:#475569;">Год выпуска этой партии моделей:</label>
+                <select id="import-year" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; background: white;">
+                    <option value="2026" selected>2026 год</option>
+                    <option value="2025">2025 год</option>
+                    <option value="2024">2024 год</option>
+                </select>
+            </div>
+            <textarea id="raw-input" rows="12" placeholder="Вставьте скопированный текст таблицы сюда..."></textarea>
+            <button type="button" id="btn-parse">🔍 Распознать & Показать</button>
+            <button type="button" id="btn-download" class="btn-success" style="display:none; margin-top:20px;">💾 Скачать базу collection.json</button>
+            <button type="button" id="btn-download-zip" style="background: #3182ce; display:none; margin-top:10px;">📦 Скачать архив картинок для Я.Диска</button>
+        </div>
+
+        <div>
+            <h2 style="margin-top:0; font-size:18px; color:#1a1a1a;">Шаг 2: Интерактивный предпросмотр готовой БД (<span id="counter">0</span> моделей)</h2>
+            <div style="overflow-x: auto; margin-top:15px;">
+                <table class="preview-table">
+                    <thead>
+                        <tr>
+                            <th>Артикул</th>
+                            <th>Каталог №</th>
+                            <th>Название модели</th>
+                            <th>Серия / Коллекция</th>
+                            <th>Индекс серии</th>
+                            <th>Редкость</th>
+                            <th style="width: 140px; text-align: center;">Наличие</th> <!-- Новая колонка -->
+                            <th style="width: 120px; text-align: center;">Фото модели</th>
+                        </tr>
+                    </thead>
+                    <tbody id="preview-tbody">
+                        <tr>
+                            <td colspan="7" style="text-align: center; color: #888; font-style: italic; padding: 30px;">Здесь появится список распознанных машинок после нажатия синей кнопки.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================
+       [ПОЛНАЯ ИСПРАВЛЕННАЯ ПРОГРАММНАЯ ЛОГИКА НА JAVASCRIPT] 
+       ======================================================== -->
+    <script>
+                let parsedCars = [];
+        let localImagesMap = {}; 
+
+        document.getElementById('btn-parse').addEventListener('click', function() {
+            const rawText = document.getElementById('raw-input').value;
+            if (!rawText.trim()) return alert('Поле ввода пустое!');
+
+            const lines = rawText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+            parsedCars = [];
+            localImagesMap = {}; 
+            let currentCar = null;
+
+            lines.forEach(line => {
+                const parts = line.split('\t');
+                
+                if (parts.length >= 3) {
+                    const firstPart = parts[0].trim();
+                    if (firstPart.length === 5 || firstPart === 'Toy #') {
+                        if (firstPart === 'Toy #') return; 
+
+                        if (currentCar) parsedCars.push(currentCar);
+
+                        let sNum = 1, sTotal = 1;
+                        const mainExtraText = parts.join(' ');
+                        const mainFraction = mainExtraText.match(/(\d+)\s*\/\s*(\d+)/);
+                        
+                        if (mainFraction) {
+                            sNum = parseInt(mainFraction[1]);
+                            sTotal = parseInt(mainFraction[2]);
+                        }
+
+                        currentCar = {
+                            id: Date.now() + Math.random(),
+                            toyNum: parts[0].trim(),
+                            colNum: parts[1] ? parts[1].trim() : '',
+                            name: parts[2] ? parts[2].trim() : '',
+                            year: parseInt(document.getElementById('import-year').value) || 2026,
+                            seriesName: parts[3] ? parts[3].trim() : 'HW Dream Garage',
+                            seriesNum: sNum,
+                            seriesTotal: sTotal,
+                            rarity: 'Mainline',
+                            status: 'missing',
+                            price: 0,
+                            image: '', 
+                            comment: ''
+                        };
+                        return;
+                    }
+                }
+
+                if (currentCar) {
+                    const fractionMatch = line.match(/(\d+)\s*\/\s*(\d+)/);
+                    let cleanLine = line;
+
+                    if (fractionMatch) {
+                        currentCar.seriesNum = parseInt(fractionMatch[1]);
+                        currentCar.seriesTotal = parseInt(fractionMatch[2]);
+                        cleanLine = line.substring(0, line.indexOf(fractionMatch[0])).trim();
+                    }
+
+                    const lowerLine = line.toLowerCase();
+                    if (lowerLine.includes('treasure hunt')) {
+                        currentCar.rarity = 'Treasure Hunt (TH)';
+                    } else if (lowerLine.includes('exclusive')) {
+                        currentCar.rarity = 'Exclusive';
+                        if (cleanLine) currentCar.comment = cleanLine;
+                    } else if (lowerLine.includes('new for') || lowerLine.includes('excl')) {
+                        if (cleanLine) currentCar.comment = cleanLine;
+                    }
+                }
+            });
+            
+            if (currentCar) parsedCars.push(currentCar);
+
+            renderPreviewTable();
+        });
+
+        // ИСПРАВЛЕНО: Восстановили корректную генерацию ID и функций для каждой строки
+        function renderPreviewTable() {
+            const tbody = document.getElementById('preview-tbody');
+            tbody.innerHTML = '';
+
+            parsedCars.forEach(car => {
+                let badgeStyle = 'background: #64748b;';
+                if (car.rarity.includes('TH')) badgeStyle = 'background: #ff9f1c;';
+                if (car.rarity === 'Exclusive') badgeStyle = 'background: #9b5de5;';
+
+                const isOwned = car.status === 'owned';
+                const statusBtnText = isOwned ? `✅ Куплена (${car.price} ₽)` : '🔍 В поиске';
+                const statusBtnStyle = isOwned 
+                    ? 'background: #2ec4b6; color: white; padding: 5px 10px; border-radius: 4px; border: none; font-weight: bold; cursor: pointer; font-size: 12px; width: 100%;' 
+                    : 'background: #cbd5e1; color: #1a1a1a; padding: 5px 10px; border-radius: 4px; border: none; font-weight: bold; cursor: pointer; font-size: 12px; width: 100%;';
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><b>${car.toyNum}</b></td>
+                    <td>${car.colNum}</td>
+                    <td>${car.name}</td>
+                    <td>${car.seriesName}</td>
+                    <td style="color:#ff5000; font-weight:bold; text-align:center;">${car.seriesNum}/${car.seriesTotal}</td>
+                    <td>
+                        <span class="badge" style="${badgeStyle}">${car.rarity}</span>
+                        <div style="font-size:11px; color:#64748b; margin-top:2px;">${car.comment}</div>
+                    </td>
+                    <td style="text-align: center;" id="status-cell-${car.toyNum}">
+                        <button type="button" style="${statusBtnStyle}" onclick="toggleCarStatus('${car.toyNum}')">${statusBtnText}</button>
+                    </td>
+                    <td style="text-align: center;" id="photo-cell-${car.toyNum}">
+                        ${car.image ? `<img src="${car.image}" class="row-thumb" title="Кликните для удаления" onclick="deleteRowImage('${car.toyNum}')">` : `<input type="file" class="row-img-input" id="file-${car.toyNum}" onchange="uploadRowImage('${car.toyNum}')" accept="image/*" style="font-size:11px; width:100px;">`}
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            document.getElementById('counter').innerText = parsedCars.length;
+            document.getElementById('btn-download').style.display = parsedCars.length > 0 ? 'block' : 'none';
+            document.getElementById('btn-download-zip').style.display = parsedCars.length > 0 ? 'block' : 'none';
+        }
+
+        function toggleCarStatus(toyNum) {
+            const car = parsedCars.find(c => c.toyNum === toyNum);
+            if (!car) return;
+
+            if (car.status === 'missing') {
+                const userPrice = prompt(`Укажите цену покупки для модели ${car.name} (₽):`, "249");
+                if (userPrice === null) return;
+                car.status = 'owned';
+                car.price = parseFloat(userPrice) || 0;
+            } else {
+                if (confirm(`Сбросить статус модели ${car.name} обратно в поиск?`)) {
+                    car.status = 'missing';
+                    car.price = 0;
+                }
+            }
+            renderPreviewTable();
+        }
+
+        function uploadRowImage(toyNum) {
+            const fileInput = document.getElementById(`file-${toyNum}`);
+            if (fileInput && fileInput.files && fileInput.files.length > 0) {
+                const file = fileInput.files[0]; 
+
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const imgData = event.target.result;
+                    const img = new Image();
+                    img.src = imgData;
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = 80; canvas.height = 50;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, 80, 50);
+                        
+                        const targetCar = parsedCars.find(c => c.toyNum === toyNum);
+                        if (targetCar) {
+                            targetCar.image = canvas.toDataURL('image/jpeg', 0.5);
+                        }
+                        renderPreviewTable(); 
+                    };
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function deleteRowImage(toyNum) {
+            if (confirm(`Удалить фото для модели ${toyNum}?`)) {
+                const targetCar = parsedCars.find(c => c.toyNum === toyNum);
+                if (targetCar) targetCar.image = '';
+                renderPreviewTable();
+            }
+        }
+
+        document.getElementById('btn-download').addEventListener('click', function() {
+            if (parsedCars.length === 0) return;
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(parsedCars, null, 2));
+            const dlAnchor = document.createElement('a');
+            dlAnchor.setAttribute("href", dataStr);
+            dlAnchor.setAttribute("download", "collection.json");
+            document.body.appendChild(dlAnchor);
+            dlAnchor.click();
+            dlAnchor.remove();
+        });
+
+
+    </script>
+</body>
+</html>
+
+

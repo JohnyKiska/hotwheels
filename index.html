@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hot Wheels Альбом</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f4f9; padding: 20px; margin: 0; }
+        .main-layout { display: grid; grid-template-columns: 320px 1fr; gap: 20px; }
+        .form-container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); height: fit-content; }
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        button { background: #ff5000; color: white; border: none; padding: 12px; border-radius: 4px; cursor: pointer; width: 100%; font-size: 16px; font-weight: bold; margin-top: 5px; }
+        button:hover { background: #e04500; }
+        /* ИСПРАВЛЕНО: Главная витрина теперь выстраивает сами плитки серий в ряд */
+        .collection-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+            gap: 20px; 
+            margin-top: 20px; 
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .car-card { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.15); display: flex; flex-direction: column; border: 1px solid #e0e0e0; }
+        .car-card.missing { background: #f1f5f9; border: 2px dashed #cbd5e1; opacity: 0.7; }
+        .car-card.missing .car-card-top { background-color: #cbd5e1; }
+        .car-card.missing .car-img { filter: grayscale(1) opacity(0.2); }
+        .car-card-top { background-color: #6b1d2f; padding: 15px 15px 0 15px; position: relative; }
+        .card-series-index { position: absolute; top: 35px; right: 15px; color: #fff; font-weight: bold; font-size: 16px; }
+        .car-img { width: 100%; height: 150px; object-fit: contain; }
+        .pantone-block { padding: 15px; text-align: left; border-bottom: 1px solid #eee; background: white; }
+        .pantone-title { font-family: sans-serif; font-size: 20px; font-weight: 900; text-transform: uppercase; color: #1a1a1a; margin: 0; }
+        .pantone-sub { font-size: 13px; color: #555; margin: 3px 0 0 0; }
+        .car-card-price { padding: 10px 15px; font-size: 14px; font-weight: bold; color: #4a5568; background-color: #fafafa; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+        .car-card-bottom { background-color: #1a1a1a; color: #ffffff; padding: 12px 15px; text-align: center; font-weight: 800; text-transform: uppercase; font-size: 13px; margin-top: auto; }
+        .delete-btn { background: #ff3333; color: white; border: none; padding: 4px 8px; font-size: 11px; border-radius: 4px; cursor: pointer; width: auto; margin: 0; }
+         /* Жесткая сетка для машинок внутри раскрывающихся плиток серий */
+        .series-cars-grid {
+            display: grid !important; /* Гарантирует режим сетки */
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)) !important; /* Автоматические ряды по 200px */
+            gap: 15px !important;
+            margin-top: 12px !important;
+            padding: 5px !important;
+        }
+
+    </style>
+</head>
+<body>
+
+    <header style="background: #1a1a1a; color: white; padding: 20px; border-radius: 10px; text-align: center; margin-bottom: 20px; border-bottom: 5px solid #ff5000;">
+        <h1 style="margin: 0;">Гараж Hot Wheels 🏎️</h1>
+    </header>
+
+    <div style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 25px;">
+        <h2 style="margin-top: 0; color: #1a1a1a; font-size: 22px; border-bottom: 2px solid #eee; padding-bottom: 10px;">📊 Аналитика коллекции</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 15px; text-align: center;">
+            <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border-left: 4px solid #ff5000;">
+                <span style="font-size: 12px; color: #64748b; font-weight: bold;">В БАЗЕ</span>
+                <p id="dash-total-cars" style="font-size: 24px; font-weight: bold; margin: 5px 0 0 0;">0</p>
+            </div>
+            <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border-left: 4px solid #2ec4b6;">
+                <span style="font-size: 12px; color: #64748b; font-weight: bold;">КУПЛЕНО</span>
+                <p id="dash-owned-cars" style="font-size: 24px; font-weight: bold; margin: 5px 0 0 0;">0</p>
+            </div>
+            <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border-left: 4px solid #3182ce;">
+                <span style="font-size: 12px; color: #64748b; font-weight: bold;">ПОТРАЧЕНО</span>
+                <p id="dash-total-spent" style="font-size: 24px; font-weight: bold; margin: 5px 0 0 0;">0 ₽</p>
+            </div>
+            <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border-left: 4px solid #475569;">
+                <span style="font-size: 12px; color: #64748b; font-weight: bold;">ДОЛЯ</span>
+                <p id="dash-ratio" style="font-size: 24px; font-weight: bold; margin: 5px 0 0 0;">0%</p>
+            </div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; font-size: 14px; color: #475569;">
+            <div><b>Траты по годам:</b><div id="chart-years-container" style="margin-top: 5px;"></div></div>
+            <div><b>Траты по сериям:</b><div id="chart-series-container" style="margin-top: 5px;"></div></div>
+        </div>
+    </div>
+
+    <div class="main-layout">
+        <div class="form-container">
+            <h2>Добавить модель</h2>
+            <form id="car-form">
+                <div class="form-group"><label>Название машинки *</label><input type="text" id="car-name" required></div>
+                <div class="form-group"><label>Год выпуска *</label><input type="number" id="car-year" min="1968" max="2030" required></div>
+                <div class="form-group"><label>Название серии *</label><input type="text" id="car-series" required></div>
+                <div class="form-group">
+                    <label>Номер в серии / Всего *</label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <input type="number" id="car-num" placeholder="Номер" required>
+                        <input type="number" id="car-total" placeholder="Всего" required>
+                    </div>
+                </div>
+                <div class="form-group"><label>Цена покупки (₽) *</label><input type="number" id="car-price" min="0" required></div>
+                <div class="form-group">
+                    <label>Статус модели *</label>
+                    <select id="car-status">
+                        <option value="owned" selected>Куплена (В гараже)</option>
+                        <option value="missing">В поиске (Нет в наличии)</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Фото машинки</label><input type="file" id="car-image" accept="image/*"></div>
+                <button type="submit">Поставить в гараж</button>
+            </form>
+
+            <div style="margin-top: 20px; padding-top: 15px; border-top: 2px dashed #cbd5e1;">
+                <label style="font-size: 12px; font-weight: bold; color: #64748b;">Синхронизация JSON:</label>
+                <textarea id="car-json-data" rows="3" placeholder="Вставьте код для импорта..."></textarea>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 5px;">
+                    <button type="button" id="btn-import-json" style="background:#3182ce; padding: 6px; font-size: 13px;">Импорт</button>
+                    <button type="button" id="btn-export-json" style="background:#4a5568; padding: 6px; font-size: 13px;">Экспорт</button>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <div style="margin-bottom: 15px;">
+                <input type="text" id="search-input" placeholder="🔍 Поиск по названию или серии..." style="width: 60%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                <select id="filter-select" style="width: 35%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; background: white; float: right;">
+                    <option value="all" selected>Все машинки</option>
+                    <option value="owned">Только купленные</option>
+                    <option value="missing">Только в поиске</option>
+                </select>
+            </div>
+            <div class="collection-grid" id="collection-grid"></div>
+        </div>
+    </div>
+    <script>
+        let cars = JSON.parse(localStorage.getItem('hw_dashboard_album')) || [];
+
+        function saveToStorage() {
+            localStorage.setItem('hw_dashboard_album', JSON.stringify(cars));
+            updateDashboard();
+        }
+
+        const btnImport = document.getElementById('btn-import-json');
+        const jsonDataArea = document.getElementById('car-json-data');
+        if (btnImport && jsonDataArea) {
+            btnImport.addEventListener('click', function() {
+                try {
+                    const parsed = JSON.parse(jsonDataArea.value.trim());
+                    if (Array.isArray(parsed)) { cars = parsed; saveToStorage(); alert('Импортировано!'); }
+                } catch (e) { alert('Ошибка в JSON!'); }
+            });
+        }
+
+        const btnExport = document.getElementById('btn-export-json');
+        if (btnExport && jsonDataArea) {
+            btnExport.addEventListener('click', function() {
+                jsonDataArea.value = JSON.stringify(cars, null, 2);
+                jsonDataArea.select();
+            });
+        }
+
+        const carForm = document.getElementById('car-form');
+        if (carForm) {
+            carForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const status = document.getElementById('car-status').value;
+                const imageInput = document.getElementById('car-image');
+                const fallbackImage = 'data:image/svg+xml;utf8,<svg xmlns="http://w3.org" width="240" height="70" viewBox="0 0 240 70"><rect width="100%" height="100%" fill="%23cbd5e1"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="12" fill="%2364748b">Нет фото 🏎️</text></svg>';
+
+                const newCar = {
+                    id: Date.now(),
+                    name: document.getElementById('car-name').value.trim(),
+                    year: parseInt(document.getElementById('car-year').value) || 2026,
+                    seriesName: document.getElementById('car-series').value.trim(),
+                    seriesNum: parseInt(document.getElementById('car-num').value) || 1,
+                    seriesTotal: parseInt(document.getElementById('car-total').value) || 1,
+                    price: status === 'missing' ? 0 : parseFloat(document.getElementById('car-price').value) || 0,
+                    status: status,
+                    image: fallbackImage
+                };
+
+                if (imageInput && imageInput.files && imageInput.files.length > 0) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        newCar.image = event.target.result;
+                        cars.push(newCar); saveToStorage(); carForm.reset();
+                    };
+                    reader.readAsDataURL(imageInput.files);
+                } else {
+                    cars.push(newCar); saveToStorage(); carForm.reset();
+                }
+            });
+        }
+
+        function deleteCar(id) {
+            if (confirm('Удалить?')) { cars = cars.filter(c => c.id !== id); saveToStorage(); }
+        }
+
+        const collectionGrid = document.getElementById('collection-grid');
+        const searchInput = document.getElementById('search-input');
+        const filterSelect = document.getElementById('filter-select');
+
+
+        function updateDashboard() {
+            if (!collectionGrid) return;
+            collectionGrid.innerHTML = ''; 
+            
+            let totalSpent = 0, ownedCount = 0;
+            let spendByYear = {}, spendBySeries = {};
+
+            const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
+            const filterType = filterSelect ? filterSelect.value : 'all';
+
+            // Глобальный подсчет статистики для верхнего дашборда
+            cars.forEach(car => {
+                if (car.status === 'owned') {
+                    const carPrice = parseFloat(car.price) || 0;
+                    totalSpent += carPrice; ownedCount++;
+                    if (car.year) spendByYear[car.year] = (spendByYear[car.year] || 0) + carPrice;
+                    const sName = car.seriesName || car.series || 'Общая серия';
+                    spendBySeries[sName] = (spendBySeries[sName] || 0) + carPrice;
+                }
+            });
+
+            // Обновляем циферки на верхнем дашборде
+            const tCars = document.getElementById('dash-total-cars');
+            const oCars = document.getElementById('dash-owned-cars');
+            const tSpent = document.getElementById('dash-total-spent');
+            const ratio = document.getElementById('dash-ratio');
+
+            if (tCars) tCars.innerText = cars.length;
+            if (oCars) oCars.innerText = ownedCount;
+            if (tSpent) tSpent.innerText = totalSpent.toLocaleString() + ' ₽';
+            if (ratio) ratio.innerText = cars.length > 0 ? Math.round((ownedCount / cars.length) * 100) + '%' : '0%';
+
+            const yChart = document.getElementById('chart-years-container');
+            const sChart = document.getElementById('chart-series-container');
+            if (yChart) yChart.innerHTML = Object.keys(spendByYear).map(y => `<div>${y} г.: <b>${spendByYear[y]} ₽</b></div>`).join('');
+            if (sChart) sChart.innerHTML = Object.keys(spendBySeries).map(s => `<div>${s}: <b>${spendBySeries[s]} ₽</b></div>`).join('');
+
+            // Группировка машинок по сериям
+            let groups = {};
+            cars.forEach(car => {
+                const sName = car.seriesName || car.series || 'Общая серия';
+                
+                if (query && !car.name.toLowerCase().includes(query) && !sName.toLowerCase().includes(query)) return;
+                if (filterType === 'owned' && car.status !== 'owned') return;
+                if (filterType === 'missing' && car.status !== 'missing') return;
+
+                if (!groups[sName]) {
+                    groups[sName] = {
+                        name: sName,
+                        year: car.year || '—',
+                        totalInSeries: parseInt(car.seriesTotal || car.carTotal) || 1,
+                        ownedCount: 0,
+                        items: []
+                    };
+                }
+                if (car.status === 'owned') groups[sName].ownedCount++;
+                groups[sName].items.push(car);
+            });
+
+            // ОТРИСОВКА НАСТОЯЩИХ КВАДРАТНЫХ ПЛИТОК
+            Object.keys(groups).sort().forEach(sName => {
+                const group = groups[sName];
+                group.items.sort((a, b) => (parseInt(a.seriesNum || a.carNum) || 0) - (parseInt(b.seriesNum || b.carNum) || 0));
+
+                let tileBg = '#1e293b'; 
+                let tileColor = '#ffffff';
+                if (group.ownedCount > 0) {
+                    if (group.ownedCount === group.totalInSeries) {
+                        tileBg = '#10b981'; // Полностью собрана — зеленая
+                    } else {
+                        tileBg = '#f59e0b'; // Начата — желтая
+                        tileColor = '#1e293b';
+                    }
+                }
+
+                const percentDone = Math.round((group.ownedCount / group.totalInSeries) * 100) || 0;
+                const gridId = `grid-${sName.replace(/[^a-zA-Z0-9]/g, '-')}`;
+                
+                // Обертка-контейнер для плитки (grid-column убран, чтобы плитки ложились в ряд по несколько штук)
+                const tileWrapper = document.createElement('div');
+                
+                // ИСПРАВЛЕНО: Задаем жесткое позиционирование для всего контейнера серии, чтобы плитки не косило
+                tileWrapper.style.cssText = "grid-column: 1 / -1 !important; width: 100%; display: flex; flex-direction: column; box-sizing: border-box; margin-top: 10px; margin-bottom: 5px;";
+                
+                // Компактная квадратная плитка
+                const mainTile = document.createElement('div');
+                mainTile.style.cssText = `background: ${tileBg}; color: ${tileColor}; padding: 15px; border-radius: 12px; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; user-select: none; box-shadow: 0 4px 10px rgba(0,0,0,0.08); height: 130px; transition: transform 0.1s; box-sizing: border-box;`;
+                mainTile.innerHTML = `
+                    <div style="display: flex; flex-direction: column; gap: 4px; text-align: left;">
+                        <h3 style="margin: 0; font-size: 15px; text-transform: uppercase; font-weight: 900; letter-spacing: 0.5px; line-height: 1.2;">${group.name}</h3>
+                        <span style="font-size: 10px; opacity: 0.7;">Релиз: ${group.year} г.</span>
+                    </div>
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 10px;">
+                        <span style="font-size: 11px; font-weight: bold; background: rgba(255,255,255,0.2); padding: 3px 8px; border-radius: 12px;">
+                            ${group.ownedCount}/${group.totalInSeries} шт.
+                        </span>
+                        <span style="font-size: 13px; font-weight: 900; letter-spacing: -0.5px;">
+                            ${percentDone}%
+                        </span>
+                    </div>
+                `;
+
+                // Автономная скрытая сетка для машинок (Растягивается на всю ширину под плитками через grid-column: 1 / -1)
+                const carsGrid = document.createElement('div');
+                carsGrid.id = gridId;
+                // ИСПРАВЛЕНО: Сетка машин теперь раздвигает общие колонки и ложится ровно в ряд под плитками
+                carsGrid.style.cssText = "display: none; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important; gap: 15px; margin-top: 12px; padding: 15px; background: #f8fafc; border-radius: 8px; box-shadow: inset 0 2px 5px rgba(0,0,0,0.05); grid-column: 1 / -1 !important; width: 100%; box-sizing: border-box;";
+
+                mainTile.addEventListener('click', function() {
+                    const isHidden = carsGrid.style.display === 'none';
+                    // Прячем другие открытые сетки серий, чтобы не захламлять интерфейс
+                    document.querySelectorAll('[id^="grid-"]').forEach(el => el.style.display = 'none');
+                    carsGrid.style.display = isHidden ? 'grid' : 'none';
+                });
+
+                group.items.forEach(car => {
+                    const carIsOwned = car.status === 'owned';
+                    const cardBorderColor = carIsOwned ? '#10b981' : '#cbd5e1';
+
+                    let yearColor = '#64748b';
+                    if (car.year === 2026) yearColor = '#e50012';
+                    if (car.year === 2025) yearColor = '#1e40af';
+                    if (car.year === 2024) yearColor = '#16a34a';
+
+                    let carImage = car.image || "data:image/svg+xml;utf8,<svg xmlns='http://w3.org' width='300' height='150'><rect width='100%' height='100%' fill='%23cbd5e1'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='14' fill='%2364748b'>Нет фото 🏎️</text></svg>";
+
+                    const card = document.createElement('div');
+                    card.style.cssText = `
+                        position: relative;
+                        width: 100%;
+                        height: 160px;
+                        border: 2px solid ${cardBorderColor};
+                        border-radius: 12px;
+                        overflow: hidden;
+                        background-image: url('${carImage}');
+                        background-size: cover;
+                        background-position: center;
+                        box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+                        display: flex;
+                        flex-direction: column;
+                        justify-content: space-between;
+                        box-sizing: border-box;
+                        ${!carIsOwned ? 'filter: grayscale(0.6); opacity: 0.9;' : ''}
+                    `;
+
+                    // ИСПРАВЛЕНО: Убран неэкранированный косой слэш перед car.toyNum
+                    card.innerHTML = `
+                        <div style="display: flex; flex-direction: column; align-items: flex-end; padding: 8px; gap: 4px; pointer-events: none;">
+                            <div style="background: ${carIsOwned ? yearColor : 'rgba(255,255,255,0.8)'}; color: ${carIsOwned ? 'white' : '#64748b'}; padding: 2px 10px; font-weight: bold; font-size: 11px; border-radius: 6px;">
+                                ${car.year || '—'}
+                            </div>
+                            <div style="background: rgba(255, 255, 255, 0.85); color: #1e293b; padding: 2px 8px; font-weight: 800; font-size: 11px; border-radius: 6px;">
+                                ${car.seriesNum || car.carNum || 1}/${car.seriesTotal || car.carTotal || 1}
+                            </div>
+                        </div>
+
+                        <button onclick="event.stopPropagation(); deleteCar(${car.id});" style="position: absolute; top: 8px; left: 8px; background: rgba(255,51,55,0.8); color: white; border: none; border-radius: 50%; width: 22px; height: 22px; font-size: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 20;">×</button>
+
+                        <div style="background: rgba(255, 255, 255, 0.9); padding: 10px 12px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(0,0,0,0.05);">
+                            <div style="display: flex; flex-direction: column; max-width: 65%; text-align: left;">
+                                <span style="font-size: 13px; font-weight: bold; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase;">
+                                    ${car.name}
+                                </span>
+                                ${car.toyNum ? `<span style="color: #ff5000; font-size: 10px; font-weight: bold; margin-top: 1px;">[${car.toyNum}]</span>` : ''}
+                            </div>
+                            
+                            <div style="display: flex; align-items: center;">
+                                ${carIsOwned ? `
+                                    <div style="font-size: 12px; font-weight: 900; color: #1e293b; background: rgba(16,185,129,0.15); padding: 5px 10px; border-radius: 6px; white-space: nowrap;">
+                                        💰 ${car.price} ₽
+                                    </div>
+                                ` : `
+                                    <!-- ИСПРАВЛЕНО: Интерактивная кнопка покупки по клику прямо в альбоме -->
+                                    <button type="button" onclick="event.stopPropagation(); buyCarInline(${car.id});" style="font-size: 12px; font-weight: 900; color: #1e293b; background: #cbd5e1; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; transition: background 0.1s;">
+                                        Купить
+                                    </button>
+                                `}
+                            </div>
+                        </div>
+                    `;
+                    carsGrid.appendChild(card);
+                });
+
+                tileWrapper.appendChild(mainTile);
+                tileWrapper.appendChild(carsGrid);
+                collectionGrid.appendChild(tileWrapper);
+            });
+        }
+
+        // ФУНКЦИЯ БЫСТРОЙ ПОКУПКИ МОДЕЛИ ВНУТРИ АЛЬБОМА
+        function buyCarInline(carId) {
+            const car = cars.find(c => c.id === carId);
+            if (!car) return;
+
+            const userPrice = prompt(`Поздравляем с покупкой модели ${car.name}! Укажите цену приобретения (₽):`, "250");
+            
+            // Если пользователь отменил диалоговое окно, прерываем функцию
+            if (userPrice === null) return;
+
+            // Переводим машинку в статус купленной и сохраняем цену
+            car.status = 'owned';
+            car.price = parseFloat(userPrice) || 0;
+
+            // Пересохраняем базу данных в localStorage и обновляем витрину
+            saveToStorage();
+        }
+
+        if (searchInput) searchInput.addEventListener('input', updateDashboard);
+        if (filterSelect) filterSelect.addEventListener('change', updateDashboard);
+
+        updateDashboard();
+    </script>
+</body>
+</html>
+
+
+
