@@ -556,13 +556,13 @@ function updateDashboard() {
                 <div style="position: relative; z-index: 1; background: ${bottomBarBg}; border-top: ${bottomBarBorder}; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center;">
                     <div style="display: flex; flex-direction: column; max-width: 65%; text-align: left;">
                         <span style="font-size: 13px; font-weight: bold; color: ${textColor}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase;">${car.name}</span>
-                        ${car.toyNum ? `<span style="color: #ff5000; font-size: 10px; font-weight: bold; margin-top: 1px;">[\${car.toyNum}]</span>` : ''}
+                        ${car.toyNum ? `<span style="color: #ff5000; font-size: 10px; font-weight: bold; margin-top: 1px;">[${car.toyNum}]</span>` : ''}
                     </div>
                     <div style="display: flex; align-items: center;">
                         ${carIsOwned ? `
-                            <div style="font-size: 12px; font-weight: 900; color: #1e293b; background: rgba(16,185,129,0.15); padding: 5px 10px; border-radius: 6px;">💰 \${car.price} ₽</div>
+                            <div style="font-size: 12px; font-weight: 900; color: #1e293b; background: rgba(16,185,129,0.15); padding: 5px 10px; border-radius: 6px;">💰 ${car.price} ₽</div>
                         ` : `
-                            <button type="button" onclick="event.stopPropagation(); buyCarInline(\${car.id});" style="font-size: 12px; font-weight: 900; color: #1e293b; background: #cbd5e1; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer;">Купить</button>
+                            <button type="button" onclick="event.stopPropagation(); buyCarInline(${car.id});" style="font-size: 12px; font-weight: 900; color: #1e293b; background: #cbd5e1; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer;">Купить</button>
                         `}
                     </div>
                 </div>
