@@ -249,9 +249,13 @@
             <div class="collection-grid" id="collection-grid"></div>
         </div>
     </div>
+
+
+    
     <script>
 // Автоматическая загрузка базы данных прямо из твоего репозитория GitHub
         let cars = [];
+        let activeExpandedSeries = null; // Запоминает, какая серия сейчас развернута
 
         async function loadDatabase() {
             try {
