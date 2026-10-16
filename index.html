@@ -54,6 +54,56 @@
             margin-top: 12px !important;
             padding: 5px !important;
         }
+               /* СТИЛИ ОБНОВЛЕННОГО ДАШБОРДА И СКРЫТОЙ ФОРМЫ */
+        .dash-card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .analytics-card {
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+            border: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .progress-bar-container {
+            background: #e2e8f0;
+            border-radius: 6px;
+            height: 8px;
+            width: 100%;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+        .progress-bar-fill {
+            background: #f59e0b;
+            height: 100%;
+            border-radius: 6px;
+            transition: width 0.3s;
+        }
+        .toggle-form-btn {
+            background: #1e293b;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 15px;
+            width: 100%;
+            transition: background 0.2s;
+        }
+        .toggle-form-btn:hover { background: #334155; }
+ 
 
     </style>
 </head>
@@ -63,77 +113,102 @@
         <h1 style="margin: 0;">Гараж Hot Wheels 🏎️</h1>
     </header>
 
-    <div style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 25px;">
-        <h2 style="margin-top: 0; color: #1a1a1a; font-size: 22px; border-bottom: 2px solid #eee; padding-bottom: 10px;">📊 Аналитика коллекции</h2>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 15px; text-align: center;">
-            <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border-left: 4px solid #ff5000;">
-                <span style="font-size: 12px; color: #64748b; font-weight: bold;">В БАЗЕ</span>
-                <p id="dash-total-cars" style="font-size: 24px; font-weight: bold; margin: 5px 0 0 0;">0</p>
+    <!-- ГЛАВНЫЙ ИЗОЛИРОВАННЫЙ КОНТЕЙНЕР ДАШБОРДА -->
+    <div style="width: 100%; box-sizing: border-box; display: flex; flex-direction: column; gap: 10px;">
+        
+        <!-- СТИЛЬНЫЙ ДАШБОРД СТАТИСТИКИ -->
+        <div class="dash-card-grid">
+            <div class="analytics-card">
+                <span style="font-size: 12px; color: #64748b; font-weight: bold; text-transform: uppercase;">Всего в базе</span>
+                <div style="font-size: 28px; font-weight: 900; color: #1e293b;" id="dash-total-cars">0</div>
+                <span style="font-size: 11px; color: #94a3b8;" id="dash-ratio">Куплено: 0%</span>
             </div>
-            <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border-left: 4px solid #2ec4b6;">
-                <span style="font-size: 12px; color: #64748b; font-weight: bold;">КУПЛЕНО</span>
-                <p id="dash-owned-cars" style="font-size: 24px; font-weight: bold; margin: 5px 0 0 0;">0</p>
+            <div class="analytics-card">
+                <span style="font-size: 12px; color: #64748b; font-weight: bold; text-transform: uppercase;">В коллекции ✅</span>
+                <div style="font-size: 28px; font-weight: 900; color: #10b981;" id="dash-owned-cars">0</div>
             </div>
-            <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border-left: 4px solid #3182ce;">
-                <span style="font-size: 12px; color: #64748b; font-weight: bold;">ПОТРАЧЕНО</span>
-                <p id="dash-total-spent" style="font-size: 24px; font-weight: bold; margin: 5px 0 0 0;">0 ₽</p>
+            <div class="analytics-card">
+                <span style="font-size: 12px; color: #64748b; font-weight: bold; text-transform: uppercase;">Финансы 💰</span>
+                <div style="font-size: 28px; font-weight: 900; color: #3b82f6;" id="dash-total-spent">0 ₽</div>
             </div>
-            <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border-left: 4px solid #475569;">
-                <span style="font-size: 12px; color: #64748b; font-weight: bold;">ДОЛЯ</span>
-                <p id="dash-ratio" style="font-size: 24px; font-weight: bold; margin: 5px 0 0 0;">0%</p>
+            <div class="analytics-card">
+                <span style="font-size: 12px; color: #64748b; font-weight: bold; text-transform: uppercase;">Инвестиции по годам</span>
+                <div style="font-size: 12px; color: #334155; display: flex; flex-direction: column; gap: 4px;" id="chart-years-container"></div>
             </div>
         </div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; font-size: 14px; color: #475569;">
-            <div><b>Траты по годам:</b><div id="chart-years-container" style="margin-top: 5px;"></div></div>
-            <div><b>Траты по сериям:</b><div id="chart-series-container" style="margin-top: 5px;"></div></div>
-        </div>
-    </div>
 
-    <div class="main-layout">
-        <div class="form-container">
-            <h2>Добавить модель</h2>
-            <form id="car-form">
-                <div class="form-group"><label>Название машинки *</label><input type="text" id="car-name" required></div>
-                <div class="form-group"><label>Год выпуска *</label><input type="number" id="car-year" min="1968" max="2030" required></div>
-                <div class="form-group"><label>Название серии *</label><input type="text" id="car-series" required></div>
-                <div class="form-group">
-                    <label>Номер в серии / Всего *</label>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                        <input type="number" id="car-num" placeholder="Номер" required>
-                        <input type="number" id="car-total" placeholder="Всего" required>
+        <!-- КНОПКА ДЛЯ ОТКРЫТИЯ/СКРЫТИЯ СТАТИСТИКИ СЕРИЙ -->
+        <button type="button" class="toggle-form-btn" style="background: #3b82f6; margin-bottom: 5px;" onclick="const s = document.getElementById('chart-series-wrapper'); s.style.display = s.style.display === 'none' ? 'block' : 'none';">
+            📊 Финансовая аналитика серий (Нажмите для открытия / скрытия)
+        </button>
+
+        <!-- СКРЫТЫЙ ПО УМОЛЧАНИЮ БЛОК ШКАЛ СЕРИЙ -->
+        <div id="chart-series-wrapper" style="display: none; width: 100%; box-sizing: border-box;">
+            <div class="analytics-card" style="margin-bottom: 15px;">
+                <span style="font-size: 12px; color: #64748b; font-weight: bold; text-transform: uppercase;">Траты и прогресс по сериям</span>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; margin-top: 10px;" id="chart-series-container"></div>
+            </div>
+        </div>
+
+
+        <!-- КНОПКА ФОРМЫ ДОБАВЛЕНИЯ -->
+        <button type="button" class="toggle-form-btn" onclick="const f = document.getElementById('car-form-container'); f.style.display = f.style.display === 'none' ? 'block' : 'none';">
+            🔧 Сборка ручной карточки (Нажмите для открытия / скрытия формы)
+        </button>
+
+        <!-- СКРЫТЫЙ БЛОК ФОРМЫ ДОБАВЛЕНИЯ -->
+        <div id="car-form-container" style="display: none; background: white; padding: 20px; border-radius: 12px; border: 1px solid #cbd5e1; margin-bottom: 15px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); width: 100%; box-sizing: border-box;">
+            <form id="car-form" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; align-items: end;">
+                <div>
+                    <label style="display:block; font-size:11px; font-weight:bold; margin-bottom:4px;">Название авто:</label>
+                    <input type="text" id="car-name" required style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; box-sizing:border-box;">
+                </div>
+                <div>
+                    <label style="display:block; font-size:11px; font-weight:bold; margin-bottom:4px;">Артикул [Toy #]:</label>
+                    <input type="text" id="car-toy" placeholder="Например, JJH30" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; box-sizing:border-box;">
+                </div>
+                <div>
+                    <label style="display:block; font-size:11px; font-weight:bold; margin-bottom:4px;">Серия / Коллекция:</label>
+                    <input type="text" id="car-series" required style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; box-sizing:border-box;">
+                </div>
+                <div>
+                    <label style="display:block; font-size:11px; font-weight:bold; margin-bottom:4px;">Год релиза:</label>
+                    <input type="number" id="car-year" value="2026" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; box-sizing:border-box;">
+                </div>
+                <div>
+                    <label style="display:block; font-size:11px; font-weight:bold; margin-bottom:4px;">Индекс (Номер/Всего):</label>
+                    <div style="display:flex; gap:5px;">
+                        <input type="number" id="car-num" value="1" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; box-sizing:border-box;">
+                        <span style="align-self:center; font-weight:bold;">/</span>
+                        <input type="number" id="car-total" value="5" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; box-sizing:border-box;">
                     </div>
                 </div>
-                <div class="form-group"><label>Цена покупки (₽) *</label><input type="number" id="car-price" min="0" required></div>
-                <div class="form-group">
-                    <label>Статус модели *</label>
-                    <select id="car-status">
-                        <option value="owned" selected>Куплена (В гараже)</option>
-                        <option value="missing">В поиске (Нет в наличии)</option>
+                <div>
+                    <label style="display:block; font-size:11px; font-weight:bold; margin-bottom:4px;">Статус модели:</label>
+                    <select id="car-status" onchange="const p = document.getElementById('price-block'); p.style.opacity = this.value === 'missing' ? '0.4' : '1';" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; box-sizing:border-box; background:white;">
+                        <option value="missing" selected>🔍 В поиске</option>
+                        <option value="owned">✅ В коллекции</option>
                     </select>
                 </div>
-                <div class="form-group"><label>Фото машинки</label><input type="file" id="car-image" accept="image/*"></div>
-                <button type="submit">Поставить в гараж</button>
-            </form>
-
-            <div style="margin-top: 20px; padding-top: 15px; border-top: 2px dashed #cbd5e1;">
-                <label style="font-size: 12px; font-weight: bold; color: #64748b;">Синхронизация JSON:</label>
-                <textarea id="car-json-data" rows="3" placeholder="Вставьте код для импорта..."></textarea>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 5px;">
-                    <button type="button" id="btn-import-json" style="background:#3182ce; padding: 6px; font-size: 13px;">Импорт</button>
-                    <button type="button" id="btn-export-json" style="background:#4a5568; padding: 6px; font-size: 13px;">Экспорт</button>
+                <div id="price-block" style="opacity: 0.4; transition: opacity 0.2s;">
+                    <label style="display:block; font-size:11px; font-weight:bold; margin-bottom:4px;">Цена покупки (₽):</label>
+                    <input type="number" id="car-price" value="0" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; box-sizing:border-box;">
                 </div>
-            </div>
+                <button type="submit" style="background:#10b981; color:white; border:none; padding:10px; border-radius:6px; font-weight:bold; cursor:pointer; height:36px;">🚀 Закинуть на полку</button>
+            </form>
         </div>
 
-        <div>
-            <div style="margin-bottom: 15px;">
-                <input type="text" id="search-input" placeholder="🔍 Поиск по названию или серии..." style="width: 60%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
-                <select id="filter-select" style="width: 35%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; background: white; float: right;">
-                    <option value="all" selected>Все машинки</option>
-                    <option value="owned">Только купленные</option>
-                    <option value="missing">Только в поиске</option>
-                </select>
-            </div>
+        <!-- ИЗОЛИРОВАННАЯ ПАНЕЛЬ ПОИСКА И ФИЛЬТРОВ (Выровнена на 100% ширины) -->
+        <div style="display: flex; gap: 10px; width: 100%; box-sizing: border-box; margin-top: 5px; margin-bottom: 5px; flex-wrap: wrap;">
+            <input type="text" id="search-input" placeholder="🔍 Поиск по названию, серии или артикулу..." style="flex: 1; min-width: 250px; padding: 10px 15px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+            <select id="filter-select" style="padding: 10px 15px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background: white; cursor: pointer; min-width: 160px; box-sizing: border-box;">
+                <option value="all">Все машинки</option>
+                <option value="owned">Только купленные</option>
+                <option value="missing">Только в поиске</option>
+            </select>
+        </div>
+    </div> <!-- Конец верхнего блока -->
+
             <div class="collection-grid" id="collection-grid"></div>
         </div>
     </div>
@@ -267,7 +342,30 @@
             const yChart = document.getElementById('chart-years-container');
             const sChart = document.getElementById('chart-series-container');
             if (yChart) yChart.innerHTML = Object.keys(spendByYear).map(y => `<div>${y} г.: <b>${spendByYear[y]} ₽</b></div>`).join('');
-            if (sChart) sChart.innerHTML = Object.keys(spendBySeries).map(s => `<div>${s}: <b>${spendBySeries[s]} ₽</b></div>`).join('');
+                        // ГЕНЕРАЦИЯ ИНТЕРАКТИВНЫХ ШКАЛ ДЛЯ ДАШБОРДА
+            if (sChart) {
+                // Находим максимальную сумму трат среди всех серий, чтобы шкала ровнялась по лидеру
+                const maxSpent = Math.max(...Object.values(spendBySeries), 1);
+
+                sChart.innerHTML = Object.keys(spendBySeries).map(sName => {
+                    const currentSpent = spendBySeries[sName];
+                    // Вычисляем процент заполнения шкалы относительно самой дорогой серии
+                    const barWidth = Math.round((currentSpent / maxSpent) * 100);
+                    
+                    return `
+                        <div style="background: #ffffff; padding: 10px; border-radius: 8px; border: 1px solid #f1f5f9; display: flex; flex-direction: column; gap: 4px;">
+                            <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: bold; color: #334155;">
+                                <span style="text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px;">${sName}</span>
+                                <span style="color: #1e293b;">${currentSpent.toLocaleString()} ₽</span>
+                            </div>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar-fill" style="width: ${barWidth}%; background: ${sName.toLowerCase().includes('boulevard') ? '#f59e0b' : '#3b82f6'};"></div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
 
 // Группировка машинок по сериям
             let groups = {};
@@ -338,16 +436,33 @@
                 const group = groups[sName];
                 group.items.sort((a, b) => (parseInt(a.seriesNum || a.carNum) || 0) - (parseInt(b.seriesNum || b.carNum) || 0));
 
+                // УМНЫЙ СВЕТОФОР ПЛИТОК: Цвета подстраиваются под выбранный фильтр поиска
                 let tileBg = '#1e293b'; 
                 let tileColor = '#ffffff';
-                if (group.ownedCount > 0) {
-                    if (group.ownedCount === group.totalInSeries) {
-                        tileBg = '#10b981'; // Полностью собрана — зеленая
-                    } else {
-                        tileBg = '#f59e0b'; // Начата — желтая
+
+                if (filterType === 'owned') {
+                    // Если смотрим только купленные: все начатые и собранные серии горят зеленым
+                    if (group.ownedCount > 0) {
+                        tileBg = '#10b981';
+                    }
+                } else if (filterType === 'missing') {
+                    // Если смотрим то, что в поиске: начатые горят желтым, полностью собранные гаснут
+                    if (group.ownedCount > 0 && group.ownedCount < group.totalInSeries) {
+                        tileBg = '#f59e0b';
                         tileColor = '#1e293b';
                     }
+                } else {
+                    // Стандартный режим "Все": деление на зеленый, желтый и черный
+                    if (group.ownedCount > 0) {
+                        if (group.ownedCount === group.totalInSeries) {
+                            tileBg = '#10b981';
+                        } else {
+                            tileBg = '#f59e0b';
+                            tileColor = '#1e293b';
+                        }
+                    }
                 }
+
 
                 const percentDone = Math.round((group.ownedCount / group.totalInSeries) * 100) || 0;
                 const gridId = `grid-${sName.replace(/[^a-zA-Z0-9]/g, '-')}`;
@@ -361,19 +476,35 @@
 // Компактная квадратная плитка
                 const mainTile = document.createElement('div');
                 mainTile.style.cssText = `background: ${tileBg}; color: ${tileColor}; padding: 15px; border-radius: 12px; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; user-select: none; box-shadow: 0 4px 10px rgba(0,0,0,0.08); height: 130px; transition: transform 0.1s; box-sizing: border-box;`;
+                // УМНАЯ ССЫЛКА НА ЛОГОТИП: переводим название серии в нижний регистр для папки series-img
+                const cleanSeriesName = sName.toLowerCase().trim();
+                const seriesLogoUrl = `series-img/${encodeURIComponent(cleanSeriesName)}.webp`;
+
                 mainTile.innerHTML = `
-                    <div style="text-align: left;">
-                        <h3 style="margin: 0; font-size: 16px; text-transform: uppercase; font-weight: 900; letter-spacing: 0.5px;">${group.name}</h3>
-                        <span style="font-size: 10px; opacity: 0.7;">Релиз: ${group.year} г.</span>
+                    <div style="display: flex; align-items: center; gap: 15px; text-align: left;">
+                        <!-- УВЕЛИЧЕННЫЙ ЛОГОТИП СЕРИИ: подняли высоту до 50px и убрали лишние рамки -->
+                        <img src="${seriesLogoUrl}" 
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-flex';" 
+                             style="height: 70px; width: auto; max-width: 90px; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));">
+                        
+                        <!-- Увеличенная альтернативная иконка-заглушка с красивым фоном -->
+                        <span style="display: none; font-size: 24px; background: rgba(255,255,255,0.2); width: 70px; height: 70px; border-radius: 10px; align-items: center; justify-content: center; box-shadow: inset 0 1px 3px rgba(255,255,255,0.2);">🏎️</span>
+                        
+                        <div>
+                            <h3 style="margin: 0; font-size: 16px; text-transform: uppercase; font-weight: 900; letter-spacing: 0.5px; line-height: 1.2;">${group.name}</h3>
+                            <span style="font-size: 10px; opacity: 0.7;">Релиз: ${group.year} г.</span>
+                        </div>
                     </div>
+
                     <div style="display: flex; align-items: center; gap: 15px;">
-                        <span style="font-size: 12px; font-weight: bold; background: rgba(255,255,255,0.2); padding: 3px 10px; border-radius: 12px;">
+                        <span style="font-size: 11px; font-weight: bold; background: rgba(255,255,255,0.2); padding: 3px 10px; border-radius: 12px; white-space: nowrap;">
                             ${group.ownedCount} из ${group.totalInSeries} шт.
                         </span>
                         <span style="font-size: 14px; font-weight: 900;">${percentDone}%</span>
                         <span style="font-size: 11px; opacity: 0.6;">▼</span>
                     </div>
                 `;
+
 
 
 // Автономная скрытая сетка для машинок (Растягивается на всю ширину под плитками через grid-column: 1 / -1)
@@ -445,7 +576,7 @@
                         border-radius: 12px;
                         overflow: hidden;
                         background-image: url('${carImage}');
-                        background-size: 120% auto;
+                        background-size: 160% auto;
                         background-position: center 55%;
                         background-color: #cbd5e1;
                         box-shadow: 0 4px 10px rgba(0,0,0,0.04);
@@ -455,6 +586,7 @@
                         box-sizing: border-box;
                         ${!carIsOwned ? 'filter: grayscale(0.5); opacity: 0.9;' : ''}
                     `;
+
 
                     card.innerHTML = `                   
 <!-- ВЕРХНИЙ БЛОК: Чистый год и номер коллекции без дублирования цвета плашки -->
@@ -545,6 +677,3 @@
     </script>
 </body>
 </html>
-
-
-
