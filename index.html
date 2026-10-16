@@ -24,15 +24,19 @@
         button { background: #ff5000; color: white; border: none; padding: 12px; border-radius: 4px; cursor: pointer; width: 100%; font-size: 16px; font-weight: bold; margin-top: 5px; }
         button:hover { background: #e04500; }
         
-/* ИСПРАВЛЕНО: Главная витрина теперь выстраивает сами плитки серий в ряд */
-        .collection-grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
-            gap: 20px; 
-            margin-top: 20px; 
-            width: 100%;
-            box-sizing: border-box;
+        .collection-tile {
+            width: 100%; /* Заставляет плитку растягиваться во всю ширину своей колонки */
+            box-sizing: border-box; /* Защищает от вылезания рамок за края */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            min-height: 85px; /* Дает простор для увеличенных логотипов */
+            transition: background 0.2s;
         }
+
 
         .car-card { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.15); display: flex; flex-direction: column; border: 1px solid #e0e0e0; }
         .car-card.missing { background: #f1f5f9; border: 2px dashed #cbd5e1; opacity: 0.7; }
