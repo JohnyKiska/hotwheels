@@ -324,49 +324,33 @@
         const filterSelect = document.getElementById('filter-select');
 
 
-        function updateDashboard() {
-            if (!collectionGrid) return;
-            
-// Находим ID группы, которая развернута прямо сейчас (у которой display равен 'grid')
-            const activeGridEl = document.querySelector('[id^="grid-"]:not([style*="display: none"])');
-            const activeGridId = activeGridEl ? activeGridEl.id : null;
-            collectionGrid.innerHTML = ''; 
-            
-            let totalSpent = 0, ownedCount = 0;
-            let spendByYear = {}, spendBySeries = {};
-
-            const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
-            const filterType = filterSelect ? filterSelect.value : 'all';
-
-// Глобальный подсчет статистики для верхнего дашборда
-            cars.forEach(car => {
-                if (car.status === 'owned') {
-                    const carPrice = parseFloat(car.price) || 0;
-                    totalSpent += carPrice; ownedCount++;
-                    if (car.year) spendByYear[car.year] = (spendByYear[car.year] || 0) + carPrice;
-                    const sName = car.seriesName || car.series || 'Общая серия';
-                    spendBySeries[sName] = (spendBySeries[sName] || 0) + carPrice;
-                }
-            });
-
-// Обновляем циферки на верхнем дашборде (БЕЗОПАСНЫЙ МОНОЛИТНЫЙ ВАРИАНТ)
-const tCars = document.getElementById('dash-total-cars');
-const oCars = document.getElementById('dash-owned-cars');
-const tSpent = document.getElementById('dash-total-spent');
-const ratio = document.getElementById('dash-ratio');
-const yChart = document.getElementById('chart-years-container');
-const sChart = document.getElementById('chart-series-container');
-
-    // 1. ЖЕСТКИЙ ПЕРЕРАСЧЕТ ВСЕЙ БАЗЫ ДАННЫХ
-    const currentCarsArray = (typeof cars !== 'undefined') ? cars : ((window.cars) ? window.cars : []);
-    const totalCount = currentCarsArray.length;
+function updateDashboard() {
+    const grid = document.getElementById('collection-grid');
+    const chartYears = document.getElementById('chart-years-container');
+    const sChart = document.getElementById('chart-series-container');
     
+    if (!grid) return;
+    grid.innerHTML = '';
+
+    // Безопасно получаем значения элементов поиска
+    const searchInput = document.getElementById('search-input');
+    const filterSelect = document.getElementById('filter-select');
+    const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+    const filterType = filterSelect ? filterSelect.value : 'all';
+
+    // 1. СБРОС СЧЕТЧИКОВ ДЛЯ ЧИСТОГО ПЕРЕРАСЧЕТА
     ownedCount = 0;
     totalSpent = 0;
+
     let collectionsMap = {};
     let spendBySeries = {};
-    let carsByYear = {}; // Инициализируем объект для сбора статистики по годам
+    let carsByYear = {}; 
 
+    // Вычленяем правильный массив данных (поддержка window.cars)
+    const currentCarsArray = (typeof cars !== 'undefined') ? cars : ((window.cars) ? window.cars : []);
+    const totalCount = currentCarsArray.length;
+
+    // 2. ЕДИНЫЙ ЦИКЛ СБОРЩИКА ДАННЫХ (БЕЗ ДУБЛИКАТОВ)
     currentCarsArray.forEach(car => {
         const carIsOwned = car.status === 'owned';
         const carPrice = parseFloat(car.price) || 0;
@@ -377,20 +361,22 @@ const sChart = document.getElementById('chart-series-container');
             totalSpent += carPrice;
         }
 
-        // Собираем года строго по всей сырой базе для нашего аккордеона
+        // Собираем данные по годам для аккордеона
         if (!carsByYear[carYear]) {
             carsByYear[carYear] = { total: 0, owned: 0 };
         }
         carsByYear[carYear].total++;
         if (carIsOwned) carsByYear[carYear].owned++;
 
+        // Собираем трат по сериям
         if (carIsOwned && car.seriesName) {
             const sName = car.seriesName.trim();
             spendBySeries[sName] = (spendBySeries[sName] || 0) + carPrice;
         }
 
-        // ГРУППИРОВКА: Игнорируем год, чтобы Batman не двоился!
+        // ГРУППИРОВКА: Игнорируем год, склеиваем дубли серий
         const sKey = car.seriesName ? car.seriesName.trim() : 'HW Garage';
+        
         if (!collectionsMap[sKey]) {
             collectionsMap[sKey] = {
                 name: sKey,
@@ -414,12 +400,17 @@ const sChart = document.getElementById('chart-series-container');
         }
     });
 
-    // 2. ВЫВОД ИСТИННЫХ ЦИФР НА ДАШБОРД (Твои 1300+ моделей)
-    const ratioPercent = totalCount > 0 ? Math.round((ownedCount / totalCount) * 100) : 0;
+    // 3. ОТРИСОВКА ВЕРХНИХ ЦИФР НА ДАШБОРДЕ
+    const tCars = document.getElementById('dash-total-cars');
+    const oCars = document.getElementById('dash-owned-cars');
+    const tSpent = document.getElementById('dash-total-spent');
+    const ratio = document.getElementById('dash-ratio');
 
     if (tCars) tCars.innerText = totalCount; 
     if (oCars) oCars.innerText = ownedCount;
     if (tSpent) tSpent.innerText = `${totalSpent.toLocaleString()} ₽`;
+    
+    const ratioPercent = totalCount > 0 ? Math.round((ownedCount / totalCount) * 100) : 0;
     if (ratio) ratio.innerText = `🏆 ${ratioPercent}% Собрано`;
 
     const mainProgressBar = document.getElementById('dash-main-progress-bar');
@@ -427,19 +418,14 @@ const sChart = document.getElementById('chart-series-container');
         mainProgressBar.style.width = `${Math.max(ratioPercent, 4)}%`; 
     }
 
-// БЕЗОПАСНАЯ ГЕНЕРАЦИЯ МИНИ-ШКАЛ ПО ГОДАМ
-if (yChart) {
-    // Проверяем, существует ли вообще переменная carsByYear в коде
-    const yearsData = (typeof carsByYear !== 'undefined') ? carsByYear : null;
-    
-    if (yearsData && Object.keys(yearsData).length > 0) {
-        yChart.innerHTML = Object.keys(yearsData).sort((a,b) => b - a).map(year => {
-            const yTotal = yearsData[year].total || 0;
-            const yOwned = yearsData[year].owned || 0;
+    // 4. ГЕНЕРАЦИЯ ШКАЛ ПО ГОДАМ В АККОРДЕОНЕ
+    if (chartYears) {
+        chartYears.innerHTML = Object.keys(carsByYear).sort((a,b) => b - a).map(year => {
+            const yTotal = carsByYear[year].total;
+            const yOwned = carsByYear[year].owned;
             const yPercent = yTotal > 0 ? Math.round((yOwned / yTotal) * 100) : 0;
-
             return `
-                <div style="display: flex; flex-direction: column; gap: 3px; background: white; padding: 8px 12px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                <div style="display: flex; flex-direction: column; gap: 3px; background: white; padding: 8px 12px; border-radius: 6px; border: 1px solid #e2e8f0; margin-top: 4px;">
                     <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: bold; color: #475569;">
                         <span>📅 ${year} год</span>
                         <span style="color: #10b981;">${yOwned} <span style="color:#94a3b8; font-weight:normal;">из</span> ${yTotal} шт. (${yPercent}%)</span>
@@ -450,329 +436,145 @@ if (yChart) {
                 </div>
             `;
         }).join('');
-    } else {
-        // Если переменной нет, просто выведем красивую текстовую строчку, чтобы ничего не ломалось
-        yChart.innerHTML = `<div style="font-size:12px; color:#64748b; font-style:italic; text-align:center; padding:5px;">Статистика по годам релиза обновляется динамически...</div>`;
     }
-}
 
-// БЕЗОПАСНАЯ ГЕНЕРАЦИЯ ИНТЕРАКТИВНЫХ ШКАЛ ДЛЯ ТРАТ ПО СЕРИЯМ
-if (sChart && typeof spendBySeries !== 'undefined' && Object.keys(spendBySeries).length > 0) {
-    const maxSpent = Math.max(...Object.values(spendBySeries), 1);
-
-    sChart.innerHTML = Object.keys(spendBySeries).map(sName => {
-        const currentSpent = spendBySeries[sName];
-        const barWidth = Math.round((currentSpent / maxSpent) * 100);
-        
-        return `
-            <div style="background: #ffffff; padding: 10px; border-radius: 8px; border: 1px solid #f1f5f9; display: flex; flex-direction: column; gap: 4px;">
-                <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: bold; color: #334155;">
-                    <span style="text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px;">${sName}</span>
-                    <span style="color: #1e293b;">${currentSpent.toLocaleString()} ₽</span>
+    // 5. ГЕНЕРАЦИЯ СИНЕ-ЖЕЛТЫХ ШКАЛ СЕРИЙ
+    if (sChart && Object.keys(spendBySeries).length > 0) {
+        const maxSpent = Math.max(...Object.values(spendBySeries), 1);
+        sChart.innerHTML = Object.keys(spendBySeries).map(sName => {
+            const currentSpent = spendBySeries[sName];
+            const barWidth = Math.round((currentSpent / maxSpent) * 100);
+            return `
+                <div style="background: #ffffff; padding: 10px; border-radius: 8px; border: 1px solid #f1f5f9; display: flex; flex-direction: column; gap: 4px;">
+                    <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: bold; color: #334155;">
+                        <span style="text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px;">${sName}</span>
+                        <span style="color: #1e293b;">${currentSpent.toLocaleString()} ₽</span>
+                    </div>
+                    <div class="progress-bar-container" style="background: #e2e8f0; height: 6px; border-radius: 4px; overflow: hidden;">
+                        <div class="progress-bar-fill" style="width: ${barWidth}%; height: 100%; background: ${sName.toLowerCase().includes('boulevard') ? '#f59e0b' : '#3b82f6'};"></div>
+                    </div>
                 </div>
-                <div class="progress-bar-container">
-                    <div class="progress-bar-fill" style="width: ${barWidth}%; background: ${sName.toLowerCase().includes('boulevard') ? '#f59e0b' : '#3b82f6'};"></div>
-                </div>
-            </div>
-        `;
-    }).join('');
-}
+            `;
+        }).join('');
+    }
 
+    // 6. ОТРИСОВКА ПЛИТОК КОЛЛЕКЦИЙ И КАРТОЧЕК
+    Object.keys(collectionsMap).forEach(sName => {
+        const group = collectionsMap[sName];
+        if (group.items.length === 0) return; 
 
-// 3. ГЕНЕРАЦИЯ ИНТЕРАКТИВНЫХ ШКАЛ ДЛЯ ТРАТ ПО СЕРИЯМ
-if (sChart) {
-    const maxSpent = Math.max(...Object.values(spendBySeries), 1);
+        group.totalInSeries = Math.max(...group.items.map(item => item.seriesTotal || 5), 5);
+        group.items.sort((a, b) => (a.seriesNum || 0) - (b.seriesNum || 0));
+        const percentDone = Math.round((group.ownedCount / group.totalInSeries) * 100);
 
-    sChart.innerHTML = Object.keys(spendBySeries).map(sName => {
-        const currentSpent = spendBySeries[sName];
-        const barWidth = Math.round((currentSpent / maxSpent) * 100);
-        
-        return `
-            <div style="background: #ffffff; padding: 10px; border-radius: 8px; border: 1px solid #f1f5f9; display: flex; flex-direction: column; gap: 4px;">
-                <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: bold; color: #334155;">
-                    <span style="text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px;">${sName}</span>
-                    <span style="color: #1e293b;">${currentSpent.toLocaleString()} ₽</span>
-                </div>
-                <div class="progress-bar-container">
-                    <div class="progress-bar-fill" style="width: ${barWidth}%; background: ${sName.toLowerCase().includes('boulevard') ? '#f59e0b' : '#3b82f6'};"></div>
-                </div>
-            </div>
-        `;
-    }).join('');
-}
-
-
-// Группировка машинок по сериям
-            let groups = {};
-            cars.forEach(car => {
-                const sName = car.seriesName || car.series || 'Общая серия';
-                
-// УМНЫЙ ПОИСК: Ищет совпадения по названию, серии или уникальному артикулу модели [Toy #]
-// УМНЫЙ ПОИСК: Приводим всё к нижнему регистру, чтобы поиск 'jjj40' находил 'JJJ40'
-                const nameClean = (car.name || '').toLowerCase();
-                const seriesClean = (sName || '').toLowerCase();
-                const toyNumClean = (car.toyNum || '').toLowerCase();
-
-                if (query) {
-                    const hasName = nameClean.includes(query);
-                    const hasSeries = seriesClean.includes(query);
-                    const hasToyNum = toyNumClean.includes(query);
-                    
-// Если ни одного совпадения нет, скрываем карточку
-                    if (!hasName && !hasSeries && !hasToyNum) return;
-                }
-
-
-                if (filterType === 'owned' && car.status !== 'owned') return;
-                if (filterType === 'missing' && car.status !== 'missing') return;
-
-                if (!groups[sName]) {
-                    groups[sName] = {
-                        name: sName,
-                        year: car.year || '—',
-                        totalInSeries: 0, // Сбрасываем жесткий индекс каталога
-                        ownedCount: 0,
-                        items: []
-                    };
-                }
-// Увеличиваем общее число моделей в этой серии на единицу за каждую найденную карточку вариации
-                groups[sName].totalInSeries++; 
-                
-                if (car.status === 'owned') groups[sName].ownedCount++;
-                groups[sName].items.push(car);
-            });
-
-// ОТРИСОВКА НАСТОЯЩИХ КВАДРАТНЫХ ПЛИТОК
-// УМНАЯ СОРТИРОВКА ПЛИТОК: Начатые (Желтые) -> Собранные (Зеленые) -> Пустые (Черные)
-            Object.keys(groups).sort((a, b) => {
-                const groupA = groups[a];
-                const groupB = groups[b];
-
-// Присваиваем веса статусам: Начата = 3, Собрана = 2, Пустая = 1
-                let weightA = 1;
-                if (groupA.ownedCount > 0) {
-                    weightA = (groupA.ownedCount === groupA.totalInSeries) ? 2 : 3;
-                }
-
-                let weightB = 1;
-                if (groupB.ownedCount > 0) {
-                    weightB = (groupB.ownedCount === groupB.totalInSeries) ? 2 : 3;
-                }
-
-// Сначала сортируем по весу (от большего к меньшему)
-                if (weightA !== weightB) {
-                    return weightB - weightA;
-                }
-
-// Если статус одинаковый, сортируем по алфавиту
-                return a.localeCompare(b);
-            }).forEach(sName => {
-
-                const group = groups[sName];
-                group.items.sort((a, b) => (parseInt(a.seriesNum || a.carNum) || 0) - (parseInt(b.seriesNum || b.carNum) || 0));
-
-                // УМНЫЙ СВЕТОФОР ПЛИТОК: Цвета подстраиваются под выбранный фильтр поиска
-                let tileBg = '#1e293b'; 
-                let tileColor = '#ffffff';
-
-                if (filterType === 'owned') {
-                    // Если смотрим только купленные: все начатые и собранные серии горят зеленым
-                    if (group.ownedCount > 0) {
-                        tileBg = '#10b981';
-                    }
-                } else if (filterType === 'missing') {
-                    // Если смотрим то, что в поиске: начатые горят желтым, полностью собранные гаснут
-                    if (group.ownedCount > 0 && group.ownedCount < group.totalInSeries) {
-                        tileBg = '#f59e0b';
-                        tileColor = '#1e293b';
-                    }
+        let tileBg = '#1e293b'; 
+        let tileColor = '#ffffff';
+        if (filterType === 'owned') {
+            if (group.ownedCount > 0) tileBg = '#10b981';
+        } else if (filterType === 'missing') {
+            if (group.ownedCount > 0 && group.ownedCount < group.totalInSeries) {
+                tileBg = '#f59e0b';
+                tileColor = '#1e293b';
+            }
+        } else {
+            if (group.ownedCount > 0) {
+                if (group.ownedCount === group.totalInSeries) {
+                    tileBg = '#10b981';
                 } else {
-                    // Стандартный режим "Все": деление на зеленый, желтый и черный
-                    if (group.ownedCount > 0) {
-                        if (group.ownedCount === group.totalInSeries) {
-                            tileBg = '#10b981';
-                        } else {
-                            tileBg = '#f59e0b';
-                            tileColor = '#1e293b';
-                        }
-                    }
+                    tileBg = '#f59e0b';
+                    tileColor = '#1e293b';
                 }
-
-
-                const percentDone = Math.round((group.ownedCount / group.totalInSeries) * 100) || 0;
-                const gridId = `grid-${sName.replace(/[^a-zA-Z0-9]/g, '-')}`;
-                
-// Обертка-контейнер для плитки (grid-column убран, чтобы плитки ложились в ряд по несколько штук)
-                const tileWrapper = document.createElement('div');
-                
-// ИСПРАВЛЕНО: Задаем жесткое позиционирование для всего контейнера серии, чтобы плитки не косило
-                tileWrapper.style.cssText = "grid-column: 1 / -1 !important; width: 100%; display: flex; flex-direction: column; box-sizing: border-box; margin-top: 10px; margin-bottom: 5px;";
-                
-// Компактная квадратная плитка
-                const mainTile = document.createElement('div');
-                mainTile.style.cssText = `background: ${tileBg}; color: ${tileColor}; padding: 15px; border-radius: 12px; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; user-select: none; box-shadow: 0 4px 10px rgba(0,0,0,0.08); height: 130px; transition: transform 0.1s; box-sizing: border-box;`;
-                // УМНАЯ ССЫЛКА НА ЛОГОТИП: переводим название серии в нижний регистр для папки series-img
-                const cleanSeriesName = sName.toLowerCase().trim();
-                const seriesLogoUrl = `series-img/${encodeURIComponent(cleanSeriesName)}.webp`;
-
-                mainTile.innerHTML = `
-                    <div style="display: flex; align-items: center; gap: 15px; text-align: left;">
-                        <!-- УВЕЛИЧЕННЫЙ ЛОГОТИП СЕРИИ: подняли высоту до 50px и убрали лишние рамки -->
-                        <img src="${seriesLogoUrl}" 
-                             onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-flex';" 
-                             style="height: 70px; width: auto; max-width: 90px; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));">
-                        
-                        <!-- Увеличенная альтернативная иконка-заглушка с красивым фоном -->
-                        <span style="display: none; font-size: 24px; background: rgba(255,255,255,0.2); width: 70px; height: 70px; border-radius: 10px; align-items: center; justify-content: center; box-shadow: inset 0 1px 3px rgba(255,255,255,0.2);">🏎️</span>
-                        
-                        <div>
-                            <h3 style="margin: 0; font-size: 16px; text-transform: uppercase; font-weight: 900; letter-spacing: 0.5px; line-height: 1.2;">${group.name}</h3>
-                            <span style="font-size: 10px; opacity: 0.7;">Релиз: ${group.year} г.</span>
-                        </div>
-                    </div>
-
-                    <div style="display: flex; align-items: center; gap: 15px;">
-                        <span style="font-size: 11px; font-weight: bold; background: rgba(255,255,255,0.2); padding: 3px 10px; border-radius: 12px; white-space: nowrap;">
-                            ${group.ownedCount} из ${group.totalInSeries} шт.
-                        </span>
-                        <span style="font-size: 14px; font-weight: 900;">${percentDone}%</span>
-                        <span style="font-size: 11px; opacity: 0.6;">▼</span>
-                    </div>
-                `;
-
-
-
-// Автономная скрытая сетка для машинок (Растягивается на всю ширину под плитками через grid-column: 1 / -1)
-                const carsGrid = document.createElement('div');
-                carsGrid.id = gridId;
-// ИСПРАВЛЕНО: Сетка машин теперь раздвигает общие колонки и ложится ровно в ряд под плитками
-                carsGrid.style.cssText = "display: none; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important; gap: 15px; margin-top: 12px; padding: 15px; background: #f8fafc; border-radius: 8px; box-shadow: inset 0 2px 5px rgba(0,0,0,0.05); grid-column: 1 / -1 !important; width: 100%; box-sizing: border-box;";
-
-                mainTile.addEventListener('click', function() {
-                    const isHidden = carsGrid.style.display === 'none';
-// Прячем другие открытые сетки серий, чтобы не захламлять интерфейс
-                    document.querySelectorAll('[id^="grid-"]').forEach(el => el.style.display = 'none');
-                    carsGrid.style.display = isHidden ? 'grid' : 'none';
-                });
-
-                group.items.forEach(car => {
-                    const carIsOwned = car.status === 'owned';
-                    const cardBorderColor = carIsOwned ? '#10b981' : '#cbd5e1';
-
-                    let yearColor = '#64748b';
-                    if (car.year === 2026) yearColor = '#e50012';
-                    if (car.year === 2025) yearColor = '#1e40af';
-                    if (car.year === 2024) yearColor = '#16a34a';
-
-                    // УМНАЯ ССЫЛКА НА ФОТО: Сначала проверяем встроенную мелкую превьюшку из базы. 
-                    // Если её нет, скрипт автоматически генерирует прямую ссылку на качественный .webp файл в твоей папкеcars-img на GitHub Pages!
-                    // Если и там файла не окажется, сработает аккуратная серая заглушка.
-                    let carImage = car.image || `cars-img/${car.toyNum}.webp` || "data:image/svg+xml;utf8,<svg xmlns='http://w3.org' width='300' height='150'><rect width='100%' height='100%' fill='%23cbd5e1'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='14' fill='%2364748b'>Нет фото 🏎️</text></svg>";
-
-
-                    // УМНАЯ СИСТЕМА ПАЛИТРЫ РЕДКОСТИ HOT WHEELS WIKI
-                    const carRarity = (car.rarity || '').toLowerCase();
-                    const carSeries = (car.seriesName || car.series || '').toLowerCase();
-
-                    // Дефолтные настройки для обычного Mainline (Небесно-голубой)
-                    let bottomBarBg = 'rgba(240, 249, 255, 0.95)';
-                    let bottomBarBorder = '1px solid #bae6fd';
-                    let textColor = '#1e293b';
-
-                    if (carRarity.includes('super treasure') || carRarity.includes('sth')) {
-                        // 1. Золотой премиум для Super Treasure Hunt
-                        bottomBarBg = 'linear-gradient(135deg, rgba(254,243,199,0.98) 0%, rgba(251,191,36,0.95) 100%)';
-                        bottomBarBorder = '1px solid #f59e0b';
-                        textColor = '#78350f';
-                    } else if (carRarity.includes('treasure hunt') || carRarity.includes('th')) {
-                        // 2. Бордово-розовый для обычных Treasure Hunt
-                        bottomBarBg = 'rgba(253, 242, 248, 0.95)';
-                        bottomBarBorder = '1px solid #fbcfe8';
-                        textColor = '#9d174d';
-                    } else if (carSeries.includes('silver') || carRarity.includes('silver')) {
-                        // 3. Серебряный металлик для Silver Series
-                        bottomBarBg = 'linear-gradient(180deg, rgba(248,250,25fc,0.95) 0%, rgba(226,232,240,0.95) 100%)';
-                        bottomBarBorder = '1px solid #cbd5e1';
-                        textColor = '#334155';
-                    } else if (carSeries.includes('culture') || carSeries.includes('boulevard') || carSeries.includes('premium')) {
-                        // 4. Матовый графит для Pop Culture, Car Culture и Boulevard
-                        bottomBarBg = 'rgba(30, 41, 59, 0.95)';
-                        bottomBarBorder = '1px solid #475569';
-                        textColor = '#f8fafc'; // Белый текст для темного фона
-                    }
-
-//Позиционирование блистера HW в карточке
-                    const card = document.createElement('div');
-                    card.style.cssText = `
-                        position: relative;
-                        width: 100%;
-                        height: 160px;
-                        border: 2px solid ${cardBorderColor};
-                        border-radius: 12px;
-                        overflow: hidden;
-                        background-image: url('${carImage}');
-                        background-size: 160% auto;
-                        background-position: center 55%;
-                        background-color: #cbd5e1;
-                        box-shadow: 0 4px 10px rgba(0,0,0,0.04);
-                        display: flex;
-                        flex-direction: column;
-                        justify-content: space-between;
-                        box-sizing: border-box;
-                        ${!carIsOwned ? 'filter: grayscale(0.5); opacity: 0.9;' : ''}
-                    `;
-
-
-                    card.innerHTML = `                   
-<!-- ВЕРХНИЙ БЛОК: Чистый год и номер коллекции без дублирования цвета плашки -->
-                        <div style="display: flex; flex-direction: column; align-items: flex-end; padding: 8px; gap: 4px; pointer-events: none;">
-                            <div style="background: ${carIsOwned ? yearColor : '#cbd5e1'}; color: white; padding: 2px 10px; font-weight: bold; font-size: 11px; border-radius: 6px;">
-                                ${car.year || '—'}
-                            </div>
-                            <div style="background: rgba(255, 255, 255, 0.85); color: #1e293b; padding: 2px 8px; font-weight: 800; font-size: 11px; border-radius: 6px; border: 1px solid #cbd5e1;">
-                                ${car.seriesNum || car.carNum || 1}/${car.seriesTotal || car.carTotal || 1}
-                            </div>
-                        </div>
-
-
-
-                        <button onclick="event.stopPropagation(); resetCarStatus(${car.id});" style="position: absolute; top: 8px; left: 8px; background: rgba(255,51,55,0.8); color: white; border: none; border-radius: 50%; width: 22px; height: 22px; font-size: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 20;">×</button>
- <!-- ИСПРАВЛЕНО: Плашка теперь использует динамические цвета редкости -->
-                        <div style="background: ${bottomBarBg}; border-top: ${bottomBarBorder}; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center;">
-
-                            <div style="display: flex; flex-direction: column; max-width: 65%; text-align: left;">
-                                <span style="font-size: 13px; font-weight: bold; color: ${textColor}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase;">${car.name}</span>
-
-                                ${car.toyNum ? `<span style="color: #ff5000; font-size: 10px; font-weight: bold; margin-top: 1px;">[${car.toyNum}]</span>` : ''}
-                            </div>
-                            
-                            <div style="display: flex; align-items: center;">
-                                ${carIsOwned ? `
-                                    <div style="font-size: 12px; font-weight: 900; color: #1e293b; background: rgba(16,185,129,0.15); padding: 5px 10px; border-radius: 6px; white-space: nowrap;">
-                                        💰 ${car.price} ₽
-                                    </div>
-                                ` : `
-<!-- ИСПРАВЛЕНО: Интерактивная кнопка покупки по клику прямо в альбоме -->
-                                    <button type="button" onclick="event.stopPropagation(); buyCarInline(${car.id});" style="font-size: 12px; font-weight: 900; color: #1e293b; background: #cbd5e1; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; transition: background 0.1s;">
-                                        Купить
-                                    </button>
-                                `}
-                            </div>
-                        </div>
-                    `;
-                    carsGrid.appendChild(card);
-                });
-
-                tileWrapper.appendChild(mainTile);
-                tileWrapper.appendChild(carsGrid);
-                collectionGrid.appendChild(tileWrapper);
-            });
-// ИСПРАВЛЕНО: Если до обновления была открыта группа, возвращаем ей режим отображения 'grid'
-            if (activeGridId) {
-                const restoreGrid = document.getElementById(activeGridId);
-                if (restoreGrid) restoreGrid.style.display = 'grid';
             }
         }
+
+        const mainTile = document.createElement('div');
+        mainTile.className = 'collection-tile';
+        mainTile.style.cssText = `background: ${tileBg}; color: ${tileColor};`;
+        
+        mainTile.onclick = () => {
+            const childGrid = mainTile.nextElementSibling;
+            childGrid.style.display = childGrid.style.display === 'none' ? 'grid' : 'none';
+        };
+
+        const cleanSeriesName = sName.toLowerCase().trim();
+        const seriesLogoUrl = `series-img/${encodeURIComponent(cleanSeriesName)}.webp`;
+
+        mainTile.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 15px; text-align: left;">
+                <img src="${seriesLogoUrl}" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-flex';" style="height: 50px; width: auto; max-width: 90px; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));">
+                <span style="display: none; font-size: 24px; background: rgba(255,255,255,0.2); width: 50px; height: 50px; border-radius: 10px; align-items: center; justify-content: center; box-shadow: inset 0 1px 3px rgba(255,255,255,0.2);">🏎️</span>
+                <div>
+                    <h3 style="margin: 0; font-size: 16px; text-transform: uppercase; font-weight: 900; letter-spacing: 0.5px; line-height: 1.2;">${group.name}</h3>
+                    <span style="font-size: 10px; opacity: 0.7;">Коллекция объединена</span>
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <span style="font-size: 11px; font-weight: bold; background: rgba(255,255,255,0.2); padding: 3px 10px; border-radius: 12px; white-space: nowrap;">
+                    ${group.ownedCount} из ${group.totalInSeries} шт.
+                </span>
+                <span style="font-size: 14px; font-weight: 900;">${percentDone}%</span>
+                <span style="font-size: 11px; opacity: 0.6;">▼</span>
+            </div>
+        `;
+
+        const carsGrid = document.createElement('div');
+        carsGrid.className = 'cars-grid';
+        carsGrid.style.display = 'none'; 
+
+        group.items.forEach(car => {
+            const carIsOwned = car.status === 'owned';
+            const cardBorderColor = carIsOwned ? '#10b981' : '#cbd5e1';
+            const bottomBarBg = carIsOwned ? '#f8fafc' : '#f1f5f9';
+            const bottomBarBorder = carIsOwned ? '1px solid #10b981' : '1px solid #cbd5e1';
+            const textColor = carIsOwned ? '#1e293b' : '#64748b';
+            const yearColor = car.rarity === 'Premium' ? '#f59e0b' : '#3b82f6';
+            const carImage = car.image || `cars-img/${car.toyNum}.jpg`;
+
+            const card = document.createElement('div');
+            card.className = 'car-card';
+            card.style.cssText = `
+                position: relative; width: 100%; height: 160px;
+                border: 2px solid ${cardBorderColor}; border-radius: 12px; overflow: hidden;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.04); display: flex; flex-direction: column;
+                justify-content: space-between; box-sizing: border-box; background-color: #cbd5e1;
+                background-image: url('${carImage}'); background-size: cover; background-position: center 35%;
+                ${!carIsOwned ? 'filter: grayscale(0.5); opacity: 0.9;' : ''}
+            `;
+
+            card.innerHTML = `
+                <div style="position: relative; z-index: 1; display: flex; flex-direction: column; align-items: flex-end; padding: 8px; gap: 4px; pointer-events: none;">
+                    <div style="background: ${carIsOwned ? yearColor : '#cbd5e1'}; color: white; padding: 2px 10px; font-weight: bold; font-size: 11px; border-radius: 6px;">
+                        ${car.year || '—'}
+                    </div>
+                    <div style="background: rgba(255, 255, 255, 0.85); color: #1e293b; padding: 2px 8px; font-weight: 800; font-size: 11px; border-radius: 6px; border: 1px solid #cbd5e1;">
+                        ${car.seriesNum || 1}/${car.seriesTotal || 5}
+                    </div>
+                </div>
+
+                <button onclick="event.stopPropagation(); resetCarStatus(${car.id});" style="position: absolute; top: 8px; left: 8px; background: rgba(255,51,55,0.8); color: white; border: none; border-radius: 50%; width: 22px; height: 22px; font-size: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 20;" title="Вернуть в статус 'В поиске'">×</button>
+
+                <div style="position: relative; z-index: 1; background: ${bottomBarBg}; border-top: ${bottomBarBorder}; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center;">
+                    <div style="display: flex; flex-direction: column; max-width: 65%; text-align: left;">
+                        <span style="font-size: 13px; font-weight: bold; color: ${textColor}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase;">${car.name}</span>
+                        ${car.toyNum ? `<span style="color: #ff5000; font-size: 10px; font-weight: bold; margin-top: 1px;">[\${car.toyNum}]</span>` : ''}
+                    </div>
+                    <div style="display: flex; align-items: center;">
+                        ${carIsOwned ? `
+                            <div style="font-size: 12px; font-weight: 900; color: #1e293b; background: rgba(16,185,129,0.15); padding: 5px 10px; border-radius: 6px;">💰 \${car.price} ₽</div>
+                        ` : `
+                            <button type="button" onclick="event.stopPropagation(); buyCarInline(\${car.id});" style="font-size: 12px; font-weight: 900; color: #1e293b; background: #cbd5e1; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer;">Купить</button>
+                        `}
+                    </div>
+                </div>
+            `;
+            carsGrid.appendChild(card);
+        });
+
+        grid.appendChild(mainTile);
+        grid.appendChild(carsGrid);
+    });
+}
+
 
 // ФУНКЦИЯ БЫСТРОЙ ПОКУПКИ МОДЕЛИ ВНУТРИ АЛЬБОМА
         function buyCarInline(carId) {
