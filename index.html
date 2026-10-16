@@ -521,10 +521,11 @@ function updateDashboard() {
             </div>
         `;
 
-        // Контейнер-обертка для всей раскрывающейся витрины серии
+        // Контейнер-обертка для всей раскрывающейся витрины серии (С фиксом для ПК сетки)
         const wrapperGrid = document.createElement('div');
-        wrapperGrid.style.display = 'none'; // По умолчанию скрыт
+        wrapperGrid.style.display = 'none'; 
         wrapperGrid.style.width = '100%';
+        wrapperGrid.style.gridColumn = '1 / -1'; // Жесткий фикс: растягивает полку на всю строку грида!
 
         // ГРУППИРУЕМ МАШИНКИ ВНУТРИ СЕРИИ ЕЩЕ РАЗ — ТЕПЕРЬ ПО ГОДАМ
         let itemsByYear = {};
