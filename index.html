@@ -117,25 +117,46 @@
     <div style="width: 100%; box-sizing: border-box; display: flex; flex-direction: column; gap: 10px;">
         
         <!-- СТИЛЬНЫЙ ДАШБОРД СТАТИСТИКИ -->
-        <div class="dash-card-grid">
-            <div class="analytics-card">
-                <span style="font-size: 12px; color: #64748b; font-weight: bold; text-transform: uppercase;">Всего в базе</span>
-                <div style="font-size: 28px; font-weight: 900; color: #1e293b;" id="dash-total-cars">0</div>
-                <span style="font-size: 11px; color: #94a3b8;" id="dash-ratio">Куплено: 0%</span>
+                <!-- ОБНОВЛЕННЫЙ МОНОЛИТНЫЙ ДАШБОРД С ИНТЕРАКТИВНЫМ АККОРДЕОНОМ -->
+        <div class="dash-card-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; margin-bottom: 15px;">
+            
+            <!-- ГЕНЕРАЛЬНАЯ КАРТОЧКА ОБЩЕГО ПРОГРЕССА (КЛИКАБЕЛЬНАЯ) -->
+            <div class="analytics-card" style="position: relative; cursor: pointer; padding: 0; overflow: hidden; display: flex; flex-direction: column;" onclick="const y = document.getElementById('years-progress-dropdown'); y.style.display = y.style.display === 'none' ? 'block' : 'none';">
+                
+                <!-- Основной контент карточки (по твоему наброску) -->
+                <div style="display: flex; min-height: 90px; width: 100%;">
+                    <!-- Слева: живая динамическая шкала прогресса -->
+                    <div id="dash-main-progress-bar" style="background: #10b981; width: 6%; transition: width 0.4s ease; min-width: 12px;"></div>
+                    
+                    <!-- Справа: текстовые данные -->
+                    <div style="padding: 15px; display: flex; flex-direction: column; justify-content: center; gap: 4px; flex: 1;">
+                        <span style="font-size: 11px; color: #64748b; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">Всего в базе / В коллекции</span>
+                        <div style="font-size: 24px; font-weight: 900; color: #1e293b;">
+                            <span id="dash-owned-cars" style="color: #10b981;">0</span> <span style="color: #94a3b8; font-weight: 500; font-size: 18px;">/</span> <span id="dash-total-cars" style="color: #1e293b; font-size: 20px;">0</span> <span style="font-size: 13px; color: #64748b; font-weight: normal;">шт.</span>
+                        </div>
+                        <div style="font-size: 14px; font-weight: 800; color: #10b981;" id="dash-ratio">6% Собрано</div>
+                        <span style="font-size: 10px; color: #94a3b8; margin-top: 2px;">▼ Нажмите, чтобы посмотреть по годам</span>
+                    </div>
+                </div>
+
+                <!-- ВЫПАДАЮЩИЙ СПИСОК: Прогресс по годам внутри карточки -->
+                <div id="years-progress-dropdown" style="display: none; background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 15px; box-sizing: border-box; width: 100%;">
+                    <span style="font-size: 11px; color: #64748b; font-weight: bold; text-transform: uppercase; display: block; margin-bottom: 8px;">Прогресс по годам релиза:</span>
+                    <div style="display: flex; flex-direction: column; gap: 10px;" id="chart-years-container">
+                        <!-- Сюда скрипт вставит мини-прогрессбары годов -->
+                    </div>
+                </div>
             </div>
-            <div class="analytics-card">
-                <span style="font-size: 12px; color: #64748b; font-weight: bold; text-transform: uppercase;">В коллекции ✅</span>
-                <div style="font-size: 28px; font-weight: 900; color: #10b981;" id="dash-owned-cars">0</div>
+
+            <!-- КАРТОЧКА ФИНАНСОВ (ОСТАЕТСЯ РЯДОМ) -->
+            <div class="analytics-card" style="padding: 15px; display: flex; flex-direction: column; justify-content: center; min-height: 90px; box-sizing: border-box;">
+                <span style="font-size: 11px; color: #64748b; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">Финансовые инвестиции 💰</span>
+                <div style="font-size: 26px; font-weight: 900; color: #3b82f6; margin-top: 4px;" id="dash-total-spent">0 ₽</div>
+                <span style="font-size: 11px; color: #94a3b8;">Общая стоимость купленных моделей</span>
             </div>
-            <div class="analytics-card">
-                <span style="font-size: 12px; color: #64748b; font-weight: bold; text-transform: uppercase;">Финансы 💰</span>
-                <div style="font-size: 28px; font-weight: 900; color: #3b82f6;" id="dash-total-spent">0 ₽</div>
-            </div>
-            <div class="analytics-card">
-                <span style="font-size: 12px; color: #64748b; font-weight: bold; text-transform: uppercase;">Инвестиции по годам</span>
-                <div style="font-size: 12px; color: #334155; display: flex; flex-direction: column; gap: 4px;" id="chart-years-container"></div>
-            </div>
+
         </div>
+
 
         <!-- КНОПКА ДЛЯ ОТКРЫТИЯ/СКРЫТИЯ СТАТИСТИКИ СЕРИЙ -->
         <button type="button" class="toggle-form-btn" style="background: #3b82f6; margin-bottom: 5px;" onclick="const s = document.getElementById('chart-series-wrapper'); s.style.display = s.style.display === 'none' ? 'block' : 'none';">
@@ -328,43 +349,102 @@
                 }
             });
 
-// Обновляем циферки на верхнем дашборде
-            const tCars = document.getElementById('dash-total-cars');
-            const oCars = document.getElementById('dash-owned-cars');
-            const tSpent = document.getElementById('dash-total-spent');
-            const ratio = document.getElementById('dash-ratio');
+// Обновляем циферки на верхнем дашборде (БЕЗОПАСНЫЙ МОНОЛИТНЫЙ ВАРИАНТ)
+const tCars = document.getElementById('dash-total-cars');
+const oCars = document.getElementById('dash-owned-cars');
+const tSpent = document.getElementById('dash-total-spent');
+const ratio = document.getElementById('dash-ratio');
+const yChart = document.getElementById('chart-years-container');
+const sChart = document.getElementById('chart-series-container');
 
-            if (tCars) tCars.innerText = cars.length;
-            if (oCars) oCars.innerText = ownedCount;
-            if (tSpent) tSpent.innerText = totalSpent.toLocaleString() + ' ₽';
-            if (ratio) ratio.innerText = cars.length > 0 ? Math.round((ownedCount / cars.length) * 100) + '%' : '0%';
+// Вычисляем общий процент коллекции на основе реальных переменных
+const totalCount = (typeof cars !== 'undefined') ? cars.length : 0;
+const ratioPercent = totalCount > 0 ? Math.round((ownedCount / totalCount) * 100) : 0;
 
-            const yChart = document.getElementById('chart-years-container');
-            const sChart = document.getElementById('chart-series-container');
-            if (yChart) yChart.innerHTML = Object.keys(spendByYear).map(y => `<div>${y} г.: <b>${spendByYear[y]} ₽</b></div>`).join('');
-                        // ГЕНЕРАЦИЯ ИНТЕРАКТИВНЫХ ШКАЛ ДЛЯ ДАШБОРДА
-            if (sChart) {
-                // Находим максимальную сумму трат среди всех серий, чтобы шкала ровнялась по лидеру
-                const maxSpent = Math.max(...Object.values(spendBySeries), 1);
+if (tCars) tCars.innerText = totalCount;
+if (oCars) oCars.innerText = ownedCount;
+if (tSpent) tSpent.innerText = `${totalSpent.toLocaleString()} ₽`;
+if (ratio) ratio.innerText = `🏆 ${ratioPercent}% Собрано`;
 
-                sChart.innerHTML = Object.keys(spendBySeries).map(sName => {
-                    const currentSpent = spendBySeries[sName];
-                    // Вычисляем процент заполнения шкалы относительно самой дорогой серии
-                    const barWidth = Math.round((currentSpent / maxSpent) * 100);
-                    
-                    return `
-                        <div style="background: #ffffff; padding: 10px; border-radius: 8px; border: 1px solid #f1f5f9; display: flex; flex-direction: column; gap: 4px;">
-                            <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: bold; color: #334155;">
-                                <span style="text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px;">${sName}</span>
-                                <span style="color: #1e293b;">${currentSpent.toLocaleString()} ₽</span>
-                            </div>
-                            <div class="progress-bar-container">
-                                <div class="progress-bar-fill" style="width: ${barWidth}%; background: ${sName.toLowerCase().includes('boulevard') ? '#f59e0b' : '#3b82f6'};"></div>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-            }
+// Двигаем левую зеленую полоску прогресса на карточке
+const mainProgressBar = document.getElementById('dash-main-progress-bar');
+if (mainProgressBar) {
+    mainProgressBar.style.width = `${Math.max(ratioPercent, 4)}%`; 
+}
+
+// БЕЗОПАСНАЯ ГЕНЕРАЦИЯ МИНИ-ШКАЛ ПО ГОДАМ
+if (yChart) {
+    // Проверяем, существует ли вообще переменная carsByYear в коде
+    const yearsData = (typeof carsByYear !== 'undefined') ? carsByYear : null;
+    
+    if (yearsData && Object.keys(yearsData).length > 0) {
+        yChart.innerHTML = Object.keys(yearsData).sort((a,b) => b - a).map(year => {
+            const yTotal = yearsData[year].total || 0;
+            const yOwned = yearsData[year].owned || 0;
+            const yPercent = yTotal > 0 ? Math.round((yOwned / yTotal) * 100) : 0;
+
+            return `
+                <div style="display: flex; flex-direction: column; gap: 3px; background: white; padding: 8px 12px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                    <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: bold; color: #475569;">
+                        <span>📅 ${year} год</span>
+                        <span style="color: #10b981;">${yOwned} <span style="color:#94a3b8; font-weight:normal;">из</span> ${yTotal} шт. (${yPercent}%)</span>
+                    </div>
+                    <div style="background: #e2e8f0; border-radius: 4px; height: 6px; width: 100%; overflow: hidden;">
+                        <div style="background: #10b981; height: 100%; width: ${yPercent}%; transition: width 0.3s ease;"></div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    } else {
+        // Если переменной нет, просто выведем красивую текстовую строчку, чтобы ничего не ломалось
+        yChart.innerHTML = `<div style="font-size:12px; color:#64748b; font-style:italic; text-align:center; padding:5px;">Статистика по годам релиза обновляется динамически...</div>`;
+    }
+}
+
+// БЕЗОПАСНАЯ ГЕНЕРАЦИЯ ИНТЕРАКТИВНЫХ ШКАЛ ДЛЯ ТРАТ ПО СЕРИЯМ
+if (sChart && typeof spendBySeries !== 'undefined' && Object.keys(spendBySeries).length > 0) {
+    const maxSpent = Math.max(...Object.values(spendBySeries), 1);
+
+    sChart.innerHTML = Object.keys(spendBySeries).map(sName => {
+        const currentSpent = spendBySeries[sName];
+        const barWidth = Math.round((currentSpent / maxSpent) * 100);
+        
+        return `
+            <div style="background: #ffffff; padding: 10px; border-radius: 8px; border: 1px solid #f1f5f9; display: flex; flex-direction: column; gap: 4px;">
+                <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: bold; color: #334155;">
+                    <span style="text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px;">${sName}</span>
+                    <span style="color: #1e293b;">${currentSpent.toLocaleString()} ₽</span>
+                </div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar-fill" style="width: ${barWidth}%; background: ${sName.toLowerCase().includes('boulevard') ? '#f59e0b' : '#3b82f6'};"></div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+
+// 3. ГЕНЕРАЦИЯ ИНТЕРАКТИВНЫХ ШКАЛ ДЛЯ ТРАТ ПО СЕРИЯМ
+if (sChart) {
+    const maxSpent = Math.max(...Object.values(spendBySeries), 1);
+
+    sChart.innerHTML = Object.keys(spendBySeries).map(sName => {
+        const currentSpent = spendBySeries[sName];
+        const barWidth = Math.round((currentSpent / maxSpent) * 100);
+        
+        return `
+            <div style="background: #ffffff; padding: 10px; border-radius: 8px; border: 1px solid #f1f5f9; display: flex; flex-direction: column; gap: 4px;">
+                <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: bold; color: #334155;">
+                    <span style="text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px;">${sName}</span>
+                    <span style="color: #1e293b;">${currentSpent.toLocaleString()} ₽</span>
+                </div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar-fill" style="width: ${barWidth}%; background: ${sName.toLowerCase().includes('boulevard') ? '#f59e0b' : '#3b82f6'};"></div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
 
 
 // Группировка машинок по сериям
