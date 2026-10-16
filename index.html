@@ -357,20 +357,75 @@ const ratio = document.getElementById('dash-ratio');
 const yChart = document.getElementById('chart-years-container');
 const sChart = document.getElementById('chart-series-container');
 
-// Вычисляем общий процент коллекции на основе реальных переменных
-const totalCount = (typeof cars !== 'undefined') ? cars.length : 0;
-const ratioPercent = totalCount > 0 ? Math.round((ownedCount / totalCount) * 100) : 0;
+    // 1. ЖЕСТКИЙ ПЕРЕРАСЧЕТ ВСЕЙ БАЗЫ ДАННЫХ
+    const currentCarsArray = (typeof cars !== 'undefined') ? cars : ((window.cars) ? window.cars : []);
+    const totalCount = currentCarsArray.length;
+    
+    ownedCount = 0;
+    totalSpent = 0;
+    let collectionsMap = {};
+    let spendBySeries = {};
+    let carsByYear = {}; // Инициализируем объект для сбора статистики по годам
 
-if (tCars) tCars.innerText = totalCount;
-if (oCars) oCars.innerText = ownedCount;
-if (tSpent) tSpent.innerText = `${totalSpent.toLocaleString()} ₽`;
-if (ratio) ratio.innerText = `🏆 ${ratioPercent}% Собрано`;
+    currentCarsArray.forEach(car => {
+        const carIsOwned = car.status === 'owned';
+        const carPrice = parseFloat(car.price) || 0;
+        const carYear = car.year || '—';
 
-// Двигаем левую зеленую полоску прогресса на карточке
-const mainProgressBar = document.getElementById('dash-main-progress-bar');
-if (mainProgressBar) {
-    mainProgressBar.style.width = `${Math.max(ratioPercent, 4)}%`; 
-}
+        if (carIsOwned) {
+            ownedCount++;
+            totalSpent += carPrice;
+        }
+
+        // Собираем года строго по всей сырой базе для нашего аккордеона
+        if (!carsByYear[carYear]) {
+            carsByYear[carYear] = { total: 0, owned: 0 };
+        }
+        carsByYear[carYear].total++;
+        if (carIsOwned) carsByYear[carYear].owned++;
+
+        if (carIsOwned && car.seriesName) {
+            const sName = car.seriesName.trim();
+            spendBySeries[sName] = (spendBySeries[sName] || 0) + carPrice;
+        }
+
+        // ГРУППИРОВКА: Игнорируем год, чтобы Batman не двоился!
+        const sKey = car.seriesName ? car.seriesName.trim() : 'HW Garage';
+        if (!collectionsMap[sKey]) {
+            collectionsMap[sKey] = {
+                name: sKey,
+                ownedCount: 0,
+                totalInSeries: 0,
+                items: []
+            };
+        }
+
+        const matchesSearch = car.name.toLowerCase().includes(searchTerm) || 
+                              sKey.toLowerCase().includes(searchTerm) || 
+                              (car.toyNum && car.toyNum.toLowerCase().includes(searchTerm));
+        
+        const matchesFilter = filterType === 'all' || 
+                              (filterType === 'owned' && carIsOwned) || 
+                              (filterType === 'missing' && !carIsOwned);
+
+        if (matchesSearch && matchesFilter) {
+            collectionsMap[sKey].items.push(car);
+            if (carIsOwned) collectionsMap[sKey].ownedCount++;
+        }
+    });
+
+    // 2. ВЫВОД ИСТИННЫХ ЦИФР НА ДАШБОРД (Твои 1300+ моделей)
+    const ratioPercent = totalCount > 0 ? Math.round((ownedCount / totalCount) * 100) : 0;
+
+    if (tCars) tCars.innerText = totalCount; 
+    if (oCars) oCars.innerText = ownedCount;
+    if (tSpent) tSpent.innerText = `${totalSpent.toLocaleString()} ₽`;
+    if (ratio) ratio.innerText = `🏆 ${ratioPercent}% Собрано`;
+
+    const mainProgressBar = document.getElementById('dash-main-progress-bar');
+    if (mainProgressBar) {
+        mainProgressBar.style.width = `${Math.max(ratioPercent, 4)}%`; 
+    }
 
 // БЕЗОПАСНАЯ ГЕНЕРАЦИЯ МИНИ-ШКАЛ ПО ГОДАМ
 if (yChart) {
