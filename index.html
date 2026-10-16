@@ -29,17 +29,18 @@
             width: 100%;
             box-sizing: border-box;
         }
-                .collection-tile {
-            width: 100%; /* Заставляет плитку растягиваться во всю ширину своей колонки */
-            box-sizing: border-box; /* Защищает от вылезания рамок за края */
+        .collection-tile {
+            width: 100%;
+            box-sizing: border-box;
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 12px 20px;
             border-radius: 12px;
             cursor: pointer;
-            min-height: 85px; /* Дает простор для увеличенных логотипов */
+            min-height: 85px;
             transition: background 0.2s;
+            margin-bottom: 12px; /* ИСПРАВЛЕНО: Раздвигает плитки коллекций между собой */
         }
 
 
