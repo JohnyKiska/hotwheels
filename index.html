@@ -513,9 +513,12 @@ function updateDashboard() {
         mainTile.className = 'collection-tile';
         mainTile.style.cssText = `background: ${tileBg}; color: ${tileColor};`;
         
-        mainTile.onclick = () => {
+         mainTile.onclick = () => {
             const childGrid = mainTile.nextElementSibling;
-            childGrid.style.display = childGrid.style.display === 'none' ? 'block' : 'none';
+            const isOpening = childGrid.style.display === 'none';
+            childGrid.style.display = isOpening ? 'block' : 'none';
+            // Если открыли — запоминаем имя серии, если закрыли — сбрасываем память
+            activeExpandedSeries = isOpening ? group.name : null;
         };
 
         const cleanSeriesName = sName.toLowerCase().trim();
@@ -539,11 +542,12 @@ function updateDashboard() {
             </div>
         `;
 
-        // Контейнер-обертка для всей раскрывающейся витрины серии (С фиксом для ПК сетки)
+        // Контейнер-обертка для всей раскрывающейся витрины серии (С памятью состояния)
         const wrapperGrid = document.createElement('div');
-        wrapperGrid.style.display = 'none'; 
+        // ИСПРАВЛЕНО: Проверяем, была ли эта серия открыта до покупки
+        wrapperGrid.style.display = (activeExpandedSeries === group.name) ? 'block' : 'none'; 
         wrapperGrid.style.width = '100%';
-        wrapperGrid.style.gridColumn = '1 / -1'; // Жесткий фикс: растягивает полку на всю строку грида!
+        wrapperGrid.style.gridColumn = '1 / -1';
 
         // ГРУППИРУЕМ МАШИНКИ ВНУТРИ СЕРИИ ЕЩЕ РАЗ — ТЕПЕРЬ ПО ГОДАМ
         let itemsByYear = {};
