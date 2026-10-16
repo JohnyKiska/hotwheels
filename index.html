@@ -435,7 +435,7 @@
                         textColor = '#f8fafc'; // Белый текст для темного фона
                     }
 
-                    
+//Позиционирование блистера HW в картечке
                     const card = document.createElement('div');
                     card.style.cssText = `
                         position: relative;
@@ -445,15 +445,16 @@
                         border-radius: 12px;
                         overflow: hidden;
                         background-image: url('${carImage}');
-                        background-size: cover;
-                        background-position: center;
+                        background-size: cover; /* Растягиваем на весь блок без щелей */
+                        background-position: center 35%; /* Смещаем фокус ровно на центральный рисунок авто */
                         box-shadow: 0 4px 10px rgba(0,0,0,0.04);
                         display: flex;
                         flex-direction: column;
                         justify-content: space-between;
                         box-sizing: border-box;
-                        ${!carIsOwned ? 'filter: grayscale(0.6); opacity: 0.9;' : ''}
+                        ${!carIsOwned ? 'filter: grayscale(0.5); opacity: 0.9;' : ''}
                     `;
+
 
                     card.innerHTML = `                   
 <!-- ВЕРХНИЙ БЛОК: Чистый год и номер коллекции без дублирования цвета плашки -->
