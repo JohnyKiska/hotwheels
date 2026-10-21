@@ -22,11 +22,15 @@ from bs4 import BeautifulSoup
 SKU_RE = re.compile(r"\bSKU\s+([A-Z0-9]{4,8})\b", re.I)
 YEAR_RE = re.compile(r"\b(?:Release year|Year)\s*:?\s*(20\d{2})\b", re.I)
 SCALE_RE = re.compile(r"\b(1\s*/\s*\d+)\b")
+COLOR_LABELS = (
+    "body color", "body source", "interior color", "interior source",
+    "base color", "base premium", "base source", "window color", "window source",
+    "detailed", "source", "premium", "color",
+)
+_FIELD_LABEL_PATTERN = "|".join(re.escape(label) for label in sorted(COLOR_LABELS, key=len, reverse=True))
 FIELD_RE = re.compile(
-    r"\b(body color|interior color|interior source|base color|window color|"
-    r"detailed|source|premium|color)\s*:\s*(.*?)"
-    r"(?=\s+(?:body color|interior color|interior source|base color|window color|"
-    r"detailed|source|premium|color)\s*:|$)",
+    rf"(?P<label>{_FIELD_LABEL_PATTERN})\\s*:\\s*(?P<value>.*?)"
+    rf"(?=\\s+(?:{_FIELD_LABEL_PATTERN})\\s*:|$)",
     re.I,
 )
 
