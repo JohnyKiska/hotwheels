@@ -29,8 +29,8 @@ COLOR_LABELS = (
 )
 _FIELD_LABEL_PATTERN = "|".join(re.escape(label) for label in sorted(COLOR_LABELS, key=len, reverse=True))
 FIELD_RE = re.compile(
-    rf"(?P<label>{_FIELD_LABEL_PATTERN})\\s*:\\s*(?P<value>.*?)"
-    rf"(?=\\s+(?:{_FIELD_LABEL_PATTERN})\\s*:|$)",
+    rf"(?P<label>{_FIELD_LABEL_PATTERN})\s*:\s*(?P<value>.*?)"
+    rf"(?=\s+(?:{_FIELD_LABEL_PATTERN})\s*:|$)",
     re.I,
 )
 
