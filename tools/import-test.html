@@ -24,9 +24,9 @@ const FIELD_RULES=[
 function decode(s){return s.replace(/\\u0026/g,'&').replace(/\\u003c/g,'<').replace(/\\u003e/g,'>').replace(/\\u002f/g,'/').replace(/\\u0022/g,'"').replace(/\\u0027/g,"'").replace(/\\\\/g,'\\').replace(/&amp;/g,'&').replace(/&quot;/g,'"').replace(/&#x27;/g,"'").replace(/<[^>]*>/g,' ').replace(/\\s+/g,' ').trim();}
 function extract(html,filename){
  const txt=decode(html);const result={sourceFile:filename};let found=0;
- function pick(label){const escaped=label.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+ function pick(label){const escaped=label;
    const patterns=[
-    new RegExp(`[\"']${escaped}[\"']\\\\s*[:,]\\\\s*[\"']([^\"']{1,100})[\"']`,'i'),
+    new RegExp(`[\"']${escaped}[\"']\\s*[:,]\\s*[\"']([^\"']{1,100})[\"']`,'i'),
     new RegExp('(?:^|\\s)'+escaped+'\\s*[:：]\\s*([^|,;\\n]{1,100})','i'),
     new RegExp('>\\s*'+escaped+'\\s*<[^>]*>\\s*([^<]{1,100})','i')
    ];
