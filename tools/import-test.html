@@ -34,10 +34,10 @@ function extract(html,filename){
    return '';
  }
  for(const [key,label] of FIELD_RULES){const val=pick(label);if(val){result[key]=val;found++;}}
- const sku=(filename.match(/\\b([A-Z]{2,4}\\d{2,3})\\b/i)||[])[1];
+ const sku=(filename.match(/\b([A-Z]{2,4}\d{2,3})\b/i)||[])[1];
  if(sku)result.filenameSku=sku.toUpperCase();
  // Find canonical page URL if embedded in serialized payload.
- const url=(html.match(/https?:\\?\/\\?\/allhotwheels\\.com\\/car\\/[^"'\\s<>]+/i)||[])[0];
+ const url=(html.match(/https?:\\?\/\\?\/allhotwheels\.com\/car\/[^"'\s<>]+/i)||[])[0];
  if(url)result.sourceUrl=url.replace(/\\\\/g,'');
  result.fieldsFound=found;return result;
 }
