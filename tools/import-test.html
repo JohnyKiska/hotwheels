@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Hot Wheels Garage — тест импорта v0.3.2</title>
+<title>Hot Wheels Garage — тест импорта v0.3.3</title>
 <style>
 :root{font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#18202b;background:#f3f5f8}*{box-sizing:border-box}body{margin:0;padding:24px}.wrap{max-width:1050px;margin:auto}.hero{background:#171b24;color:white;padding:26px;border-radius:18px;margin-bottom:18px}.hero h1{margin:0 0 8px;font-size:clamp(24px,4vw,36px)}.hero p{margin:0;color:#d0d6e0;line-height:1.5}.panel{background:white;border:1px solid #dfe4eb;border-radius:14px;padding:20px;margin:14px 0}.panel h2{font-size:18px;margin:0 0 12px}.hint{color:#596579;font-size:14px;line-height:1.5}.inputs{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}.drop{border:1px dashed #9ba8ba;border-radius:10px;padding:15px;background:#fafbfc}.drop label{display:block;font-weight:700;margin-bottom:8px}.drop input{max-width:100%}button{border:0;border-radius:9px;padding:12px 16px;font-weight:700;cursor:pointer;background:#ed4b24;color:white;margin:6px 6px 0 0}button.secondary{background:#e8edf3;color:#202938}button:disabled{opacity:.45;cursor:not-allowed}.status{padding:12px;border-radius:9px;background:#f0f4f8;margin-top:12px;white-space:pre-wrap}.status.good{background:#e7f7ec}.status.warn{background:#fff4db}.tablewrap{overflow:auto}table{width:100%;border-collapse:collapse;font-size:14px}th,td{text-align:left;padding:9px;border-bottom:1px solid #e7ebf0;vertical-align:top}th{background:#f7f8fa}.tag{display:inline-block;padding:3px 7px;border-radius:20px;background:#e8edf3;font-size:12px}.foot{font-size:13px;color:#647084;margin-top:18px}@media(max-width:600px){body{padding:12px}.panel{padding:14px}}
 </style></head>
@@ -92,7 +92,18 @@ $('run').onclick=async()=>{
     if(parsed[key]!==undefined && (details[key]===undefined||details[key]===''||details[key]===null)){details[key]=parsed[key];added.push(key);}
    }
    if(parsed.sourceUrl && !details.sourceUrl){details.sourceUrl=parsed.sourceUrl;added.push('sourceUrl');}
-   if(added.length){car.details=details;car.dataSources=[...(car.dataSources||[]),{source:'All Hot Wheels',file:file.name,importedAt:new Date().toISOString(),fields:added}];totalAdded+=added.length;}
+   if(added.length){
+    car.details=details;
+    const sources=Array.isArray(car.dataSources)?[...car.dataSources]:[];
+    const existingSource=sources.find(s=>s&&s.source==='All Hot Wheels'&&s.file===file.name);
+    if(existingSource){
+      existingSource.fields=[...new Set([...(Array.isArray(existingSource.fields)?existingSource.fields:[]),...added])];
+    }else{
+      sources.push({source:'All Hot Wheels',file:file.name,importedAt:new Date().toISOString(),fields:[...added]});
+    }
+    car.dataSources=sources;
+    totalAdded+=added.length;
+   }
    reportRows.push({sku:modelSku,name:car.name||file.name,found:parsed.fieldsFound,added,status:added.length?'Добавлены новые данные':parsed.fieldsFound?'Данные уже заполнены / не найдены новые поля':'Нужна настройка парсера'});
   }
   output=data;
