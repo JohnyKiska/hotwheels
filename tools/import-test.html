@@ -2,12 +2,12 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Hot Wheels Garage — тест импорта v0.3.7</title>
+<title>Hot Wheels Garage — тест импорта v0.3.9</title>
 <style>
 :root{font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#18202b;background:#f3f5f8}*{box-sizing:border-box}body{margin:0;padding:24px}.wrap{max-width:1050px;margin:auto}.hero{background:#171b24;color:white;padding:26px;border-radius:18px;margin-bottom:18px}.hero h1{margin:0 0 8px;font-size:clamp(24px,4vw,36px)}.hero p{margin:0;color:#d0d6e0;line-height:1.5}.panel{background:white;border:1px solid #dfe4eb;border-radius:14px;padding:20px;margin:14px 0}.panel h2{font-size:18px;margin:0 0 12px}.hint{color:#596579;font-size:14px;line-height:1.5}.inputs{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}.drop{border:1px dashed #9ba8ba;border-radius:10px;padding:15px;background:#fafbfc}.drop label{display:block;font-weight:700;margin-bottom:8px}.drop input{max-width:100%}button{border:0;border-radius:9px;padding:12px 16px;font-weight:700;cursor:pointer;background:#ed4b24;color:white;margin:6px 6px 0 0}button.secondary{background:#e8edf3;color:#202938}button:disabled{opacity:.45;cursor:not-allowed}.status{padding:12px;border-radius:9px;background:#f0f4f8;margin-top:12px;white-space:pre-wrap}.status.good{background:#e7f7ec}.status.warn{background:#fff4db}.tablewrap{overflow:auto}table{width:100%;border-collapse:collapse;font-size:14px}th,td{text-align:left;padding:9px;border-bottom:1px solid #e7ebf0;vertical-align:top}th{background:#f7f8fa}.tag{display:inline-block;padding:3px 7px;border-radius:20px;background:#e8edf3;font-size:12px}.foot{font-size:13px;color:#647084;margin-top:18px}.preview-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:14px;margin-top:14px}.car-card{border:1px solid #dfe4eb;border-radius:13px;overflow:hidden;background:#fff}.car-card-head{padding:14px;background:#202938;color:#fff}.car-card-head h3{margin:0 0 5px;font-size:17px}.car-card-head p{margin:0;color:#d7deea;font-size:12px;overflow-wrap:anywhere}.car-card-body{padding:14px}.car-fields{display:grid;grid-template-columns:1fr 1fr;gap:8px}.car-field{padding:9px;border-radius:8px;background:#f4f6f9;min-width:0}.car-field small{display:block;color:#687487;font-size:11px;text-transform:uppercase;letter-spacing:.03em;margin-bottom:3px}.car-field strong{display:block;font-size:13px;overflow-wrap:anywhere}.car-field.empty{opacity:.58}.car-card-foot{padding:10px 14px;border-top:1px solid #e7ebf0;font-size:12px;color:#596579}.source-link{color:#175fc4;overflow-wrap:anywhere}.preview-note{padding:10px 12px;background:#f0f4f8;border-radius:8px;margin-top:10px;font-size:13px;color:#596579}@media(max-width:600px){body{padding:12px}.panel{padding:14px}}
 </style></head>
 <body><main class="wrap">
-<header class="hero"><h1>Hot Wheels Garage · Тест импорта <span style="font-size:14px;font-weight:500;opacity:.8">v0.3.7</span></h1><p>Проверочная страница: сопоставляет сохранённые HTML-страницы All Hot Wheels с записями collection.json. Исходный файл не меняется автоматически — результат можно скачать отдельно после проверки.</p></header>
+<header class="hero"><h1>Hot Wheels Garage · Тест импорта <span style="font-size:14px;font-weight:500;opacity:.8">v0.3.9</span></h1><p>Проверочная страница: сопоставляет сохранённые HTML-страницы All Hot Wheels с записями collection.json. Исходный файл не меняется автоматически — результат можно скачать отдельно после проверки.</p></header>
 <section class="panel"><h2>1. Выбери файлы</h2><div class="inputs">
 <div class="drop"><label for="catalog">Текущий collection.json</label><input id="catalog" type="file" accept=".json,application/json"><p class="hint">Файл каталога из репозитория. Обрабатывается локально в браузере.</p></div>
 <div class="drop"><label for="pages">HTML-страницы All Hot Wheels</label><input id="pages" type="file" accept=".html,.htm,text/html" multiple><p class="hint">Выбери одну или несколько страниц, сохранённых через браузер. Можно начать с четырёх тестовых моделей.</p></div>
@@ -18,6 +18,8 @@
 </main>
 <script>
 const $=id=>document.getElementById(id);let output=null, reportRows=[], newCars=[], previewRows=[];
+const SERIES_TOTALS={Boulevard:165};
+function configuredTotal(name){const key=Object.keys(SERIES_TOTALS).find(k=>k.toLowerCase()===String(name||'').trim().toLowerCase());return key?SERIES_TOTALS[key]:null;}
 const FIELD_RULES=[
  ['bodyColor','Body Color'],['interiorColor','Interior Color'],['baseColor','Base Color'],['windowColor','Window Color'],['wheelType','Wheel Type'],['scale','Scale'],['releaseYear','Release Year'],['toyNum','Toy Number'],['seriesIndex','Series index']
 ];
@@ -38,7 +40,7 @@ function extract(html,filename){
  const badgeMatch=html.match(/class="inline-flex items-center rounded-full border border-brand-indigo\/30 bg-brand-indigo\/10 px-3 py-1 text-sm font-bold text-brand-indigo">([^<]+)<\/span>/i);
  const sentenceSeries=(decode(description).match(/part of the (.+?) series/i)||[])[1];
  const routeCategory=(result.sourcePathCategory||'').replace(/-/g,' ');
- const genericCategories=['mainline','premium','silver series','monster trucks','racing circuit','rc'];
+ const genericCategories=['mainline','premium','silver series','monster trucks','racing circuit','rc','boulevard'];
  // Only explicit series badges or descriptions populate seriesName. URL categories are stored separately
  // because labels such as Boulevard can be product lines rather than thematic series.
  result.seriesName=(badgeMatch&&decode(badgeMatch[1]))||sentenceSeries||'';
@@ -82,6 +84,7 @@ function extract(html,filename){
  const fileSku=(filename.match(/\b([A-Z]{2,4}\d{2,3})\b/i)||[])[1];
  if(fileSku&&!result.filenameSku)result.filenameSku=fileSku.toUpperCase();
  if(!result.toyNum&&result.filenameSku)result.toyNum=result.filenameSku;
+ if((result.sourceCategory||result.assortmentName||'').trim().toLowerCase()==='boulevard' && result.seriesNum!=null)result.seriesTotal=configuredTotal('Boulevard')||result.seriesTotal;
  result.fieldsFound=found;return result;
 }
 function escapeHtml(s){return String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
@@ -100,7 +103,7 @@ $('run').onclick=async()=>{
     if(matches.length===0 && modelSku){
       const baseName=file.name.replace(/\.(html?|HTML?)$/,'').replace(/^([A-Z]{2,4}\d{2,3})\s*/i,'').replace(/\s+Hot Wheels.*$/i,'').replace(/\s+\(\d{4}\).*$/,'').trim();
       const yearMatch=file.name.match(/\((20\d{2})\)/);
-      const candidate={id:Date.now()+newCars.length,toyNum:modelSku,colNum:"",name:baseName||modelSku,year:yearMatch?Number(yearMatch[1]):(parsed.releaseYear?Number(parsed.releaseYear):null),seriesName:parsed.seriesName||"",seriesNum:parsed.seriesNum??null,seriesTotal:parsed.seriesTotal??null,rarity:"",status:"missing",price:0,image:"",comment:"",details:{},reviewRequired:true};
+      const candidate={id:Date.now()+newCars.length,toyNum:modelSku,colNum:"",name:baseName||modelSku,year:yearMatch?Number(yearMatch[1]):(parsed.releaseYear?Number(parsed.releaseYear):null),seriesName:(parsed.assortmentName==="Boulevard"?"Boulevard":(parsed.seriesName||"")),seriesNum:parsed.seriesNum??null,seriesTotal:(parsed.assortmentName==="Boulevard"?(configuredTotal("Boulevard")||parsed.seriesTotal??null):(parsed.seriesTotal??null)),rarity:"",status:"missing",price:0,image:"",comment:"",details:{},reviewRequired:true};
       for(const key of ['bodyColor','interiorColor','baseColor','windowColor','wheelType','scale','sourceUrl','assortmentName','sourcePathCategory','sourceCategory']) if(parsed[key])candidate.details[key]=parsed[key];
       candidate.details.sourceFile=file.name;
       newCars.push(candidate);
@@ -127,12 +130,12 @@ $('run').onclick=async()=>{
   $('summary').textContent='Записей каталога: '+data.length+' · HTML-файлов: '+files.length+' · точных совпадений: '+totalMatched+' · добавлено полей: '+totalAdded+' · новых машинок на проверку: '+newCars.length+'.';
   $('rows').innerHTML=reportRows.map(r=>'<tr><td><b>'+escapeHtml(r.sku)+'</b></td><td>'+escapeHtml(r.name)+'</td><td>'+escapeHtml(r.found)+'</td><td>'+escapeHtml(r.added.join(', ')||'—')+'</td><td>'+escapeHtml(r.status)+'</td></tr>').join('');
   const visualFields=[
-   ['SKU / артикул',p=>p.toyNum||p.filenameSku],['Год выпуска',p=>p.releaseYear],['Категория на сайте',p=>p.sourceCategory],['Линейка / assortment',p=>p.assortmentName],['Тематическая серия',p=>p.seriesName],['Номер в серии',p=>p.seriesNum!=null&&p.seriesTotal!=null?(p.seriesNum+' / '+p.seriesTotal):null],['Цвет кузова',p=>p.bodyColor],['Цвет салона',p=>p.interiorColor],['Цвет базы',p=>p.baseColor],['Цвет окон',p=>p.windowColor],['Тип колёс',p=>p.wheelType],['Масштаб',p=>p.scale],['Категория URL',p=>p.sourcePathCategory]
+   ['SKU / артикул',p=>p.toyNum||p.filenameSku],['Год выпуска',p=>p.releaseYear],['Категория на сайте',p=>p.sourceCategory],['Линейка / assortment',p=>p.assortmentName],['Тематическая серия',p=>p.seriesName],['Номер в серии',(p,item)=>{const num=p.seriesNum??item.match?.seriesNum;const total=configuredTotal(p.assortmentName||p.sourceCategory||item.match?.seriesName)||p.seriesTotal??item.match?.seriesTotal;return num!=null&&total!=null?(num+' / '+total):null;}],['Цвет кузова',p=>p.bodyColor],['Цвет салона',p=>p.interiorColor],['Цвет базы',p=>p.baseColor],['Цвет окон',p=>p.windowColor],['Тип колёс',p=>p.wheelType],['Масштаб',p=>p.scale],['Категория URL',p=>p.sourcePathCategory]
   ];
   $('visualSummary').textContent='Карточек: '+previewRows.length+' · совпадение с каталогом: '+previewRows.filter(x=>x.matchCount===1).length+' · без точного совпадения: '+previewRows.filter(x=>x.matchCount!==1).length+'. Значения показаны как распознал их парсер, без догадок.';
   $('visualCards').innerHTML=previewRows.map(item=>{
    const p=item.parsed;
-   const fields=visualFields.map(([label,get])=>{const value=get(p);return '<div class="car-field '+(value==null||value===''?'empty':'')+'"><small>'+escapeHtml(label)+'</small><strong>'+(value==null||value===''?'—':escapeHtml(value))+'</strong></div>';}).join('');
+   const fields=visualFields.map(([label,get])=>{const value=get(p,item);return '<div class="car-field '+(value==null||value===''?'empty':'')+'"><small>'+escapeHtml(label)+'</small><strong>'+(value==null||value===''?'—':escapeHtml(value))+'</strong></div>';}).join('');
    const matchText=item.matchCount===1?'Совпало с каталогом: '+(item.match.name||item.match.toyNum):item.matchCount>1?'В каталоге несколько записей с этим артикулом':'Новая запись или не найдено совпадение';
    return '<article class="car-card"><div class="car-card-head"><h3>'+escapeHtml(item.match?.name||p.name||item.fileName.replace(/[.]html?$/i,''))+'</h3><p>'+escapeHtml(item.modelSku||'Артикул не распознан')+' · '+escapeHtml(item.fileName)+'</p></div><div class="car-card-body"><div class="car-fields">'+fields+'</div><div class="preview-note">'+escapeHtml(matchText)+'<br>Найдено полей в HTML: '+escapeHtml(p.fieldsFound)+'</div>'+(p.sourceUrl?'<p><a class="source-link" href="'+escapeHtml(p.sourceUrl)+'" target="_blank" rel="noopener">Открыть страницу-источник ↗</a></p>':'')+'</div><div class="car-card-foot">Пустые поля на карточке означают «не извлечено», а не подтверждённое отсутствие данных.</div></article>';
   }).join('');
