@@ -1,0 +1,34 @@
+[
+  {
+    "catalog_id": "2025-mainline-hyw66",
+    "toyNum": "HYW66",
+    "name": "Mazda Autozam",
+    "release_year": 2025,
+    "series": "Mainline",
+    "source_url": "https://allhotwheels.com/car/2025/mainline/hyw66/mazda-autozam"
+  },
+  {
+    "catalog_id": "2026-boulevard-jbl27",
+    "toyNum": "JBL27",
+    "name": "BMW M3 GT2",
+    "release_year": 2026,
+    "series": "Boulevard",
+    "source_url": "https://allhotwheels.com/car/2026/boulevard/jbl27/bmw-m3-gt2"
+  },
+  {
+    "catalog_id": "2026-boulevard-jhw20",
+    "toyNum": "JHW20",
+    "name": "2015 Toyota Alphard",
+    "release_year": 2026,
+    "series": "Boulevard",
+    "source_url": "https://allhotwheels.com/car/2026/boulevard/jhw20/2015-toyota-alphard"
+  },
+  {
+    "catalog_id": "2025-mainline-jjm44",
+    "toyNum": "JJM44",
+    "name": "Land Rover Defender 90",
+    "release_year": 2025,
+    "series": "Mainline",
+    "source_url": "https://allhotwheels.com/car/2025/mainline/jjm44/land-rover-defender-90"
+  }
+]
