@@ -91,7 +91,7 @@ function extract(html,filename){
    }
    // Series and assortment are parsed from page metadata above, never from generic prose.
    if(key==='scale') val=(html.match(/<div[^>]*font-semibold[^>]*>1\/64<\/div>/i)||[])[0]?'1/64':val;
-   if(key==='seriesIndex'){const sm=html.match(/Series index<\\/div><div[^>]*font-semibold[^>]*>([^<]+)<\\/div>/i);if(sm){result.seriesIndexRaw=decode(sm[1]);const ix=result.seriesIndexRaw.match(/^(\\d+)(?:\\s*\\/\\s*(\\d+))?$/);if(ix){result.seriesNum=Number(ix[1]);if(ix[2])result.seriesTotal=Number(ix[2]);}} val='';}}
+   if(key==='seriesIndex'){const sm=html.match(/Series index<\/div><div[^>]*font-semibold[^>]*>([^<]+)<\/div>/i);if(sm){result.seriesIndexRaw=decode(sm[1]);const ix=result.seriesIndexRaw.match(/^(\d+)(?:\s*\/\s*(\d+))?$/);if(ix){result.seriesNum=Number(ix[1]);if(ix[2])result.seriesTotal=Number(ix[2]);}} val='';}}}
    if(val){result[key]=decode(val);found++;}
  }
  const fileSku=(filename.match(/\b([A-Z]{2,4}\d{2,3})\b/i)||[])[1];
@@ -163,7 +163,7 @@ $('run').onclick=async()=>{
     const p=item.parsed, legacy=item.match||{};
     const sku=String(item.modelSku||p.filenameSku||'').toUpperCase();
     const releaseId='release-'+(sku||slug(item.fileName));
-    const suspiciousIndex=/^0\\s*\\//.test(p.seriesIndexRaw||'');
+    const suspiciousIndex=/^0\s*\//.test(p.seriesIndexRaw||'');
     const hasClass=!!(p.productSegment||p.lineName||p.themeSeries);
     return {
      releaseId, castingId:null, sku:sku||null,
@@ -180,7 +180,7 @@ $('run').onclick=async()=>{
       seriesTotal:p.seriesTotal??(configuredTotal(p.lineName||p.assortmentName||p.sourceCategory)??null),
       classificationStatus:suspiciousIndex?'needs_review':(hasClass?'needs_review':'unclassified')
      },
-     displayName:legacy.name||item.fileName.replace(/\\.(html?|HTML?)$/,'').replace(/^([A-Z]{2,4}\\d{2,3})\\s*/i,'').replace(/\\s+Hot Wheels.*$/i,'').trim()||sku||null,
+     displayName:legacy.name||item.fileName.replace(/\.(html?|HTML?)$/,'').replace(/^([A-Z]{2,4}\d{2,3})\s*/i,'').replace(/\s+Hot Wheels.*$/i,'').trim()||sku||null,
      notes:null
     };
    }),
@@ -192,7 +192,7 @@ $('run').onclick=async()=>{
      sourcePathCategory:p.sourcePathCategory||null, sourceCategory:p.sourceCategory||null,
      sourceSeriesLabel:p.seriesName||null, sourceSeriesIndexRaw:p.seriesIndexRaw||null,
      observedAt:new Date().toISOString(), reviewStatus:'pending',
-     reviewNote:/^0\\s*\\//.test(p.seriesIndexRaw||'')?'Suspicious source index; verify before accepting numeric series number.':null
+     reviewNote:/^0\s*\//.test(p.seriesIndexRaw||'')?'Suspicious source index; verify before accepting numeric series number.':null
     };
    }),
    legacyLinks:previewRows.map(item=>({
