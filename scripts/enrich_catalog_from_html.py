@@ -43,6 +43,8 @@ def parse_saved_page(path: Path) -> dict | None:
     soup = BeautifulSoup(raw, "html.parser")
     title = soup.find("h1")
     name = title.get_text(" ", strip=True) if title else None
+    canonical = soup.find("link", rel="canonical")
+    source_url = canonical.get("href") if canonical else None
 
     # Use the page's model detail panel, not related-car cards, to find SKU.
     page_text = soup.get_text(" ", strip=True)
@@ -71,7 +73,7 @@ def parse_saved_page(path: Path) -> dict | None:
 
     return {
         "sku": sku,
-        "source_url": None,
+        "source_url": source_url,
         "source_file": path.name,
         "source_name": name,
         "release_year": int(year_match.group(1)) if year_match else None,
