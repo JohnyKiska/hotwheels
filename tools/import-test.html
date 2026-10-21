@@ -2,18 +2,18 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Hot Wheels Garage — тест импорта v0.2.0</title>
+<title>Hot Wheels Garage — тест импорта v0.3.0</title>
 <style>
 :root{font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#18202b;background:#f3f5f8}*{box-sizing:border-box}body{margin:0;padding:24px}.wrap{max-width:1050px;margin:auto}.hero{background:#171b24;color:white;padding:26px;border-radius:18px;margin-bottom:18px}.hero h1{margin:0 0 8px;font-size:clamp(24px,4vw,36px)}.hero p{margin:0;color:#d0d6e0;line-height:1.5}.panel{background:white;border:1px solid #dfe4eb;border-radius:14px;padding:20px;margin:14px 0}.panel h2{font-size:18px;margin:0 0 12px}.hint{color:#596579;font-size:14px;line-height:1.5}.inputs{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}.drop{border:1px dashed #9ba8ba;border-radius:10px;padding:15px;background:#fafbfc}.drop label{display:block;font-weight:700;margin-bottom:8px}.drop input{max-width:100%}button{border:0;border-radius:9px;padding:12px 16px;font-weight:700;cursor:pointer;background:#ed4b24;color:white;margin:6px 6px 0 0}button.secondary{background:#e8edf3;color:#202938}button:disabled{opacity:.45;cursor:not-allowed}.status{padding:12px;border-radius:9px;background:#f0f4f8;margin-top:12px;white-space:pre-wrap}.status.good{background:#e7f7ec}.status.warn{background:#fff4db}.tablewrap{overflow:auto}table{width:100%;border-collapse:collapse;font-size:14px}th,td{text-align:left;padding:9px;border-bottom:1px solid #e7ebf0;vertical-align:top}th{background:#f7f8fa}.tag{display:inline-block;padding:3px 7px;border-radius:20px;background:#e8edf3;font-size:12px}.foot{font-size:13px;color:#647084;margin-top:18px}@media(max-width:600px){body{padding:12px}.panel{padding:14px}}
 </style></head>
 <body><main class="wrap">
-<header class="hero"><h1>Hot Wheels Garage · Тест импорта <span style="font-size:14px;font-weight:500;opacity:.8">v0.2.0</span></h1><p>Проверочная страница: сопоставляет сохранённые HTML-страницы All Hot Wheels с записями collection.json. Исходный файл не меняется автоматически — результат можно скачать отдельно после проверки.</p></header>
+<header class="hero"><h1>Hot Wheels Garage · Тест импорта <span style="font-size:14px;font-weight:500;opacity:.8">v0.3.0</span></h1><p>Проверочная страница: сопоставляет сохранённые HTML-страницы All Hot Wheels с записями collection.json. Исходный файл не меняется автоматически — результат можно скачать отдельно после проверки.</p></header>
 <section class="panel"><h2>1. Выбери файлы</h2><div class="inputs">
 <div class="drop"><label for="catalog">Текущий collection.json</label><input id="catalog" type="file" accept=".json,application/json"><p class="hint">Файл каталога из репозитория. Обрабатывается локально в браузере.</p></div>
 <div class="drop"><label for="pages">HTML-страницы All Hot Wheels</label><input id="pages" type="file" accept=".html,.htm,text/html" multiple><p class="hint">Выбери одну или несколько страниц, сохранённых через браузер. Можно начать с четырёх тестовых моделей.</p></div>
 </div><button id="run">Проверить и сопоставить</button><button id="download" class="secondary" disabled>Скачать дополненный JSON</button><button id="report" class="secondary" disabled>Скачать отчёт CSV</button><button id="newcars" class="secondary" disabled>Скачать новые машинки JSON</button><div id="status" class="status">Ожидаются файлы.</div></section>
 <section class="panel"><h2>2. Результаты сопоставления</h2><p class="hint">Поля заполняются только если найдены в HTML и пока пусты в каталоге. Существующие значения, статус, цена и комментарий не перезаписываются. Все извлечённые детали записываются в объект <code>details</code> вместе с источником.</p><div id="summary" class="hint">Пока нет результатов.</div><div class="tablewrap"><table><thead><tr><th>Артикул</th><th>Модель</th><th>Найдено в HTML</th><th>Добавленные поля</th><th>Статус</th></tr></thead><tbody id="rows"></tbody></table></div></section>
-<section class="panel"><h2>3. Что важно знать</h2><ul class="hint"><li>v0.2.0 обрабатывает только выбранные HTML-файлы; папка ALLHW используется как архив, страница не читает её автоматически.</li><li>Страницы All Hot Wheels сериализуют часть данных в Next.js payload, поэтому результат зависит от того, какие значения реально присутствуют в сохранённой странице.</li><li>Если поле не извлечено, это не доказывает, что источник его не содержит: формат может требовать отдельного правила парсинга.</li><li>Перед массовым импортом нужно проверить точность на образцах. Не загружай результат в основную ветку, пока не проверены отчёт и JSON.</li></ul></section>
+<section class="panel"><h2>3. Что важно знать</h2><ul class="hint"><li>v0.3.0 обрабатывает только выбранные HTML-файлы; папка ALLHW используется как архив, страница не читает её автоматически.</li><li>Страницы All Hot Wheels сериализуют часть данных в Next.js payload, поэтому результат зависит от того, какие значения реально присутствуют в сохранённой странице.</li><li>Если поле не извлечено, это не доказывает, что источник его не содержит: формат может требовать отдельного правила парсинга.</li><li>Перед массовым импортом нужно проверить точность на образцах. Не загружай результат в основную ветку, пока не проверены отчёт и JSON.</li></ul></section>
 <p class="foot">Локальная обработка: выбранные файлы не отправляются на сервер этой страницы. Сохрани исходный JSON перед экспериментами.</p>
 </main>
 <script>
@@ -24,6 +24,14 @@ const FIELD_RULES=[
 function decode(s){return s.replace(/\\u0026/g,'&').replace(/\\u003c/g,'<').replace(/\\u003e/g,'>').replace(/\\u002f/g,'/').replace(/\\u0022/g,'"').replace(/\\u0027/g,"'").replace(/\\\\/g,'\\').replace(/&amp;/g,'&').replace(/&quot;/g,'"').replace(/&#x27;/g,"'").replace(/<[^>]*>/g,' ').replace(/\\s+/g,' ').trim();}
 function extract(html,filename){
  const txt=decode(html);const result={sourceFile:filename};let found=0;
+ // Parse the saved page's actual markup first; labels are lowercase and values live in sibling spans.
+ function markupValue(label){
+   const re=new RegExp('uppercase[^>]*>'+label+'</div>([\\s\\S]{0,2200}?)(?:</div></div></div>|</section>)','i');
+   const m=html.match(re); if(!m)return '';
+   const block=m[1].replace(/<script[\\s\\S]*?<\\/script>/gi,' ');
+   const vals=[...block.matchAll(/<span[^>]*class="[^"]*font-semibold[^"]*"[^>]*>([^<]+)<\\/span>/gi)].map(x=>decode(x[1]));
+   return vals.find(v=>v && v.length<80 && !/^(color|unknown|n\\/?a|none|null)$/i.test(v))||'';
+ }
  function pick(label){const escaped=label;
    const patterns=[
     new RegExp(`[\"']${escaped}[\"']\\s*[:,]\\s*[\"']([^\"']{1,100})[\"']`,'i'),
@@ -33,7 +41,20 @@ function extract(html,filename){
    for(const re of patterns){const m=txt.match(re);if(m){const v=decode(m[1]);if(v&&v.length<100&&!/^(unknown|n\/?a|none|null)$/i.test(v))return v;}}
    return '';
  }
- for(const [key,label] of FIELD_RULES){const val=pick(label);if(val){result[key]=val;found++;}}
+ for(const [key,label] of FIELD_RULES){
+   let val=pick(label);
+   if(key==='bodyColor') val=markupValue('body')||val;
+   if(key==='interiorColor') val=markupValue('interior')||val;
+   if(key==='baseColor') val=markupValue('base')||val;
+   if(key==='windowColor') val=markupValue('windows')||val;
+   if(key==='wheelType'){
+     const wheel=html.match(/<span[^>]*font-mono[^>]*>([^<]+)<\\/span>\\s*([^<]+)<\\/span>/i);
+     val=wheel?decode(wheel[1]+' '+wheel[2]):val;
+   }
+   if(key==='series') val=(html.match(/assortment series|assortment[^<]{0,40}/i)||[])[0]||val;
+   if(key==='scale') val=(html.match(/<div[^>]*font-semibold[^>]*>1\\/64<\\/div>/i)||[])[0]?'1/64':val;
+   if(val){result[key]=decode(val);found++;}
+ }
  const sku=(filename.match(/\b([A-Z]{2,4}\d{2,3})\b/i)||[])[1];
  if(sku)result.filenameSku=sku.toUpperCase();
  // Find canonical page URL if embedded in serialized payload.
