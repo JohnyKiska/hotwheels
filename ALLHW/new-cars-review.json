@@ -1,0 +1,27 @@
+[
+  {
+    "id": 1792558895697,
+    "toyNum": "JKY49",
+    "colNum": "",
+    "name": "Kool Kombi",
+    "year": 2026,
+    "seriesName": "assortment series",
+    "seriesNum": null,
+    "seriesTotal": null,
+    "rarity": "",
+    "status": "missing",
+    "price": 0,
+    "image": "",
+    "comment": "",
+    "details": {
+      "bodyColor": "Orange",
+      "interiorColor": "Dark Orange",
+      "baseColor": "Orange",
+      "wheelType": "CAST5 Cast 5-Spoke",
+      "scale": "1/64",
+      "sourceUrl": "https://allhotwheels.com/car/2026/pantone/jky49/kool-kombi",
+      "sourceFile": "JKY49 Kool Kombi Hot Wheels (2026) - Value, Specs & Colors _ All Hot Wheels.html"
+    },
+    "reviewRequired": true
+  }
+]
