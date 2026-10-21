@@ -91,7 +91,7 @@ function extract(html,filename){
    }
    // Series and assortment are parsed from page metadata above, never from generic prose.
    if(key==='scale') val=(html.match(/<div[^>]*font-semibold[^>]*>1\/64<\/div>/i)||[])[0]?'1/64':val;
-   if(key==='seriesIndex'){const sm=html.match(/Series index<\/div><div[^>]*font-semibold[^>]*>([^<]+)<\/div>/i);if(sm){result.seriesIndexRaw=decode(sm[1]);const ix=result.seriesIndexRaw.match(/^(\d+)(?:\s*\/\s*(\d+))?$/);if(ix){result.seriesNum=Number(ix[1]);if(ix[2])result.seriesTotal=Number(ix[2]);}} val='';}}}
+   if(key==='seriesIndex'){const sm=html.match(/Series index<\/div><div[^>]*font-semibold[^>]*>([^<]+)<\/div>/i);if(sm){result.seriesIndexRaw=decode(sm[1]);const ix=result.seriesIndexRaw.match(/^(\d+)(?:\s*\/\s*(\d+))?$/);if(ix){result.seriesNum=Number(ix[1]);if(ix[2])result.seriesTotal=Number(ix[2]);}} val='';}
    if(val){result[key]=decode(val);found++;}
  }
  const fileSku=(filename.match(/\b([A-Z]{2,4}\d{2,3})\b/i)||[])[1];
