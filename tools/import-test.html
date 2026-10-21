@@ -52,7 +52,7 @@ function extract(html,filename){
  // Normalized classification: source category is evidence, not the final taxonomy.
  const category=(result.sourceCategory||routeCategory||'').trim().toLowerCase();
  if(category==='silver series' || category==='pantone')result.productSegment='Silver Series';
- else if(category==='boulevard' || category==='premium')result.productSegment='Premium';
+ else if(category==='boulevard' || category==='premium' || category==='formula 1')result.productSegment='Premium';
  else if(category==='mainline')result.productSegment='Mainline';
  if(category==='boulevard')result.lineName='Boulevard';
  else if(category==='pantone')result.lineName='Pantone';
