@@ -26,7 +26,7 @@ function extract(html,filename){
  const txt=decode(html);const result={sourceFile:filename};let found=0;
  function pick(label){const escaped=label.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
    const patterns=[
-    new RegExp('["']'+escaped+'["']\\s*[:,]\\s*["']([^"']{1,100})["']','i'),
+    new RegExp(`[\"']${escaped}[\"']\\\\s*[:,]\\\\s*[\"']([^\"']{1,100})[\"']`,'i'),
     new RegExp('(?:^|\\s)'+escaped+'\\s*[:：]\\s*([^|,;\\n]{1,100})','i'),
     new RegExp('>\\s*'+escaped+'\\s*<[^>]*>\\s*([^<]{1,100})','i')
    ];
