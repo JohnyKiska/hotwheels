@@ -1,0 +1,25 @@
+name: Catalog integrity check
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Monthly read-only check; GitHub may delay scheduled workflows.
+    - cron: '23 12 1 * *'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: catalog-integrity-check
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Validate existing catalog without modifying it
+        run: python scripts/validate_catalog.py
