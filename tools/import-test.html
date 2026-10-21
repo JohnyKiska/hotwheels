@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Hot Wheels Garage — тест импорта v0.7.0</title>
+<title>Hot Wheels Garage — тест импорта v0.8.0</title>
 <style>
 :root{font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#18202b;background:#f3f5f8}*{box-sizing:border-box}body{margin:0;padding:24px}.wrap{max-width:1050px;margin:auto}.hero{background:#171b24;color:white;padding:26px;border-radius:18px;margin-bottom:18px}.hero h1{margin:0 0 8px;font-size:clamp(24px,4vw,36px)}.hero p{margin:0;color:#d0d6e0;line-height:1.5}.panel{background:white;border:1px solid #dfe4eb;border-radius:14px;padding:20px;margin:14px 0}.panel h2{font-size:18px;margin:0 0 12px}.hint{color:#596579;font-size:14px;line-height:1.5}.inputs{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}.drop{border:1px dashed #9ba8ba;border-radius:10px;padding:15px;background:#fafbfc}.drop label{display:block;font-weight:700;margin-bottom:8px}.drop input{max-width:100%}button{border:0;border-radius:9px;padding:12px 16px;font-weight:700;cursor:pointer;background:#ed4b24;color:white;margin:6px 6px 0 0}button.secondary{background:#e8edf3;color:#202938}button:disabled{opacity:.45;cursor:not-allowed}.status{padding:12px;border-radius:9px;background:#f0f4f8;margin-top:12px;white-space:pre-wrap}.status.good{background:#e7f7ec}.status.warn{background:#fff4db}.tablewrap{overflow:auto}table{width:100%;border-collapse:collapse;font-size:14px}th,td{text-align:left;padding:9px;border-bottom:1px solid #e7ebf0;vertical-align:top}th{background:#f7f8fa}.tag{display:inline-block;padding:3px 7px;border-radius:20px;background:#e8edf3;font-size:12px}.foot{font-size:13px;color:#647084;margin-top:18px}.preview-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:14px;margin-top:14px}.car-card{border:1px solid #dfe4eb;border-radius:13px;overflow:hidden;background:#fff}.car-card-head{padding:14px;background:#202938;color:#fff}.car-card-head h3{margin:0 0 5px;font-size:17px}.car-card-head p{margin:0;color:#d7deea;font-size:12px;overflow-wrap:anywhere}.car-card-body{padding:14px}.car-fields{display:grid;grid-template-columns:1fr 1fr;gap:8px}.car-field{padding:9px;border-radius:8px;background:#f4f6f9;min-width:0}.car-field small{display:block;color:#687487;font-size:11px;text-transform:uppercase;letter-spacing:.03em;margin-bottom:3px}.car-field strong{display:block;font-size:13px;overflow-wrap:anywhere}.car-field.empty{opacity:.58}.car-card-foot{padding:10px 14px;border-top:1px solid #e7ebf0;font-size:12px;color:#596579}.source-link{color:#175fc4;overflow-wrap:anywhere}.preview-note{padding:10px 12px;background:#f0f4f8;border-radius:8px;margin-top:10px;font-size:13px;color:#596579}.review-controls{margin-top:12px;padding:12px;border:1px solid #dfe4eb;border-radius:9px;background:#fbfcfe}.review-controls label{display:block;font-size:12px;font-weight:700;margin:8px 0 4px}.review-controls select,.review-controls textarea{width:100%;padding:8px;border:1px solid #cbd3df;border-radius:7px;font:inherit;font-size:13px}.review-controls textarea{min-height:64px;resize:vertical}.source-tech{margin-top:12px;border-top:1px solid #e7ebf0;padding-top:10px;font-size:13px;color:#596579}.source-tech summary{cursor:pointer;font-weight:700;color:#344054}.source-tech p{margin:8px 0 0}@media(max-width:600px){body{padding:12px}.panel{padding:14px}}
 </style></head>
@@ -17,7 +17,7 @@
 <p class="foot">Локальная обработка: выбранные файлы не отправляются на сервер этой страницы. Сохрани исходный JSON перед экспериментами.</p>
 </main>
 <script>
-const $=id=>document.getElementById(id);let output=null, reportRows=[], newCars=[], previewRows=[], schemaDraft=null;
+const $=id=>document.getElementById(id);let output=null, reportRows=[], newCars=[], previewRows=[], schemaDraft=null;const excludedRows=new Set();
 const SERIES_TOTALS={Boulevard:165};
 function configuredTotal(name){const key=Object.keys(SERIES_TOTALS).find(k=>k.toLowerCase()===String(name||'').trim().toLowerCase());return key?SERIES_TOTALS[key]:null;}
 const FIELD_RULES=[
@@ -105,12 +105,12 @@ $('run').onclick=async()=>{
  const cf=$('catalog').files[0], files=[...$('pages').files];if(!cf||!files.length){$('status').className='status warn';$('status').textContent='Выбери collection.json и хотя бы одну HTML-страницу.';return;}
  try{
   const original=JSON.parse(await cf.text());if(!Array.isArray(original))throw new Error('Ожидался JSON-массив машинок.');
-  const data=original.map(x=>({...x}));reportRows=[];newCars=[];previewRows=[];let totalMatched=0,totalAdded=0;const seenInputSkus=new Set();const priorFile=$('priorDraft').files[0];let priorReviews=new Map();if(priorFile){const prior=JSON.parse(await priorFile.text());if(Array.isArray(prior.sources)){for(const s of prior.sources){const key=String(s.releaseId||'').replace(/^release-/,'').toUpperCase();if(key)priorReviews.set(key,{reviewStatus:s.reviewStatus||'pending',reviewNote:s.reviewNote||''});}}}
+  const data=original.map(x=>({...x}));reportRows=[];newCars=[];previewRows=[];excludedRows.clear();let totalMatched=0,totalAdded=0;const seenInputSkus=new Set();const priorFile=$('priorDraft').files[0];let priorReviews=new Map();if(priorFile){const prior=JSON.parse(await priorFile.text());if(Array.isArray(prior.sources)){for(const s of prior.sources){const key=String(s.releaseId||'').replace(/^release-/,'').toUpperCase();if(key)priorReviews.set(key,{reviewStatus:s.reviewStatus||'pending',reviewNote:s.reviewNote||''});}}}
   for(const file of files){
    const parsed=extract(await file.text(),file.name);const sku=(parsed.filenameSku||'').toUpperCase();
    // Match by SKU from filename or extracted toy number; avoid fuzzy name-only changes.
    const modelSku=(parsed.toyNum||sku||'').toUpperCase();
-   if(modelSku && seenInputSkus.has(modelSku)){reportRows.push({sku:modelSku,name:file.name,found:parsed.fieldsFound,added:[],status:'Повторный файл с тем же SKU — пропущен'});continue;}if(modelSku)seenInputSkus.add(modelSku);
+   if(modelSku && seenInputSkus.has(modelSku)){previewRows.push({fileName:file.name,parsed,modelSku,match:null,matchCount:0,isDuplicate:true});reportRows.push({sku:modelSku,name:parsed.name||file.name,found:parsed.fieldsFound,added:[],status:'ДУБЛИКАТ среди выбранных HTML-файлов',fileName:file.name});continue;}if(modelSku)seenInputSkus.add(modelSku);
    let matches=modelSku?data.filter(x=>String(x.toyNum||'').toUpperCase()===modelSku):[];
    previewRows.push({fileName:file.name,parsed,modelSku,match:matches.length===1?matches[0]:null,matchCount:matches.length});
    if(matches.length!==1){
@@ -151,8 +151,10 @@ $('run').onclick=async()=>{
    const p=item.parsed;
    const fields=visualFields.map(([label,get])=>{const value=get(p,item);return '<div class="car-field '+(value==null||value===''?'empty':'')+'"><small>'+escapeHtml(label)+'</small><strong>'+(value==null||value===''?'—':escapeHtml(value))+'</strong></div>';}).join('');
    const matchText=item.matchCount===1?'Совпало с каталогом: '+(item.match.name||item.match.toyNum):item.matchCount>1?'В каталоге несколько записей с этим артикулом':'Новая запись или не найдено совпадение';
-   return '<article class="car-card"><div class="car-card-head"><h3>'+escapeHtml(item.match?.name||p.name||item.fileName.replace(/[.]html?$/i,''))+'</h3><p>'+escapeHtml(item.modelSku||'Артикул не распознан')+' · '+escapeHtml(item.fileName)+'</p></div><div class="car-card-body"><div class="car-fields">'+fields+'</div><div class="preview-note">'+escapeHtml(matchText)+'<br>Найдено полей в HTML: '+escapeHtml(p.fieldsFound)+'</div>'+'<div class="review-controls"><strong>Ручная проверка источника</strong><label for="review-status-'+index+'">Статус проверки</label><select id="review-status-'+index+'" data-review-status="'+index+'"><option value="pending">Ожидает проверки</option><option value="verified">Источник проверен вручную</option><option value="needs_review">Нужно разобраться</option></select><label for="review-note-'+index+'">Заметка / подтверждение</label><textarea id="review-note-'+index+'" data-review-note="'+index+'" placeholder="Например: на физическом блистере указано 0/5; значение сохранено как исходная маркировка, смысл пока не установлен."></textarea></div>'+'<details class="source-tech"><summary>Технические данные источника</summary><p>Категория URL: <b>'+escapeHtml(p.sourcePathCategory||'—')+'</b></p>'+(p.sourceUrl?'<p><a class="source-link" href="'+escapeHtml(p.sourceUrl)+'" target="_blank" rel="noopener">Открыть страницу-источник ↗</a></p>':'')+'</details></div><div class="car-card-foot">Пустые поля на карточке означают «не извлечено», а не подтверждённое отсутствие данных.</div></article>';
+   const duplicate=item.isDuplicate||item.matchCount>1;const duplicateBadge=duplicate?'<p style="margin-top:8px"><span class="tag" style="background:#ffe1df;color:#9b1c13;font-weight:800">ДУБЛИКАТ / НЕОДНОЗНАЧНО</span></p>':'';const excludeButton=duplicate?'<button type="button" class="secondary exclude-duplicate" data-exclude-index="'+index+'">Исключить карточку из импорта</button>':'';const cardNote=item.isDuplicate?'Повторный SKU среди выбранных HTML-файлов.':item.matchCount>1?'В старом каталоге найдено несколько записей с этим SKU.':matchText;
+   return '<article class="car-card" data-card-index="'+index+'"><div class="car-card-head"><h3>'+escapeHtml(item.match?.name||p.name||item.fileName.replace(/[.]html?$/i,''))+'</h3><p>'+escapeHtml(item.modelSku||'Артикул не распознан')+' · '+escapeHtml(item.fileName)+'</p>'+duplicateBadge+'</div><div class="car-card-body"><div class="car-fields">'+fields+'</div><div class="preview-note">'+escapeHtml(cardNote)+'<br>Найдено полей в HTML: '+escapeHtml(p.fieldsFound)+'</div>'+excludeButton+'<div class="review-controls"><strong>Ручная проверка источника</strong><label for="review-status-'+index+'">Статус проверки</label><select id="review-status-'+index+'" data-review-status="'+index+'"><option value="pending">Ожидает проверки</option><option value="verified">Источник проверен вручную</option><option value="needs_review">Нужно разобраться</option></select><label for="review-note-'+index+'">Заметка / подтверждение</label><textarea id="review-note-'+index+'" data-review-note="'+index+'" placeholder="Например: на физическом блистере указано 0/5; значение сохранено как исходная маркировка, смысл пока не установлен."></textarea></div>'+'<details class="source-tech"><summary>Технические данные источника</summary><p>Категория URL: <b>'+escapeHtml(p.sourcePathCategory||'—')+'</b></p>'+(p.sourceUrl?'<p><a class="source-link" href="'+escapeHtml(p.sourceUrl)+'" target="_blank" rel="noopener">Открыть страницу-источник ↗</a></p>':'')+'</details></div><div class="car-card-foot">Пустые поля на карточке означают «не извлечено», а не подтверждённое отсутствие данных.</div></article>';
   }).join('');
+  document.querySelectorAll('[data-exclude-index]').forEach(button=>button.addEventListener('click',()=>{const idx=Number(button.getAttribute('data-exclude-index'));if(!Number.isInteger(idx)||idx<0||idx>=previewRows.length)return;excludedRows.add(idx);const card=document.querySelector('[data-card-index="'+idx+'"]');if(card){card.style.opacity='.45';card.style.border='2px solid #b42318';const note=card.querySelector('.preview-note');if(note)note.textContent='ИСКЛЮЧЕНО из черновика пользователем. Исходный HTML и старый каталог не удаляются.';button.textContent='Исключено из импорта';button.disabled=true;}const row=reportRows.find(r=>r.fileName===previewRows[idx].fileName);if(row)row.status='ИСКЛЮЧЕНО пользователем из черновика';}));
   // Build a separate normalized-schema draft; never rewrite the legacy catalog in place.
   const slug=s=>String(s||'unknown').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
   schemaDraft={
@@ -160,14 +162,14 @@ $('run').onclick=async()=>{
    generatedAt:new Date().toISOString(),
    warning:'Draft only. Casting links and ambiguous classifications require review. Legacy personal data is not copied into the reference catalog.',
    castings:[],
-   releases:previewRows.map(item=>{
+   releases:previewRows.map((item,index)=>{
     const p=item.parsed, legacy=item.match||{};
     const sku=String(item.modelSku||p.filenameSku||'').toUpperCase();
     const releaseId='release-'+(sku||slug(item.fileName));
     const suspiciousIndex=/^0\s*\//.test(p.seriesIndexRaw||'');
     const hasClass=!!(p.productSegment||p.lineName||p.themeSeries);
     return {
-     releaseId, castingId:null, sku:sku||null,
+     _previewIndex:index, releaseId, castingId:null, sku:sku||null,
      collectorNumber:legacy.colNum||null,
      releaseYear:p.releaseYear?Number(p.releaseYear):null,
      scale:p.scale||null, bodyColor:p.bodyColor||null, decorations:null, wheelType:p.wheelType||null,
@@ -185,10 +187,10 @@ $('run').onclick=async()=>{
      notes:null
     };
    }),
-   sources:previewRows.map(item=>{
+   sources:previewRows.map((item,index)=>{
     const p=item.parsed, sku=String(item.modelSku||p.filenameSku||'').toUpperCase();
     return {
-     sourceId:'source-'+(sku||slug(item.fileName)), releaseId:'release-'+(sku||slug(item.fileName)),
+     _previewIndex:index, sourceId:'source-'+(sku||slug(item.fileName)), releaseId:'release-'+(sku||slug(item.fileName)),
      sourceName:'All Hot Wheels', sourceUrl:p.sourceUrl||null,
      sourcePathCategory:p.sourcePathCategory||null, sourceCategory:p.sourceCategory||null,
      sourceSeriesLabel:p.seriesName||null, sourceSeriesIndexRaw:p.seriesIndexRaw||null,
@@ -196,8 +198,8 @@ $('run').onclick=async()=>{
      reviewNote:priorReviews.has(sku)?(priorReviews.get(sku).reviewNote||null):(/^0\s*\//.test(p.seriesIndexRaw||'')?'Suspicious source index; verify before accepting numeric series number.':null)
     };
    }),
-   legacyLinks:previewRows.map(item=>({
-    releaseId:'release-'+String(item.modelSku||item.parsed.filenameSku||'').toUpperCase(),
+   legacyLinks:previewRows.map((item,index)=>({
+    _previewIndex:index, releaseId:'release-'+String(item.modelSku||item.parsed.filenameSku||'').toUpperCase(),
     legacyToyNum:item.match?.toyNum||item.modelSku||null,
     legacyRecordFound:item.matchCount===1, legacyRecordCount:item.matchCount,
     legacyStatusRaw:item.match?.status??null,
@@ -212,6 +214,6 @@ $('run').onclick=async()=>{
 };
 $('download').onclick=()=>{if(!output)return;const blob=new Blob([JSON.stringify(output,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='collection-enriched-test.json';a.click();URL.revokeObjectURL(a.href);};
 $('newcars').onclick=()=>{if(!newCars.length)return;const blob=new Blob([JSON.stringify(newCars,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='new-cars-review.json';a.click();URL.revokeObjectURL(a.href);};
-$('schema').onclick=()=>{if(!schemaDraft)return;schemaDraft.sources.forEach((source,index)=>{const status=document.querySelector('[data-review-status="'+index+'"]');const note=document.querySelector('[data-review-note="'+index+'"]');if(status)source.reviewStatus=status.value;if(note)source.reviewNote=note.value.trim()||null;});const blob=new Blob([JSON.stringify(schemaDraft,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='catalog-schema-draft.json';a.click();URL.revokeObjectURL(a.href);};
+$('schema').onclick=()=>{if(!schemaDraft)return;schemaDraft.sources.forEach((source,index)=>{const status=document.querySelector('[data-review-status="'+index+'"]');const note=document.querySelector('[data-review-note="'+index+'"]');if(status)source.reviewStatus=status.value;if(note)source.reviewNote=note.value.trim()||null;});const clean=JSON.parse(JSON.stringify(schemaDraft));for(const key of ['releases','sources','legacyLinks'])clean[key]=clean[key].filter(item=>!excludedRows.has(item._previewIndex)).map(({_previewIndex,...item})=>item);const blob=new Blob([JSON.stringify(clean,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='catalog-schema-draft.json';a.click();URL.revokeObjectURL(a.href);};
 $('report').onclick=()=>{const lines=[['SKU','Model','Fields found','Added fields','Status'].join(',')];for(const r of reportRows)lines.push([r.sku,r.name,r.found,r.added.join('; '),r.status].map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(','));const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+lines.join('\r\n')],{type:'text/csv;charset=utf-8'}));a.download='import-report.csv';a.click();URL.revokeObjectURL(a.href);};
 </script></body></html>
