@@ -39,7 +39,8 @@ function extract(html,filename){
  // All Hot Wheels exposes the series as a badge or in its descriptive sentence.
   // Read the theme badge from its container without depending on the exact class order.
   const badgeMatch=html.match(/<div\b[^>]*class="[^"]*\bmt-3\b[^"]*"[^>]*>[\s\S]{0,700}?<span\b[^>]*class="[^"]*\btext-brand-indigo\b[^"]*"[^>]*>([^<]+)<\/span>/i);
- const sentenceSeries=(decode(description).match(/part of the (.+?) series/i)||[])[1];
+  const sentenceSeriesRaw=(decode(description).match(/part of the ([^.]{1,70}?) series\b/i)||[])[1]||'';
+  const sentenceSeries=/\b(?:standard|limited|assortment|rather than|available|includes|features)\b/i.test(sentenceSeriesRaw)?'':sentenceSeriesRaw.trim();
  const routeCategory=(result.sourcePathCategory||'').replace(/-/g,' ');
  const genericCategories=['mainline','premium','silver series','monster trucks','racing circuit','rc','boulevard','formula 1','pop culture','car culture','entertainment','retro entertainment','fast & furious','fast and furious','fast-furious'];
  // Only explicit series badges or descriptions populate seriesName. URL categories are stored separately
@@ -77,7 +78,7 @@ function extract(html,filename){
  if(result.seriesName && result.seriesName!==result.lineName && !nonThemeCategories.includes(category))result.themeSeries=result.seriesName;
  // Prefer explicit thematic-series statements in the page's structured FAQ/data payload.
 // Browse tags are broad search facets (e.g. "j-imports"), not reliable series labels.
-const explicitTheme=(txt.match(/(?:belongs to|part of) the ([A-Z0-9][A-Z0-9 &'’.-]{1,68}?) series\b/i)||[])[1];
+const explicitTheme=(txt.match(/belongs to the ([A-Z0-9][A-Z0-9 &'’.-]{1,48}?) series\b/i)||[])[1];
 const normalizedTheme=explicitTheme?explicitTheme.trim().replace(/\s+/g,' '):'';
  const excludedThemeNames=['mainline','premium','silver series','monster trucks','racing circuit','rc','boulevard','formula 1','pop culture','car culture','entertainment','retro entertainment','fast & furious','fast and furious','fast-furious'];
  if(normalizedTheme && !excludedThemeNames.includes(normalizedTheme.toLowerCase())){
