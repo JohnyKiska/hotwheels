@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hot Wheels — MY-HW catalog compare</title>
+<style>
+*{box-sizing:border-box}body{margin:0;padding:14px;background:#f1f5f9;color:#172033;font:14px system-ui,sans-serif}.wrap{max-width:1200px;margin:auto;display:grid;gap:12px}.hero,.panel{background:#fff;border:1px solid #dbe3ed;border-radius:12px;padding:15px}.hero{background:#172033;color:#fff}.hero h1{font-size:22px;margin:0 0 6px}.muted{color:#64748b;font-size:12px}h2{font-size:17px;margin:0 0 10px}.actions,.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0}button{border:0;border-radius:7px;padding:9px 12px;background:#2563eb;color:white;font-weight:650;cursor:pointer}button.alt{background:#e2e8f0;color:#172033}input,select{font:inherit;border:1px solid #cbd5e1;border-radius:7px;padding:8px;max-width:100%}.toolbar input{flex:1;min-width:200px}.scroll{overflow:auto;max-height:58vh;border:1px solid #dbe3ed;border-radius:8px}table{border-collapse:collapse;width:100%;font-size:12px}th{position:sticky;top:0;background:#172033;color:white;text-align:left}td,th{padding:8px;border-bottom:1px solid #e2e8f0;vertical-align:top}tbody tr:nth-child(even){background:#f8fafc}.pill{display:inline-block;border-radius:12px;padding:3px 7px;background:#e2e8f0;font-size:11px}.good{background:#dcfce7}.maybe{background:#fef3c7}.bad{background:#fee2e2}.note{padding:10px;background:#fffbeb;border:1px solid #fcd34d;border-radius:8px}.stats{display:flex;gap:8px;flex-wrap:wrap}.stats span{background:#f1f5f9;border-radius:8px;padding:8px}@media(max-width:650px){body{padding:7px}.hero h1{font-size:19px}}
+</style></head><body><main class="wrap">
+<header class="hero"><h1>Hot Wheels Garage · MY-HW Catalog Compare</h1><div>Пилот: сверяем твою базу с каталогом MY-HW, не меняя collection.json автоматически.</div></header>
+<section class="panel"><h2>1. Загрузить исходники</h2><p>Сначала скачай страницу каталога MY-HW в HTML (например, Premium или Mainline), затем выбери её здесь. Также загрузи текущий collection.json. Страница MY-HW не всегда разрешает чтение напрямую из другого сайта, поэтому локальный HTML — надёжный тестовый вход.</p>
+<div class="actions"><label>Твоя база collection.json <input id="collectionFile" type="file" accept=".json,application/json"></label><label>Страница MY-HW (HTML) <input id="catalogFile" type="file" accept=".html,.htm,text/html"></label></div>
+<div class="actions"><button id="parse">Разобрать каталог и сравнить</button><button id="export" class="alt" disabled>Скачать отчёт CSV</button><button id="json" class="alt" disabled>Скачать каталог JSON</button></div>
+<div id="status" class="muted">Оба файла ещё не загружены.</div><div id="stats" class="stats"></div>
+</section>
+<section class="panel"><h2>2. Результаты сопоставления</h2><div class="note">Автоматическое совпадение — только подсказка. Артикул/SKU важнее названия; одинаковое название без артикула может быть другой расцветкой или выпуском. В базу ничего не записывается.</div>
+<div class="toolbar"><input id="q" type="search" placeholder="Фильтр по названию, серии, SKU…"><select id="filter"><option value="all">Все результаты</option><option value="exact">Точное название + год/серия</option><option value="name">Похожее название</option><option value="new">Не найдено в моей базе</option><option value="ambiguous">Несколько возможных совпадений</option></select><span id="count" class="muted"></span></div>
+<div class="scroll"><table><thead><tr><th>Каталог MY-HW</th><th>Год</th><th>Серия</th><th>Результат сравнения</th><th>Возможное совпадение в моей базе</th></tr></thead><tbody id="rows"><tr><td colspan="5">Загрузи два файла.</td></tr></tbody></table></div></section>
+</main>
+<script>
+let myCars=[],mine=[],report=[];
+const $=id=>document.getElementById(id);
+const norm=s=>String(s??'').toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/&amp;/g,'&').replace(/[^a-z0-9а-яё]+/gi,' ').trim().replace(/\s+/g,' ');
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function readJSON(text){let x=JSON.parse(text);if(Array.isArray(x))return x;for(let k of ['collection','cars','data','items'])if(Array.isArray(x[k]))return x[k];throw Error('JSON должен содержать массив записей');}
+$('collectionFile').onchange=async e=>{try{mine=readJSON(await e.target.files[0].text());$('status').textContent='Моя база загружена: '+mine.length+' записей.'}catch(err){$('status').textContent='Ошибка collection.json: '+err.message}};
+$('catalogFile').onchange=e=>{$('status').textContent='HTML каталога выбран: '+e.target.files[0].name+'. Нажми «Разобрать каталог и сравнить».'};
+function textOf(el){return (el?.innerText||el?.textContent||'').replace(/\s+/g,' ').trim()}
+function extractCatalog(doc,filename){
+ let found=[],seen=new Set();
+ // First try card-like structures: images with meaningful alt text and their nearest compact ancestor.
+ for(const img of doc.querySelectorAll('img[alt]')){
+  let alt=(img.getAttribute('alt')||'').replace(/^image\s*:\s*/i,'').trim();
+  if(!alt||/^(image|logo|icon|avatar|qr|hot wheels)$/i.test(alt)||alt.length>100)continue;
+  let node=img;
+  for(let level=0;level<7&&node.parentElement;level++){
+   node=node.parentElement;let txt=textOf(node);
+   if(txt.length>450)continue;
+   if(txt.toLowerCase().includes(alt.toLowerCase())&&txt.length>=alt.length){
+    let parts=txt.split(/\s{2,}|\s*[|•·]\s*/).map(x=>x.trim()).filter(Boolean);
+    let yearMatch=txt.match(/\b(19\d{2}|20\d{2})\b/);
+    let name=alt;
+    // Prefer exact visible text matching the image alt; avoid taking the whole page card as the model name.
+    let series='';
+    let candidates=parts.filter(x=>x.length<90&&!/^(image|series|catalog|sort|year|name)$/i.test(x));
+    let idx=candidates.findIndex(x=>norm(x)===norm(alt));
+    if(idx>=0&&idx+1<candidates.length)series=candidates[idx+1];
+    else if(candidates.length>1)series=candidates.filter(x=>norm(x)!==norm(alt)).slice(-1)[0]||'';
+    let rec={name,year:yearMatch?Number(yearMatch[0]):'',series:series||'',source:filename};
+    let key=norm(name)+'|'+rec.year+'|'+norm(rec.series);
+    if(!seen.has(key)){seen.add(key);found.push(rec)}
+    break;
+   }
+  }
+ }
+ // Fallback: extract linked/text card labels if image alts are missing.
+ if(found.length<5){
+  for(const el of doc.querySelectorAll('a,article,[class*="card"],[class*="item"],[class*="model"]')){
+   let t=textOf(el);if(t.length<4||t.length>180)continue;
+   let y=t.match(/\b(19\d{2}|20\d{2})\b/);
+   let name=(t.split(/\n|\s{2,}/)[0]||'').trim();
+   if(name.length<4||/^(каталог|аккаунт|коллекция|избранное|mainline|premium|character|exclusive|themed)$/i.test(name))continue;
+   let key=norm(name)+'|'+(y?y[0]:'');
+   if(!seen.has(key)){seen.add(key);found.push({name,year:y?Number(y[0]):'',series:'',source:filename})}
+  }
+ }
+ return found;
+}
+function similarity(a,b){let A=new Set(norm(a).split(' ').filter(x=>x.length>1)),B=new Set(norm(b).split(' ').filter(x=>x.length>1));if(!A.size||!B.size)return 0;let inter=[...A].filter(x=>B.has(x)).length;return inter/(A.size+B.size-inter)}
+function compare(){
+ if(!mine.length||!$('catalogFile').files[0]){ $('status').textContent='Нужны оба файла: collection.json и HTML MY-HW.';return}
+ let file=$('catalogFile').files[0];let fr=new DOMParser().parseFromString; // parser below is synchronous on already read text
+ file.text().then(html=>{
+  let doc=new DOMParser().parseFromString(html,'text/html');
+  myCars=extractCatalog(doc,file.name);
+  report=myCars.map(c=>{
+   let matches=mine.map(m=>{let score=similarity(c.name,m.name);let exact=norm(c.name)===norm(m.name);let year=!!c.year&&String(c.year)===String(m.year);let series=!!c.series&&norm(c.series)===norm(m.seriesName);let sku=!!c.sku&&norm(c.sku)===norm(m.toyNum);return {m,score,exact,year,series,sku,rank:(sku?100:0)+(exact?50:0)+(year?12:0)+(series?10:0)+score*20}}).filter(x=>x.score>=0.45||x.exact||x.sku).sort((a,b)=>b.rank-a.rank);
+   let best=matches[0],kind='new',label='Не найдено в моей базе';
+   if(best&&best.sku){kind='exact';label='Совпадение по SKU'}
+   else if(best&&best.exact&&(best.year||best.series)){kind='exact';label='Точное название + контекст'}
+   else if(matches.length>1&&matches[1].rank>=best.rank-4){kind='ambiguous';label='Несколько возможных совпадений'}
+   else if(best){kind='name';label='Похожее название — проверить вручную'}
+   return {...c,kind,label,best:best?.m||null,alternatives:matches.slice(0,3).map(x=>x.m)}
+  });
+  render();$('status').textContent='Разбор завершён. Найдено записей каталога: '+myCars.length+'. Проверь качество извлечения, особенно серии и годы.';
+  $('export').disabled=!report.length;$('json').disabled=!myCars.length;
+ }).catch(e=>{$('status').textContent='Ошибка чтения HTML: '+e.message});
+}
+function render(){
+ let q=norm($('q').value),f=$('filter').value;
+ let list=report.filter(r=>(f==='all'||r.kind===f)&&(!q||norm([r.name,r.year,r.series,r.best?.name,r.best?.toyNum].join(' ')).includes(q)));
+ $('count').textContent=list.length+' строк';
+ $('rows').innerHTML=list.slice(0,1000).map(r=>'<tr><td><b>'+esc(r.name)+'</b></td><td>'+esc(r.year||'—')+'</td><td>'+esc(r.series||'—')+'</td><td><span class="pill '+(r.kind==='exact'?'good':r.kind==='new'?'bad':r.kind==='ambiguous'?'maybe':'')+'">'+esc(r.label)+'</span></td><td>'+(r.best?'<b>'+esc(r.best.name)+'</b><br>SKU: '+esc(r.best.toyNum||'—')+' · '+esc(r.best.year||'')+' · '+esc(r.best.seriesName||''):'—')+(r.alternatives.length>1?'<div class="muted">Другие варианты: '+esc(r.alternatives.slice(1).map(x=>x.name+' ['+(x.toyNum||'без SKU')+']').join('; '))+'</div>':'')+'</td></tr>').join('')||'<tr><td colspan="5">Нет результатов для этого фильтра.</td></tr>';
+ $('stats').innerHTML=['Записей MY-HW: '+report.length,'Контекстное совпадение: '+report.filter(x=>x.kind==='exact').length,'Проверить название: '+report.filter(x=>x.kind==='name').length,'Не найдено: '+report.filter(x=>x.kind==='new').length,'Неоднозначно: '+report.filter(x=>x.kind==='ambiguous').length].map(x=>'<span>'+esc(x)+'</span>').join('');
+}
+$('parse').onclick=compare;$('q').oninput=render;$('filter').onchange=render;
+function csvCell(v){return '"'+String(v??'').replace(/"/g,'""')+'"'}
+$('export').onclick=()=>{let head=['MYHW name','year','series','match status','collection name','collection SKU','collection year','collection series'];let lines=[head,...report.map(r=>[r.name,r.year,r.series,r.label,r.best?.name||'',r.best?.toyNum||'',r.best?.year||'',r.best?.seriesName||''])].map(row=>row.map(csvCell).join(',')).join('\r\n');let blob=new Blob(['\uFEFF'+lines],{type:'text/csv;charset=utf-8'});let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='myhw-collection-comparison.csv';a.click();URL.revokeObjectURL(a.href)};
+$('json').onclick=()=>{let blob=new Blob([JSON.stringify(myCars,null,2)],{type:'application/json'});let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='myhw-catalog-pilot.json';a.click();URL.revokeObjectURL(a.href)};
+</script></body></html>
