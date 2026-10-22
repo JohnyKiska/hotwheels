@@ -110,9 +110,9 @@ if(/\btreasure hunt\b/i.test(decode(description)))result.sourceRarityLabel=/\bsu
    const labelMatch=labelRe.exec(html); if(!labelMatch)return '';
    const after=html.slice(labelMatch.index+labelMatch[0].length, labelMatch.index+labelMatch[0].length+2600);
    const nextLabel=/<div[^>]*class="[^"]*uppercase[^"]*"[^>]*>/i.exec(after);
-   const block=(nextLabel?after.slice(0,nextLabel.index):after).replace(/<script[\\s\\S]*?<\\/script>/gi,' ');
-   const vals=[...block.matchAll(/<span[^>]*class="[^"]*font-semibold[^"]*"[^>]*>([^<]+)<\\/span>/gi)].map(x=>decode(x[1]));
-   return vals.find(v=>v && v.length<80 && !/^(color|unknown|n\\/?a|none|null)$/i.test(v))||'';
+   const block=(nextLabel?after.slice(0,nextLabel.index):after).replace(/<script[\s\S]*?<\/script>/gi,' ');
+   const vals=[...block.matchAll(/<span[^>]*class="[^"]*font-semibold[^"]*"[^>]*>([^<]+)<\/span>/gi)].map(x=>decode(x[1]));
+   return vals.find(v=>v && v.length<80 && !/^(color|unknown|n\/?a|none|null)$/i.test(v))||'';
  }
  function pick(label){const escaped=label;
    const patterns=[
