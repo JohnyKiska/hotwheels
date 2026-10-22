@@ -44,11 +44,16 @@ function extract(html,filename){
  // Only explicit series badges or descriptions populate seriesName. URL categories are stored separately
  // because labels such as Boulevard can be product lines rather than thematic series.
  result.seriesName=(badgeMatch&&decode(badgeMatch[1]))||sentenceSeries||'';
- const assortmentMatch=html.match(/<p class="mt-2 text-sm text-muted-foreground">([^<]+)(?:<!-- -->)?\s*·/i);
- const visibleFirstLabel=assortmentMatch?decode(assortmentMatch[1]).trim():'';
+ const assortmentMatch=html.match(/<p class="mt-2 text-sm text-muted-foreground">([\s\S]*?)<\/p>/i);
+ const assortmentText=assortmentMatch?decode(assortmentMatch[1].replace(/<[^>]+>/g,' ').replace(/<!--.*?-->/g,' ')).replace(/\s+/g,' ').trim():'';
+ const assortmentParts=assortmentText.split('·').map(v=>v.trim()).filter(Boolean);
+ const visibleFirstLabel=assortmentParts[0]||'';
  if(visibleFirstLabel)result.sourceCategory=visibleFirstLabel;
  if(genericCategories.includes(visibleFirstLabel.toLowerCase()))result.assortmentName=visibleFirstLabel.replace(/\b\w/g,ch=>ch.toUpperCase());
  else if(genericCategories.includes(routeCategory))result.assortmentName=routeCategory.replace(/\b\w/g,ch=>ch.toUpperCase());
+ // Pages may expose the mix only in the subtitle, e.g. "2013 Retro Entertainment Mix 2".
+ const mixMatch=assortmentText.match(/\bMix\s*([A-Z0-9-]+)\b/i);
+ if(mixMatch)result.assortmentName='Mix '+mixMatch[1].toUpperCase();
  // Normalized classification: source category is evidence, not the final taxonomy.
  const category=(result.sourceCategory||routeCategory||'').trim().toLowerCase();
  // Segment and line are normalized separately. "Entertainment" is the source route label;
@@ -69,6 +74,14 @@ function extract(html,filename){
  // Do not treat product lines or segment labels as thematic series.
  const nonThemeCategories=['silver series','pantone','boulevard','premium','mainline','formula 1','pop culture','car culture','entertainment','retro entertainment','fast & furious','fast and furious','fast-furious'];
  if(result.seriesName && result.seriesName!==result.lineName && !nonThemeCategories.includes(category))result.themeSeries=result.seriesName;
+ // Some pages expose the media/theme as a searchable tag rather than in the description.
+ // For Entertainment, use a clearly title-like tag (e.g. "Smokey and the Bandit"), not attribute tags.
+ if(!result.themeSeries && (category==='entertainment' || category==='retro entertainment')){
+   const themeTags=[...html.matchAll(/href="\/browse\?q=([^"]+)"[^>]*>[\s\S]*?<span[^>]*>([^<]+)<\/span>/gi)]
+     .map(m=>({query:decode(m[1].replace(/\+/g,' ')).replace(/&amp;/g,'&').toLowerCase(),label:decode(m[2]).trim()}));
+   const titleTag=themeTags.find(t=>/\b(and the|back to the|from the|of the)\b/i.test(t.label) && !/hood|wheel|color|flame|deco/i.test(t.label));
+   if(titleTag)result.themeSeries=titleTag.label.replace(/\b\w/g,ch=>ch.toUpperCase());
+ }
  // Parse the saved page's actual markup first; labels are lowercase and values live in sibling spans.
  function markupValue(label){
    const re=new RegExp('uppercase[^>]*>'+label+'</div>([\\s\\S]{0,2200}?)(?:</div></div></div>|</section>)','i');
