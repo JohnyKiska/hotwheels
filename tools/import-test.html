@@ -87,7 +87,7 @@ function extract(html,filename){
  if(visibleFirstLabel)result.sourceCategory=visibleFirstLabel;
   // Preserve unfamiliar source categories too. The raw URL slug remains in sourcePathCategory;
   // this readable label is evidence only and must not force a catalog segment or series.
-  else if(result.sourcePathCategory)result.sourceCategory=routeCategory.replace(/\\b\\w/g,ch=>ch.toUpperCase());
+  else if(result.sourcePathCategory)result.sourceCategory=routeCategory.replace(/\b\w/g,ch=>ch.toUpperCase());
  if(genericCategories.includes(visibleFirstLabel.toLowerCase()))result.assortmentName=visibleFirstLabel.replace(/\b\w/g,ch=>ch.toUpperCase());
  else if(genericCategories.includes(routeCategory))result.assortmentName=routeCategory.replace(/\b\w/g,ch=>ch.toUpperCase());
  // Pages may expose the mix only in the subtitle, e.g. "2013 Retro Entertainment Mix 2".
