@@ -38,7 +38,7 @@ function extract(html,filename){
  if(yearMatch[1]&&!result.releaseYear)result.releaseYear=yearMatch[1];
  // All Hot Wheels exposes the series as a badge or in its descriptive sentence.
   // Read the theme badge from its container without depending on the exact class order.
-  const badgeMatch=html.match(/<span\b[^>]*\btext-brand-indigo\b[^>]*>([^<]+)<\/span>/i);
+  const badgeMatch=html.match(/<span\b[^>]*font-bold\s+text-brand-indigo"[^>]*>([^<]+)<\/span>/i);
   const sentenceSeriesRaw=(decode(description).match(/part of the ([^.]{1,70}?) series\b/i)||[])[1]||'';
   const sentenceSeries=/\b(?:standard|limited|assortment|rather than|available|includes|features)\b/i.test(sentenceSeriesRaw)?'':sentenceSeriesRaw.trim();
  const routeCategory=(result.sourcePathCategory||'').replace(/-/g,' ');
