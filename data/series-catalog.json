@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "1.0",
+  "description": "Справочник тематических серий, сгруппированных по продуктовому сегменту. Дополняется через tools/import-test.html.",
+  "segments": {
+    "Mainline": [
+      "Factory Fresh",
+      "HW J-IMPORT",
+      "Wild Widebody"
+    ],
+    "Premium": [
+      "Boulevard",
+      "Car Culture",
+      "Fast & Furious",
+      "Formula 1",
+      "Pop Culture",
+      "Retro Entertainment"
+    ],
+    "Silver Series": [
+      "Pantone"
+    ]
+  }
+}
