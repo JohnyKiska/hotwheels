@@ -40,7 +40,7 @@ function extract(html,filename){
  const badgeMatch=html.match(/class="inline-flex items-center rounded-full border border-brand-indigo\/30 bg-brand-indigo\/10 px-3 py-1 text-sm font-bold text-brand-indigo">([^<]+)<\/span>/i);
  const sentenceSeries=(decode(description).match(/part of the (.+?) series/i)||[])[1];
  const routeCategory=(result.sourcePathCategory||'').replace(/-/g,' ');
- const genericCategories=['mainline','premium','silver series','monster trucks','racing circuit','rc','boulevard','formula 1','pop culture','car culture','entertainment','retro entertainment','fast & furious','fast and furious','fast-furious','treasure hunt','super treasure hunt','th','sth'];
+ const genericCategories=['mainline','premium','silver series','monster trucks','racing circuit','rc','boulevard','formula 1','pop culture','car culture','entertainment','retro entertainment','fast & furious','fast and furious','fast-furious'];
  // Only explicit series badges or descriptions populate seriesName. URL categories are stored separately
  // because labels such as Boulevard can be product lines rather than thematic series.
  result.seriesName=(badgeMatch&&decode(badgeMatch[1]))||sentenceSeries||'';
