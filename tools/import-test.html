@@ -44,8 +44,7 @@ function extract(html,filename){
  // Only explicit series badges or descriptions populate seriesName. URL categories are stored separately
  // because labels such as Boulevard can be product lines rather than thematic series.
  result.seriesName=(badgeMatch&&decode(badgeMatch[1]))||sentenceSeries||'';
- const visibleHtml=html.replace(/<script\b[\s\S]*?<\/script>/gi,'');
- const assortmentMatch=visibleHtml.match(/<p\b(?=[^>]*\bclass=["\'][^"\']*\bmt-2\b)(?=[^>]*\bclass=["\'][^"\']*\btext-sm\b)(?=[^>]*\bclass=["\'][^"\']*\btext-muted-foreground\b)[^>]*>([\s\S]*?)<\/p>/i);
+ const assortmentMatch=html.match(/<p class="mt-2 text-sm text-muted-foreground">([\s\S]*?)<\/p>/i);
  const assortmentText=assortmentMatch?decode(assortmentMatch[1].replace(/<[^>]+>/g,' ').replace(/<!--.*?-->/g,' ')).replace(/\s+/g,' ').trim():'';
  const assortmentParts=assortmentText.split('·').map(v=>v.trim()).filter(Boolean);
  const visibleFirstLabel=assortmentParts[0]||'';
