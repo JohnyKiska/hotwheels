@@ -30,9 +30,26 @@ function extract(html,filename){
  const canonical=(html.match(/<link rel="canonical" href="([^"]+)"/i)||[])[1]||'';
  if(canonical)result.sourceUrl=canonical.replace(/&amp;/g,'&');
  const description=(html.match(/<meta name="description" content="([^"]*)"/i)||[])[1]||'';
- // Candidate image from page metadata only; shown for human inspection, never auto-classified.
+ // Collect image candidates from metadata and image tags. Never treat affiliate text as rarity evidence.
  const imageMeta=html.match(/<meta[^>]+(?:property|name)=["'](?:og:image|twitter:image)["'][^>]+content=["']([^"']+)["']/i)||html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+(?:property|name)=["'](?:og:image|twitter:image)["']/i);
- if(imageMeta&&imageMeta[1])result.productImageUrl=imageMeta[1].replace(/&amp;/g,'&');
+ const imageCandidates=[];
+ if(imageMeta&&imageMeta[1])imageCandidates.push({url:imageMeta[1].replace(/&amp;/g,'&'),score:1});
+ const skuHint=(filename.match(/\b([A-Z]{2,4}\d{2,3})\b/i)||[])[1]||'';
+ const titleHint=(filename.replace(/\.html?$/i,'').replace(/^([A-Z]{2,4}\d{2,3})\s*/i,'').replace(/\s+Hot Wheels.*$/i,'')).toLowerCase();
+ for(const m of html.matchAll(/<img\b[^>]*>/gi)){
+   const tag=m[0]; const attr=n=>((tag.match(new RegExp('(?:^|\\s)'+n+'=["\\']([^"\\']+)', 'i'))||[])[1]||'');
+   let url=attr('src')||attr('data-src')||attr('data-lazy-src');
+   if(!url){const ss=attr('srcset');if(ss)url=ss.split(',')[0].trim().split(/\s+/)[0];}
+   if(!url||/^(data:|blob:|javascript:)/i.test(url))continue;
+   url=url.replace(/&amp;/g,'&'); const hay=(attr('alt')+' '+attr('title')+' '+url).toLowerCase();
+   let score=0;if(skuHint&&hay.includes(skuHint.toLowerCase()))score+=5;if(titleHint&&titleHint.length>4&&hay.includes(titleHint))score+=4;
+   if(/affiliate|amazon|ebay|recommend|related|banner|logo/i.test(hay))score-=5;
+   if(/hotwheels|hot-wheels|allhotwheels|product|car|vehicle|image/i.test(hay))score+=1;
+   imageCandidates.push({url,score});
+ }
+ imageCandidates.sort((a,b)=>b.score-a.score);
+ if(imageCandidates.length)result.productImageUrl=imageCandidates[0].url;
+ result.productImageCandidates=imageCandidates.slice(0,8).map(x=>x.url);
  const pathMatch=result.sourceUrl.match(/\/car\/(20\d{2})\/([^/]+)\/([a-z0-9]+)\//i);
  if(pathMatch){result.releaseYear=pathMatch[1];result.sourcePathCategory=pathMatch[2].toLowerCase();result.filenameSku=pathMatch[3].toUpperCase();}
  const skuMatch=(description.match(/SKU\s+([A-Z0-9]+)/i)||html.match(/<div[^>]*>SKU<\/div><div[^>]*>([A-Z0-9]+)<\/div>/i)||[]);
@@ -83,7 +100,7 @@ function extract(html,filename){
    const themeTags=[...html.matchAll(/href="\/browse\?q=([^"]+)"[^>]*>[\s\S]*?<span[^>]*>([^<]+)<\/span>/gi)]
      .map(m=>({query:decode(m[1].replace(/\+/g,' ')).replace(/&amp;/g,'&').toLowerCase(),label:decode(m[2]).trim()}));
    const themePatterns=[
-     /then and now/i,/hw dream garage/i,/dream garage/i,/smokey and the bandit/i,
+     /then and now/i,/hw dream garage/i,/dream garage/i,/hw j-import/i,/j-import/i,/smokey and the bandit/i,
      /back to the future/i,/fast and furious/i,/the jetsons/i,/scooby-doo/i,
      /batman/i,/super mario/i,/hot wheels legends/i
    ];
@@ -173,7 +190,7 @@ $('run').onclick=async()=>{
   $('summary').textContent='Записей каталога: '+data.length+' · HTML-файлов: '+files.length+' · точных совпадений: '+totalMatched+' · добавлено полей: '+totalAdded+' · новых машинок на проверку: '+newCars.length+'.';
   $('rows').innerHTML=reportRows.map(r=>'<tr><td><b>'+escapeHtml(r.sku)+'</b></td><td>'+escapeHtml(r.name)+'</td><td>'+escapeHtml(r.found)+'</td><td>'+escapeHtml(r.added.join(', ')||'—')+'</td><td>'+escapeHtml(r.status)+'</td></tr>').join('');
   const visualFields=[
-   ['SKU / артикул',p=>p.toyNum||p.filenameSku],['Год выпуска',p=>p.releaseYear],['Категория на сайте',p=>p.sourceCategory],['Продуктовый сегмент',p=>p.productSegment],['Линейка / коллекция',p=>p.lineName],['Тематическая серия',p=>p.themeSeries],['Ассортимент',p=>p.assortmentName],['Номер в линейке',(p,item)=>{const num=p.seriesNum??item.match?.seriesNum;const total=configuredTotal(p.lineName||p.assortmentName||p.sourceCategory||item.match?.details?.lineName||item.match?.seriesName) || (p.seriesTotal ?? item.match?.seriesTotal);return num!=null&&total!=null?(num+' / '+total):null;}],['Цвет кузова',p=>p.bodyColor],['Цвет салона',p=>p.interiorColor],['Цвет базы',p=>p.baseColor],['Цвет окон',p=>p.windowColor],['Тип колёс',p=>p.wheelType],['Масштаб',p=>p.scale]
+   ['SKU / артикул',p=>p.toyNum||p.filenameSku],['Год выпуска',p=>p.releaseYear],['Категория на сайте',p=>p.sourceCategory],['Продуктовый сегмент',p=>p.productSegment],['Линейка / коллекция',p=>p.lineName],['Тематическая серия',p=>p.themeSeries],['Ассортимент',p=>p.assortmentName],['Номер в линейке',(p,item)=>{const num=p.seriesNum??item.match?.seriesNum;const total=configuredTotal(p.lineName||p.assortmentName||p.sourceCategory||item.match?.details?.lineName||item.match?.seriesName) || (p.seriesTotal ?? item.match?.seriesTotal);return num!=null&&total!=null?(num+' / '+total):null;}],['Цвет кузова',p=>p.bodyColor],['Цвет салона',p=>p.interiorColor],['Цвет базы',p=>p.baseColor],['Цвет окон',p=>p.windowColor],['Тип колёс',p=>p.wheelType],['Масштаб',p=>p.scale],['Кандидатов фото',p=>(p.productImageCandidates||[]).length||null]
   ];
   $('visualSummary').textContent='Карточек: '+previewRows.length+' · совпадение с каталогом: '+previewRows.filter(x=>x.matchCount===1).length+' · без точного совпадения: '+previewRows.filter(x=>x.matchCount!==1).length+'. Значения показаны как распознал их парсер, без догадок.';
   $('visualCards').innerHTML=previewRows.map((item,index)=>{
@@ -181,7 +198,7 @@ $('run').onclick=async()=>{
    const fields=visualFields.map(([label,get])=>{const value=get(p,item);return '<div class="car-field '+(value==null||value===''?'empty':'')+'"><small>'+escapeHtml(label)+'</small><strong>'+(value==null||value===''?'—':escapeHtml(value))+'</strong></div>';}).join('');
    const matchText=item.matchCount===1?'Совпало с каталогом: '+(item.match.name||item.match.toyNum):item.matchCount>1?'В каталоге несколько записей с этим артикулом':'Новая запись или не найдено совпадение';
    const duplicate=item.isDuplicate||item.matchCount>1;const duplicateBadge=duplicate?'<p style="margin-top:8px"><span class="tag" style="background:#ffe1df;color:#9b1c13;font-weight:800">ДУБЛИКАТ / НЕОДНОЗНАЧНО</span></p>':'';const excludeButton=duplicate?'<button type="button" class="secondary exclude-duplicate" data-exclude-index="'+index+'">Удалить карточку из черновика</button>':'';const cardNote=item.isDuplicate?'Повторный SKU среди выбранных HTML-файлов.':item.matchCount>1?'В старом каталоге найдено несколько записей с этим SKU.':matchText;
-   const imagePreview=p.productImageUrl?'<div style="padding:12px 14px 0"><a href="'+escapeHtml(p.productImageUrl)+'" target="_blank" rel="noopener"><img src="'+escapeHtml(p.productImageUrl)+'" alt="Кандидат изображения '+escapeHtml(item.modelSku||'машинки')+'" loading="lazy" style="display:block;max-width:100%;max-height:220px;object-fit:contain;margin:auto;border:1px solid #e7ebf0;border-radius:8px;background:#fff"></a><small>Кандидат изображения из метаданных страницы — проверь, что это именно нужная машинка.</small></div>':'';
+   const imagePreview=p.productImageUrl?'<div style="padding:12px 14px 0"><a href="'+escapeHtml(p.productImageUrl)+'" target="_blank" rel="noopener"><img src="'+escapeHtml(p.productImageUrl)+'" alt="Кандидат изображения '+escapeHtml(item.modelSku||'машинки')+'" loading="lazy" onerror="this.style.display=\'none\';this.nextElementSibling.textContent=\'Изображение не загрузилось. Проверь альтернативные URL ниже.\'" style="display:block;max-width:100%;max-height:220px;object-fit:contain;margin:auto;border:1px solid #e7ebf0;border-radius:8px;background:#fff"></a><small>Кандидат изображения — проверь, что это именно нужная машинка.</small>'+(p.productImageCandidates||[]).slice(1).map((url,j)=>'<p><a class="source-link" href="'+escapeHtml(url)+'" target="_blank" rel="noopener">Альтернативное фото '+(j+1)+'</a></p>').join('')+'</div>':'';
    return '<article class="car-card" data-card-index="'+index+'"><div class="car-card-head"><h3>'+escapeHtml(item.match?.name||p.name||item.fileName.replace(/[.]html?$/i,''))+'</h3><p>'+escapeHtml(item.modelSku||'Артикул не распознан')+' · '+escapeHtml(item.fileName)+'</p>'+duplicateBadge+'</div>'+imagePreview+'<div class="car-card-body"><div class="car-fields">'+fields+'</div><div class="preview-note">'+escapeHtml(cardNote)+'<br>Найдено полей в HTML: '+escapeHtml(p.fieldsFound)+'</div>'+excludeButton+'<div class="review-controls"><strong>Визуальная проверка TH / STH</strong><p class="hint">Определяй по логотипу на самой машинке: TH — пламя в кружочке; STH — буквы TH. Текст страницы и рекламные карточки не считаются доказательством.</p><label for="rarity-'+index+'">Редкость</label><select id="rarity-'+index+'" data-rarity="'+index+'"><option value="">Не подтверждено</option><option value="TH">TH — пламя в кружочке</option><option value="STH">STH — буквы TH</option></select><label for="review-status-'+index+'">Статус проверки</label><select id="review-status-'+index+'" data-review-status="'+index+'"><option value="pending">Ожидает проверки</option><option value="verified">Источник проверен вручную</option><option value="needs_review">Нужно разобраться</option></select><label for="review-note-'+index+'">Заметка / подтверждение</label><textarea id="review-note-'+index+'" data-review-note="'+index+'" placeholder="Например: на физическом блистере указано 0/5; значение сохранено как исходная маркировка, смысл пока не установлен."></textarea></div>'+'<details class="source-tech"><summary>Технические данные источника</summary><p>Категория URL: <b>'+escapeHtml(p.sourcePathCategory||'—')+'</b></p>'+(p.sourceUrl?'<p><a class="source-link" href="'+escapeHtml(p.sourceUrl)+'" target="_blank" rel="noopener">Открыть страницу-источник ↗</a></p>':'')+'</details></div><div class="car-card-foot">Пустые поля на карточке означают «не извлечено», а не подтверждённое отсутствие данных.</div></article>';
   }).join('');
   document.querySelectorAll('[data-exclude-index]').forEach(button=>button.addEventListener('click',()=>{const idx=Number(button.getAttribute('data-exclude-index'));if(!Number.isInteger(idx)||idx<0||idx>=previewRows.length)return;excludedRows.add(idx);const card=document.querySelector('[data-card-index="'+idx+'"]');if(card){card.remove();const summary=document.getElementById('visualSummary');if(summary)summary.textContent+=' Исключено вручную: '+(previewRows[idx].modelSku||previewRows[idx].fileName)+'.';}const row=reportRows.find(r=>r.fileName===previewRows[idx].fileName);if(row)row.status='ИСКЛЮЧЕНО пользователем из черновика';}));
