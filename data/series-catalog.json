@@ -3,9 +3,25 @@
   "description": "Справочник тематических серий, сгруппированных по продуктовому сегменту. Дополняется через tools/import-test.html.",
   "segments": {
     "Mainline": [
+      "HW Dream Garage",
+      "HW Screen Time",
+      "HW Art Cars",
+      "HW Metro",
+      "HW EV",
       "Factory Fresh",
-      "HW J-IMPORT",
-      "Wild Widebody"
+      "HW Hot Trucks",
+      "HW Modified",
+      "HW J-Imports",
+      "Muscle Mania",
+      "X-Raycers",
+      "HW First Response",
+      "HW Ride-Ons",
+      "Rod Squad",
+      "Wild Widebody",
+      "Fast Foodie",
+      "Safari Mode",
+      "Compact Kings",
+      "HW Dirt"
     ],
     "Premium": [
       "Boulevard",
@@ -13,7 +29,8 @@
       "Fast & Furious",
       "Formula 1",
       "Pop Culture",
-      "Retro Entertainment"
+      "Retro Entertainment",
+      "Team Transport"
     ],
     "Silver Series": [
       "Pantone"
