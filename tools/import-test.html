@@ -37,7 +37,7 @@ function extract(html,filename){
  const skuHint=(filename.match(/\b([A-Z]{2,4}\d{2,3})\b/i)||[])[1]||'';
  const titleHint=(filename.replace(/\.html?$/i,'').replace(/^([A-Z]{2,4}\d{2,3})\s*/i,'').replace(/\s+Hot Wheels.*$/i,'')).toLowerCase();
  for(const m of html.matchAll(/<img\b[^>]*>/gi)){
-   const tag=m[0]; const attr=n=>((tag.match(new RegExp("(?:^|\\s)"+n+"=[\\\"\\\']([^\\\"\\\']+)", "i"))||[])[1]||"");
+   const tag=m[0]; const attr=n=>{const match=tag.match(new RegExp("\\\\b"+n+"\\\\s*=\\\\s*([\\\"\\\'])(.*?)\\\\1","i"));return match?match[2]:"";};
    let url=attr('src')||attr('data-src')||attr('data-lazy-src');
    if(!url){const ss=attr('srcset');if(ss)url=ss.split(',')[0].trim().split(/\s+/)[0];}
    if(!url||/^(data:|blob:|javascript:)/i.test(url))continue;
