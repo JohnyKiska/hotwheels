@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "catalog_sources": [
+    {
+      "id": "source:character:collection-list",
+      "fileName": "character collection.txt",
+      "direction": "Character",
+      "sourceType": "collection-list",
+      "lineCount": 27,
+      "nonEmptyLineCount": 27
+    },
+    {
+      "id": "source:character:series-list",
+      "fileName": "character series.txt",
+      "direction": "Character",
+      "sourceType": "series-list",
+      "lineCount": 93,
+      "nonEmptyLineCount": 93
+    },
+    {
+      "id": "source:exclusive:collection-list",
+      "fileName": "exclusive collection.txt",
+      "direction": "Exclusive",
+      "sourceType": "collection-list",
+      "lineCount": 11,
+      "nonEmptyLineCount": 11
+    },
+    {
+      "id": "source:exclusive:series-list",
+      "fileName": "exclusive series.txt",
+      "direction": "Exclusive",
+      "sourceType": "series-list",
+      "lineCount": 215,
+      "nonEmptyLineCount": 215
+    },
+    {
+      "id": "source:mainline:collection-list",
+      "fileName": "mainline collection.txt",
+      "direction": "Mainline",
+      "sourceType": "collection-list",
+      "lineCount": 6,
+      "nonEmptyLineCount": 6
+    },
+    {
+      "id": "source:mainline:series-list",
+      "fileName": "mainline series.txt",
+      "direction": "Mainline",
+      "sourceType": "series-list",
+      "lineCount": 763,
+      "nonEmptyLineCount": 763
+    },
+    {
+      "id": "source:playsets:collection-list",
+      "fileName": "playsets collection.txt",
+      "direction": "Playsets",
+      "sourceType": "collection-list",
+      "lineCount": 11,
+      "nonEmptyLineCount": 11
+    },
+    {
+      "id": "source:playsets:series-list",
+      "fileName": "playsets series.txt",
+      "direction": "Playsets",
+      "sourceType": "series-list",
+      "lineCount": 186,
+      "nonEmptyLineCount": 186
+    },
+    {
+      "id": "source:premium:collection-list",
+      "fileName": "premium collection.txt",
+      "direction": "Premium",
+      "sourceType": "collection-list",
+      "lineCount": 23,
+      "nonEmptyLineCount": 23
+    },
+    {
+      "id": "source:premium:series-list",
+      "fileName": "premium series.txt",
+      "direction": "Premium",
+      "sourceType": "series-list",
+      "lineCount": 653,
+      "nonEmptyLineCount": 653
+    },
+    {
+      "id": "source:special:collection-list",
+      "fileName": "special collection.txt",
+      "direction": "Special",
+      "sourceType": "collection-list",
+      "lineCount": 16,
+      "nonEmptyLineCount": 16
+    },
+    {
+      "id": "source:special:series-list",
+      "fileName": "special series.txt",
+      "direction": "Special",
+      "sourceType": "series-list",
+      "lineCount": 549,
+      "nonEmptyLineCount": 549
+    }
+  ]
+}
