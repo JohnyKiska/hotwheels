@@ -23,8 +23,13 @@ input[type=text],select{border:1px solid #cbd3df;border-radius:9px;padding:10px;
 .list-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;flex-wrap:wrap}.list{display:grid;gap:7px}
 .item{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;border:1px solid #e1e6ed;border-radius:10px;padding:10px 11px}
 .item.selected{border-color:#ff5000;background:#fff8f4}.item input{width:17px;height:17px;accent-color:#ff5000}
-.item-name{font-weight:650;overflow-wrap:anywhere}.item-meta{font-size:12px;color:#6a7587;margin-top:3px;overflow-wrap:anywhere}
-.item-actions{display:flex;gap:5px}.mini{padding:6px 8px;font-size:12px;background:#edf0f5}
+.item-name{font-weight:700;font-size:17px;line-height:1.35;overflow-wrap:anywhere;color:#172033}
+.item-meta{font-size:14px;line-height:1.5;color:#315b86;margin-top:5px;overflow-wrap:anywhere}
+.item-meta .kind-tag{display:inline-block;background:#e8f1ff;color:#174a8b;border-radius:5px;padding:2px 7px;font-weight:700;margin-right:5px}
+.item-meta .direction-tag{display:inline-block;background:#fff0e6;color:#a43b08;border-radius:5px;padding:2px 7px;font-weight:700}
+.change-preview{margin-top:7px;padding:7px 9px;border-radius:7px;background:#f1f8ee;border-left:4px solid #398343;color:#245c2b;font-size:14px;line-height:1.5;overflow-wrap:anywhere}
+.change-preview .before{color:#9a3e32;font-weight:650}.change-preview .after{color:#24703a;font-weight:750}
+.item-actions{display:flex;gap:5px}.mini{padding:7px 9px;font-size:13px;background:#edf0f5}
 .empty{padding:28px;text-align:center;color:#6b7687;border:1px dashed #cbd3df;border-radius:10px}
 #notice{display:none;padding:11px 14px;border-radius:10px;margin:0 0 14px;background:#e8f7ed;color:#145b2e}
 #notice.error{background:#fff0ed;color:#8e2716}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
@@ -83,6 +88,7 @@ const WORKING_KEY='hotwheels.catalog.editor.working.v1';
 const $=id=>document.getElementById(id);
 const kindLabels={group:'Группа',collection:'Коллекция',series:'Серия',model:'Модель'};
 let base=null, draft=null, selected=new Set(), editingId=null, dirty=false;
+const changePreview=new Map();
 const clone=x=>JSON.parse(JSON.stringify(x));
 function notify(message,error=false){const n=$('notice');n.textContent=message;n.className=error?'error':'';n.style.display='block';}
 function hideNotice(){$('notice').style.display='none';}
@@ -128,12 +134,19 @@ function renderParentResults(){
  box.style.display='block';
 }
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function currentParents(id){return edges().filter(e=>e.childId===id).map(e=>getNode(e.parentId)?.name||e.parentId);}
 function renderItems(){
  const q=$('search').value.trim().toLocaleLowerCase();
  const k=$('filterKind').value, d=$('filterDirection').value;
  const arr=sortedNodes(nodes()).filter(n=>(!k||n.kind===k)&&(!d||dir(n)===d)&&(!q||(n.name+' '+n.id).toLocaleLowerCase().includes(q)));
  $('shown').textContent='Показано '+arr.length+' из '+nodes().length;
- $('items').innerHTML=arr.length?arr.map(n=>'<article class="item '+(selected.has(n.id)?'selected':'')+'"><input type="checkbox" data-check="'+esc(n.id)+'" '+(selected.has(n.id)?'checked':'')+' aria-label="Выбрать '+esc(n.name)+'"><div><div class="item-name">'+esc(n.name)+'</div><div class="item-meta">'+esc(kindLabels[n.kind]||n.kind)+' · '+esc(dir(n)||'направление не указано')+'<br>'+esc(n.id)+'</div></div><div class="item-actions"><button class="mini" data-edit="'+esc(n.id)+'">Изменить</button></div></article>').join(''):'<div class="empty">Ничего не найдено.</div>';
+ $('items').innerHTML=arr.length?arr.map(n=>{
+  const change=changePreview.get(n.id);
+  const preview=change?'<div class="change-preview"><span class="before">Было:</span> '+esc(change.before)+' <span aria-hidden="true">→</span> <span class="after">Стало:</span> '+esc(change.after)+'</div>':'';
+  const parents=currentParents(n.id);
+  const parentLine=parents.length?'<div>Родитель: '+esc(parents.join(', '))+'</div>':'<div>Родитель: <span style="color:#7a4b00;font-weight:650">не задан</span></div>';
+  return '<article class="item '+(selected.has(n.id)?'selected':'')+'"><input type="checkbox" data-check="'+esc(n.id)+'" '+(selected.has(n.id)?'checked':'')+' aria-label="Выбрать '+esc(n.name)+'"><div><div class="item-name">'+esc(n.name)+'</div><div class="item-meta"><span class="kind-tag">'+esc(kindLabels[n.kind]||n.kind)+'</span><span class="direction-tag">'+esc(dir(n)||'направление не указано')+'</span><div style="margin-top:5px">'+esc(n.id)+'</div>'+parentLine+'</div>'+preview+'</div><div class="item-actions"><button class="mini" data-edit="'+esc(n.id)+'">Изменить</button></div></article>';
+ }).join(''):'<div class="empty">Ничего не найдено.</div>';
  $('selectVisible').checked=arr.length>0&&arr.every(n=>selected.has(n.id));
  $('rename').disabled=selected.size!==1;
 }
@@ -211,8 +224,11 @@ $('create').addEventListener('click',()=>{
 $('rename').addEventListener('click',()=>{
  if(selected.size!==1){notify('Выбери ровно один элемент.',true);return;}
  const n=getNode([...selected][0]),name=$('name').value.trim();if(!n||!name){notify('Выбери элемент и укажи название.',true);return;}
+ const before=n.name+' · '+(kindLabels[n.kind]||n.kind)+' · '+(dir(n)||'без направления');
  n.name=name;n.kind=$('kind').value;n.attributes=n.attributes||{};if($('direction').value)n.attributes.sourceDirection=$('direction').value;else delete n.attributes.sourceDirection;n.updatedAt=new Date().toISOString();
- setDirty();render();notify('Элемент обновлён: название, тип и направление сохранены. ID и связи сохранены.');
+ const after=n.name+' · '+(kindLabels[n.kind]||n.kind)+' · '+(dir(n)||'без направления');
+ changePreview.set(n.id,{before,after});
+ setDirty();render();notify('Изменения показаны в строке элемента: «Было → Стало».');
 });
 $('parent').addEventListener('input',()=>{delete $('parent').dataset.selectedId;renderParentResults();});
 $('parent').addEventListener('focus',renderParentResults);
@@ -224,9 +240,15 @@ $('move').addEventListener('click',()=>{
  if(!parent){notify('Выбери место назначения из подсказок под строкой поиска.',true);return;}
  for(const id of ids){if(id===parent.id){notify('Нельзя переместить элемент внутрь самого себя.',true);return;}if(ancestorsWouldCycle(id,parent.id)){notify('Перемещение «'+(getNode(id)?.name||id)+'» создаст цикл. Ничего не изменено.',true);return;}}
  const now=new Date().toISOString();
+ const oldEdges=edges().filter(e=>ids.includes(e.childId));
+ const oldById=new Map(ids.map(id=>[id,oldEdges.filter(e=>e.childId===id).map(e=>getNode(e.parentId)?.name||e.parentId)]));
  draft.catalog_edges=edges().filter(e=>!ids.includes(e.childId));
- ids.forEach(id=>draft.catalog_edges.push({id:uid('edge'),parentId:parent.id,childId:id,relation:'parent-child',createdAt:now}));
- setDirty();render();notify('Перемещено элементов: '+ids.length+' → '+parent.name+'. Изменения пока в черновике.');
+ ids.forEach(id=>{
+  const before=(oldById.get(id)||[]).join(', ')||'не задано';
+  draft.catalog_edges.push({id:uid('edge'),parentId:parent.id,childId:id,relation:'parent-child',createdAt:now});
+  changePreview.set(id,{before:'Родитель: '+before,after:'Родитель: '+parent.name});
+ });
+ setDirty();render();notify('Перемещение показано в строках выбранных элементов: «Было → Стало».');
 });
 $('addPlacement').addEventListener('click',()=>{
  const parent=resolveParentInput(),ids=[...selected];
@@ -246,7 +268,7 @@ $('copySelection').addEventListener('click',()=>{const ids=[...selected];if(!ids
 $('apply').addEventListener('click',()=>{
  const err=validate();if(err){notify('Проверка не пройдена: '+err,true);return;}
  draft.editorMeta={...(draft.editorMeta||{}),appliedAt:new Date().toISOString(),schemaVersion:1};
- localStorage.setItem(WORKING_KEY,JSON.stringify(draft));localStorage.removeItem(DRAFT_KEY);base=clone(draft);dirty=false;$('saveStatus').textContent='Применено локально';render();notify('Изменения проверены и применены к рабочей версии в этом браузере. Для переноса в репозиторий используй «Экспорт JSON».');
+ localStorage.setItem(WORKING_KEY,JSON.stringify(draft));localStorage.removeItem(DRAFT_KEY);base=clone(draft);dirty=false;changePreview.clear();$('saveStatus').textContent='Применено локально';render();notify('Изменения проверены и применены к рабочей версии в этом браузере. Для переноса в репозиторий используй «Экспорт JSON».');
 });
 $('discard').addEventListener('click',()=>{
  if(!confirm('Отменить все изменения черновика и вернуться к последней применённой версии?'))return;
