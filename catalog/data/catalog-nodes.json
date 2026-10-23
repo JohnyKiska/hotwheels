@@ -20456,6 +20456,14 @@
       "attributes": {
         "sourceDirection": "Exclusive"
       }
+    },
+    {
+      "id": "group:root:hot-wheels-special",
+      "kind": "group",
+      "name": "Hot Wheels Special",
+      "attributes": {
+        "sourceDirection": "Special"
+      }
     }
   ]
 }
