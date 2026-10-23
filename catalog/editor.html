@@ -15,7 +15,7 @@ button,select,input{font:inherit}button{border:0;border-radius:9px;padding:10px 
 button:disabled{opacity:.45;cursor:not-allowed}.primary{background:#ff5000;color:white}.secondary{background:#e9edf3;color:#172033}.danger{background:#fff0ed;color:#a52d16}
 input[type=text],select{border:1px solid #cbd3df;border-radius:9px;padding:10px;background:#fff;min-width:0}
 #search{flex:1;min-width:210px}.status{margin-left:auto;color:#536074;font-size:13px}
-.layout{display:grid;grid-template-columns:minmax(280px,360px) minmax(0,1fr);gap:16px;align-items:start}.explorer-layout{display:grid;grid-template-columns:minmax(260px,320px) minmax(0,1fr);gap:12px;align-items:start}.explorer-pane{min-height:520px}.explorer-list{display:grid;gap:8px}.explorer-item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:12px;border:1px solid #e1e6ed;border-radius:9px;background:#fff}.explorer-item:hover{border-color:#aeb9ca;background:#f9fbff}.explorer-item .item-name{font-size:15px}.explorer-empty{padding:28px;text-align:center;color:#687487;border:1px dashed #cbd3df;border-radius:10px}.duplicate-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 12px}.duplicate-tools label{display:flex;align-items:center;gap:7px;font-size:13px;color:#4b5565}.duplicate-summary{font-size:12px;color:#697386}.duplicate-group{border:1px solid #dfe5ed;border-radius:9px;padding:10px 12px;background:#fff}.duplicate-group+.duplicate-group{margin-top:8px}.duplicate-group-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.duplicate-group-head strong{font-size:14px}.duplicate-variants{margin-top:8px;display:grid;gap:6px}.duplicate-variant{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 9px;border-radius:7px;background:#f5f7fa;font-size:13px}.duplicate-variant small{color:#687487}.tree-row.active{background:#fff2e9;border-color:#ff5000}.tree-row .tree-name{flex:1}.tree-row .tree-pick{display:none}.tree{max-height:70vh}.tree-wrap{margin-bottom:0}
+.layout{display:grid;grid-template-columns:minmax(280px,360px) minmax(0,1fr);gap:16px;align-items:start}.explorer-layout{display:grid;grid-template-columns:minmax(260px,320px) minmax(0,1fr);gap:12px;align-items:start}.explorer-pane{min-height:520px}.explorer-list{display:grid;gap:8px}.explorer-item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:12px;border:1px solid #e1e6ed;border-radius:9px;background:#fff}.explorer-item:hover{border-color:#aeb9ca;background:#f9fbff}.explorer-item .item-name{font-size:15px}.explorer-empty{padding:28px;text-align:center;color:#687487;border:1px dashed #cbd3df;border-radius:10px}.duplicate-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 12px}.duplicate-tools label{display:flex;align-items:center;gap:7px;font-size:13px;color:#4b5565}.duplicate-summary{font-size:12px;color:#697386}.duplicate-group{border:1px solid #dfe5ed;border-radius:9px;padding:10px 12px;background:#fff}.duplicate-group+.duplicate-group{margin-top:8px}.duplicate-group-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.duplicate-group-head strong{font-size:14px}.duplicate-variants{margin-top:8px;display:grid;gap:6px}.duplicate-variant{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 9px;border-radius:7px;background:#f5f7fa;font-size:13px}.duplicate-variant small{color:#687487}.tree-row.active{background:#fff2e9;border-color:#ff5000}.tree-row .tree-name{flex:1}.tree-row .tree-pick{display:none}.tree{max-height:70vh}.tree-wrap{margin-bottom:0}.tree-search{margin:8px 0}.tree-actions{display:grid;gap:8px;padding:10px;border:1px solid #dce3ec;border-radius:9px;background:#f8fafc;margin-top:10px}.tree-action-buttons{display:flex;gap:6px;flex-wrap:wrap}.tree-actions select,.tree-search input{width:100%}.tree-row{cursor:pointer}
 .panel h2{font-size:18px;margin:0 0 12px}.field{display:grid;gap:6px;margin-bottom:12px}.field label{font-size:13px;font-weight:700;color:#4d596b}
 .filters{display:grid;grid-template-columns:1fr 1fr;gap:8px}.filters select{width:100%}
 .hint{font-size:13px;line-height:1.45;color:#647084;margin:10px 0 0}
@@ -53,9 +53,9 @@ input[type=text],select{border:1px solid #cbd3df;border-radius:9px;padding:10px;
 <div class="explorer-layout">
 <section class="panel explorer-pane">
 <div class="list-head"><h2 style="margin:0">Каталог</h2><button id="addRootGroup" class="mini">+ Уровень</button></div>
-<div class="tree-toolbar"><button id="expandTree" class="mini">Развернуть всё</button><button id="collapseTree" class="mini">Свернуть всё</button></div>
+<div class="tree-search"><input id="treeSearch" type="search" placeholder="Поиск в дереве…" aria-label="Поиск в дереве"></div><div class="tree-toolbar"><button id="expandTree" class="mini">Развернуть всё</button><button id="collapseTree" class="mini">Свернуть всё</button></div>
 <div class="tree-wrap"><div id="tree" class="tree"><div class="tree-empty">Загрузка дерева…</div></div></div>
-<p class="hint">Выбери узел слева. Перетаскивай узлы для изменения структуры.</p>
+<p class="hint">Выбери узел слева, чтобы переименовать, удалить или перенести его в верхнюю группу.</p><div id="treeActions" class="tree-actions" hidden><strong id="treeActionTitle">Действия с элементом</strong><div class="tree-action-buttons"><button id="treeRename" class="secondary">Переименовать</button><button id="treeDelete" class="secondary">Удалить</button></div><label for="treeMoveGroup" class="small">Перенести в верхнюю группу</label><select id="treeMoveGroup"></select><button id="treeMove" class="primary">Перенести</button><div id="treeActionHint" class="small"></div></div>
 <hr style="border:0;border-top:1px solid #e4e8ee;margin:16px 0">
 <h2>Создать / переименовать</h2>
 <div class="field"><label for="kind">Тип элемента</label><select id="kind"><option value="group">Группа</option><option value="collection">Коллекция</option><option value="series">Серия</option><option value="model">Модель</option></select></div>
@@ -178,7 +178,7 @@ function renderTree(){
  edges().forEach(e=>{if(kids.has(e.parentId)&&parents.has(e.childId)){kids.get(e.parentId).push(e.childId);parents.get(e.childId).push(e.parentId);}});
  for(const arr of kids.values())arr.sort((a,b)=>(getNode(a)?.name||'').localeCompare(getNode(b)?.name||'','ru',{sensitivity:'base'}));
  const roots=sortedNodes(nodes().filter(n=>!(parents.get(n.id)||[]).length));
- const visibleSearch=$('search').value.trim().toLocaleLowerCase();
+ const visibleSearch=$('treeSearch')?.value.trim().toLocaleLowerCase()||'';
  let html='',seen=new Set();
  function row(id,depth){
   const n=getNode(id);if(!n||seen.has(id))return;seen.add(id);
@@ -189,12 +189,27 @@ function renderTree(){
    '<button class="tree-pick mini" data-tree-pick="'+esc(id)+'">Выбрать</button></div>';
   if(has&&!isCollapsed)children.forEach(child=>row(child,depth+1));
  }
- roots.forEach(n=>row(n.id,0));
+ roots.filter(n=>!visibleSearch||treeBranchMatches(n.id,visibleSearch,kids)).forEach(n=>row(n.id,0));
  // Preserve disconnected or malformed records visibly rather than hiding them.
- sortedNodes(nodes().filter(n=>!seen.has(n.id))).forEach(n=>{html+='<div class="tree-row" draggable="true" data-tree-node="'+esc(n.id)+'" title="Элемент без корневого пути"><span class="tree-id">↳ отдельная ветвь</span><span class="tree-name">'+esc(n.name)+'</span><span class="tree-kind">'+esc(kindLabels[n.kind]||n.kind)+'</span><button class="tree-pick mini" data-tree-pick="'+esc(n.id)+'">Выбрать</button></div>';});
- box.innerHTML=html||'<div class="tree-empty">В каталоге пока нет элементов.</div>';
+ sortedNodes(nodes().filter(n=>!seen.has(n.id)&&(!visibleSearch||n.name.toLocaleLowerCase().includes(visibleSearch)))).forEach(n=>{html+='<div class="tree-row" draggable="true" data-tree-node="'+esc(n.id)+'" title="Элемент без корневого пути"><span class="tree-id">↳ отдельная ветвь</span><span class="tree-name">'+esc(n.name)+'</span><span class="tree-kind">'+esc(kindLabels[n.kind]||n.kind)+'</span><button class="tree-pick mini" data-tree-pick="'+esc(n.id)+'">Выбрать</button></div>';});
+ box.innerHTML=html||'<div class="tree-empty">Ничего не найдено.</div>';renderTreeActions();
 }
 function render(){renderStats();renderParentOptions();renderItems();renderEdges();renderTree();renderContents();}
+function treeBranchMatches(id,q,kids){
+ const n=getNode(id);if(n&&n.name.toLocaleLowerCase().includes(q))return true;
+ return (kids.get(id)||[]).some(child=>treeBranchMatches(child,q,kids));
+}
+function renderTreeActions(){
+ const panel=$('treeActions'),n=activeTreeId&&getNode(activeTreeId);
+ if(!panel)return;
+ if(!n){panel.hidden=true;return;}
+ panel.hidden=false;$('treeActionTitle').textContent=n.name;
+ const roots=sortedNodes(nodes().filter(x=>x.kind==='group'&&x.id.startsWith('group:root:')));
+ $('treeMoveGroup').innerHTML='<option value="">Выбери верхнюю группу…</option>'+roots.filter(x=>x.id!==n.id).map(x=>'<option value="'+esc(x.id)+'">'+esc(x.name)+'</option>').join('');
+ const childCount=edges().filter(e=>e.parentId===n.id).length;
+ $('treeDelete').disabled=childCount>0;
+ $('treeActionHint').textContent=childCount?'Сначала перемести или удали дочерние элементы; непустую ветку удалить нельзя.':'Удаление уберёт запись и её связи из черновика.';
+}
 function resolveParentInput(){
  const id=$('parent').dataset.selectedId||'';
  return id?getNode(id)||null:null;
