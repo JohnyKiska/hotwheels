@@ -87,7 +87,8 @@ const DRAFT_KEY='hotwheels.catalog.editor.draft.v1';
 const WORKING_KEY='hotwheels.catalog.editor.working.v1';
 const $=id=>document.getElementById(id);
 const kindLabels={group:'Группа',collection:'Коллекция',series:'Серия',model:'Модель'};
-let base=null, draft=null, selected=new Set(), editingId=null, dirty=false;\nconst collapsed=new Set(); let draggingId=null;
+let base=null, draft=null, selected=new Set(), editingId=null, dirty=false;
+const collapsed=new Set(); let draggingId=null;
 const changePreview=new Map();
 const clone=x=>JSON.parse(JSON.stringify(x));
 function notify(message,error=false){const n=$('notice');n.textContent=message;n.className=error?'error':'';n.style.display='block';}
