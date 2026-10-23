@@ -1,4 +1,473 @@
 {
   "schemaVersion": 1,
-  "catalog_edges": []
+  "catalog_edges": [
+    {
+      "id": "edge:root:collection:character:racerverse",
+      "parentId": "group:root:hot-wheels-character-cars",
+      "childId": "collection:character:racerverse",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:character:themed:series",
+      "parentId": "group:root:hot-wheels-character-cars",
+      "childId": "collection:character:themed-series",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:character:dc",
+      "parentId": "group:root:hot-wheels-character-cars",
+      "childId": "collection:character:dc",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:character:disney",
+      "parentId": "group:root:hot-wheels-character-cars",
+      "childId": "collection:character:disney",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:character:dreamworks",
+      "parentId": "group:root:hot-wheels-character-cars",
+      "childId": "collection:character:dreamworks",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:character:godzilla",
+      "parentId": "group:root:hot-wheels-character-cars",
+      "childId": "collection:character:godzilla",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:character:jurassic:world",
+      "parentId": "group:root:hot-wheels-character-cars",
+      "childId": "collection:character:jurassic-world",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:character:lightyear",
+      "parentId": "group:root:hot-wheels-character-cars",
+      "childId": "collection:character:lightyear",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:character:looney:tunes",
+      "parentId": "group:root:hot-wheels-character-cars",
+      "childId": "collection:character:looney-tunes",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:character:marvel",
+      "parentId": "group:root:hot-wheels-character-cars",
+      "childId": "collection:character:marvel",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:character:masters",
+      "parentId": "group:root:hot-wheels-character-cars",
+      "childId": "collection:character:masters",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:character:minecraft",
+      "parentId": "group:root:hot-wheels-character-cars",
+      "childId": "collection:character:minecraft",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:character:minions",
+      "parentId": "group:root:hot-wheels-character-cars",
+      "childId": "collection:character:minions",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:character:muppets",
+      "parentId": "group:root:hot-wheels-character-cars",
+      "childId": "collection:character:muppets",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:character:overwatch",
+      "parentId": "group:root:hot-wheels-character-cars",
+      "childId": "collection:character:overwatch",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:character:rugrats",
+      "parentId": "group:root:hot-wheels-character-cars",
+      "childId": "collection:character:rugrats",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:character:san:diego:comic:con",
+      "parentId": "group:root:hot-wheels-character-cars",
+      "childId": "collection:character:san-diego-comic-con",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:character:sanrio",
+      "parentId": "group:root:hot-wheels-character-cars",
+      "childId": "collection:character:sanrio",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:character:space:jam",
+      "parentId": "group:root:hot-wheels-character-cars",
+      "childId": "collection:character:space-jam",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:character:spongebob",
+      "parentId": "group:root:hot-wheels-character-cars",
+      "childId": "collection:character:spongebob",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:character:star:wars",
+      "parentId": "group:root:hot-wheels-character-cars",
+      "childId": "collection:character:star-wars",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:character:super:mario",
+      "parentId": "group:root:hot-wheels-character-cars",
+      "childId": "collection:character:super-mario",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:character:super:sonic",
+      "parentId": "group:root:hot-wheels-character-cars",
+      "childId": "collection:character:super-sonic",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:character:tmnt",
+      "parentId": "group:root:hot-wheels-character-cars",
+      "childId": "collection:character:tmnt",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:character:toy:story",
+      "parentId": "group:root:hot-wheels-character-cars",
+      "childId": "collection:character:toy-story",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:character:trolls",
+      "parentId": "group:root:hot-wheels-character-cars",
+      "childId": "collection:character:trolls",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:character:universal",
+      "parentId": "group:root:hot-wheels-character-cars",
+      "childId": "collection:character:universal",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:exclusive:red:line:club",
+      "parentId": "group:root:hot-wheels-exclusive",
+      "childId": "collection:exclusive:red-line-club",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:exclusive:collector:edition",
+      "parentId": "group:root:hot-wheels-exclusive",
+      "childId": "collection:exclusive:collector-edition",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:exclusive:collectors:convention",
+      "parentId": "group:root:hot-wheels-exclusive",
+      "childId": "collection:exclusive:collectors-convention",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:exclusive:collectors:nationals",
+      "parentId": "group:root:hot-wheels-exclusive",
+      "childId": "collection:exclusive:collectors-nationals",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:exclusive:employee:exclusive",
+      "parentId": "group:root:hot-wheels-exclusive",
+      "childId": "collection:exclusive:employee-exclusive",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:exclusive:hwc",
+      "parentId": "group:root:hot-wheels-exclusive",
+      "childId": "collection:exclusive:hwc",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:exclusive:japan:convention",
+      "parentId": "group:root:hot-wheels-exclusive",
+      "childId": "collection:exclusive:japan-convention",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:exclusive:mattel:creations",
+      "parentId": "group:root:hot-wheels-exclusive",
+      "childId": "collection:exclusive:mattel-creations",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:exclusive:mexico:convention",
+      "parentId": "group:root:hot-wheels-exclusive",
+      "childId": "collection:exclusive:mexico-convention",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:exclusive:special:edition",
+      "parentId": "group:root:hot-wheels-exclusive",
+      "childId": "collection:exclusive:special-edition",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:exclusive:virtual:garage",
+      "parentId": "group:root:hot-wheels-exclusive",
+      "childId": "collection:exclusive:virtual-garage",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:mainline:mainline",
+      "parentId": "group:root:hot-wheels-mainline",
+      "childId": "collection:mainline:mainline",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:mainline:multipack",
+      "parentId": "group:root:hot-wheels-mainline",
+      "childId": "collection:mainline:multipack",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:mainline:hw:5:pack",
+      "parentId": "group:root:hot-wheels-mainline",
+      "childId": "collection:mainline:hw-5-pack",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:mainline:id:cars",
+      "parentId": "group:root:hot-wheels-mainline",
+      "childId": "collection:mainline:id-cars",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:mainline:pop:culture",
+      "parentId": "group:root:hot-wheels-mainline",
+      "childId": "collection:mainline:pop-culture",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:mainline:special:edition",
+      "parentId": "group:root:hot-wheels-mainline",
+      "childId": "collection:mainline:special-edition",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:playsets:mainline",
+      "parentId": "group:root:hot-wheels-playsets",
+      "childId": "collection:playsets:mainline",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:playsets:action:packs",
+      "parentId": "group:root:hot-wheels-playsets",
+      "childId": "collection:playsets:action-packs",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:playsets:color:changers",
+      "parentId": "group:root:hot-wheels-playsets",
+      "childId": "collection:playsets:color-changers",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:playsets:monster:trucks",
+      "parentId": "group:root:hot-wheels-playsets",
+      "childId": "collection:playsets:monster-trucks",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:playsets:pull:back",
+      "parentId": "group:root:hot-wheels-playsets",
+      "childId": "collection:playsets:pull-back",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:playsets:remote:control",
+      "parentId": "group:root:hot-wheels-playsets",
+      "childId": "collection:playsets:remote-control",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:playsets:set:series",
+      "parentId": "group:root:hot-wheels-playsets",
+      "childId": "collection:playsets:set-series",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:playsets:showcase",
+      "parentId": "group:root:hot-wheels-playsets",
+      "childId": "collection:playsets:showcase",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:playsets:track:sets",
+      "parentId": "group:root:hot-wheels-playsets",
+      "childId": "collection:playsets:track-sets",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:playsets:truckin:haulers",
+      "parentId": "group:root:hot-wheels-playsets",
+      "childId": "collection:playsets:truckin-haulers",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:playsets:xl",
+      "parentId": "group:root:hot-wheels-playsets",
+      "childId": "collection:playsets:xl",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:premium:anniversary:cars",
+      "parentId": "group:root:hot-wheels-premium",
+      "childId": "collection:premium:anniversary-cars",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:premium:100:preferred",
+      "parentId": "group:root:hot-wheels-premium",
+      "childId": "collection:premium:100-preferred",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:premium:auto:affinity",
+      "parentId": "group:root:hot-wheels-premium",
+      "childId": "collection:premium:auto-affinity",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:premium:boulevard",
+      "parentId": "group:root:hot-wheels-premium",
+      "childId": "collection:premium:boulevard",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:premium:car:culture",
+      "parentId": "group:root:hot-wheels-premium",
+      "childId": "collection:premium:car-culture",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:premium:car:culture:2:pack",
+      "parentId": "group:root:hot-wheels-premium",
+      "childId": "collection:premium:car-culture-2-pack",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:premium:collector:set",
+      "parentId": "group:root:hot-wheels-premium",
+      "childId": "collection:premium:collector-set",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:premium:custom:classics",
+      "parentId": "group:root:hot-wheels-premium",
+      "childId": "collection:premium:custom-classics",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:premium:fast:and:furious",
+      "parentId": "group:root:hot-wheels-premium",
+      "childId": "collection:premium:fast-and-furious",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:premium:garage",
+      "parentId": "group:root:hot-wheels-premium",
+      "childId": "collection:premium:garage",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:premium:hall:of:fame",
+      "parentId": "group:root:hot-wheels-premium",
+      "childId": "collection:premium:hall-of-fame",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:premium:legends",
+      "parentId": "group:root:hot-wheels-premium",
+      "childId": "collection:premium:legends",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:premium:nostalgia",
+      "parentId": "group:root:hot-wheels-premium",
+      "childId": "collection:premium:nostalgia",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:premium:oil:cans",
+      "parentId": "group:root:hot-wheels-premium",
+      "childId": "collection:premium:oil-cans",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:premium:pop:culture",
+      "parentId": "group:root:hot-wheels-premium",
+      "childId": "collection:premium:pop-culture",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:premium:premium:multipack",
+      "parentId": "group:root:hot-wheels-premium",
+      "childId": "collection:premium:premium-multipack",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:premium:pro:racing",
+      "parentId": "group:root:hot-wheels-premium",
+      "childId": "collection:premium:pro-racing",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:premium:racing",
+      "parentId": "group:root:hot-wheels-premium",
+      "childId": "collection:premium:racing",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:premium:real:riders",
+      "parentId": "group:root:hot-wheels-premium",
+      "childId": "collection:premium:real-riders",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:premium:replica:entertainment",
+      "parentId": "group:root:hot-wheels-premium",
+      "childId": "collection:premium:replica-entertainment",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:premium:special:edition",
+      "parentId": "group:root:hot-wheels-premium",
+      "childId": "collection:premium:special-edition",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:premium:team:transport",
+      "parentId": "group:root:hot-wheels-premium",
+      "childId": "collection:premium:team-transport",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:root:collection:premium:whips",
+      "parentId": "group:root:hot-wheels-premium",
+      "childId": "collection:premium:whips",
+      "relation": "parent-child"
+    }
+  ]
 }

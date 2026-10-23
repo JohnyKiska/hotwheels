@@ -15,7 +15,7 @@ button,select,input{font:inherit}button{border:0;border-radius:9px;padding:10px 
 button:disabled{opacity:.45;cursor:not-allowed}.primary{background:#ff5000;color:white}.secondary{background:#e9edf3;color:#172033}.danger{background:#fff0ed;color:#a52d16}
 input[type=text],select{border:1px solid #cbd3df;border-radius:9px;padding:10px;background:#fff;min-width:0}
 #search{flex:1;min-width:210px}.status{margin-left:auto;color:#536074;font-size:13px}
-.layout{display:grid;grid-template-columns:minmax(280px,360px) minmax(0,1fr);gap:16px;align-items:start}
+.layout{display:grid;grid-template-columns:minmax(280px,360px) minmax(0,1fr);gap:16px;align-items:start}.explorer-layout{display:grid;grid-template-columns:minmax(260px,320px) minmax(0,1fr);gap:12px;align-items:start}.explorer-pane{min-height:520px}.explorer-list{display:grid;gap:8px}.explorer-item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:12px;border:1px solid #e1e6ed;border-radius:9px;background:#fff}.explorer-item:hover{border-color:#aeb9ca;background:#f9fbff}.explorer-item .item-name{font-size:15px}.explorer-empty{padding:28px;text-align:center;color:#687487;border:1px dashed #cbd3df;border-radius:10px}.tree-row.active{background:#fff2e9;border-color:#ff5000}.tree-row .tree-name{flex:1}.tree-row .tree-pick{display:none}.tree{max-height:70vh}.tree-wrap{margin-bottom:0}
 .panel h2{font-size:18px;margin:0 0 12px}.field{display:grid;gap:6px;margin-bottom:12px}.field label{font-size:13px;font-weight:700;color:#4d596b}
 .filters{display:grid;grid-template-columns:1fr 1fr;gap:8px}.filters select{width:100%}
 .hint{font-size:13px;line-height:1.45;color:#647084;margin:10px 0 0}
@@ -50,33 +50,31 @@ input[type=text],select{border:1px solid #cbd3df;border-radius:9px;padding:10px;
 <span id="saveStatus" class="status">Загрузка каталога…</span>
 </div>
 <div class="stats" id="stats"></div>
-<div class="layout">
-<section class="panel">
-<h2>Создать или изменить элемент</h2>
+<div class="explorer-layout">
+<section class="panel explorer-pane">
+<div class="list-head"><h2 style="margin:0">Каталог</h2><button id="addRootGroup" class="mini">+ Уровень</button></div>
+<div class="tree-toolbar"><button id="expandTree" class="mini">Развернуть всё</button><button id="collapseTree" class="mini">Свернуть всё</button></div>
+<div class="tree-wrap"><div id="tree" class="tree"><div class="tree-empty">Загрузка дерева…</div></div></div>
+<p class="hint">Выбери узел слева. Перетаскивай узлы для изменения структуры.</p>
+<hr style="border:0;border-top:1px solid #e4e8ee;margin:16px 0">
+<h2>Создать / переименовать</h2>
 <div class="field"><label for="kind">Тип элемента</label><select id="kind"><option value="group">Группа</option><option value="collection">Коллекция</option><option value="series">Серия</option><option value="model">Модель</option></select></div>
 <div class="field"><label for="name">Название</label><input id="name" type="text" placeholder="Название элемента"></div>
 <div class="field"><label for="direction">Направление / источник</label><select id="direction"><option value="">Не указано</option><option>Character</option><option>Exclusive</option><option>Mainline</option><option>Playsets</option><option>Premium</option><option>Special</option></select></div>
 <div class="actions"><button id="create" class="primary">Создать элемент</button><button id="rename" class="secondary" disabled>Переименовать выбранный</button></div>
-<p class="hint">ID элемента стабилен. Переименование меняет название, но не создаёт новую запись. Для неоднозначных одноимённых записей сначала выбери нужную строку.</p>
-<hr style="border:0;border-top:1px solid #e4e8ee;margin:18px 0">
-<h2>Связи и перемещение</h2>
-<div class="field"><label for="parent">Куда переместить выбранные элементы</label><input id="parent" type="text" autocomplete="off" placeholder="Начни вводить название группы или коллекции…"><div id="parentResults" class="list" style="display:none;max-height:220px;overflow:auto;margin-top:5px"></div></div>
-<div class="actions"><button id="move" class="primary">Переместить сюда</button><button id="addPlacement" class="secondary">Добавить ещё одно размещение</button><button id="makeRoot" class="secondary">Сделать корневыми</button></div>
-<p class="hint">Выбери элементы в списке справа, начни вводить название места назначения и выбери подходящий вариант из подсказок. Перемещение заменяет их прежнее родительское размещение; сами элементы и их ID сохраняются. Для нескольких элементов операция выполняется сразу для всех выбранных.</p>
+<div class="actions"><button id="makeRoot" class="secondary">Сделать корневым</button><button id="discard" class="secondary">Отменить черновик</button></div>
+</section>
+<section class="panel explorer-pane">
+<div class="list-head"><div><h2 id="contentsTitle" style="margin:0">Содержимое</h2><div id="contentsSubtitle" class="small">Выбери раздел слева</div></div><span id="shown" class="small"></span></div>
+<div class="toolbar" style="padding:8px;box-shadow:none;margin-bottom:10px"><input id="search" type="text" placeholder="Поиск по названию или ID…" aria-label="Поиск"><button id="apply" class="primary">Применить</button><button id="export" class="secondary">Экспорт JSON</button></div>
+<div class="filters" style="margin-bottom:12px"><select id="filterKind" aria-label="Фильтр по типу"><option value="">Все типы</option><option value="group">Группы</option><option value="collection">Коллекции</option><option value="series">Серии</option><option value="model">Модели</option></select><select id="filterDirection" aria-label="Фильтр по направлению"><option value="">Все направления</option><option>Character</option><option>Exclusive</option><option>Mainline</option><option>Playsets</option><option>Premium</option><option>Special</option></select></div>
+<div id="contents" class="explorer-list"><div class="explorer-empty">Выбери узел дерева.</div></div>
+<div class="actions"><button id="move" class="primary">Переместить выбранные в выбранный раздел</button><button id="clearSelection" class="mini">Снять выбор</button></div>
 <div id="edges"></div>
-<p class="hint">Циклические связи блокируются. Удаление связи не удаляет сам элемент или исходные данные.</p>
-</section>
-<section class="panel">
-<div class="list-head"><h2 style="margin:0">Дерево каталога</h2><span class="small">Перетаскивай элемент на нового родителя</span></div><div class="tree-wrap"><div class="tree-toolbar"><button id="addRootGroup" class="mini">Добавить верхний уровень</button><button id="expandTree" class="mini">Развернуть всё</button><button id="collapseTree" class="mini">Свернуть всё</button><span class="small">Верхний уровень — группа; выбери её и перетащи на неё серии</span></div><div id="tree" class="tree"><div class="tree-empty">Строим дерево…</div></div></div><div class="list-head"><h2 style="margin:0">Все элементы (поиск и выбор)</h2><span id="shown" class="small"></span></div>
-<div class="filters" style="margin-bottom:12px">
-<select id="filterKind" aria-label="Фильтр по типу"><option value="">Все типы</option><option value="group">Группы</option><option value="collection">Коллекции</option><option value="series">Серии</option><option value="model">Модели</option></select>
-<select id="filterDirection" aria-label="Фильтр по направлению"><option value="">Все направления</option><option>Character</option><option>Exclusive</option><option>Mainline</option><option>Playsets</option><option>Premium</option><option>Special</option></select>
-</div>
-<div class="list-head"><label class="small"><input id="selectVisible" type="checkbox"> Выбрать все видимые</label><button id="clearSelection" class="mini">Снять выбор</button></div>
-<div id="items" class="list"></div>
-<div class="actions"><button id="copySelection" class="secondary">Выбрать связи для выбранных</button></div>
+<div class="list-head" style="margin-top:22px"><h2 style="margin:0;font-size:15px">Все записи (поиск)</h2><span class="small">Выбери запись и нажми перемещение</span></div><div id="items" class="list"></div>
 </section>
 </div>
+<div style="display:none"><input id="parent" type="text"><div id="parentResults"></div><button id="addPlacement"></button><button id="copySelection"></button><input id="selectVisible" type="checkbox"></div>
 <p class="hint" style="margin-top:16px">Черновик и применённая рабочая версия сохраняются только в localStorage этого браузера. Экспорт JSON создаёт файл для ручного сохранения в репозитории. Эта страница пока не записывает изменения обратно в GitHub и не изменяет collection.json.</p>
 </main>
 <script>
@@ -88,7 +86,7 @@ const WORKING_KEY='hotwheels.catalog.editor.working.v1';
 const $=id=>document.getElementById(id);
 const kindLabels={group:'Группа',collection:'Коллекция',series:'Серия',model:'Модель'};
 let base=null, draft=null, selected=new Set(), editingId=null, dirty=false;
-const collapsed=new Set(); let draggingId=null;
+const collapsed=new Set(); let draggingId=null, activeTreeId=null;
 const changePreview=new Map();
 const clone=x=>JSON.parse(JSON.stringify(x));
 function notify(message,error=false){const n=$('notice');n.textContent=message;n.className=error?'error':'';n.style.display='block';}
@@ -159,6 +157,14 @@ function renderEdges(){
  return '<div class="edge"><span>'+esc(p?.name||e.parentId)+' → <b>'+esc(c?.name||e.childId)+'</b></span><button class="mini danger" data-unlink="'+esc(e.id)+'">Убрать связь</button></div>';
  }).join(''):'<div class="small">Для выбранных элементов связей пока нет. Это нормально: исходные списки не содержали иерархии.</div>';
 }
+function renderContents(){
+ const box=$('contents');if(!box||!draft)return;const active=activeTreeId&&getNode(activeTreeId);
+ if(!active){$('contentsTitle').textContent='Содержимое';$('contentsSubtitle').textContent='Выбери раздел слева';$('shown').textContent='';box.innerHTML='<div class="explorer-empty">Выбери раздел в дереве слева.</div>';return;}
+ $('contentsTitle').textContent=active.name;$('contentsSubtitle').textContent=(kindLabels[active.kind]||active.kind)+' · '+(dir(active)||'направление не указано');
+ const childIds=edges().filter(e=>e.parentId===active.id).map(e=>e.childId);const children=sortedNodes(childIds.map(getNode).filter(Boolean));const q=$('search').value.trim().toLocaleLowerCase(),k=$('filterKind').value,d=$('filterDirection').value;
+ const filtered=children.filter(n=>(!k||n.kind===k)&&(!d||dir(n)===d)&&(!q||(n.name+' '+n.id).toLocaleLowerCase().includes(q)));$('shown').textContent=filtered.length+' записей';
+ box.innerHTML=filtered.length?filtered.map(n=>'<article class="explorer-item"><div><div class="item-name">'+esc(n.name)+'</div><div class="item-meta"><span class="kind-tag">'+esc(kindLabels[n.kind]||n.kind)+'</span><span class="direction-tag">'+esc(dir(n)||'направление не указано')+'</span><div style="margin-top:5px">ID: '+esc(n.id)+'</div>'+Object.entries(n.attributes||{}).filter(([key])=>key!=='sourceDirection').map(([key,val])=>'<div>'+esc(key)+': '+esc(typeof val==='object'?JSON.stringify(val):String(val))+'</div>').join('')+'</div></div><label class="small"><input type="checkbox" data-content-check="'+esc(n.id)+'" '+(selected.has(n.id)?'checked':'')+'> Выбрать</label></article>').join(''):'<div class="explorer-empty">'+(children.length?'Нет записей по текущим фильтрам.':'В этом разделе пока нет вложенных записей. Выбери записи в списке ниже и перемести их сюда. Индивидуальные машинки нужно будет импортировать отдельными записями, если их ещё нет в исходных данных.')+'</div>';
+}
 function renderTree(){
  const box=$('tree'); if(!draft)return;
  const kids=new Map(), parents=new Map();
@@ -171,7 +177,7 @@ function renderTree(){
  function row(id,depth){
   const n=getNode(id);if(!n||seen.has(id))return;seen.add(id);
   const children=kids.get(id)||[], has=children.length>0, isCollapsed=collapsed.has(id);
-  html+='<div class="tree-row" draggable="true" data-tree-node="'+esc(id)+'" style="margin-left:'+Math.min(depth,12)*15+'px" title="Перетащи на другого родителя">'+
+  html+='<div class="tree-row '+(activeTreeId===id?'active':'')+'" draggable="true" data-tree-node="'+esc(id)+'" style="margin-left:'+Math.min(depth,12)*15+'px" title="Перетащи на другого родителя">'+
    '<button class="tree-toggle" data-toggle="'+esc(id)+'" aria-label="'+(isCollapsed?'Раскрыть':'Свернуть')+'" '+(!has?'disabled':'')+'>'+ (has?(isCollapsed?'▸':'▾'):'·')+'</button>'+
    '<span class="tree-name">'+esc(n.name)+'</span><span class="tree-kind">'+esc(kindLabels[n.kind]||n.kind)+'</span>'+
    '<button class="tree-pick mini" data-tree-pick="'+esc(id)+'">Выбрать</button></div>';
@@ -182,7 +188,7 @@ function renderTree(){
  sortedNodes(nodes().filter(n=>!seen.has(n.id))).forEach(n=>{html+='<div class="tree-row" draggable="true" data-tree-node="'+esc(n.id)+'" title="Элемент без корневого пути"><span class="tree-id">↳ отдельная ветвь</span><span class="tree-name">'+esc(n.name)+'</span><span class="tree-kind">'+esc(kindLabels[n.kind]||n.kind)+'</span><button class="tree-pick mini" data-tree-pick="'+esc(n.id)+'">Выбрать</button></div>';});
  box.innerHTML=html||'<div class="tree-empty">В каталоге пока нет элементов.</div>';
 }
-function render(){renderStats();renderParentOptions();renderItems();renderEdges();renderTree();}
+function render(){renderStats();renderParentOptions();renderItems();renderEdges();renderTree();renderContents();}
 function resolveParentInput(){
  const id=$('parent').dataset.selectedId||'';
  return id?getNode(id)||null:null;
@@ -228,7 +234,7 @@ async function load(){
   render();notify(local?'Восстановлен локальный черновик. Проверь изменения перед применением.':'Каталог загружен. Связи не создавались автоматически.');
  }catch(err){$('saveStatus').textContent='Ошибка загрузки';const localFile=window.location.protocol==='file:';notify(localFile?'Редактор открыт напрямую с диска (file://), поэтому Chrome блокирует fetch JSON. Запусти локальный сервер из корня проекта командой «py -m http.server 8000» и открой http://localhost:8000/catalog/editor.html. Также проверь, что папка catalog/data находится рядом с editor.html внутри папки catalog.':'Не удалось загрузить данные каталога: '+err.message+'. Проверь, что файлы JSON находятся в папке catalog/data и открой редактор через локальный веб-сервер или GitHub Pages.',true);}
 }
-$('search').addEventListener('input',()=>{renderItems();});
+$('search').addEventListener('input',()=>{renderItems();renderContents();});
 $('addRootGroup').addEventListener('click',()=>{
  $('kind').value='group';$('direction').value='';$('name').value='';
  $('name').placeholder='Название верхнего уровня';$('name').focus();
@@ -237,6 +243,7 @@ $('addRootGroup').addEventListener('click',()=>{
 $('expandTree').addEventListener('click',()=>{collapsed.clear();renderTree();});
 $('collapseTree').addEventListener('click',()=>{nodes().forEach(n=>collapsed.add(n.id));renderTree();});
 $('tree').addEventListener('click',e=>{
+ const row=e.target.closest('[data-tree-node]');if(row&&!e.target.closest('[data-toggle]')){activeTreeId=row.dataset.treeNode;selected=new Set([activeTreeId]);const n=getNode(activeTreeId);if(n){$('kind').value=n.kind;$('name').value=n.name;$('direction').value=dir(n);}$('rename').disabled=false;render();return;}
  const toggle=e.target.closest('[data-toggle]'); if(toggle){const id=toggle.dataset.toggle;collapsed.has(id)?collapsed.delete(id):collapsed.add(id);renderTree();return;}
  const pick=e.target.closest('[data-tree-pick]');if(pick){selected=new Set([pick.dataset.treePick]);render();notify('Выбран элемент «'+(getNode(pick.dataset.treePick)?.name||'')+'». Теперь перетащи его на нового родителя или используй кнопку перемещения.');}
 });
@@ -263,9 +270,10 @@ $('tree').addEventListener('drop',e=>{
  collapsed.delete(targetId);changePreview.set(sourceId,{before:'Родитель: '+old,after:'Родитель: '+target.name});
  selected=new Set([sourceId]);setDirty();render();notify('Перемещение подготовлено: «'+source.name+'» → «'+target.name+'». Проверь «Было → Стало» и нажми «Применить изменения».');
 });
-$('filterKind').addEventListener('change',renderItems);
-$('filterDirection').addEventListener('change',renderItems);
+$('filterKind').addEventListener('change',()=>{renderItems();renderContents();});
+$('filterDirection').addEventListener('change',()=>{renderItems();renderContents();});
 $('items').addEventListener('change',e=>{const id=e.target.dataset.check;if(id)toggleSelection(id,e.target.checked);});
+$('contents').addEventListener('change',e=>{const id=e.target.dataset.contentCheck;if(id)toggleSelection(id,e.target.checked);});
 $('items').addEventListener('click',e=>{const id=e.target.dataset.edit;if(id){selected=new Set([id]);editNode(id);render();}});
 $('edges').addEventListener('click',e=>{const id=e.target.dataset.unlink;if(!id)return;const edge=edges().find(x=>x.id===id);if(!edge)return;draft.catalog_edges=edges().filter(x=>x.id!==id);setDirty();render();notify('Связь удалена. Сами элементы сохранены.');});
 $('selectVisible').addEventListener('change',e=>{
@@ -293,9 +301,9 @@ $('parent').addEventListener('focus',renderParentResults);
 $('parentResults').addEventListener('click',e=>{const id=e.target.closest('[data-parent]')?.dataset.parent;if(!id)return;const n=getNode(id);if(!n)return;$('parent').dataset.selectedId=id;$('parent').value=parentDisplay(n);$('parentResults').style.display='none';});
 document.addEventListener('click',e=>{if(!e.target.closest('#parent')&&!e.target.closest('#parentResults'))$('parentResults').style.display='none';});
 $('move').addEventListener('click',()=>{
- const parent=resolveParentInput(),ids=[...selected];
+ const parent=activeTreeId?getNode(activeTreeId):resolveParentInput(),ids=[...selected].filter(id=>id!==parent?.id);
  if(!ids.length){notify('Сначала выбери один или несколько элементов в списке справа.',true);return;}
- if(!parent){notify('Выбери место назначения из подсказок под строкой поиска.',true);return;}
+ if(!parent){notify('Сначала выбери раздел в дереве слева.',true);return;}
  for(const id of ids){if(id===parent.id){notify('Нельзя переместить элемент внутрь самого себя.',true);return;}if(ancestorsWouldCycle(id,parent.id)){notify('Перемещение «'+(getNode(id)?.name||id)+'» создаст цикл. Ничего не изменено.',true);return;}}
  const now=new Date().toISOString();
  const oldEdges=edges().filter(e=>ids.includes(e.childId));
