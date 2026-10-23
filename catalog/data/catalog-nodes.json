@@ -20416,6 +20416,46 @@
       "attributes": {
         "sourceDirection": "Special"
       }
+    },
+    {
+      "id": "group:root:hot-wheels-mainline",
+      "kind": "group",
+      "name": "Hot Wheels Mainline",
+      "attributes": {
+        "sourceDirection": "Mainline"
+      }
+    },
+    {
+      "id": "group:root:hot-wheels-premium",
+      "kind": "group",
+      "name": "Hot Wheels Premium",
+      "attributes": {
+        "sourceDirection": "Premium"
+      }
+    },
+    {
+      "id": "group:root:hot-wheels-character-cars",
+      "kind": "group",
+      "name": "Hot Wheels Character Cars",
+      "attributes": {
+        "sourceDirection": "Character"
+      }
+    },
+    {
+      "id": "group:root:hot-wheels-playsets",
+      "kind": "group",
+      "name": "Hot Wheels Playsets",
+      "attributes": {
+        "sourceDirection": "Playsets"
+      }
+    },
+    {
+      "id": "group:root:hot-wheels-exclusive",
+      "kind": "group",
+      "name": "Hot Wheels Exclusive",
+      "attributes": {
+        "sourceDirection": "Exclusive"
+      }
     }
   ]
 }

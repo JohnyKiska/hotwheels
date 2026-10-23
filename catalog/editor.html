@@ -67,7 +67,7 @@ input[type=text],select{border:1px solid #cbd3df;border-radius:9px;padding:10px;
 <p class="hint">Циклические связи блокируются. Удаление связи не удаляет сам элемент или исходные данные.</p>
 </section>
 <section class="panel">
-<div class="list-head"><h2 style="margin:0">Дерево каталога</h2><span class="small">Перетаскивай элемент на нового родителя</span></div><div class="tree-wrap"><div class="tree-toolbar"><button id="expandTree" class="mini">Развернуть всё</button><button id="collapseTree" class="mini">Свернуть всё</button><span class="small">Выбери строку, чтобы переместить без перетаскивания</span></div><div id="tree" class="tree"><div class="tree-empty">Строим дерево…</div></div></div><div class="list-head"><h2 style="margin:0">Все элементы (поиск и выбор)</h2><span id="shown" class="small"></span></div>
+<div class="list-head"><h2 style="margin:0">Дерево каталога</h2><span class="small">Перетаскивай элемент на нового родителя</span></div><div class="tree-wrap"><div class="tree-toolbar"><button id="addRootGroup" class="mini">Добавить верхний уровень</button><button id="expandTree" class="mini">Развернуть всё</button><button id="collapseTree" class="mini">Свернуть всё</button><span class="small">Верхний уровень — группа; выбери её и перетащи на неё серии</span></div><div id="tree" class="tree"><div class="tree-empty">Строим дерево…</div></div></div><div class="list-head"><h2 style="margin:0">Все элементы (поиск и выбор)</h2><span id="shown" class="small"></span></div>
 <div class="filters" style="margin-bottom:12px">
 <select id="filterKind" aria-label="Фильтр по типу"><option value="">Все типы</option><option value="group">Группы</option><option value="collection">Коллекции</option><option value="series">Серии</option><option value="model">Модели</option></select>
 <select id="filterDirection" aria-label="Фильтр по направлению"><option value="">Все направления</option><option>Character</option><option>Exclusive</option><option>Mainline</option><option>Playsets</option><option>Premium</option><option>Special</option></select>
@@ -229,6 +229,11 @@ async function load(){
  }catch(err){$('saveStatus').textContent='Ошибка загрузки';const localFile=window.location.protocol==='file:';notify(localFile?'Редактор открыт напрямую с диска (file://), поэтому Chrome блокирует fetch JSON. Запусти локальный сервер из корня проекта командой «py -m http.server 8000» и открой http://localhost:8000/catalog/editor.html. Также проверь, что папка catalog/data находится рядом с editor.html внутри папки catalog.':'Не удалось загрузить данные каталога: '+err.message+'. Проверь, что файлы JSON находятся в папке catalog/data и открой редактор через локальный веб-сервер или GitHub Pages.',true);}
 }
 $('search').addEventListener('input',()=>{renderItems();});
+$('addRootGroup').addEventListener('click',()=>{
+ $('kind').value='group';$('direction').value='';$('name').value='';
+ $('name').placeholder='Название верхнего уровня';$('name').focus();
+ notify('Введи название и нажми «Создать элемент». Новая группа останется верхним уровнем, пока ты не переместишь в неё элементы.');
+});
 $('expandTree').addEventListener('click',()=>{collapsed.clear();renderTree();});
 $('collapseTree').addEventListener('click',()=>{nodes().forEach(n=>collapsed.add(n.id));renderTree();});
 $('tree').addEventListener('click',e=>{
