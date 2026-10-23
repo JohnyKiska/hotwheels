@@ -55,7 +55,7 @@ input[type=text],select{border:1px solid #cbd3df;border-radius:9px;padding:10px;
 <p class="hint">ID элемента стабилен. Переименование меняет название, но не создаёт новую запись. Для неоднозначных одноимённых записей сначала выбери нужную строку.</p>
 <hr style="border:0;border-top:1px solid #e4e8ee;margin:18px 0">
 <h2>Связи и перемещение</h2>
-<div class="field"><label for="parent">Куда переместить выбранные элементы</label><input id="parent" type="text" list="parentOptions" placeholder="Начни вводить название группы, коллекции или серии…"><datalist id="parentOptions"></datalist></div>
+<div class="field"><label for="parent">Куда переместить выбранные элементы</label><input id="parent" type="text" autocomplete="off" placeholder="Начни вводить название группы или коллекции…"><div id="parentResults" class="list" style="display:none;max-height:220px;overflow:auto;margin-top:5px"></div></div>
 <div class="actions"><button id="move" class="primary">Переместить сюда</button><button id="addPlacement" class="secondary">Добавить ещё одно размещение</button><button id="makeRoot" class="secondary">Сделать корневыми</button></div>
 <p class="hint">Выбери элементы в списке справа, начни вводить название места назначения и выбери подходящий вариант из подсказок. Перемещение заменяет их прежнее родительское размещение; сами элементы и их ID сохраняются. Для нескольких элементов операция выполняется сразу для всех выбранных.</p>
 <div id="edges"></div>
@@ -109,8 +109,23 @@ function renderStats(){
 function parentDisplay(n){return n.name+' · '+kindLabels[n.kind]+' · '+(dir(n)||'без направления')+' · '+n.id.slice(-8);}
 function renderParentOptions(){
  const oldId=$('parent').dataset.selectedId||'';
- $('parentOptions').innerHTML=sortedNodes(nodes()).map(n=>'<option value="'+esc(parentDisplay(n))+'"></option>').join('');
- if(oldId&&getNode(oldId))$('parent').value=parentDisplay(getNode(oldId));
+ const n=oldId&&getNode(oldId);if(n)$('parent').value=parentDisplay(n);
+}
+function eligibleParents(){
+ const chosen=[...selected].map(getNode).filter(Boolean);
+ let allowed=['group','collection','series'];
+ if(chosen.length&&chosen.every(n=>n.kind==='model'))allowed=['series'];
+ else if(chosen.length&&chosen.every(n=>n.kind==='series'))allowed=['group','collection'];
+ else if(chosen.length&&chosen.every(n=>n.kind==='collection'))allowed=['group'];
+ else if(chosen.some(n=>n.kind==='group'))allowed=['group'];
+ return sortedNodes(nodes().filter(n=>allowed.includes(n.kind)&&!selected.has(n.id)));
+}
+function renderParentResults(){
+ const q=$('parent').value.trim().toLocaleLowerCase();
+ const results=eligibleParents().filter(n=>!q||(n.name+' '+(dir(n)||'')+' '+n.id).toLocaleLowerCase().includes(q)).slice(0,40);
+ const box=$('parentResults');
+ box.innerHTML=results.length?results.map(n=>'<button type="button" class="secondary" data-parent="'+esc(n.id)+'" style="display:block;width:100%;text-align:left;margin-bottom:4px">'+esc(parentDisplay(n))+'</button>').join(''):'<div class="small">Подходящих групп или коллекций не найдено. Попробуй другое название или сначала создай нужный элемент.</div>';
+ box.style.display='block';
 }
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function renderItems(){
@@ -132,9 +147,8 @@ function renderEdges(){
 }
 function render(){renderStats();renderParentOptions();renderItems();renderEdges();}
 function resolveParentInput(){
- const value=$('parent').value.trim();
- if(!value)return null;
- return nodes().find(n=>parentDisplay(n)===value)||null;
+ const id=$('parent').dataset.selectedId||'';
+ return id?getNode(id)||null:null;
 }
 function toggleSelection(id,on){if(on)selected.add(id);else selected.delete(id);render();}
 function editNode(id){
@@ -196,12 +210,14 @@ $('create').addEventListener('click',()=>{
 });
 $('rename').addEventListener('click',()=>{
  if(selected.size!==1){notify('Выбери ровно один элемент.',true);return;}
- const n=getNode([...selected][0]),name=$('name').value.trim();if(!n||!name){notify('Выбери элемент и укажи новое название.',true);return;}
- n.name=name;n.attributes=n.attributes||{};if($('direction').value)n.attributes.sourceDirection=$('direction').value;else delete n.attributes.sourceDirection;n.updatedAt=new Date().toISOString();
- setDirty();render();notify('Элемент обновлён. Его ID и связи сохранены.');
+ const n=getNode([...selected][0]),name=$('name').value.trim();if(!n||!name){notify('Выбери элемент и укажи название.',true);return;}
+ n.name=name;n.kind=$('kind').value;n.attributes=n.attributes||{};if($('direction').value)n.attributes.sourceDirection=$('direction').value;else delete n.attributes.sourceDirection;n.updatedAt=new Date().toISOString();
+ setDirty();render();notify('Элемент обновлён: название, тип и направление сохранены. ID и связи сохранены.');
 });
-$('parent').addEventListener('input',()=>{delete $('parent').dataset.selectedId;});
-$('parent').addEventListener('change',()=>{const n=resolveParentInput();$('parent').dataset.selectedId=n?n.id:'';});
+$('parent').addEventListener('input',()=>{delete $('parent').dataset.selectedId;renderParentResults();});
+$('parent').addEventListener('focus',renderParentResults);
+$('parentResults').addEventListener('click',e=>{const id=e.target.closest('[data-parent]')?.dataset.parent;if(!id)return;const n=getNode(id);if(!n)return;$('parent').dataset.selectedId=id;$('parent').value=parentDisplay(n);$('parentResults').style.display='none';});
+document.addEventListener('click',e=>{if(!e.target.closest('#parent')&&!e.target.closest('#parentResults'))$('parentResults').style.display='none';});
 $('move').addEventListener('click',()=>{
  const parent=resolveParentInput(),ids=[...selected];
  if(!ids.length){notify('Сначала выбери один или несколько элементов в списке справа.',true);return;}
