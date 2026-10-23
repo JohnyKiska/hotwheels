@@ -15216,6 +15216,78 @@
       "parentId": "group:root:hot-wheels-special",
       "childId": "series:special:zamac-themed-multipack",
       "relation": "parent-child"
+    },
+    {
+      "id": "edge:auto:mainline:hw-dream-garage",
+      "parentId": "group:root:hot-wheels-mainline",
+      "childId": "series:mainline:hw-dream-garage",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:auto:mainline:hw-ev",
+      "parentId": "group:root:hot-wheels-mainline",
+      "childId": "series:mainline:hw-ev",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:auto:mainline:hw-fan-driven",
+      "parentId": "group:root:hot-wheels-mainline",
+      "childId": "series:mainline:hw-fan-driven",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:auto:mainline:hw-starting-grid",
+      "parentId": "group:root:hot-wheels-mainline",
+      "childId": "series:mainline:hw-starting-grid",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:auto:mainline:hw-heavyweights",
+      "parentId": "group:root:hot-wheels-mainline",
+      "childId": "series:mainline:hw-heavyweights",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:auto:mainline:hw-all-drivers-welcome",
+      "parentId": "group:root:hot-wheels-mainline",
+      "childId": "series:mainline:hw-all-drivers-welcome",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:auto:mainline:hw-mods",
+      "parentId": "group:root:hot-wheels-mainline",
+      "childId": "series:mainline:hw-mods",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:auto:mainline:hw-j-imports",
+      "parentId": "group:root:hot-wheels-mainline",
+      "childId": "series:mainline:hw-j-imports",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:auto:mainline:hw-euro",
+      "parentId": "group:root:hot-wheels-mainline",
+      "childId": "series:mainline:hw-euro",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:auto:mainline:hw-dirt",
+      "parentId": "group:root:hot-wheels-mainline",
+      "childId": "series:mainline:hw-dirt",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:auto:mainline:hot-wheels-let-s-race",
+      "parentId": "group:root:hot-wheels-mainline",
+      "childId": "series:mainline:hot-wheels-let-s-race",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:auto:mainline:hw-torque",
+      "parentId": "group:root:hot-wheels-mainline",
+      "childId": "series:mainline:hw-torque",
+      "relation": "parent-child"
     }
   ]
 }
