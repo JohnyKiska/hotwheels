@@ -331,7 +331,18 @@ $('tree').addEventListener('drop',e=>{
 // Разрешаем перетаскивать узел дерева на карточки в обеих списочных областях справа.
 function canDropOn(source,target){return !!source&&!!target&&source.id!==target.id&&!ancestorsWouldCycle(source.id,target.id)&&((source.kind==='model'&&target.kind==='series')||(source.kind==='series'&&['group','collection'].includes(target.kind))||(source.kind==='collection'&&target.kind==='group')||(source.kind==='group'&&target.kind==='group'));}
 function clearDropHighlights(){document.querySelectorAll('#contents .drop-target,#contents .drop-invalid,#items .drop-target,#items .drop-invalid').forEach(el=>el.classList.remove('drop-target','drop-invalid'));}
-['contents','items'].forEach(containerId=>{
+// Во время HTML5 drag-and-drop браузеры часто не прокручивают страницу колесом.
+ // Перехватываем wheel только пока тащим узел: сначала прокручиваем ближайший
+ // реально прокручиваемый контейнер, а если его нет — правую панель.
+ document.addEventListener('wheel',e=>{
+  if(!draggingId)return;
+  const scrollable=e.target.closest('.list, .tree, .explorer-pane');
+  const rightPane=$('contents').closest('.explorer-pane');
+  const canScroll=el=>el&&el.scrollHeight>el.clientHeight+1;
+  const target=canScroll(scrollable)?scrollable:(canScroll(rightPane)?rightPane:null);
+  if(target){e.preventDefault();target.scrollTop+=e.deltaY;}
+ },{passive:false});
+ ['contents','items'].forEach(containerId=>{
  const container=$(containerId);if(!container)return;
  container.addEventListener('dragover',e=>{
   const card=e.target.closest('[data-drop-node]');if(!card||!draggingId)return;
