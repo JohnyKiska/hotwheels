@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "catalog_nodes": [
+    {
+      "id": "group:test:two-cars",
+      "kind": "group",
+      "name": "ТЕСТ · Две машинки",
+      "attributes": {
+        "testFixture": true
+      }
+    },
+    {
+      "id": "collection:test:japanese-cars",
+      "kind": "collection",
+      "name": "Тестовая коллекция · японские автомобили",
+      "attributes": {
+        "testFixture": true
+      }
+    },
+    {
+      "id": "series:test:comparison",
+      "kind": "series",
+      "name": "Тестовая серия · сравнение моделей",
+      "attributes": {
+        "testFixture": true
+      }
+    },
+    {
+      "id": "model:test:nissan-skyline-r34",
+      "kind": "model",
+      "name": "Nissan Skyline GT-R (R34)",
+      "attributes": {
+        "testFixture": true,
+        "testNote": "Тестовая запись; не привязана к реальной серии Hot Wheels."
+      }
+    },
+    {
+      "id": "model:test:toyota-supra-a80",
+      "kind": "model",
+      "name": "Toyota Supra (A80)",
+      "attributes": {
+        "testFixture": true,
+        "testNote": "Тестовая запись; не привязана к реальной серии Hot Wheels."
+      }
+    }
+  ]
+}
