@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "status": "imported-source-lists",
+  "description": "Split manifest for catalog import data. Original source text files are unchanged. Duplicate names are consolidated only within each source file, preserving line positions and occurrence counts. No hierarchy edges are inferred.",
+  "files": {
+    "catalog_nodes": "catalog-nodes.json",
+    "catalog_edges": "catalog-edges.json",
+    "catalog_sources": "catalog-sources.json",
+    "source_memberships": "source-memberships.json",
+    "import_report": "import-report.json"
+  }
+}

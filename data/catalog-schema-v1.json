@@ -1,0 +1,657 @@
+{
+  "schemaVersion": "1.0.0",
+  "status": "draft",
+  "description": "Логическая схема каталога Hot Wheels и личной коллекции. Это контракт данных для импорта и будущего интерфейса, не миграция существующей коллекции и не физическая БД.",
+  "principles": [
+    "Общий каталог и личная коллекция хранятся отдельно.",
+    "Неизвестные значения оставлять null или пустыми; не угадывать.",
+    "Каждое подтверждаемое поле может хранить источник, статус проверки и уверенность.",
+    "sku — основной внешний ключ сопоставления; внутренний id стабилен и не зависит от SKU.",
+    "Повторяющиеся SKU не объединять автоматически: отправлять на проверку.",
+    "История импорта и ручных правок должна сохраняться отдельно от текущих значений.",
+    "Не менять collection.json без отдельного проверенного плана миграции."
+  ],
+  "enums": {
+    "verificationStatus": [
+      "unverified",
+      "verified",
+      "probable",
+      "not_found",
+      "conflict"
+    ],
+    "recordStatus": [
+      "active",
+      "needs_review",
+      "duplicate_candidate",
+      "archived"
+    ],
+    "sourceType": [
+      "hot_wheels_wiki",
+      "all_hot_wheels",
+      "wheel_wonderland",
+      "manufacturer",
+      "user",
+      "other"
+    ],
+    "packageType": [
+      "single",
+      "multi_pack",
+      "team_transport",
+      "gift_set",
+      "unknown"
+    ],
+    "condition": [
+      "mint",
+      "near_mint",
+      "played",
+      "damaged",
+      "unknown"
+    ]
+  },
+  "entities": {
+    "Catalog": {
+      "description": "Одна запись на модель/вариант выпуска в общем справочнике.",
+      "primaryKey": "id",
+      "fields": {
+        "id": {
+          "type": "string",
+          "required": true,
+          "description": "Стабильный внутренний ID; не генерировать из отображаемого названия."
+        },
+        "sku": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "required": false,
+          "description": "Артикул/код Hot Wheels, нормализованный для поиска."
+        },
+        "model_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "required": false,
+          "description": "ID базовой модели, связывающий варианты одной машины."
+        },
+        "variant": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "required": false
+        },
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "required": false
+        },
+        "brand": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "required": false
+        },
+        "year": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "required": false
+        },
+        "segment": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "required": false
+        },
+        "series": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "required": false
+        },
+        "series_number": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "required": false
+        },
+        "package_type": {
+          "type": "string",
+          "enumRef": "packageType",
+          "required": true
+        },
+        "vehicle_1": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "required": false,
+          "description": "Основное транспортное средство; состав см. Vehicle."
+        },
+        "vehicle_2": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "required": false,
+          "description": "Второе транспортное средство для наборов вроде Team Transport."
+        },
+        "scale": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "required": false
+        },
+        "body_color": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "required": false
+        },
+        "interior_color": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "required": false
+        },
+        "base_color": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "required": false
+        },
+        "window_color": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "required": false
+        },
+        "wheel_type": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "required": false
+        },
+        "wheel_color": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "required": false
+        },
+        "notes": {
+          "type": "string",
+          "required": true,
+          "default": ""
+        },
+        "verification_status": {
+          "type": "string",
+          "enumRef": "verificationStatus",
+          "required": true,
+          "default": "unverified"
+        },
+        "record_status": {
+          "type": "string",
+          "enumRef": "recordStatus",
+          "required": true,
+          "default": "active"
+        },
+        "sources": {
+          "type": "array",
+          "items": "FieldSource",
+          "required": true,
+          "default": []
+        },
+        "created_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time",
+          "required": false
+        },
+        "updated_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time",
+          "required": false
+        }
+      }
+    },
+    "Vehicle": {
+      "description": "Описание одного транспортного средства внутри записи каталога.",
+      "fields": {
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "sku": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "body_color": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "interior_color": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "base_color": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "window_color": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "wheel_type": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "wheel_color": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "notes": {
+          "type": "string",
+          "default": ""
+        }
+      }
+    },
+    "FieldSource": {
+      "description": "Подтверждение происхождения конкретного поля каталога.",
+      "fields": {
+        "field": {
+          "type": "string",
+          "required": true
+        },
+        "value": {
+          "type": [
+            "string",
+            "number",
+            "boolean",
+            "object",
+            "null"
+          ],
+          "required": true
+        },
+        "source_type": {
+          "type": "string",
+          "enumRef": "sourceType",
+          "required": true
+        },
+        "source_url": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "required": false
+        },
+        "source_title": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "required": false
+        },
+        "verification_status": {
+          "type": "string",
+          "enumRef": "verificationStatus",
+          "required": true
+        },
+        "confidence": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "min": 0,
+          "max": 1,
+          "required": false
+        },
+        "checked_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time",
+          "required": false
+        },
+        "note": {
+          "type": "string",
+          "default": ""
+        }
+      }
+    },
+    "CollectionItems": {
+      "description": "Экземпляр в личной коллекции пользователя; не копирует весь каталог.",
+      "primaryKey": "id",
+      "fields": {
+        "id": {
+          "type": "string",
+          "required": true
+        },
+        "user_id": {
+          "type": "string",
+          "required": true
+        },
+        "catalog_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "required": false,
+          "description": "Связь с Catalog.id; может отсутствовать до сопоставления."
+        },
+        "sku_snapshot": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "required": false
+        },
+        "condition": {
+          "type": "string",
+          "enumRef": "condition",
+          "required": true,
+          "default": "unknown"
+        },
+        "quantity": {
+          "type": "integer",
+          "required": true,
+          "default": 1,
+          "min": 1
+        },
+        "purchase_price": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "required": false
+        },
+        "purchase_currency": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "required": false
+        },
+        "purchase_date": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date",
+          "required": false
+        },
+        "estimated_value": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "required": false,
+          "description": "Не считать фактом покупки; оценки лучше хранить отдельными снимками."
+        },
+        "notes": {
+          "type": "string",
+          "required": true,
+          "default": ""
+        },
+        "created_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time",
+          "required": false
+        },
+        "updated_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time",
+          "required": false
+        }
+      }
+    },
+    "ChangeLog": {
+      "description": "Неизменяемая запись о ручной правке, импорте или откате.",
+      "fields": {
+        "id": {
+          "type": "string",
+          "required": true
+        },
+        "entity_type": {
+          "type": "string",
+          "required": true
+        },
+        "entity_id": {
+          "type": "string",
+          "required": true
+        },
+        "field": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "required": false
+        },
+        "before": {
+          "type": [
+            "string",
+            "number",
+            "boolean",
+            "object",
+            "null"
+          ],
+          "required": false
+        },
+        "after": {
+          "type": [
+            "string",
+            "number",
+            "boolean",
+            "object",
+            "null"
+          ],
+          "required": false
+        },
+        "action": {
+          "type": "string",
+          "required": true
+        },
+        "source_type": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "required": false
+        },
+        "batch_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "required": false
+        },
+        "changed_at": {
+          "type": "string",
+          "format": "date-time",
+          "required": true
+        },
+        "changed_by": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "required": false
+        },
+        "note": {
+          "type": "string",
+          "default": ""
+        }
+      }
+    },
+    "ImportBatch": {
+      "description": "Отчёт об одном запуске импорта/обогащения.",
+      "fields": {
+        "id": {
+          "type": "string",
+          "required": true
+        },
+        "source_type": {
+          "type": "string",
+          "enumRef": "sourceType",
+          "required": true
+        },
+        "source_file": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "required": false
+        },
+        "started_at": {
+          "type": "string",
+          "format": "date-time",
+          "required": true
+        },
+        "finished_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time",
+          "required": false
+        },
+        "total_rows": {
+          "type": "integer",
+          "required": true,
+          "default": 0
+        },
+        "matched_rows": {
+          "type": "integer",
+          "required": true,
+          "default": 0
+        },
+        "created_rows": {
+          "type": "integer",
+          "required": true,
+          "default": 0
+        },
+        "updated_rows": {
+          "type": "integer",
+          "required": true,
+          "default": 0
+        },
+        "review_rows": {
+          "type": "integer",
+          "required": true,
+          "default": 0
+        },
+        "error_rows": {
+          "type": "integer",
+          "required": true,
+          "default": 0
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "running",
+            "completed",
+            "completed_with_warnings",
+            "failed"
+          ],
+          "required": true
+        }
+      }
+    }
+  },
+  "relationships": [
+    {
+      "from": "Catalog.model_id",
+      "to": "Catalog.model_id",
+      "type": "many-to-one logical grouping",
+      "note": "Связывает варианты одной базовой модели; не является внешним ключом к отдельной таблице."
+    },
+    {
+      "from": "CollectionItems.catalog_id",
+      "to": "Catalog.id",
+      "type": "many-to-one"
+    },
+    {
+      "from": "Catalog.sources",
+      "to": "FieldSource",
+      "type": "one-to-many"
+    },
+    {
+      "from": "ChangeLog.entity_id",
+      "to": "Catalog.id or CollectionItems.id",
+      "type": "polymorphic reference"
+    },
+    {
+      "from": "ChangeLog.batch_id",
+      "to": "ImportBatch.id",
+      "type": "optional"
+    }
+  ],
+  "workflow": {
+    "enrichmentStatuses": [
+      "exact",
+      "probable",
+      "not_found",
+      "conflict"
+    ],
+    "duplicatePolicy": "По SKU искать кандидатов, но неоднозначные совпадения не сливать автоматически.",
+    "importStages": [
+      "load",
+      "normalize",
+      "match",
+      "validate",
+      "preview",
+      "apply_to_working_copy",
+      "report",
+      "rollback_if_needed"
+    ],
+    "firstPilot": "30–50 разнородных записей; сравнить источники и качество сопоставления до массового обогащения."
+  },
+  "nextSteps": [
+    "Проверить модель на пилотной выборке из 30–50 записей.",
+    "Утвердить поля и правила SKU/вариантов до массового наполнения.",
+    "Создать отдельный рабочий каталог и импортировать в него данные без изменения collection.json.",
+    "После проверки выбрать постоянное хранилище и подключить интерфейс массового редактирования."
+  ]
+}

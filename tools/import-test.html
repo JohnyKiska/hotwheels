@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hot Wheels Garage — тест импорта v0.15.0</title>
+<style>
+:root{font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#18202b;background:#f3f5f8}*{box-sizing:border-box}body{margin:0;padding:24px}.wrap{max-width:1050px;margin:auto}.hero{background:#171b24;color:white;padding:26px;border-radius:18px;margin-bottom:18px}.hero h1{margin:0 0 8px;font-size:clamp(24px,4vw,36px)}.hero p{margin:0;color:#d0d6e0;line-height:1.5}.panel{background:white;border:1px solid #dfe4eb;border-radius:14px;padding:20px;margin:14px 0}.panel h2{font-size:18px;margin:0 0 12px}.hint{color:#596579;font-size:14px;line-height:1.5}.inputs{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}.drop{border:1px dashed #9ba8ba;border-radius:10px;padding:15px;background:#fafbfc}.drop label{display:block;font-weight:700;margin-bottom:8px}.drop input{max-width:100%}button{border:0;border-radius:9px;padding:12px 16px;font-weight:700;cursor:pointer;background:#ed4b24;color:white;margin:6px 6px 0 0}button.secondary{background:#e8edf3;color:#202938}button:disabled{opacity:.45;cursor:not-allowed}.status{padding:12px;border-radius:9px;background:#f0f4f8;margin-top:12px;white-space:pre-wrap}.status.good{background:#e7f7ec}.status.warn{background:#fff4db}.tablewrap{overflow:auto}table{width:100%;border-collapse:collapse;font-size:14px}th,td{text-align:left;padding:9px;border-bottom:1px solid #e7ebf0;vertical-align:top}th{background:#f7f8fa}.tag{display:inline-block;padding:3px 7px;border-radius:20px;background:#e8edf3;font-size:12px}.foot{font-size:13px;color:#647084;margin-top:18px}.preview-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:14px;margin-top:14px}.car-card{border:1px solid #dfe4eb;border-radius:13px;overflow:hidden;background:#fff}.car-card-head{padding:14px;background:#202938;color:#fff}.car-preview-image{display:block;width:100%;height:190px;object-fit:contain;background:#f5f6f8;border-bottom:1px solid #e7ebf0}.car-image-missing{height:92px;display:flex;align-items:center;justify-content:center;background:#f5f6f8;border-bottom:1px solid #e7ebf0;color:#8792a3;font-size:13px}.car-card-head h3{margin:0 0 5px;font-size:17px}.car-card-head p{margin:0;color:#d7deea;font-size:12px;overflow-wrap:anywhere}.car-card-body{padding:14px}.car-fields{display:grid;grid-template-columns:1fr 1fr;gap:8px}.car-field{padding:9px;border-radius:8px;background:#f4f6f9;min-width:0}.car-field small{display:block;color:#687487;font-size:11px;text-transform:uppercase;letter-spacing:.03em;margin-bottom:3px}.car-field strong{display:block;font-size:13px;overflow-wrap:anywhere}.car-field.empty{opacity:.58}.car-card-foot{padding:10px 14px;border-top:1px solid #e7ebf0;font-size:12px;color:#596579}.source-link{color:#175fc4;overflow-wrap:anywhere}.preview-note{padding:10px 12px;background:#f0f4f8;border-radius:8px;margin-top:10px;font-size:13px;color:#596579}.review-controls{margin-top:12px;padding:12px;border:1px solid #dfe4eb;border-radius:9px;background:#fbfcfe}.review-controls label{display:block;font-size:12px;font-weight:700;margin:8px 0 4px}.review-controls select,.review-controls textarea{width:100%;padding:8px;border:1px solid #cbd3df;border-radius:7px;font:inherit;font-size:13px}.review-controls textarea{min-height:64px;resize:vertical}.manual-tag-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:7px;margin-top:8px;padding:9px;border:1px solid #dfe4eb;border-radius:8px;background:#fff}.manual-tag-row input,.manual-tag-row select{width:100%;min-width:0;padding:7px;border:1px solid #cbd3df;border-radius:6px;font:inherit;font-size:12px}.manual-tag-list{display:grid;gap:7px;margin-top:10px}.manual-tag-item{padding:8px 10px;border-radius:7px;background:#eef5ff;font-size:12px;overflow-wrap:anywhere}.manual-tag-item button{padding:4px 8px;font-size:11px;margin-left:6px}.package-fields{display:grid;grid-template-columns:1fr;gap:8px;margin-top:10px}.package-fields input,.package-fields select{width:100%;padding:8px;border:1px solid #cbd3df;border-radius:7px;font:inherit;font-size:13px}.source-tech{margin-top:12px;border-top:1px solid #e7ebf0;padding-top:10px;font-size:13px;color:#596579}.source-tech summary{cursor:pointer;font-weight:700;color:#344054}.source-tech p{margin:8px 0 0}@media(max-width:600px){body{padding:12px}.panel{padding:14px}}
+
+/* Compact review tiles */
+.preview-grid{grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px;align-items:start}
+.car-card{display:grid;grid-template-columns:84px minmax(0,1fr);grid-template-rows:auto auto}
+.car-preview-image{grid-column:1;grid-row:1;width:84px;height:100%;min-height:90px;max-height:124px;object-fit:contain;border-right:1px solid #e7ebf0;border-bottom:0}
+.car-image-missing{grid-column:1;grid-row:1;min-height:90px;max-height:124px;padding:5px;text-align:center;font-size:10px;overflow-wrap:anywhere;border-right:1px solid #e7ebf0;border-bottom:0}
+.car-card-head{grid-column:2;grid-row:1;padding:9px 10px;min-width:0}
+.car-card-head h3{font-size:14px;line-height:1.25}
+.car-card-head p{font-size:11px}
+.car-card-body{grid-column:1 / -1;grid-row:2;padding:9px}
+.car-fields{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
+.car-field{padding:6px;border-radius:6px}
+.car-field strong{font-size:12px}
+.car-card-foot{grid-column:1 / -1;padding:7px 9px;font-size:11px}
+.car-card .preview-note{padding:7px 9px;margin-top:7px;font-size:11px}
+.car-card .review-controls{margin-top:8px;padding:9px}
+.car-card .review-controls textarea{min-height:46px}
+.car-card .package-fields{gap:5px;margin-top:6px}
+.car-card .source-tech{margin-top:8px;padding-top:7px}
+@media(max-width:600px){.preview-grid{grid-template-columns:1fr}.car-card{grid-template-columns:76px minmax(0,1fr)}.car-preview-image,.car-image-missing{width:76px}}
+
+
+.car-card{cursor:pointer;transition:border-color .15s,box-shadow .15s}.car-card.is-editing{border-color:#3478f6;box-shadow:0 0 0 2px #d9e7ff}.car-card .review-controls{display:none}.car-card.is-editing .review-controls{display:block}.car-preview-image,.car-image-missing{cursor:zoom-in}.classification-diff{margin-top:7px;padding:6px 8px;border-radius:6px;background:#fff4db;color:#7a4b00;font-size:12px;line-height:1.45}.classification-diff:empty{display:none}.image-lightbox{position:fixed;inset:0;background:rgba(10,14,22,.88);z-index:9999;display:none;align-items:center;justify-content:center;padding:28px;cursor:zoom-out}.image-lightbox.open{display:flex}.image-lightbox img{max-width:min(96vw,1400px);max-height:90vh;object-fit:contain;background:#fff;border-radius:8px}.image-lightbox button{position:absolute;top:14px;right:18px;font-size:24px;padding:6px 13px;margin:0}
+ .review-table-wrap{overflow:auto;border:1px solid #dfe4eb;border-radius:10px;background:#fff;margin:12px 0}.review-table{width:100%;min-width:650px;border-collapse:collapse;font-size:13px}.review-table th,.review-table td{padding:8px 10px;border-bottom:1px solid #e7ebf0;text-align:left;vertical-align:middle}.review-table th{background:#f3f6fa;font-size:11px;text-transform:uppercase}.review-table tbody tr{cursor:pointer}.review-table tbody tr:hover{background:#f5f8fc}.review-table tbody tr.active{background:#eaf2ff;box-shadow:inset 3px 0 #3478f6}.review-table .thumb{width:38px;height:44px;object-fit:contain;background:#f4f6f9;border-radius:5px}.review-table .sku-cell{font-weight:800;white-space:nowrap}.review-table small{display:block;color:#667085;margin-top:2px}.review-table .state-pill{display:inline-block;padding:3px 7px;border-radius:20px;background:#edf1f6;font-size:11px;white-space:nowrap}.car-card.selected-editor{display:grid!important}.car-card.not-selected{display:none!important}.editor-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:10px 0}.editor-toolbar .hint{margin:0}.car-card.selected-editor .review-controls{display:none}.car-card.selected-editor .review-controls.active-section{display:block}.car-card.selected-editor .car-card-foot{display:none}.car-card.selected-editor .car-preview-image,.car-card.selected-editor .car-image-missing{height:100px;width:84px;grid-column:1;grid-row:1;object-fit:contain}.car-card.selected-editor .car-card-head{grid-column:2;grid-row:1}.car-card.selected-editor .car-card-body{grid-column:1/-1;grid-row:2}</style></head>
+<body><main class="wrap">
+<header class="hero"><h1>Hot Wheels Garage · Тест импорта <span style="font-size:14px;font-weight:500;opacity:.8">v0.13.0</span></h1><p>Проверочная страница: сопоставляет сохранённые HTML-страницы All Hot Wheels с записями collection.json. Повторные SKU пропускаются, ручные статусы можно восстановить из предыдущего черновика. Исходный файл не меняется автоматически — результат можно скачать отдельно после проверки.</p></header>
+<section class="panel"><h2>1. Выбери файлы</h2><div class="inputs">
+<div class="drop"><label for="catalog">Текущий collection.json</label><input id="catalog" type="file" accept=".json,application/json"><p class="hint">Файл каталога из репозитория. Обрабатывается локально в браузере.</p></div>
+<div class="drop"><label for="pages">HTML-страницы All Hot Wheels</label><input id="pages" type="file" accept=".html,.htm,text/html" multiple><p class="hint">Выбери одну или несколько страниц, сохранённых через браузер. Можно начать с четырёх тестовых моделей.</p></div><div class="drop"><label for="priorDraft">Предыдущий черновик (необязательно)</label><input id="priorDraft" type="file" accept=".json,application/json"><p class="hint">Загрузи прошлый catalog-schema-draft.json, чтобы сохранить ручные статусы и заметки при повторном импорте.</p></div>
+</div><button id="run">Проверить и сопоставить</button><button id="download" class="secondary" disabled>Скачать дополненный JSON</button><button id="report" class="secondary" disabled>Скачать отчёт CSV</button><button id="newcars" class="secondary" disabled>Скачать новые машинки JSON</button><button id="schema" class="secondary" disabled>Скачать черновик новой схемы</button><div id="status" class="status">Ожидаются файлы.</div></section>
+<section class="panel"><h2>2. Результаты сопоставления</h2><p class="hint">Поля заполняются только если найдены в HTML и пока пусты в каталоге. Существующие значения, статус, цена и комментарий не перезаписываются. Новая классификация сегмент / линейка / тематическая серия сохраняется в details для проверки, не заменяя старые поля каталога. Год и прежние значения заполняются только при пустых полях. Все извлечённые детали записываются в объект <code>details</code> вместе с источником в details.sourceUrl.</p><div id="summary" class="hint">Пока нет результатов.</div><div class="tablewrap"><table><thead><tr><th>Артикул</th><th>Модель</th><th>Найдено в HTML</th><th>Добавленные поля</th><th>Статус</th></tr></thead><tbody id="rows"></tbody></table></div></section>
+<section class="panel"><h2>3. Справочник тематических серий</h2><p class="hint">Выбери сегмент и добавь серию. Она сразу появится в выпадающих списках карточек. Чтобы сохранить изменения, скачай JSON и замени им <code>data/series-catalog.json</code> в репозитории. Страница не записывает файлы в GitHub напрямую.</p><div class="inputs"><div><label for="catalogSegment">Сегмент</label><select id="catalogSegment"><option>Mainline</option><option>Premium</option><option>Silver Series</option></select></div><div><label for="newSeriesName">Название новой серии</label><input id="newSeriesName" placeholder="Например, HW Art Cars"></div></div><button type="button" id="addSeries">Добавить серию</button><button type="button" id="addSegment" class="secondary">Добавить сегмент / группу</button><button type="button" id="downloadSeriesCatalog" class="secondary">Скачать JSON-справочник</button><label for="loadSeriesCatalog" style="display:block;margin-top:12px">Загрузить существующий JSON-справочник</label><input id="loadSeriesCatalog" type="file" accept=".json,application/json"><div id="catalogStatus" class="status">Стартовый справочник загружен. Можно импортировать актуальный JSON.</div></section><section class="panel"><h2>4. Визуальная проверка каждой машинки</h2><p class="hint">Если в репозитории есть <code>ALLHW/&lt;артикул&gt;.webp</code>, карточка покажет это изображение как превью. Карточки также показывают, что парсер реально извлёк из каждой HTML-страницы. Прочерки означают, что значение не найдено — это не обязательно означает, что его нет на сайте. Сравни карточку с исходной страницей, прежде чем доверять импорту.</p><div id="visualSummary" class="preview-note">Сначала выбери файлы и нажми «Проверить и сопоставить».</div><div class="review-table-wrap"><table class="review-table"><thead><tr><th></th><th>Артикул / модель</th><th>Год</th><th>Категория</th><th>Серия / индекс</th><th>Статус</th></tr></thead><tbody id="reviewTableBody"><tr><td colspan="6">Загрузи HTML-файлы, чтобы увидеть список.</td></tr></tbody></table></div><div class="editor-toolbar"><strong id="selectedRecordLabel">Выбери машинку в таблице</strong><span class="hint">Редактируется только выбранная запись.</span></div><div id="visualCards" class="preview-grid"></div></section><section class="panel"><h2>5. Что важно знать</h2><ul class="hint"><li>v0.9.7 извлекает тематическую серию из структурированных данных страницы и отделяет метку редкости источника от ручной визуальной проверки; пропускает повторные SKU в одном запуске; может восстановить ручные статусы/заметки из предыдущего черновика. Обрабатывает только выбранные HTML-файлы; папка ALLHW используется как архив, страница не читает её автоматически.</li><li>Страницы All Hot Wheels сериализуют часть данных в Next.js payload, поэтому результат зависит от того, какие значения реально присутствуют в сохранённой странице.</li><li>Если поле не извлечено, это не доказывает, что источник его не содержит: формат может требовать отдельного правила парсинга.</li><li>Перед массовым импортом нужно проверить точность на образцах. Не загружай результат в основную ветку, пока не проверены отчёт и JSON.</li></ul></section>
+<div id="imageLightbox" class="image-lightbox" role="dialog" aria-modal="true" aria-label="Увеличенное изображение"><button type="button" aria-label="Закрыть">×</button><img alt="Увеличенное изображение"></div><p class="foot">Локальная обработка: выбранные файлы не отправляются на сервер этой страницы. Сохрани исходный JSON перед экспериментами.</p>
+</main>
+<script>
+const $=id=>document.getElementById(id);let output=null, reportRows=[], newCars=[], previewRows=[], schemaDraft=null;const excludedRows=new Set();
+let seriesCatalog={"schemaVersion":"1.0","description":"Справочник тематических серий, сгруппированных по продуктовому сегменту. Дополняется через tools/import-test.html.","segments":{"Mainline":["HW Dream Garage","HW Screen Time","HW Art Cars","HW Metro","HW EV","Factory Fresh","HW Hot Trucks","HW Modified","HW J-Imports","Muscle Mania","X-Raycers","HW First Response","HW Ride-Ons","Rod Squad","Wild Widebody","Fast Foodie","Safari Mode","Compact Kings","HW Dirt"],"Premium":["Boulevard","Car Culture","Car Culture Team Transport","Fast & Furious","Formula 1","Pop Culture","Retro Entertainment","Team Transport"],"Silver Series":["Pantone"]}};
+const SERIES_TOTALS={Boulevard:165};
+function normalizeCatalog(value){
+ if(!value||typeof value!=="object"||!value.segments||typeof value.segments!=="object")throw new Error("Ожидается объект segments с массивами серий.");
+ const segments={};Object.entries(value.segments).forEach(([segment,names])=>{if(Array.isArray(names))segments[segment]=[...new Set(names.map(x=>String(x).trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b));});
+ if(!Object.keys(segments).length)throw new Error("В JSON не найдено ни одного сегмента.");
+ return {schemaVersion:"1.0",description:value.description||"Справочник тематических серий по сегментам.",segments};
+}
+function catalogOptions(segment,selected){return '<option value="">— не выбрано —</option>'+(seriesCatalog.segments[segment]||[]).map(name=>'<option value="'+escapeHtml(name)+'" '+(name===selected?'selected':'')+'>'+escapeHtml(name)+'</option>').join('');}
+function refreshSeriesSelect(segmentSelect,seriesSelect,selected){seriesSelect.innerHTML=catalogOptions(segmentSelect.value,selected||"");}
+const manualTagsByIndex={};
+function escapeAttr(s){return escapeHtml(String(s??''));}
+function renderManualTags(index){
+ const host=document.querySelector('[data-manual-tag-list="'+index+'"]');if(!host)return;
+ const tags=manualTagsByIndex[index]||[];
+ host.innerHTML=tags.map((t,i)=>'<div class="manual-tag-item"><b>'+escapeAttr(t.value)+'</b> · '+escapeAttr(t.type)+' · '+escapeAttr(t.source)+' · '+escapeAttr(t.status)+' · назначение: '+escapeAttr(t.mappedTo)+(t.note?' · '+escapeAttr(t.note):'')+' <button type="button" class="secondary" data-remove-manual-tag="'+index+'" data-tag-index="'+i+'">Удалить</button></div>').join('')||'<p class="hint">Дополнительных тегов пока нет.</p>';
+}
+function updateClassificationDiff(idx){const seg=document.querySelector('[data-class-segment="'+idx+'"]'),ser=document.querySelector('[data-class-series="'+idx+'"]'),box=document.getElementById("classification-diff-"+idx);if(!seg||!ser||!box)return;const oldSeg=seg.getAttribute("data-original-value")||"—",oldSer=ser.getAttribute("data-original-value")||"—",newSeg=seg.value||"—",newSer=ser.value||"—";box.innerHTML=oldSeg!==newSeg||oldSer!==newSer?"До: <b>"+escapeHtml(oldSeg)+"</b> / <b>"+escapeHtml(oldSer)+"</b><br>После: <b>"+escapeHtml(newSeg)+"</b> / <b>"+escapeHtml(newSer)+"</b>":"";}
+function bindClassificationControls(){document.querySelectorAll("[data-class-segment]").forEach(sel=>{const idx=sel.getAttribute("data-class-segment"),ss=document.querySelector('[data-class-series="'+idx+'"]');if(!ss)return;sel.onchange=()=>{refreshSeriesSelect(sel,ss,"");updateClassificationDiff(idx);};ss.onchange=()=>updateClassificationDiff(idx);refreshSeriesSelect(sel,ss,ss.getAttribute("data-initial-series")||"");updateClassificationDiff(idx);});}
+function configuredTotal(name){const key=Object.keys(SERIES_TOTALS).find(k=>k.toLowerCase()===String(name||'').trim().toLowerCase());return key?SERIES_TOTALS[key]:null;}
+const FIELD_RULES=[
+ ['bodyColor','Body Color'],['interiorColor','Interior Color'],['baseColor','Base Color'],['windowColor','Window Color'],['wheelType','Wheel Type'],['scale','Scale'],['releaseYear','Release Year'],['toyNum','Toy Number'],['seriesIndex','Series index']
+];
+function decode(s){return s.replace(/\\u0026/g,'&').replace(/\\u003c/g,'<').replace(/\\u003e/g,'>').replace(/\\u002f/g,'/').replace(/\\u0022/g,'"').replace(/\\u0027/g,"'").replace(/\\\\/g,'\\').replace(/&amp;/g,'&').replace(/&quot;/g,'"').replace(/&#x27;/g,"'").replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim();}
+function extract(html,filename){
+ const txt=decode(html);const result={sourceFile:filename};let found=0;
+ // Prefer explicit page metadata and canonical URL over guessing from prose.
+ const canonical=(html.match(/<link rel="canonical" href="([^"]+)"/i)||[])[1]||'';
+ if(canonical)result.sourceUrl=canonical.replace(/&amp;/g,'&');
+ const description=(html.match(/<meta name="description" content="([^"]*)"/i)||[])[1]||'';
+ const pathMatch=result.sourceUrl.match(/\/car\/(20\d{2})\/([^/]+)\/([a-z0-9]+)\//i);
+ if(pathMatch){result.releaseYear=pathMatch[1];result.sourcePathCategory=pathMatch[2].toLowerCase();result.filenameSku=pathMatch[3].toUpperCase();}
+ const skuMatch=(description.match(/SKU\s+([A-Z0-9]+)/i)||html.match(/<div[^>]*>SKU<\/div><div[^>]*>([A-Z0-9]+)<\/div>/i)||[]);
+ if(skuMatch[1])result.toyNum=skuMatch[1].toUpperCase();
+ const yearMatch=(description.match(/\((20\d{2})\)/)||[]);
+ if(yearMatch[1]&&!result.releaseYear)result.releaseYear=yearMatch[1];
+ // All Hot Wheels exposes the series as a badge or in its descriptive sentence.
+  // Read the theme badge from its container without depending on the exact class order.
+  const badgeMatch=html.match(/<span\b[^>]*font-bold\s+text-brand-indigo"[^>]*>([^<]+)<\/span>/i);
+  const sentenceSeriesRaw=(decode(description).match(/part of the ([^.]{1,70}?) series\b/i)||[])[1]||'';
+  const sentenceSeries=/\b(?:standard|limited|assortment|rather than|available|includes|features)\b/i.test(sentenceSeriesRaw)?'':sentenceSeriesRaw.trim();
+ const routeCategory=(result.sourcePathCategory||'').replace(/-/g,' ');
+ const genericCategories=['mainline','premium','silver series','monster trucks','racing circuit','rc','boulevard','formula 1','pop culture','car culture','entertainment','retro entertainment','fast & furious','fast and furious','fast-furious'];
+ // Only explicit series badges or descriptions populate seriesName. URL categories are stored separately
+ // because labels such as Boulevard can be product lines rather than thematic series.
+ result.seriesName=(badgeMatch&&decode(badgeMatch[1]))||sentenceSeries||'';
+ const assortmentMatch=html.match(/<p class="mt-2 text-sm text-muted-foreground">([\s\S]*?)<\/p>/i);
+ const assortmentText=assortmentMatch?decode(assortmentMatch[1].replace(/<[^>]+>/g,' ').replace(/<!--.*?-->/g,' ')).replace(/\s+/g,' ').trim():'';
+ const assortmentParts=assortmentText.split('·').map(v=>v.trim()).filter(Boolean);
+ const visibleFirstLabel=assortmentParts[0]||'';
+ if(visibleFirstLabel)result.sourceCategory=visibleFirstLabel;
+  // Preserve unfamiliar source categories too. The raw URL slug remains in sourcePathCategory;
+  // this readable label is evidence only and must not force a catalog segment or series.
+  else if(result.sourcePathCategory)result.sourceCategory=routeCategory.replace(/\b\w/g,ch=>ch.toUpperCase());
+ if(genericCategories.includes(visibleFirstLabel.toLowerCase()))result.assortmentName=visibleFirstLabel.replace(/\b\w/g,ch=>ch.toUpperCase());
+ else if(genericCategories.includes(routeCategory))result.assortmentName=routeCategory.replace(/\b\w/g,ch=>ch.toUpperCase());
+ // Pages may expose the mix only in the subtitle, e.g. "2013 Retro Entertainment Mix 2".
+ const mixMatch=assortmentText.match(/\bMix\s*([A-Z0-9-]+)\b/i);
+ if(mixMatch)result.assortmentName='Mix '+mixMatch[1].toUpperCase();
+ // Normalized classification: source category is evidence, not the final taxonomy.
+ const category=(result.sourceCategory||routeCategory||'').trim().toLowerCase();
+ // Segment and line are normalized separately. "Entertainment" is the source route label;
+ // the catalog line is "Retro Entertainment". TH/STH labels are not product segments.
+ const premiumCategories=['boulevard','premium','formula 1','pop culture','car culture','entertainment','retro entertainment','fast & furious','fast and furious','fast-furious'];
+ if(category==='silver series' || category==='pantone')result.productSegment='Silver Series';
+ else if(premiumCategories.includes(category))result.productSegment='Premium';
+ else if(category==='mainline')result.productSegment='Mainline';
+ if(category==='boulevard')result.lineName='Boulevard';
+ else if(category==='pantone')result.lineName='Pantone';
+ else if(category==='formula 1')result.lineName='Formula 1';
+ else if(category==='pop culture')result.lineName='Pop Culture';
+ else if(category==='car culture')result.lineName='Car Culture';
+ else if(category==='entertainment' || category==='retro entertainment')result.lineName='Retro Entertainment';
+ else if(category==='fast & furious' || category==='fast and furious' || category==='fast-furious')result.lineName='Fast & Furious';
+ else if((category==='silver series'||category==='premium') && result.seriesName)result.lineName=result.seriesName;
+ // Do not treat product lines or segment labels as thematic series.
+ const nonThemeCategories=['silver series','pantone','boulevard','premium','mainline','formula 1','pop culture','car culture','entertainment','retro entertainment','fast & furious','fast and furious','fast-furious'];
+  // A dedicated indigo badge is the page's explicit thematic-series label, including on Mainline pages.
+  const badgeTheme=badgeMatch?decode(badgeMatch[1]).trim():'';
+  if(badgeTheme && !nonThemeCategories.includes(badgeTheme.toLowerCase()))result.themeSeries=badgeTheme;
+  else if(result.seriesName && result.seriesName!==result.lineName && !nonThemeCategories.includes(category))result.themeSeries=result.seriesName;
+ // Prefer explicit thematic-series statements in the page's structured FAQ/data payload.
+// Browse tags are broad search facets (e.g. "j-imports"), not reliable series labels.
+const explicitTheme=(txt.match(/belongs to the ([A-Z0-9][A-Z0-9 &'’.-]{1,48}?) series\b/i)||[])[1];
+const normalizedTheme=explicitTheme?explicitTheme.trim().replace(/\s+/g,' '):'';
+ const excludedThemeNames=['mainline','premium','silver series','monster trucks','racing circuit','rc','boulevard','formula 1','pop culture','car culture','entertainment','retro entertainment','fast & furious','fast and furious','fast-furious'];
+ if(normalizedTheme && !excludedThemeNames.includes(normalizedTheme.toLowerCase())){
+   result.themeSeries=/^hw j-import$/i.test(normalizedTheme)?'HW J-IMPORT':normalizedTheme.replace(/\\b\\w/g,ch=>ch.toUpperCase());
+ }
+// Preserve rarity wording from source metadata as a claim only; it is not visual verification.
+if(/\btreasure hunt\b/i.test(decode(description)))result.sourceRarityLabel=/\bsuper treasure hunt\b/i.test(decode(description))?'STH':'TH';
+// Some source pages expose thematic labels only as searchable tags.
+ // Prefer known theme-like labels; never infer a theme from ordinary decoration/attribute tags.
+ if(!result.themeSeries){
+   const themeTags=[...html.matchAll(/href="\/browse\?q=([^"]+)"[^>]*>[\s\S]*?<span[^>]*>([^<]+)<\/span>/gi)]
+     .map(m=>({query:decode(m[1].replace(/\+/g,' ')).replace(/&amp;/g,'&').toLowerCase(),label:decode(m[2]).trim()}));
+   const themePatterns=[
+     /then and now/i,/hw dream garage/i,/dream garage/i,/smokey and the bandit/i,
+     /back to the future/i,/fast and furious/i,/the jetsons/i,/scooby-doo/i,
+     /batman/i,/super mario/i,/hot wheels legends/i
+   ];
+   const titleTag=themeTags.find(t=>themePatterns.some(re=>re.test(t.label)) ||
+     ((category==='entertainment'||category==='retro entertainment') && /\b(and the|back to the|from the|of the)\b/i.test(t.label) && !/hood|wheel|color|flame|deco/i.test(t.label)));
+   if(titleTag)result.themeSeries=titleTag.label.replace(/\b\w/g,ch=>ch.toUpperCase());
+ }
+ // Parse the saved page's actual markup first; labels are lowercase and values live in sibling spans.
+ function markupValue(label){
+   // Find the exact attribute label, then inspect only its value area up to the next label.
+   // Saved pages vary in nested closing tags, so avoid relying on a fixed closing-tag sequence.
+   const labelRe=new RegExp('uppercase[^>]*>\\s*'+label+'\\s*<\\/div>','i');
+   const labelMatch=labelRe.exec(html); if(!labelMatch)return '';
+   const after=html.slice(labelMatch.index+labelMatch[0].length, labelMatch.index+labelMatch[0].length+2600);
+   const nextLabel=/<div[^>]*class="[^"]*uppercase[^"]*"[^>]*>/i.exec(after);
+   const block=(nextLabel?after.slice(0,nextLabel.index):after).replace(/<script[\s\S]*?<\/script>/gi,' ');
+   const vals=[...block.matchAll(/<span[^>]*class="[^"]*font-semibold[^"]*"[^>]*>([^<]+)<\/span>/gi)].map(x=>decode(x[1]));
+   return vals.find(v=>v && v.length<80 && !/^(color|unknown|n\/?a|none|null)$/i.test(v))||'';
+ }
+ function pick(label){const escaped=label;
+   const patterns=[
+    new RegExp(`[\"']${escaped}[\"']\\s*[:,]\\s*[\"']([^\"']{1,100})[\"']`,'i'),
+    new RegExp('(?:^|\\s)'+escaped+'\\s*[:：]\\s*([^|,;\\n]{1,100})','i'),
+    new RegExp('>\\s*'+escaped+'\\s*<[^>]*>\\s*([^<]{1,100})','i')
+   ];
+   for(const re of patterns){const m=txt.match(re);if(m){const v=decode(m[1]);if(v&&v.length<100&&!/^(unknown|n\/?a|none|null)$/i.test(v))return v;}}
+   return '';
+ }
+ for(const [key,label] of FIELD_RULES){
+   let val=pick(label);
+   if(key==='bodyColor') val=markupValue('body')||val;
+   if(key==='interiorColor') val=markupValue('interior')||val;
+   if(key==='baseColor') val=markupValue('base')||val;
+   if(key==='windowColor') val=markupValue('window')||markupValue('windows')||val;
+   if(key==='wheelType'){
+     const wheel=html.match(/<span[^>]*font-mono[^>]*>([^<]+)<\/span>\s*([^<]+)<\/span>/i);
+     val=wheel?decode(wheel[1]+' '+wheel[2]):val;
+   }
+   // Series and assortment are parsed from page metadata above, never from generic prose.
+   if(key==='scale') val=(html.match(/<div[^>]*font-semibold[^>]*>1\/64<\/div>/i)||[])[0]?'1/64':val;
+   if(key==='seriesIndex'){const sm=html.match(/Series index<\/div><div[^>]*font-semibold[^>]*>([^<]+)<\/div>/i);if(sm){result.seriesIndexRaw=decode(sm[1]);const ix=result.seriesIndexRaw.match(/^(\d+)(?:\s*\/\s*(\d+))?$/);if(ix){result.seriesNum=Number(ix[1]);if(ix[2])result.seriesTotal=Number(ix[2]);}} val='';}
+   if(val){result[key]=decode(val);found++;}
+ }
+ const fileSku=(filename.match(/\b([A-Z]{2,4}\d{2,3})\b/i)||[])[1];
+ if(fileSku&&!result.filenameSku)result.filenameSku=fileSku.toUpperCase();
+ if(!result.toyNum&&result.filenameSku)result.toyNum=result.filenameSku;
+ if((result.sourceCategory||result.assortmentName||'').trim().toLowerCase()==='boulevard' && result.seriesNum!=null)result.seriesTotal=configuredTotal('Boulevard')||result.seriesTotal;
+ result.fieldsFound=found;return result;
+}
+function escapeHtml(s){return String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+$('run').onclick=async()=>{
+ const cf=$('catalog').files[0], files=[...$('pages').files];if(!cf||!files.length){$('status').className='status warn';$('status').textContent='Выбери collection.json и хотя бы одну HTML-страницу.';return;}
+ try{
+  const original=JSON.parse(await cf.text());if(!Array.isArray(original))throw new Error('Ожидался JSON-массив машинок.');
+  const data=original.map(x=>({...x}));reportRows=[];newCars=[];previewRows=[];excludedRows.clear();let totalMatched=0,totalAdded=0;const seenInputSkus=new Set();const priorFile=$('priorDraft').files[0];let priorReviews=new Map();if(priorFile){const prior=JSON.parse(await priorFile.text());if(Array.isArray(prior.sources)){for(const s of prior.sources){const key=String(s.releaseId||'').replace(/^release-/,'').toUpperCase();if(key)priorReviews.set(key,{reviewStatus:s.reviewStatus||'pending',reviewNote:s.reviewNote||''});}}}
+  for(const file of files){
+   const parsed=extract(await file.text(),file.name);const sku=(parsed.filenameSku||'').toUpperCase();
+   // Match by SKU from filename or extracted toy number; avoid fuzzy name-only changes.
+   const modelSku=(parsed.toyNum||sku||'').toUpperCase();
+   if(modelSku && seenInputSkus.has(modelSku)){previewRows.push({fileName:file.name,parsed,modelSku,match:null,matchCount:0,isDuplicate:true});reportRows.push({sku:modelSku,name:parsed.name||file.name,found:parsed.fieldsFound,added:[],status:'ДУБЛИКАТ среди выбранных HTML-файлов',fileName:file.name});continue;}if(modelSku)seenInputSkus.add(modelSku);
+   let matches=modelSku?data.filter(x=>String(x.toyNum||'').toUpperCase()===modelSku):[];
+   previewRows.push({fileName:file.name,parsed,modelSku,match:matches.length===1?matches[0]:null,matchCount:matches.length});
+   if(matches.length!==1){
+    if(matches.length===0 && modelSku){
+      const baseName=file.name.replace(/\.(html?|HTML?)$/,'').replace(/^([A-Z]{2,4}\d{2,3})\s*/i,'').replace(/\s+Hot Wheels.*$/i,'').replace(/\s+\(\d{4}\).*$/,'').trim();
+      const yearMatch=file.name.match(/\((20\d{2})\)/);
+      const candidate={id:Date.now()+newCars.length,toyNum:modelSku,colNum:"",name:baseName||modelSku,year:yearMatch?Number(yearMatch[1]):(parsed.releaseYear?Number(parsed.releaseYear):null),seriesName:(parsed.assortmentName==="Boulevard"?"Boulevard":(parsed.seriesName||"")),seriesNum:parsed.seriesNum??null,seriesTotal:(parsed.assortmentName==="Boulevard"?(configuredTotal("Boulevard") || (parsed.seriesTotal ?? null)):(parsed.seriesTotal??null)),rarity:"",status:"missing",price:0,image:"",comment:"",details:{},reviewRequired:true};
+      for(const key of ['bodyColor','interiorColor','baseColor','windowColor','wheelType','scale','sourceUrl','assortmentName','sourcePathCategory','sourceCategory','productSegment','lineName','themeSeries']) if(parsed[key])candidate.details[key]=parsed[key];
+      candidate.details.sourceFile=file.name;
+      newCars.push(candidate);
+      reportRows.push({sku:modelSku,name:candidate.name,found:parsed.fieldsFound,added:Object.keys(candidate.details),status:'Новая запись — только черновик на проверку'});
+    } else {
+      reportRows.push({sku:modelSku||'—',name:file.name,found:parsed.fieldsFound,added:[],status:matches.length?'Неоднозначный артикул':'Не найден артикул',fileName:file.name});
+    }
+    continue;
+   }
+   const car=matches[0];totalMatched++;let details={...(car.details||{})};let added=[];
+   for(const key of ['bodyColor','interiorColor','baseColor','windowColor','wheelType','scale','assortmentName','sourcePathCategory','sourceCategory','productSegment','lineName','themeSeries']){
+    if(parsed[key]!==undefined && (details[key]===undefined||details[key]===''||details[key]===null)){details[key]=parsed[key];added.push(key);}
+   }
+   if(parsed.sourceUrl && !details.sourceUrl){details.sourceUrl=parsed.sourceUrl;added.push('sourceUrl');}
+   if(parsed.seriesName && (!car.seriesName || car.seriesName==='')){car.seriesName=parsed.seriesName;added.push('seriesName');}
+   if(parsed.releaseYear && (car.year==null || car.year==='')){car.year=Number(parsed.releaseYear)||parsed.releaseYear;added.push('year');}
+   if(parsed.seriesNum!=null && (car.seriesNum==null || car.seriesNum==='')){car.seriesNum=parsed.seriesNum;added.push('seriesNum');}
+   if(parsed.seriesTotal!=null && (car.seriesTotal==null || car.seriesTotal==='')){car.seriesTotal=parsed.seriesTotal;added.push('seriesTotal');}
+   if(added.length){car.details=details;totalAdded+=added.length;}
+   // Keep provenance in details, not in a separate dataSources block.
+   reportRows.push({sku:modelSku,name:car.name||file.name,found:parsed.fieldsFound,added,status:added.length?'Черновик обогащён — каталог не изменён':parsed.fieldsFound?'Поля уже заполнены / новых данных нет':'Нужна настройка парсера'});
+  }
+  output=data;
+  $('summary').textContent='Записей каталога: '+data.length+' · HTML-файлов: '+files.length+' · точных совпадений: '+totalMatched+' · добавлено полей: '+totalAdded+' · новых машинок на проверку: '+newCars.length+'.';
+  $('rows').innerHTML=reportRows.map(r=>'<tr><td><b>'+escapeHtml(r.sku)+'</b></td><td>'+escapeHtml(r.name)+'</td><td>'+escapeHtml(r.found)+'</td><td>'+escapeHtml(r.added.join(', ')||'—')+'</td><td>'+escapeHtml(r.status)+'</td></tr>').join('');
+  const visualFields=[
+   ['SKU / артикул',p=>p.toyNum||p.filenameSku],['Год выпуска',p=>p.releaseYear],['Категория на сайте',p=>p.sourceCategory],['Продуктовый сегмент',p=>p.productSegment],['Линейка / коллекция',p=>p.lineName],['Тематическая серия',p=>p.themeSeries],['Метка редкости в метаданных',p=>p.sourceRarityLabel],['Ассортимент',p=>p.assortmentName],['Номер в линейке',(p,item)=>{const num=p.seriesNum??item.match?.seriesNum;const total=configuredTotal(p.lineName||p.assortmentName||p.sourceCategory||item.match?.details?.lineName||item.match?.seriesName) || (p.seriesTotal ?? item.match?.seriesTotal);return num!=null&&total!=null?(num+' / '+total):null;}],['Цвет кузова',p=>p.bodyColor],['Цвет салона',p=>p.interiorColor],['Цвет базы',p=>p.baseColor],['Цвет окон',p=>p.windowColor],['Тип колёс',p=>p.wheelType],['Масштаб',p=>p.scale]
+  ];
+  $('visualSummary').textContent='Карточек: '+previewRows.length+' · совпадение с каталогом: '+previewRows.filter(x=>x.matchCount===1).length+' · без точного совпадения: '+previewRows.filter(x=>x.matchCount!==1).length+'. Значения показаны как распознал их парсер, без догадок.';
+  $('visualCards').innerHTML=previewRows.map((item,index)=>{
+   const p=item.parsed;
+   const fields=visualFields.map(([label,get])=>{const value=get(p,item);return '<div class="car-field '+(value==null||value===''?'empty':'')+'"><small>'+escapeHtml(label)+'</small><strong>'+(value==null||value===''?'—':escapeHtml(value))+'</strong></div>';}).join('');
+   const matchText=item.matchCount===1?'Совпало с каталогом: '+(item.match.name||item.match.toyNum):item.matchCount>1?'В каталоге несколько записей с этим артикулом':'Новая запись или не найдено совпадение';
+   const duplicate=item.isDuplicate||item.matchCount>1;const duplicateBadge=duplicate?'<p style="margin-top:8px"><span class="tag" style="background:#ffe1df;color:#9b1c13;font-weight:800">ДУБЛИКАТ / НЕОДНОЗНАЧНО</span></p>':'';const excludeButton=duplicate?'<button type="button" class="secondary exclude-duplicate" data-exclude-index="'+index+'">Удалить карточку из черновика</button>':'';const cardNote=item.isDuplicate?'Повторный SKU среди выбранных HTML-файлов.':item.matchCount>1?'В старом каталоге найдено несколько записей с этим SKU.':matchText;
+   const skuForImage=String(item.modelSku||p.toyNum||p.filenameSku||'').trim();const imageUrl=skuForImage?'https://raw.githubusercontent.com/JohnyKiska/hotwheels/feature/scheduled-market-data/ALLHW/'+encodeURIComponent(skuForImage)+'.webp':'';const imagePreview=imageUrl?'<img class="car-preview-image" data-zoom-image src="'+imageUrl+'" alt="Нажми, чтобы увеличить: '+escapeHtml(skuForImage)+'" loading="lazy" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'"><div class="car-image-missing" data-zoom-image style="display:none">Превью не найдено: '+escapeHtml(skuForImage)+'.webp</div>':'<div class="car-image-missing">Не распознан артикул для поиска фото</div>';return '<article class="car-card" data-card-index="'+index+'">'+imagePreview+'<div class="car-card-head"><h3>'+escapeHtml(item.match?.name||p.name||item.fileName.replace(/[.]html?$/i,''))+'</h3><p>'+escapeHtml(item.modelSku||'Артикул не распознан')+' · '+escapeHtml(item.fileName)+'</p>'+duplicateBadge+'</div><div class="car-card-body"><div class="car-fields">'+fields+'</div><div class="preview-note">'+escapeHtml(cardNote)+'<br>Найдено полей в HTML: '+escapeHtml(p.fieldsFound)+'</div><div class="review-controls"><strong>Классификация серии</strong><label for="class-segment-'+index+'">Продуктовый сегмент</label><select id="class-segment-'+index+'" data-class-segment="'+index+'" data-original-value="'+escapeHtml(p.productSegment||item.match?.details?.productSegment||'')+'"><option value="">— выбери сегмент —</option>'+Object.keys(seriesCatalog.segments).map(s=>'<option value="'+escapeHtml(s)+'" '+(s===(p.productSegment||item.match?.details?.productSegment||'')?'selected':'')+'>'+escapeHtml(s)+'</option>').join('')+'</select><label for="class-series-'+index+'">Тематическая серия</label><select id="class-series-'+index+'" data-class-series="'+index+'" data-original-value="'+escapeHtml(p.themeSeries||item.match?.details?.themeSeries||'')+'" data-initial-series="'+escapeHtml(p.themeSeries||item.match?.details?.themeSeries||'')+'">'+catalogOptions(p.productSegment||item.match?.details?.productSegment||'',p.themeSeries||item.match?.details?.themeSeries||'')+'</select><div class="classification-diff" id="classification-diff-'+index+'"></div><div class="tile-actions"><button type="button" class="apply-classification" data-apply-classification="'+index+'">Применить</button><button type="button" class="secondary add-tile-series" data-add-tile-series="'+index+'">＋ Новая серия</button><span class="apply-state" id="apply-state-'+index+'">Есть неприменённые изменения</span></div></div>'+excludeButton+'<div class="review-controls"><strong>Тип товара / комплект</strong><label for="package-type-'+index+'">Формат выпуска</label><select id="package-type-'+index+'" data-package-type="'+index+'"><option value="single">Одиночная машинка</option><option value="team_transport">Team Transport — комплект с тягачом и машинкой</option><option value="multi_pack">Мультипак / набор</option><option value="other_set">Другой комплект</option></select><div class="package-fields"><label for="package-primary-'+index+'">Основная машинка / содержимое</label><input id="package-primary-'+index+'" data-package-primary="'+index+'" placeholder="Например: 1989 Porsche 944 Turbo"><label for="package-secondary-'+index+'">Вторая машинка / тягач (если есть)</label><input id="package-secondary-'+index+'" data-package-secondary="'+index+'" placeholder="Например: 2008 Porsche Cayenne"><label for="package-notes-'+index+'">Заметка о комплекте</label><textarea id="package-notes-'+index+'" data-package-notes="'+index+'" placeholder="Например: Porsche 944 на прицепе, Cayenne — тягач"></textarea></div><p class="hint">Это одна запись набора с несколькими моделями, а не автоматическое создание отдельных машинок.</p></div><div class="review-controls"><strong>Дополнительные теги и наблюдения</strong><p class="hint">Добавляй значимые надписи, эмблемы, фракции, персонажей и другие сведения с упаковки или изображения, даже если сайт не дал их тегом. Исходное значение сохраняется отдельно от назначения.</p><div class="manual-tag-row"><input data-manual-tag-value="'+index+'" placeholder="Например: Rebel Alliance"><select data-manual-tag-type="'+index+'"><option value="unknown">Тип не определён</option><option value="faction">Фракция</option><option value="character">Персонаж</option><option value="franchise">Франшиза / вселенная</option><option value="team">Команда / альянс</option><option value="symbol">Эмблема / символ</option><option value="inscription">Надпись на упаковке</option><option value="other">Другое</option></select><select data-manual-tag-source="'+index+'"><option value="packaging_text">Текст на упаковке</option><option value="packaging_image">Изображение упаковки</option><option value="vehicle_image">Изображение машинки</option><option value="manual_note">Ручная заметка</option></select><select data-manual-tag-status="'+index+'"><option value="needs_review">Требует проверки</option><option value="visually_confirmed">Визуально подтверждено</option><option value="source_confirmed">Подтверждено источником</option></select><select data-manual-tag-map="'+index+'"><option value="related_tag">Связанный тег</option><option value="franchise">Франшиза</option><option value="faction">Фракция</option><option value="character">Персонаж</option><option value="team">Команда / альянс</option><option value="series">Серия</option><option value="collection">Коллекция</option><option value="product_segment">Продуктовый сегмент</option><option value="assortment">Ассортимент</option><option value="body_color">Цвет кузова</option><option value="interior_color">Цвет салона</option><option value="other_field">Другое поле</option><option value="unmapped">Пока не назначать</option></select><input data-manual-tag-note="'+index+'" placeholder="Заметка / где видно (необязательно)"></div><button type="button" class="secondary" data-add-manual-tag="'+index+'">＋ Добавить тег</button><div class="manual-tag-list" data-manual-tag-list="'+index+'"></div></div><div class="review-controls"><strong>Ручная проверка источника</strong><label for="review-status-'+index+'">Статус проверки</label><select id="review-status-'+index+'" data-review-status="'+index+'"><option value="pending">Ожидает проверки</option><option value="verified">Источник проверен вручную</option><option value="needs_review">Нужно разобраться</option></select><label for="rarity-review-'+index+'">Редкость по визуальной проверке машинки</label><select id="rarity-review-'+index+'" data-rarity-review="'+index+'"><option value="unknown">Не проверено / неизвестно</option><option value="TH">TH — пламя в круге</option><option value="STH">STH — буквы TH на машинке</option></select><label for="rarity-note-'+index+'">Доказательство редкости (необязательно)</label><textarea id="rarity-note-'+index+'" data-rarity-note="'+index+'" placeholder="Что именно видно на машинке; если неразборчиво — оставь неизвестно."></textarea><label for="review-note-'+index+'">Заметка / подтверждение источника</label><textarea id="review-note-'+index+'" data-review-note="'+index+'" placeholder="Например: на физическом блистере указано 0/5; значение сохранено как исходная маркировка, смысл пока не установлен."></textarea></div>'+'<details class="source-tech"><summary>Технические данные источника</summary><p>Категория URL: <b>'+escapeHtml(p.sourcePathCategory||'—')+'</b></p>'+(p.sourceUrl?'<p><a class="source-link" href="'+escapeHtml(p.sourceUrl)+'" target="_blank" rel="noopener">Открыть страницу-источник ↗</a></p>':'')+'</details></div><div class="car-card-foot">Пустые поля на карточке означают «не извлечено», а не подтверждённое отсутствие данных.</div></article>';
+  }).join('');
+  const reviewTableBody=$('reviewTableBody');
+  let selectedReviewIndex=previewRows.length?0:-1;
+  function drawReviewTable(){
+   reviewTableBody.innerHTML=previewRows.map((item,index)=>{
+    const p=item.parsed||{},sku=String(item.modelSku||p.toyNum||p.filenameSku||'—'),imageSku=String(item.modelSku||p.toyNum||p.filenameSku||'').trim();
+    const img=imageSku?'<img class="thumb" src="https://raw.githubusercontent.com/JohnyKiska/hotwheels/feature/scheduled-market-data/ALLHW/'+encodeURIComponent(imageSku)+'.webp" alt="" loading="lazy" onerror="this.style.visibility=\'hidden\'">':'';
+    const series=p.themeSeries||p.seriesName||p.lineName||'—',idx=p.seriesIndexRaw||((p.seriesNum!=null&&p.seriesTotal!=null)?p.seriesNum+'/'+p.seriesTotal:'');
+    const status=item.matchCount===1?'Совпадение найдено':item.matchCount>1?'Несколько совпадений':'Проверить';
+    return '<tr data-review-row="'+index+'" class="'+(index===selectedReviewIndex?'active':'')+'"><td>'+img+'</td><td><span class="sku-cell">'+escapeHtml(sku)+'</span><small>'+escapeHtml(item.match?.name||p.name||item.fileName)+'</small></td><td>'+escapeHtml(p.releaseYear||'—')+'</td><td>'+escapeHtml(p.sourceCategory||p.sourcePathCategory||'—')+'</td><td>'+escapeHtml(series)+(idx?'<small>'+escapeHtml(idx)+'</small>':'')+'</td><td><span class="state-pill">'+status+'</span></td></tr>';
+   }).join('')||'<tr><td colspan="6">Нет записей.</td></tr>';
+   document.querySelectorAll('.car-card[data-card-index]').forEach(card=>{const i=Number(card.getAttribute('data-card-index'));card.classList.toggle('selected-editor',i===selectedReviewIndex);card.classList.toggle('not-selected',i!==selectedReviewIndex);});
+   const selected=previewRows[selectedReviewIndex],label=$('selectedRecordLabel');if(label&&selected)label.textContent='Редактирование: '+(selected.modelSku||selected.parsed.filenameSku||'без SKU')+' · '+(selected.match?.name||selected.parsed.name||selected.fileName);
+  }
+  drawReviewTable();
+  reviewTableBody.addEventListener('click',event=>{const row=event.target.closest('[data-review-row]');if(!row)return;selectedReviewIndex=Number(row.getAttribute('data-review-row'));drawReviewTable();});
+  document.querySelectorAll('.car-card[data-card-index]').forEach(card=>{
+   const controls=Array.from(card.querySelectorAll('.review-controls'));
+   controls.forEach((control,i)=>{control.classList.add('collapsible');if(i===0)control.classList.add('active-section');});
+   if(controls.length){const toolbar=document.createElement('div');toolbar.className='editor-tabs';['Классификация','Комплект','Теги и наблюдения','Проверка'].forEach((name,i)=>{const b=document.createElement('button');b.type='button';b.className=i===0?'active':'';b.textContent=name;b.addEventListener('click',()=>{controls.forEach((c,j)=>c.classList.toggle('active-section',j===i));toolbar.querySelectorAll('button').forEach(x=>x.classList.toggle('active',x===b));});toolbar.appendChild(b);});const body=card.querySelector('.car-card-body');if(body)body.insertBefore(toolbar,body.querySelector('.review-controls'));}
+  });
+  bindClassificationControls();
+  document.querySelectorAll('[data-exclude-index]').forEach(button=>button.addEventListener('click',()=>{const idx=Number(button.getAttribute('data-exclude-index'));if(!Number.isInteger(idx)||idx<0||idx>=previewRows.length)return;excludedRows.add(idx);const card=document.querySelector('[data-card-index="'+idx+'"]');if(card){card.remove();const summary=document.getElementById('visualSummary');if(summary)summary.textContent+=' Исключено вручную: '+(previewRows[idx].modelSku||previewRows[idx].fileName)+'.';}const row=reportRows.find(r=>r.fileName===previewRows[idx].fileName);if(row)row.status='ИСКЛЮЧЕНО пользователем из черновика';}));
+  // Build a separate normalized-schema draft; never rewrite the legacy catalog in place.
+  const slug=s=>String(s||'unknown').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+  schemaDraft={
+   schemaVersion:'0.1-draft',
+   generatedAt:new Date().toISOString(),
+   warning:'Draft only. Casting links and ambiguous classifications require review. Legacy personal data is not copied into the reference catalog.',
+   castings:[],
+   releases:previewRows.map((item,index)=>{
+    const p=item.parsed, legacy=item.match||{};
+    const raritySelect=document.querySelector('[data-rarity-review="'+index+'"]');
+    const rarityNote=document.querySelector('[data-rarity-note="'+index+'"]');
+    const manualRarity=raritySelect&&raritySelect.value!=='unknown'?raritySelect.value:null;
+    const sku=String(item.modelSku||p.filenameSku||'').toUpperCase();
+    const releaseId='release-'+(sku||slug(item.fileName));
+    const suspiciousIndex=/^0\s*\//.test(p.seriesIndexRaw||'');
+    const hasClass=!!(p.productSegment||p.lineName||p.themeSeries);
+    const segmentControl=document.querySelector('[data-class-segment="'+index+'"]');
+    const seriesControl=document.querySelector('[data-class-series="'+index+'"]');
+    const reviewedSegment=segmentControl?.value||p.productSegment||null;
+    const reviewedSeries=seriesControl?.value||p.themeSeries||null;
+    return {
+     _previewIndex:index, releaseId, castingId:null, sku:sku||null,
+     collectorNumber:legacy.colNum||null,
+     releaseYear:p.releaseYear?Number(p.releaseYear):null,
+     scale:p.scale||null, bodyColor:p.bodyColor||null, decorations:null, wheelType:p.wheelType||null,
+      packageType:(document.querySelector('[data-package-type="'+index+'"]')?.value||'single'),
+      includedVehicles:[document.querySelector('[data-package-primary="'+index+'"]')?.value.trim(),document.querySelector('[data-package-secondary="'+index+'"]')?.value.trim()].filter(Boolean),
+      packageNotes:document.querySelector('[data-package-notes="'+index+'"]')?.value.trim()||null,
+     interiorColor:p.interiorColor||null, windowColor:p.windowColor||null,
+     baseMaterial:null, baseColor:p.baseColor||null, countryOfManufacture:null,
+     rarityLabel:manualRarity, rarityEvidence:manualRarity?{method:'manual_visual_review',note:rarityNote?.value.trim()||null}:null, sourceRarityLabel:p.sourceRarityLabel||null, imageUrl:legacy.image||null, // Metadata is not visual verification.
+     classification:{
+      productSegment:reviewedSegment, lineName:p.lineName||null,
+      themeSeries:reviewedSeries, assortmentName:p.assortmentName||null,
+      seriesNumber:suspiciousIndex?null:(p.seriesNum??null),
+      seriesTotal:p.seriesTotal??(configuredTotal(p.lineName||p.assortmentName||p.sourceCategory)??null),
+      classificationStatus:suspiciousIndex?'needs_review':(hasClass?'needs_review':'unclassified')
+     },
+     displayName:legacy.name||item.fileName.replace(/\.(html?|HTML?)$/,'').replace(/^([A-Z]{2,4}\d{2,3})\s*/i,'').replace(/\s+Hot Wheels.*$/i,'').trim()||sku||null,
+     notes:null
+    };
+   }),
+   sources:previewRows.map((item,index)=>{
+    const p=item.parsed, sku=String(item.modelSku||p.filenameSku||'').toUpperCase();
+    const raritySelect=document.querySelector('[data-rarity-review="'+index+'"]');
+    const rarityNote=document.querySelector('[data-rarity-note="'+index+'"]');
+    return {
+     _previewIndex:index, sourceId:'source-'+(sku||slug(item.fileName)), releaseId:'release-'+(sku||slug(item.fileName)),
+     sourceName:'All Hot Wheels', sourceUrl:p.sourceUrl||null,
+     sourcePathCategory:p.sourcePathCategory||null, sourceCategory:p.sourceCategory||null,
+     sourceSeriesLabel:p.seriesName||null, sourceThemeSeriesLabel:p.themeSeries||null, sourceRarityLabel:p.sourceRarityLabel||null, manuallyVerifiedRarity:raritySelect&&raritySelect.value!=='unknown'?raritySelect.value:null, rarityEvidence:raritySelect&&raritySelect.value!=='unknown'?{method:'manual_visual_review',note:rarityNote?.value.trim()||null}:null, sourceSeriesIndexRaw:p.seriesIndexRaw||null,
+     observedAt:new Date().toISOString(), reviewStatus:priorReviews.get(sku)?.reviewStatus||'pending',
+     reviewNote:priorReviews.has(sku)?(priorReviews.get(sku).reviewNote||null):(/^0\s*\//.test(p.seriesIndexRaw||'')?'Suspicious source index; verify before accepting numeric series number.':null)
+    };
+   }),
+   legacyLinks:previewRows.map((item,index)=>({
+    _previewIndex:index, releaseId:'release-'+String(item.modelSku||item.parsed.filenameSku||'').toUpperCase(),
+    legacyToyNum:item.match?.toyNum||item.modelSku||null,
+    legacyRecordFound:item.matchCount===1, legacyRecordCount:item.matchCount,
+    legacyStatusRaw:item.match?.status??null,
+    note:'Legacy status is preserved as raw data; do not map to a standardized personal-collection status without review.'
+   }))
+  };
+  schemaDraft.sources.forEach((source,index)=>{const key=String(source.releaseId||'').replace(/^release-/,'').toUpperCase();const saved=priorReviews.get(key);if(saved){const status=$('review-status-'+index);const note=$('review-note-'+index);if(status)status.value=saved.reviewStatus;if(note)note.value=saved.reviewNote;}});
+  $('schema').disabled=false;
+  $('status').className='status '+(totalAdded?'good':'warn');$('status').textContent='Проверка завершена. Это предварительный результат: просмотри таблицу, затем скачай JSON и отчёт. Ничего не записано обратно в GitHub.';
+  $('download').disabled=false;$('report').disabled=false;$('newcars').disabled=newCars.length===0;$('schema').disabled=false;
+ }catch(e){$('status').className='status warn';$('status').textContent='Ошибка: '+e.message;}
+};
+$('download').onclick=()=>{if(!output)return;const blob=new Blob([JSON.stringify(output,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='collection-enriched-test.json';a.click();URL.revokeObjectURL(a.href);};
+$('newcars').onclick=()=>{if(!newCars.length)return;const blob=new Blob([JSON.stringify(newCars,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='new-cars-review.json';a.click();URL.revokeObjectURL(a.href);};
+$('schema').onclick=()=>{if(!schemaDraft)return;schemaDraft.releases.forEach(release=>{const index=release._previewIndex;const type=document.querySelector('[data-package-type="'+index+'"]');const primary=document.querySelector('[data-package-primary="'+index+'"]');const secondary=document.querySelector('[data-package-secondary="'+index+'"]');const notes=document.querySelector('[data-package-notes="'+index+'"]');release.packageType=type?.value||'single';release.includedVehicles=[primary?.value.trim(),secondary?.value.trim()].filter(Boolean);release.packageNotes=notes?.value.trim()||null;});schemaDraft.releases.forEach(release=>{release.observedTags=(manualTagsByIndex[release._previewIndex]||[]).map(tag=>({...tag}));});schemaDraft.sources.forEach((source,index)=>{const status=document.querySelector('[data-review-status="'+index+'"]');const note=document.querySelector('[data-review-note="'+index+'"]');const rarity=document.querySelector('[data-rarity-review="'+index+'"]');const rarityNote=document.querySelector('[data-rarity-note="'+index+'"]');if(status)source.reviewStatus=status.value;if(note)source.reviewNote=note.value.trim()||null;source.manuallyVerifiedRarity=rarity&&rarity.value!=='unknown'?rarity.value:null;source.rarityEvidence=source.manuallyVerifiedRarity?{method:'manual_visual_review',note:rarityNote?.value.trim()||null}:null;const release=schemaDraft.releases.find(r=>r.releaseId===source.releaseId);if(release){release.rarityLabel=source.manuallyVerifiedRarity;release.rarityEvidence=source.rarityEvidence;}});const clean=JSON.parse(JSON.stringify(schemaDraft));for(const key of ['releases','sources','legacyLinks'])clean[key]=clean[key].filter(item=>!excludedRows.has(item._previewIndex)).map(({_previewIndex,...item})=>item);const blob=new Blob([JSON.stringify(clean,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='catalog-schema-draft.json';a.click();URL.revokeObjectURL(a.href);};
+$('addSegment').onclick=()=>{const name=prompt('Название нового сегмента / группы (например, Monster Trucks или Team Transport):');if(name===null)return;const segment=name.trim();if(!segment){$('catalogStatus').className='status warn';$('catalogStatus').textContent='Название группы не может быть пустым.';return;}const existing=Object.keys(seriesCatalog.segments).find(x=>x.toLowerCase()===segment.toLowerCase());if(existing){$('catalogStatus').className='status warn';$('catalogStatus').textContent='Такая группа уже есть: '+existing;return;}seriesCatalog.segments[segment]=[];$('catalogSegment').innerHTML=Object.keys(seriesCatalog.segments).map(s=>'<option value="'+escapeHtml(s)+'">'+escapeHtml(s)+'</option>').join('');$('catalogSegment').value=segment;document.querySelectorAll('[data-class-segment]').forEach(sel=>sel.insertAdjacentHTML('beforeend','<option value="'+escapeHtml(segment)+'">'+escapeHtml(segment)+'</option>'));$('catalogStatus').className='status good';$('catalogStatus').textContent='Создан сегмент '+segment+'. Добавь серию или выбери его на плитке и нажми «Применить».';};
+document.addEventListener('click',event=>{
+ const addManual=event.target.closest('[data-add-manual-tag]');
+ if(addManual){
+  const idx=Number(addManual.getAttribute('data-add-manual-tag'));
+  const value=document.querySelector('[data-manual-tag-value="'+idx+'"]')?.value.trim();
+  if(!value){alert('Введи значение тега или надписи.');return;}
+  const entry={value,type:document.querySelector('[data-manual-tag-type="'+idx+'"]')?.value||'unknown',source:document.querySelector('[data-manual-tag-source="'+idx+'"]')?.value||'manual_note',status:document.querySelector('[data-manual-tag-status="'+idx+'"]')?.value||'needs_review',mappedTo:document.querySelector('[data-manual-tag-map="'+idx+'"]')?.value||'unmapped',note:document.querySelector('[data-manual-tag-note="'+idx+'"]')?.value.trim()||null};
+  manualTagsByIndex[idx]=manualTagsByIndex[idx]||[];manualTagsByIndex[idx].push(entry);
+  const input=document.querySelector('[data-manual-tag-value="'+idx+'"]');if(input)input.value='';
+  const note=document.querySelector('[data-manual-tag-note="'+idx+'"]');if(note)note.value='';
+  renderManualTags(idx);return;
+ }
+ const removeManual=event.target.closest('[data-remove-manual-tag]');
+ if(removeManual){const idx=Number(removeManual.getAttribute('data-remove-manual-tag')),tagIdx=Number(removeManual.getAttribute('data-tag-index'));if(manualTagsByIndex[idx])manualTagsByIndex[idx].splice(tagIdx,1);renderManualTags(idx);return;}
+
+ const zoom=event.target.closest("[data-zoom-image]");if(zoom){const img=zoom.matches("img")?zoom:zoom.parentElement.querySelector("img");if(img&&img.src&&img.complete&&img.naturalWidth){const modal=document.getElementById("imageLightbox");modal.querySelector("img").src=img.src;modal.classList.add("open");}return;}
+ const card=event.target.closest(".car-card");if(card&&!event.target.closest("button,select,input,textarea,a,label,summary,.image-lightbox"))card.classList.toggle("is-editing");
+ const apply=event.target.closest('[data-apply-classification]');
+ if(apply){const idx=Number(apply.getAttribute('data-apply-classification')),item=previewRows[idx];if(!item)return;const segment=document.querySelector('[data-class-segment="'+idx+'"]'),series=document.querySelector('[data-class-series="'+idx+'"]');if(!segment||!segment.value){const state=$('apply-state-'+idx);if(state)state.textContent='Сначала выбери сегмент';return;}if(series&&series.value&&!((seriesCatalog.segments[segment.value]||[]).includes(series.value))){const state=$('apply-state-'+idx);if(state)state.textContent='Серия не входит в выбранную группу';return;}item.parsed.productSegment=segment.value;item.parsed.themeSeries=series&&series.value?series.value:null;if(item.match)item.match.details={...(item.match.details||{}),productSegment:segment.value,themeSeries:item.parsed.themeSeries};if(schemaDraft){const sku=String(item.modelSku||item.parsed.filenameSku||'').toUpperCase();const rel=schemaDraft.releases.find(x=>x.releaseId==='release-'+sku);if(rel){rel.classification.productSegment=segment.value;rel.classification.themeSeries=item.parsed.themeSeries;rel.classification.classificationStatus='manually_reviewed';}const src=schemaDraft.sources.find(x=>x.releaseId==='release-'+sku);if(src){src.reviewStatus='verified';src.reviewNote=[src.reviewNote,'Classification applied on tile: '+segment.value+(item.parsed.themeSeries?' / '+item.parsed.themeSeries:'')].filter(Boolean).join(' | ');}}updateClassificationDiff(idx);const state=$('apply-state-'+idx);if(state){state.textContent='Применено к черновику';state.style.color='#18733b';}const status=$('catalogStatus');status.className='status good';status.textContent='Классификация применена к черновику. Для сохранения нажми «Скачать черновик новой схемы»';}
+ const add=event.target.closest('[data-add-tile-series]');
+ if(add){const idx=Number(add.getAttribute('data-add-tile-series')),segment=document.querySelector('[data-class-segment="'+idx+'"]'),series=document.querySelector('[data-class-series="'+idx+'"]');if(!segment||!segment.value){const state=$('apply-state-'+idx);if(state)state.textContent='Сначала выбери сегмент';return;}const value=prompt('Название новой серии для сегмента '+segment.value+':');if(value===null)return;const name=value.trim();if(!name){const state=$('apply-state-'+idx);if(state)state.textContent='Название не может быть пустым';return;}if(!seriesCatalog.segments[segment.value])seriesCatalog.segments[segment.value]=[];const found=seriesCatalog.segments[segment.value].find(x=>x.toLowerCase()===name.toLowerCase());if(found){refreshSeriesSelect(segment,series,found);const state=$('apply-state-'+idx);if(state)state.textContent='Серия уже существует — выбрана';return;}seriesCatalog.segments[segment.value].push(name);seriesCatalog.segments[segment.value].sort((a,b)=>a.localeCompare(b));refreshSeriesSelect(segment,series,name);const state=$('apply-state-'+idx);if(state)state.textContent='Новая серия добавлена в справочник — нажми «Применить»';const status=$('catalogStatus');status.className='status good';status.textContent='Добавлена серия '+name+' в '+segment.value+'. Скачай JSON-справочник для сохранения.';}
+});
+document.getElementById("imageLightbox").addEventListener("click",()=>document.getElementById("imageLightbox").classList.remove("open"));document.addEventListener("keydown",e=>{if(e.key==="Escape")document.getElementById("imageLightbox").classList.remove("open");});
+$('addSeries').onclick=()=>{const segment=$('catalogSegment').value,name=$('newSeriesName').value.trim();if(!name){$('catalogStatus').className='status warn';$('catalogStatus').textContent='Введи название серии.';return;}if(!seriesCatalog.segments[segment])seriesCatalog.segments[segment]=[];const existing=seriesCatalog.segments[segment].find(x=>x.toLowerCase()===name.toLowerCase());if(existing){$('catalogStatus').className='status warn';$('catalogStatus').textContent='Такая серия уже есть: '+existing;return;}seriesCatalog.segments[segment].push(name);seriesCatalog.segments[segment].sort((a,b)=>a.localeCompare(b));document.querySelectorAll('[data-class-segment]').forEach(sel=>{const idx=sel.getAttribute('data-class-segment'),ss=document.querySelector('[data-class-series="'+idx+'"]');if(ss&&sel.value===segment)refreshSeriesSelect(sel,ss,ss.value);});$('newSeriesName').value='';$('catalogStatus').className='status good';$('catalogStatus').textContent='Добавлено: '+name+' → '+segment+'. Скачай JSON, чтобы сохранить изменение в файл.';};
+$('downloadSeriesCatalog').onclick=()=>{const blob=new Blob([JSON.stringify(seriesCatalog,null,2)+'\n'],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='series-catalog.json';a.click();URL.revokeObjectURL(a.href);};
+$('loadSeriesCatalog').addEventListener('change',async e=>{const file=e.target.files&&e.target.files[0];if(!file)return;try{seriesCatalog=normalizeCatalog(JSON.parse(await file.text()));$('catalogSegment').innerHTML=Object.keys(seriesCatalog.segments).map(s=>'<option value="'+escapeHtml(s)+'">'+escapeHtml(s)+'</option>').join('');document.querySelectorAll('[data-class-segment]').forEach(sel=>{const idx=sel.getAttribute('data-class-segment'),ss=document.querySelector('[data-class-series="'+idx+'"]');sel.innerHTML=Object.keys(seriesCatalog.segments).map(s=>'<option value="'+escapeHtml(s)+'" '+(s===sel.value?'selected':'')+'>'+escapeHtml(s)+'</option>').join('');if(ss)refreshSeriesSelect(sel,ss,'');});$('catalogStatus').className='status good';$('catalogStatus').textContent='Справочник загружен: '+file.name;}catch(err){$('catalogStatus').className='status warn';$('catalogStatus').textContent='Ошибка JSON: '+err.message;}});
+$('report').onclick=()=>{const lines=[['SKU','Model','Fields found','Added fields','Status'].join(',')];for(const r of reportRows)lines.push([r.sku,r.name,r.found,r.added.join('; '),r.status].map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(','));const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+lines.join('\r\n')],{type:'text/csv;charset=utf-8'}));a.download='import-report.csv';a.click();URL.revokeObjectURL(a.href);};
+</script></body></html>

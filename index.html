@@ -255,9 +255,27 @@
     <script>
 // Автоматическая загрузка базы данных прямо из твоего репозитория GitHub
         let cars = [];
+        let seriesTotals = { Boulevard: 165 };
         let activeExpandedSeries = null; // Запоминает, какая серия сейчас развернута
 
+        function getDisplayedSeriesTotal(car) {
+            const seriesName = String(car.seriesName || '').trim().toLowerCase();
+            const configuredName = Object.keys(seriesTotals).find(name => name.trim().toLowerCase() === seriesName);
+            return configuredName ? seriesTotals[configuredName] : (car.seriesTotal || 5);
+        }
+
         async function loadDatabase() {
+            try {
+                const configResponse = await fetch('series-config.json');
+                if (configResponse.ok) {
+                    const config = await configResponse.json();
+                    if (config && config.seriesTotals && typeof config.seriesTotals === 'object') {
+                        seriesTotals = { ...seriesTotals, ...config.seriesTotals };
+                    }
+                }
+            } catch (configError) {
+                console.warn('Не удалось загрузить series-config.json, используются значения по умолчанию.', configError);
+            }
             try {
 // Скрипт сам берет файл collection.json, лежащий в этой же папке на хостинге
                 const response = await fetch('collection.json');
@@ -617,7 +635,7 @@ function updateDashboard() {
                             ${car.year || '—'}
                         </div>
                         <div style="background: rgba(255, 255, 255, 0.85); color: #1e293b; padding: 2px 8px; font-weight: 800; font-size: 11px; border-radius: 6px; border: 1px solid #cbd5e1;">
-                            ${car.seriesNum || 1}/${car.seriesTotal || 5}
+                            ${car.seriesNum || 1}/${getDisplayedSeriesTotal(car)}
                         </div>
                     </div>
 
