@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "catalog_edges": [
+    {
+      "id": "edge:test:group-collection",
+      "parentId": "group:test:two-cars",
+      "childId": "collection:test:japanese-cars",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:test:collection-series",
+      "parentId": "collection:test:japanese-cars",
+      "childId": "series:test:comparison",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:test:series-skyline",
+      "parentId": "series:test:comparison",
+      "childId": "model:test:nissan-skyline-r34",
+      "relation": "parent-child"
+    },
+    {
+      "id": "edge:test:series-supra",
+      "parentId": "series:test:comparison",
+      "childId": "model:test:toyota-supra-a80",
+      "relation": "parent-child"
+    }
+  ]
+}
