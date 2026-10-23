@@ -77,7 +77,7 @@ input[type=text],select{border:1px solid #cbd3df;border-radius:9px;padding:10px;
 <script>
 (function(){
 'use strict';
-const DATA='../data/';
+const DATA='data/';
 const DRAFT_KEY='hotwheels.catalog.editor.draft.v1';
 const WORKING_KEY='hotwheels.catalog.editor.working.v1';
 const $=id=>document.getElementById(id);
@@ -169,7 +169,7 @@ async function load(){
   if(!Array.isArray(draft.catalog_nodes)||!Array.isArray(draft.catalog_edges))throw Error('Формат каталога не распознан.');
   base=clone(draft);dirty=false;$('saveStatus').textContent=local?'Черновик восстановлен из браузера':'Каталог загружен';
   render();notify(local?'Восстановлен локальный черновик. Проверь изменения перед применением.':'Каталог загружен. Связи не создавались автоматически.');
- }catch(err){$('saveStatus').textContent='Ошибка загрузки';notify('Не удалось загрузить данные каталога: '+err.message+'. Открой страницу через GitHub Pages или локальный веб-сервер, а не как file://.',true);}
+ }catch(err){$('saveStatus').textContent='Ошибка загрузки';const localFile=window.location.protocol==='file:';notify(localFile?'Редактор открыт напрямую с диска (file://), поэтому Chrome блокирует fetch JSON. Запусти локальный сервер из корня проекта командой «py -m http.server 8000» и открой http://localhost:8000/catalog/editor.html. Также проверь, что папка catalog/data находится рядом с editor.html внутри папки catalog.':'Не удалось загрузить данные каталога: '+err.message+'. Проверь, что файлы JSON находятся в папке catalog/data и открой редактор через локальный веб-сервер или GitHub Pages.',true);}
 }
 $('search').addEventListener('input',renderItems);
 $('filterKind').addEventListener('change',renderItems);
