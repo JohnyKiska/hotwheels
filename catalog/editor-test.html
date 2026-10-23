@@ -384,6 +384,13 @@ $('clearSelection').addEventListener('click',()=>{selected.clear();render();});
 $('create').addEventListener('click',()=>{
  const name=$('name').value.trim();if(!name){notify('Укажи название элемента.',true);return;}
  const kind=$('kind').value,direction=$('direction').value,tags=parseTags($('tags').value);
+ const duplicate=nodes().find(x=>x.kind===kind&&String(x.name||'').trim().toLocaleLowerCase()===name.toLocaleLowerCase());
+ if(duplicate){
+  const useExisting=confirm('Элемент типа «'+(kindLabels[kind]||kind)+'» с названием «'+duplicate.name+'» уже существует.\n\nOK — выбрать существующий элемент для редактирования.\nОтмена — не создавать дубликат.');
+  if(useExisting){selected=new Set([duplicate.id]);activeTreeId=duplicate.id;$('kind').value=duplicate.kind;$('name').value=duplicate.name;$('direction').value=dir(duplicate);$('tags').value=(duplicate.attributes?.tags||[]).join(', ');$('rename').disabled=false;render();notify('Выбран существующий элемент. Отредактируй его и нажми «Переименовать выбранный».');}
+  else notify('Создание отменено: дубликат не добавлен.');
+  return;
+ }
  const n={id:uid(kind),kind,name,attributes:{...(direction?{sourceDirection:direction}:{}),...(tags.length?{tags}:{})},createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};
  nodes().push(n);selected=new Set([n.id]);editingId=null;$('name').value='';$('tags').value='';setDirty();render();notify('Создан элемент «'+name+'». Изменения пока в черновике.');
 });
