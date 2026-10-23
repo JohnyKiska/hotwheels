@@ -106,10 +106,11 @@ function renderStats(){
  nodes().forEach(n=>counts[n.kind]=(counts[n.kind]||0)+1);
  $('stats').innerHTML='<span class="chip">Всего: <b class="count">'+nodes().length+'</b></span>'+Object.keys(counts).map(k=>'<span class="chip">'+kindLabels[k]+': <b class="count">'+counts[k]+'</b></span>').join('')+'<span class="chip">Связей: <b class="count">'+edges().length+'</b></span><span class="chip">Выбрано: <b class="count">'+selected.size+'</b></span>';
 }
+function parentDisplay(n){return n.name+' · '+kindLabels[n.kind]+' · '+(dir(n)||'без направления')+' · '+n.id.slice(-8);}
 function renderParentOptions(){
  const oldId=$('parent').dataset.selectedId||'';
- $('parentOptions').innerHTML=sortedNodes(nodes()).map(n=>'<option value="'+esc(n.name+' · '+kindLabels[n.kind])+'"></option>').join('');
- if(oldId&&getNode(oldId))$('parent').value=getNode(oldId).name+' · '+kindLabels[getNode(oldId).kind];
+ $('parentOptions').innerHTML=sortedNodes(nodes()).map(n=>'<option value="'+esc(parentDisplay(n))+'"></option>').join('');
+ if(oldId&&getNode(oldId))$('parent').value=parentDisplay(getNode(oldId));
 }
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function renderItems(){
@@ -133,7 +134,7 @@ function render(){renderStats();renderParentOptions();renderItems();renderEdges(
 function resolveParentInput(){
  const value=$('parent').value.trim();
  if(!value)return null;
- return nodes().find(n=>(n.name+' · '+kindLabels[n.kind])===value)||null;
+ return nodes().find(n=>parentDisplay(n)===value)||null;
 }
 function toggleSelection(id,on){if(on)selected.add(id);else selected.delete(id);render();}
 function editNode(id){
@@ -216,7 +217,7 @@ $('makeRoot').addEventListener('click',()=>{
  const before=edges().length;draft.catalog_edges=edges().filter(e=>!ids.includes(e.childId));
  const removed=before-draft.catalog_edges.length;setDirty();render();notify('Элементы сделаны корневыми. Убрано родительских связей: '+removed+'. Сами элементы сохранены.');
 });
-$('copySelection').addEventListener('click',()=>{const ids=[...selected];if(!ids.length){notify('Сначала выбери элементы.',true);return;}const parents=edges().filter(e=>ids.includes(e.childId)).map(e=>e.parentId);if(parents.length)$('parent').value=parents[0];renderEdges();notify('Показаны текущие связи выбранных элементов.');});
+$('copySelection').addEventListener('click',()=>{const ids=[...selected];if(!ids.length){notify('Сначала выбери элементы.',true);return;}const parents=edges().filter(e=>ids.includes(e.childId)).map(e=>e.parentId);if(parents.length&&getNode(parents[0])){$('parent').dataset.selectedId=parents[0];$('parent').value=parentDisplay(getNode(parents[0]));}renderEdges();notify('Показаны текущие связи выбранных элементов.');});
 $('apply').addEventListener('click',()=>{
  const err=validate();if(err){notify('Проверка не пройдена: '+err,true);return;}
  draft.editorMeta={...(draft.editorMeta||{}),appliedAt:new Date().toISOString(),schemaVersion:1};
