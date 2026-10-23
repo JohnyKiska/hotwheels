@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Hot Wheels — редактор каталога</title>
 <style>
-:root{font-family:Inter,"Segoe UI",Arial,sans-serif;color:#172033;background:#f3f5f8}
+:root{font-family:Inter,"Segoe UI",Arial,sans-serif;color:#172033;background:#f3f5f8;--kind-group:#dceafe;--kind-collection:#dff5e5;--kind-series:#ffedcf;--kind-model:#f1ddff}
 *{box-sizing:border-box}body{margin:0}header{background:#182235;color:#fff;padding:22px clamp(16px,4vw,42px);border-bottom:4px solid #ff5000}
 header h1{margin:0 0 6px;font-size:clamp(22px,3vw,32px)}header p{margin:0;color:#c8d0dc}
 main{max-width:1500px;margin:auto;padding:22px clamp(12px,3vw,30px) 48px}
@@ -20,7 +20,7 @@ input[type=text],select{border:1px solid #cbd3df;border-radius:9px;padding:10px;
 .filters{display:grid;grid-template-columns:1fr 1fr;gap:8px}.filters select{width:100%}
 .hint{font-size:13px;line-height:1.45;color:#647084;margin:10px 0 0}
 .stats{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.chip{font-size:12px;background:#eef1f6;border-radius:99px;padding:5px 9px;color:#475368}
-.tree-wrap{border:1px solid #dce3ec;border-radius:10px;padding:10px;margin-bottom:14px;background:#fbfcfe}.tree-toolbar{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:9px}.tree{display:grid;gap:3px;max-height:520px;overflow:auto}.tree-row{display:flex;align-items:center;gap:6px;padding:7px 8px;border-radius:7px;border:1px solid transparent;min-width:0}.tree-row[draggable="true"]{cursor:grab}.tree-row.dragging{opacity:.45}.tree-row.drop-target{background:#e9f7ec;border-color:#3a9952}.tree-row.drop-invalid{background:#fff0ed;border-color:#c84a35}.tree-row .tree-name{min-width:0;overflow-wrap:anywhere;font-size:14px;font-weight:650}.tree-row .tree-kind{font-size:11px;color:#52627a;background:#e9edf4;border-radius:5px;padding:3px 5px;white-space:nowrap}.tree-row .tree-toggle{padding:2px 5px;background:transparent;min-width:24px}.tree-row .tree-pick{padding:5px 7px;font-size:12px}.tree-row .tree-id{font-size:10px;color:#8993a3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.tree-empty{font-size:13px;color:#657187;padding:12px}.list-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;flex-wrap:wrap}.list{display:grid;gap:7px}
+.tree-wrap{border:1px solid #dce3ec;border-radius:10px;padding:10px;margin-bottom:14px;background:#fbfcfe}.tree-toolbar{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:9px}.tree{display:grid;gap:3px;max-height:520px;overflow:auto}.tree-row{display:flex;align-items:center;gap:6px;padding:7px 8px;border-radius:7px;border:1px solid transparent;min-width:0}.tree-row[draggable="true"]{cursor:grab}.tree-row.dragging{opacity:.45}.tree-row.drop-target{background:#e9f7ec;border-color:#3a9952}.tree-row.drop-invalid{background:#fff0ed;border-color:#c84a35}.tree-row .tree-name{min-width:0;overflow-wrap:anywhere;font-size:14px;font-weight:650}.tree-row .tree-kind{font-size:11px;color:#172033;background:var(--kind-series);border-radius:5px;padding:3px 5px;white-space:nowrap}.tree-row[data-kind="group"] .tree-kind,.kind-tag[data-kind="group"]{background:var(--kind-group)}.tree-row[data-kind="collection"] .tree-kind,.kind-tag[data-kind="collection"]{background:var(--kind-collection)}.tree-row[data-kind="series"] .tree-kind,.kind-tag[data-kind="series"]{background:var(--kind-series)}.tree-row[data-kind="model"] .tree-kind,.kind-tag[data-kind="model"]{background:var(--kind-model)}.kind-color-settings{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0;padding:10px;border:1px solid #dce3ec;border-radius:9px;background:#f8fafc}.kind-color-setting{display:flex;align-items:center;gap:8px;font-size:13px}.kind-color-setting input{width:34px;height:30px;padding:2px;border:1px solid #cbd3df;border-radius:6px;background:white}.tree-row .tree-toggle{padding:2px 5px;background:transparent;min-width:24px}.tree-row .tree-pick{padding:5px 7px;font-size:12px}.tree-row .tree-id{font-size:10px;color:#8993a3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.tree-empty{font-size:13px;color:#657187;padding:12px}.list-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;flex-wrap:wrap}.list{display:grid;gap:7px}
 .item{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;border:1px solid #e1e6ed;border-radius:10px;padding:10px 11px}
 .item.selected{border-color:#ff5000;background:#fff8f4}.item input{width:17px;height:17px;accent-color:#ff5000}
 .item-name{font-weight:700;font-size:17px;line-height:1.35;overflow-wrap:anywhere;color:#172033}
@@ -53,7 +53,7 @@ input[type=text],select{border:1px solid #cbd3df;border-radius:9px;padding:10px;
 <div class="explorer-layout">
 <section class="panel explorer-pane">
 <div class="list-head"><h2 style="margin:0">Каталог</h2><button id="addRootGroup" class="mini">+ Уровень</button></div>
-<div class="tree-search"><input id="treeSearch" type="search" placeholder="Поиск в дереве…" aria-label="Поиск в дереве"></div><div class="tree-toolbar"><button id="expandTree" class="mini">Развернуть всё</button><button id="collapseTree" class="mini">Свернуть всё</button></div>
+<div class="tree-search"><input id="treeSearch" type="search" placeholder="Поиск в дереве…" aria-label="Поиск в дереве"></div><details><summary style="cursor:pointer;font-size:13px;font-weight:650;margin:8px 0">Настроить цвета типов</summary><div class="kind-color-settings"><label class="kind-color-setting">Группа <input type="color" data-kind-color="group" value="#dceafe"></label><label class="kind-color-setting">Коллекция <input type="color" data-kind-color="collection" value="#dff5e5"></label><label class="kind-color-setting">Серия <input type="color" data-kind-color="series" value="#ffedcf"></label><label class="kind-color-setting">Модель <input type="color" data-kind-color="model" value="#f1ddff"></label><button id="resetKindColors" class="secondary" style="grid-column:1/-1">Сбросить цвета</button></div></details><div class="tree-toolbar"><button id="expandTree" class="mini">Развернуть всё</button><button id="collapseTree" class="mini">Свернуть всё</button></div>
 <div class="tree-wrap"><div id="tree" class="tree"><div class="tree-empty">Загрузка дерева…</div></div></div>
 <p class="hint">Выбери узел слева, чтобы переименовать, удалить или перенести его в верхнюю группу.</p><div id="treeActions" class="tree-actions" hidden><strong id="treeActionTitle">Действия с элементом</strong><div class="tree-action-buttons"><button id="treeRename" class="secondary">Переименовать</button><button id="treeDelete" class="secondary">Удалить</button></div><label for="treeMoveGroup" class="small">Перенести в верхнюю группу</label><select id="treeMoveGroup"></select><button id="treeMove" class="primary">Перенести</button><div id="treeActionHint" class="small"></div></div>
 <hr style="border:0;border-top:1px solid #e4e8ee;margin:16px 0">
@@ -88,6 +88,10 @@ const kindLabels={group:'Группа',collection:'Коллекция',series:'�
 let base=null, draft=null, selected=new Set(), editingId=null, dirty=false;
 const collapsed=new Set(); let draggingId=null, activeTreeId=null;
 const changePreview=new Map();
+const KIND_COLOR_DEFAULTS={group:'#dceafe',collection:'#dff5e5',series:'#ffedcf',model:'#f1ddff'};
+const KIND_COLOR_KEY='hotwheels.catalog.editor.kindColors.v1';
+function applyKindColors(){let saved={};try{saved=JSON.parse(localStorage.getItem(KIND_COLOR_KEY)||'{}')||{};}catch{};Object.keys(KIND_COLOR_DEFAULTS).forEach(k=>{const value=/^#[0-9a-f]{6}$/i.test(saved[k]||'')?saved[k]:KIND_COLOR_DEFAULTS[k];document.documentElement.style.setProperty('--kind-'+k,value);const input=document.querySelector('[data-kind-color="'+k+'"]');if(input)input.value=value;});}
+function saveKindColors(){const colors={};document.querySelectorAll('[data-kind-color]').forEach(input=>{colors[input.dataset.kindColor]=input.value;});localStorage.setItem(KIND_COLOR_KEY,JSON.stringify(colors));applyKindColors();}
 const clone=x=>JSON.parse(JSON.stringify(x));
 function notify(message,error=false){const n=$('notice');n.textContent=message;n.className=error?'error':'';n.style.display='block';}
 function hideNotice(){$('notice').style.display='none';}
@@ -183,7 +187,7 @@ function renderTree(){
  function row(id,depth){
   const n=getNode(id);if(!n||seen.has(id))return;seen.add(id);
   const children=kids.get(id)||[], has=children.length>0, isCollapsed=collapsed.has(id);
-  html+='<div class="tree-row '+(activeTreeId===id?'active':'')+'" draggable="true" data-tree-node="'+esc(id)+'" style="margin-left:'+Math.min(depth,12)*15+'px" title="Перетащи на другого родителя">'+
+  html+='<div class="tree-row '+(activeTreeId===id?'active':'')+'" data-kind="'+esc(n.kind)+'" draggable="true" data-tree-node="'+esc(id)+'" style="margin-left:'+Math.min(depth,12)*15+'px" title="Перетащи на другого родителя">'+
    '<button class="tree-toggle" data-toggle="'+esc(id)+'" aria-label="'+(isCollapsed?'Раскрыть':'Свернуть')+'" '+(!has?'disabled':'')+'>'+ (has?(isCollapsed?'▸':'▾'):'·')+'</button>'+
    '<span class="tree-name">'+esc(n.name)+'</span><span class="tree-kind">'+esc(kindLabels[n.kind]||n.kind)+'</span>'+
    '<button class="tree-pick mini" data-tree-pick="'+esc(id)+'">Выбрать</button></div>';
@@ -191,7 +195,7 @@ function renderTree(){
  }
  roots.filter(n=>!visibleSearch||treeBranchMatches(n.id,visibleSearch,kids)).forEach(n=>row(n.id,0));
  // Preserve disconnected or malformed records visibly rather than hiding them.
- sortedNodes(nodes().filter(n=>!seen.has(n.id)&&(!visibleSearch||n.name.toLocaleLowerCase().includes(visibleSearch)))).forEach(n=>{html+='<div class="tree-row" draggable="true" data-tree-node="'+esc(n.id)+'" title="Элемент без корневого пути"><span class="tree-id">↳ отдельная ветвь</span><span class="tree-name">'+esc(n.name)+'</span><span class="tree-kind">'+esc(kindLabels[n.kind]||n.kind)+'</span><button class="tree-pick mini" data-tree-pick="'+esc(n.id)+'">Выбрать</button></div>';});
+ sortedNodes(nodes().filter(n=>!seen.has(n.id)&&(!visibleSearch||n.name.toLocaleLowerCase().includes(visibleSearch)))).forEach(n=>{html+='<div class="tree-row" data-kind="'+esc(n.kind)+'" draggable="true" data-tree-node="'+esc(n.id)+'" title="Элемент без корневого пути"><span class="tree-id">↳ отдельная ветвь</span><span class="tree-name">'+esc(n.name)+'</span><span class="tree-kind">'+esc(kindLabels[n.kind]||n.kind)+'</span><button class="tree-pick mini" data-tree-pick="'+esc(n.id)+'">Выбрать</button></div>';});
  box.innerHTML=html||'<div class="tree-empty">Ничего не найдено.</div>';renderTreeActions();
 }
 function render(){renderStats();renderParentOptions();renderItems();renderEdges();renderTree();renderContents();}
@@ -394,6 +398,9 @@ $('export').addEventListener('click',()=>{
  a.href=url;a.download='hotwheels-catalog-working.json';document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);notify('JSON подготовлен к скачиванию. Экспорт не записывает данные в GitHub автоматически.');
 });
 window.addEventListener('beforeunload',()=>{if(draft&&dirty)localStorage.setItem(DRAFT_KEY,JSON.stringify(draft));});
+document.querySelectorAll('[data-kind-color]').forEach(input=>input.addEventListener('input',saveKindColors));
+$('resetKindColors').addEventListener('click',()=>{localStorage.removeItem(KIND_COLOR_KEY);applyKindColors();});
+applyKindColors();
 load();
 })();
 </script>
