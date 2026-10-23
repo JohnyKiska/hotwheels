@@ -55,9 +55,9 @@ input[type=text],select{border:1px solid #cbd3df;border-radius:9px;padding:10px;
 <p class="hint">ID элемента стабилен. Переименование меняет название, но не создаёт новую запись. Для неоднозначных одноимённых записей сначала выбери нужную строку.</p>
 <hr style="border:0;border-top:1px solid #e4e8ee;margin:18px 0">
 <h2>Связи и перемещение</h2>
-<div class="field"><label for="parent">Родительский элемент</label><select id="parent"><option value="">— Выбрать родителя —</option></select></div>
-<div class="actions"><button id="link" class="primary">Добавить связь для выбранных</button><button id="unlink" class="secondary">Убрать связь с родителем</button></div>
-<p class="hint">Выбери один или несколько элементов слева, затем родителя. Добавление новой связи не удаляет другие размещения. Чтобы именно переместить элемент, сначала добавь новую связь, затем убери старую в блоке «Текущие связи».</p>
+<div class="field"><label for="parent">Куда переместить выбранные элементы</label><input id="parent" type="text" list="parentOptions" placeholder="Начни вводить название группы, коллекции или серии…"><datalist id="parentOptions"></datalist></div>
+<div class="actions"><button id="move" class="primary">Переместить сюда</button><button id="makeRoot" class="secondary">Сделать корневыми</button></div>
+<p class="hint">Выбери элементы в списке справа, начни вводить название места назначения и выбери подходящий вариант из подсказок. Перемещение заменяет их прежнее родительское размещение; сами элементы и их ID сохраняются. Для нескольких элементов операция выполняется сразу для всех выбранных.</p>
 <div id="edges"></div>
 <p class="hint">Циклические связи блокируются. Удаление связи не удаляет сам элемент или исходные данные.</p>
 </section>
@@ -107,9 +107,9 @@ function renderStats(){
  $('stats').innerHTML='<span class="chip">Всего: <b class="count">'+nodes().length+'</b></span>'+Object.keys(counts).map(k=>'<span class="chip">'+kindLabels[k]+': <b class="count">'+counts[k]+'</b></span>').join('')+'<span class="chip">Связей: <b class="count">'+edges().length+'</b></span><span class="chip">Выбрано: <b class="count">'+selected.size+'</b></span>';
 }
 function renderParentOptions(){
- const old=$('parent').value;
- $('parent').innerHTML='<option value="">— Выбрать родителя —</option>'+sortedNodes(nodes()).map(n=>'<option value="'+esc(n.id)+'">'+esc(label(n))+'</option>').join('');
- if(getNode(old))$('parent').value=old;
+ const oldId=$('parent').dataset.selectedId||'';
+ $('parentOptions').innerHTML=sortedNodes(nodes()).map(n=>'<option value="'+esc(n.name+' · '+kindLabels[n.kind])+'"></option>').join('');
+ if(oldId&&getNode(oldId))$('parent').value=getNode(oldId).name+' · '+kindLabels[getNode(oldId).kind];
 }
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function renderItems(){
@@ -130,6 +130,11 @@ function renderEdges(){
  }).join(''):'<div class="small">Для выбранных элементов связей пока нет. Это нормально: исходные списки не содержали иерархии.</div>';
 }
 function render(){renderStats();renderParentOptions();renderItems();renderEdges();}
+function resolveParentInput(){
+ const value=$('parent').value.trim();
+ if(!value)return null;
+ return nodes().find(n=>(n.name+' · '+kindLabels[n.kind])===value)||null;
+}
 function toggleSelection(id,on){if(on)selected.add(id);else selected.delete(id);render();}
 function editNode(id){
  const n=getNode(id);if(!n)return;
@@ -194,17 +199,22 @@ $('rename').addEventListener('click',()=>{
  n.name=name;n.attributes=n.attributes||{};if($('direction').value)n.attributes.sourceDirection=$('direction').value;else delete n.attributes.sourceDirection;n.updatedAt=new Date().toISOString();
  setDirty();render();notify('Элемент обновлён. Его ID и связи сохранены.');
 });
-$('link').addEventListener('click',()=>{
- const parentId=$('parent').value,ids=[...selected];if(!parentId||!ids.length){notify('Выбери элементы и родителя.',true);return;}
- const parent=getNode(parentId);if(!parent)return;
- const add=[];
- for(const id of ids){if(id===parentId){notify('Нельзя связать элемент с самим собой.',true);return;}if(ancestorsWouldCycle(id,parentId)){notify('Связь для «'+(getNode(id)?.name||id)+'» создаст цикл. Ничего не изменено.',true);return;}if(!edges().some(e=>e.parentId===parentId&&e.childId===id))add.push({id:uid('edge'),parentId,childId:id,relation:'parent-child',createdAt:new Date().toISOString()});}
- draft.catalog_edges.push(...add);setDirty();render();notify('Добавлено связей: '+add.length+'. Существующие размещения оставлены без изменений.');
+$('parent').addEventListener('input',()=>{delete $('parent').dataset.selectedId;});
+$('parent').addEventListener('change',()=>{const n=resolveParentInput();$('parent').dataset.selectedId=n?n.id:'';});
+$('move').addEventListener('click',()=>{
+ const parent=resolveParentInput(),ids=[...selected];
+ if(!ids.length){notify('Сначала выбери один или несколько элементов в списке справа.',true);return;}
+ if(!parent){notify('Выбери место назначения из подсказок под строкой поиска.',true);return;}
+ for(const id of ids){if(id===parent.id){notify('Нельзя переместить элемент внутрь самого себя.',true);return;}if(ancestorsWouldCycle(id,parent.id)){notify('Перемещение «'+(getNode(id)?.name||id)+'» создаст цикл. Ничего не изменено.',true);return;}}
+ const now=new Date().toISOString();
+ draft.catalog_edges=edges().filter(e=>!ids.includes(e.childId));
+ ids.forEach(id=>draft.catalog_edges.push({id:uid('edge'),parentId:parent.id,childId:id,relation:'parent-child',createdAt:now}));
+ setDirty();render();notify('Перемещено элементов: '+ids.length+' → '+parent.name+'. Изменения пока в черновике.');
 });
-$('unlink').addEventListener('click',()=>{
- const parentId=$('parent').value,ids=[...selected];if(!parentId||!ids.length){notify('Выбери элементы и родителя, связь с которым нужно убрать.',true);return;}
- const before=edges().length;draft.catalog_edges=edges().filter(e=>!(e.parentId===parentId&&ids.includes(e.childId)));
- const removed=before-draft.catalog_edges.length;setDirty();render();notify(removed?'Удалено связей: '+removed+'. Элементы не удалены.':'Подходящих связей не найдено.');
+$('makeRoot').addEventListener('click',()=>{
+ const ids=[...selected];if(!ids.length){notify('Сначала выбери элементы в списке справа.',true);return;}
+ const before=edges().length;draft.catalog_edges=edges().filter(e=>!ids.includes(e.childId));
+ const removed=before-draft.catalog_edges.length;setDirty();render();notify('Элементы сделаны корневыми. Убрано родительских связей: '+removed+'. Сами элементы сохранены.');
 });
 $('copySelection').addEventListener('click',()=>{const ids=[...selected];if(!ids.length){notify('Сначала выбери элементы.',true);return;}const parents=edges().filter(e=>ids.includes(e.childId)).map(e=>e.parentId);if(parents.length)$('parent').value=parents[0];renderEdges();notify('Показаны текущие связи выбранных элементов.');});
 $('apply').addEventListener('click',()=>{
