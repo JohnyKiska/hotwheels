@@ -98,7 +98,7 @@ function getNode(id){return nodes().find(n=>n.id===id)}
 function dir(n){return n.attributes?.sourceDirection||''}
 function label(n){return (kindLabels[n.kind]||n.kind)+' · '+n.name}
 function setDirty(){dirty=true;$('saveStatus').textContent='Есть несохранённые изменения';localStorage.setItem(DRAFT_KEY,JSON.stringify(draft));renderStats();}
-function sortedNodes(arr){return arr.slice().sort((a,b)=>a.name.localeCompare(b.name,'ru',{sensitivity:'base'}))}
+function sortedNodes(arr){const rank={group:0,collection:1,series:2,model:3};return arr.slice().sort((a,b)=>(rank[a.kind]??9)-(rank[b.kind]??9)||a.name.localeCompare(b.name,'ru',{sensitivity:'base'}))}
 function ancestorsWouldCycle(child,parent){
  if(child===parent)return true;
  const stack=[child],seen=new Set();
