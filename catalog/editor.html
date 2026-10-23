@@ -204,7 +204,8 @@ function renderTreeActions(){
  if(!panel)return;
  if(!n){panel.hidden=true;return;}
  panel.hidden=false;$('treeActionTitle').textContent=n.name;
- const roots=sortedNodes(nodes().filter(x=>x.kind==='group'&&x.id.startsWith('group:root:')));
+ const parentIds=new Set(edges().map(e=>e.childId));
+ const roots=sortedNodes(nodes().filter(x=>x.kind==='group'&&!parentIds.has(x.id)));
  $('treeMoveGroup').innerHTML='<option value="">Выбери верхнюю группу…</option>'+roots.filter(x=>x.id!==n.id).map(x=>'<option value="'+esc(x.id)+'">'+esc(x.name)+'</option>').join('');
  const childCount=edges().filter(e=>e.parentId===n.id).length;
  $('treeDelete').disabled=childCount>0;
