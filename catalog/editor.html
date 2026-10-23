@@ -234,7 +234,7 @@ $('tree').addEventListener('click',e=>{
  const toggle=e.target.closest('[data-toggle]'); if(toggle){const id=toggle.dataset.toggle;collapsed.has(id)?collapsed.delete(id):collapsed.add(id);renderTree();return;}
  const pick=e.target.closest('[data-tree-pick]');if(pick){selected=new Set([pick.dataset.treePick]);render();notify('Выбран элемент «'+(getNode(pick.dataset.treePick)?.name||'')+'». Теперь перетащи его на нового родителя или используй кнопку перемещения.');}
 });
-$('tree').addEventListener('dragstart',e=>{const row=e.target.closest('[data-tree-node]');if(!row)return;draggingId=row.dataset.treeNode;e.dataTransfer.setData('text/plain',draggingId);e.dataTransfer.effectAllowed='move;row.classList.add('dragging');});
+$('tree').addEventListener('dragstart',e=>{const row=e.target.closest('[data-tree-node]');if(!row)return;draggingId=row.dataset.treeNode;e.dataTransfer.setData('text/plain',draggingId);e.dataTransfer.effectAllowed='move';row.classList.add('dragging');});
 $('tree').addEventListener('dragend',()=>{draggingId=null;$('tree').querySelectorAll('.drop-target,.drop-invalid,.dragging').forEach(el=>el.classList.remove('drop-target','drop-invalid','dragging'));});
 $('tree').addEventListener('dragover',e=>{
  const row=e.target.closest('[data-tree-node]');if(!row||!draggingId)return;e.preventDefault();
