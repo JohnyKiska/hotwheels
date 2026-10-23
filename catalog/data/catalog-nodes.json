@@ -20464,6 +20464,102 @@
       "attributes": {
         "sourceDirection": "Special"
       }
+    },
+    {
+      "id": "series:mainline:hw-dream-garage",
+      "kind": "series",
+      "name": "HW Dream Garage",
+      "attributes": {
+        "sourceDirection": "Mainline"
+      }
+    },
+    {
+      "id": "series:mainline:hw-ev",
+      "kind": "series",
+      "name": "HW EV",
+      "attributes": {
+        "sourceDirection": "Mainline"
+      }
+    },
+    {
+      "id": "series:mainline:hw-fan-driven",
+      "kind": "series",
+      "name": "HW Fan Driven",
+      "attributes": {
+        "sourceDirection": "Mainline"
+      }
+    },
+    {
+      "id": "series:mainline:hw-starting-grid",
+      "kind": "series",
+      "name": "HW Starting Grid",
+      "attributes": {
+        "sourceDirection": "Mainline"
+      }
+    },
+    {
+      "id": "series:mainline:hw-heavyweights",
+      "kind": "series",
+      "name": "HW Heavyweights",
+      "attributes": {
+        "sourceDirection": "Mainline"
+      }
+    },
+    {
+      "id": "series:mainline:hw-all-drivers-welcome",
+      "kind": "series",
+      "name": "HW All Drivers Welcome",
+      "attributes": {
+        "sourceDirection": "Mainline"
+      }
+    },
+    {
+      "id": "series:mainline:hw-mods",
+      "kind": "series",
+      "name": "HW Mods",
+      "attributes": {
+        "sourceDirection": "Mainline"
+      }
+    },
+    {
+      "id": "series:mainline:hw-j-imports",
+      "kind": "series",
+      "name": "HW J-Imports",
+      "attributes": {
+        "sourceDirection": "Mainline"
+      }
+    },
+    {
+      "id": "series:mainline:hw-euro",
+      "kind": "series",
+      "name": "HW Euro",
+      "attributes": {
+        "sourceDirection": "Mainline"
+      }
+    },
+    {
+      "id": "series:mainline:hw-dirt",
+      "kind": "series",
+      "name": "HW Dirt",
+      "attributes": {
+        "sourceDirection": "Mainline"
+      }
+    },
+    {
+      "id": "series:mainline:hot-wheels-let-s-race",
+      "kind": "series",
+      "name": "Hot Wheels Let's Race",
+      "attributes": {
+        "sourceDirection": "Mainline"
+      }
+    },
+    {
+      "id": "series:mainline:hw-torque",
+      "kind": "series",
+      "name": "HW Torque",
+      "attributes": {
+        "sourceDirection": "Mainline"
+      }
     }
   ]
 }
