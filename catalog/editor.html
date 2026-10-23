@@ -96,8 +96,8 @@ function setDirty(){dirty=true;$('saveStatus').textContent='Есть несох�
 function sortedNodes(arr){return arr.slice().sort((a,b)=>a.name.localeCompare(b.name,'ru',{sensitivity:'base'}))}
 function ancestorsWouldCycle(child,parent){
  if(child===parent)return true;
- const stack=[parent],seen=new Set();
- while(stack.length){const id=stack.pop();if(id===child)return true;if(seen.has(id))continue;seen.add(id);edges().filter(e=>e.parentId===id).forEach(e=>stack.push(e.childId));}
+ const stack=[child],seen=new Set();
+ while(stack.length){const id=stack.pop();if(id===parent)return true;if(seen.has(id))continue;seen.add(id);edges().filter(e=>e.parentId===id).forEach(e=>stack.push(e.childId));}
  return false;
 }
 function renderStats(){
@@ -191,7 +191,7 @@ $('create').addEventListener('click',()=>{
 $('rename').addEventListener('click',()=>{
  if(selected.size!==1){notify('Выбери ровно один элемент.',true);return;}
  const n=getNode([...selected][0]),name=$('name').value.trim();if(!n||!name){notify('Выбери элемент и укажи новое название.',true);return;}
- n.name=name;n.kind=$('kind').value;n.attributes=n.attributes||{};if($('direction').value)n.attributes.sourceDirection=$('direction').value;else delete n.attributes.sourceDirection;n.updatedAt=new Date().toISOString();
+ n.name=name;n.attributes=n.attributes||{};if($('direction').value)n.attributes.sourceDirection=$('direction').value;else delete n.attributes.sourceDirection;n.updatedAt=new Date().toISOString();
  setDirty();render();notify('Элемент обновлён. Его ID и связи сохранены.');
 });
 $('link').addEventListener('click',()=>{
