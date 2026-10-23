@@ -61,13 +61,14 @@ input[type=text],select{border:1px solid #cbd3df;border-radius:9px;padding:10px;
 <div class="field"><label for="kind">Тип элемента</label><select id="kind"><option value="group">Группа</option><option value="collection">Коллекция</option><option value="series">Серия</option><option value="model">Модель</option></select></div>
 <div class="field"><label for="name">Название</label><input id="name" type="text" placeholder="Название элемента"></div>
 <div class="field"><label for="direction">Направление / источник</label><select id="direction"><option value="">Не указано</option><option>Character</option><option>Exclusive</option><option>Mainline</option><option>Playsets</option><option>Premium</option><option>Special</option></select></div>
+<div class="field"><label for="tags">Теги (через запятую)</label><input id="tags" type="text" placeholder="японская, синий, фото днища"></div>
 <div class="actions"><button id="create" class="primary">Создать элемент</button><button id="rename" class="secondary" disabled>Переименовать выбранный</button></div>
 <div class="actions"><button id="makeRoot" class="secondary">Сделать корневым</button><button id="discard" class="secondary">Отменить черновик</button></div>
 </section>
 <section class="panel explorer-pane">
 <div class="list-head"><div><h2 id="contentsTitle" style="margin:0">Содержимое</h2><div id="contentsSubtitle" class="small">Выбери раздел слева</div></div><span id="shown" class="small"></span></div>
 <div class="toolbar" style="padding:8px;box-shadow:none;margin-bottom:10px"><input id="contentsSearch" type="text" placeholder="Поиск по названию или ID…" aria-label="Поиск содержимого"><button id="applyContents" class="primary">Применить</button><button id="exportContents" class="secondary">Экспорт JSON</button></div>
-<div class="duplicate-tools"><label><input id="groupDuplicates" type="checkbox"> Сгруппировать одинаковые названия</label><span id="duplicateSummary" class="duplicate-summary"></span></div><div class="filters" style="margin-bottom:12px"><select id="filterKind" aria-label="Фильтр по типу"><option value="">Все типы</option><option value="group">Группы</option><option value="collection">Коллекции</option><option value="series">Серии</option><option value="model">Модели</option></select><select id="filterDirection" aria-label="Фильтр по направлению"><option value="">Все направления</option><option>Character</option><option>Exclusive</option><option>Mainline</option><option>Playsets</option><option>Premium</option><option>Special</option></select></div>
+<div class="duplicate-tools"><label><input id="groupDuplicates" type="checkbox"> Сгруппировать одинаковые названия</label><span id="duplicateSummary" class="duplicate-summary"></span></div><div class="filters" style="margin-bottom:12px"><select id="filterKind" aria-label="Фильтр по типу"><option value="">Все типы</option><option value="group">Группы</option><option value="collection">Коллекции</option><option value="series">Серии</option><option value="model">Модели</option></select><select id="filterDirection" aria-label="Фильтр по направлению"><option value="">Все направления</option><option>Character</option><option>Exclusive</option><option>Mainline</option><option>Playsets</option><option>Premium</option><option>Special</option></select><input id="filterTags" type="text" placeholder="Фильтр по тегам…" aria-label="Фильтр по тегам"></div>
 <div id="contents" class="explorer-list"><div class="explorer-empty">Выбери узел дерева.</div></div>
 <div class="actions"><button id="move" class="primary">Переместить выбранные в выбранный раздел</button><button id="clearSelection" class="mini">Снять выбор</button></div>
 <div id="edges"></div>
@@ -100,6 +101,9 @@ function nodes(){return draft.catalog_nodes}
 function edges(){return draft.catalog_edges}
 function getNode(id){return nodes().find(n=>n.id===id)}
 function dir(n){return n.attributes?.sourceDirection||''}
+function tagsOf(n){return Array.isArray(n.attributes?.tags)?n.attributes.tags:[]}
+function parseTags(v){return [...new Set(String(v||'').split(',').map(t=>t.trim()).filter(Boolean))]}
+function tagsMatch(n,v){const q=String(v||'').trim().toLocaleLowerCase();return !q||tagsOf(n).some(t=>t.toLocaleLowerCase().includes(q))}
 function label(n){return (kindLabels[n.kind]||n.kind)+' · '+n.name}
 function setDirty(){dirty=true;$('saveStatus').textContent='Есть несохранённые изменения';localStorage.setItem(DRAFT_KEY,JSON.stringify(draft));renderStats();}
 function sortedNodes(arr){const rank={group:0,collection:1,series:2,model:3};return arr.slice().sort((a,b)=>(rank[a.kind]??9)-(rank[b.kind]??9)||a.name.localeCompare(b.name,'ru',{sensitivity:'base'}))}
@@ -140,8 +144,8 @@ function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&l
 function currentParents(id){return edges().filter(e=>e.childId===id).map(e=>getNode(e.parentId)?.name||e.parentId);}
 function renderItems(){
  const q=($('contentsSearch')?.value||$('search').value).trim().toLocaleLowerCase();
- const k=$('filterKind').value, d=$('filterDirection').value;
- const arr=sortedNodes(nodes()).filter(n=>(!k||n.kind===k)&&(!d||dir(n)===d)&&(!q||(n.name+' '+n.id).toLocaleLowerCase().includes(q)));
+ const k=$('filterKind').value, d=$('filterDirection').value, t=$('filterTags').value;
+ const arr=sortedNodes(nodes()).filter(n=>(!k||n.kind===k)&&(!d||dir(n)===d)&&(!q||(n.name+' '+n.id).toLocaleLowerCase().includes(q))&&tagsMatch(n,t));
  $('shown').textContent='Показано '+arr.length+' из '+nodes().length;
  $('items').innerHTML=arr.length?arr.map(n=>{
   const change=changePreview.get(n.id);
@@ -165,8 +169,8 @@ function renderContents(){
  const box=$('contents');if(!box||!draft)return;const active=activeTreeId&&getNode(activeTreeId);
  if(!active){$('contentsTitle').textContent='Содержимое';$('contentsSubtitle').textContent='Выбери раздел слева';$('shown').textContent='';$('duplicateSummary').textContent='';box.innerHTML='<div class="explorer-empty">Выбери раздел в дереве слева.</div>';return;}
  $('contentsTitle').textContent=active.name;$('contentsSubtitle').textContent=(kindLabels[active.kind]||active.kind)+' · '+(dir(active)||'направление не указано');
- const childIds=edges().filter(e=>e.parentId===active.id).map(e=>e.childId);const children=sortedNodes(childIds.map(getNode).filter(Boolean));const q=($('contentsSearch')?.value||$('search').value).trim().toLocaleLowerCase(),k=$('filterKind').value,d=$('filterDirection').value;
- const filtered=children.filter(n=>(!k||n.kind===k)&&(!d||dir(n)===d)&&(!q||(n.name+' '+n.id).toLocaleLowerCase().includes(q)));
+ const childIds=edges().filter(e=>e.parentId===active.id).map(e=>e.childId);const children=sortedNodes(childIds.map(getNode).filter(Boolean));const q=($('contentsSearch')?.value||$('search').value).trim().toLocaleLowerCase(),k=$('filterKind').value,d=$('filterDirection').value,t=$('filterTags').value;
+ const filtered=children.filter(n=>(!k||n.kind===k)&&(!d||dir(n)===d)&&(!q||(n.name+' '+n.id).toLocaleLowerCase().includes(q))&&tagsMatch(n,t));
  const groups=new Map();for(const n of filtered){const key=n.name.trim().toLocaleLowerCase();if(!groups.has(key))groups.set(key,[]);groups.get(key).push(n);}
  const duplicateGroups=[...groups.values()].filter(g=>g.length>1);const grouping=$('groupDuplicates').checked;
  $('shown').textContent=filtered.length+' записей';$('duplicateSummary').textContent=duplicateGroups.length?duplicateGroups.length+' повторяющихся названий · '+duplicateGroups.reduce((sum,g)=>sum+g.length,0)+' записей':'Повторов в этом разделе не найдено';
@@ -231,7 +235,7 @@ function resolveParentInput(){
 function toggleSelection(id,on){if(on)selected.add(id);else selected.delete(id);render();}
 function editNode(id){
  const n=getNode(id);if(!n)return;
- editingId=id;$('kind').value=n.kind;$('name').value=n.name;$('direction').value=dir(n);
+ editingId=id;$('kind').value=n.kind;$('name').value=n.name;$('direction').value=dir(n);$('tags').value=tagsOf(n).join(', ');
  $('create').textContent='Создать элемент';$('rename').disabled=selected.size!==1;
  $('name').focus();notify('Выбран элемент для редактирования: '+n.name);
 }
@@ -366,6 +370,7 @@ function clearDropHighlights(){document.querySelectorAll('#contents .drop-target
 });
 $('filterKind').addEventListener('change',()=>{renderItems();renderContents();});
 $('filterDirection').addEventListener('change',()=>{renderItems();renderContents();});
+$('filterTags').addEventListener('input',()=>{renderItems();renderContents();});
 $('groupDuplicates').addEventListener('change',renderContents);
 $('items').addEventListener('change',e=>{const id=e.target.dataset.check;if(id)toggleSelection(id,e.target.checked);});
 $('contents').addEventListener('change',e=>{const id=e.target.dataset.contentCheck;if(id)toggleSelection(id,e.target.checked);});
@@ -378,15 +383,15 @@ $('selectVisible').addEventListener('change',e=>{
 $('clearSelection').addEventListener('click',()=>{selected.clear();render();});
 $('create').addEventListener('click',()=>{
  const name=$('name').value.trim();if(!name){notify('Укажи название элемента.',true);return;}
- const kind=$('kind').value,direction=$('direction').value;
- const n={id:uid(kind),kind,name,attributes:{...(direction?{sourceDirection:direction}:{})},createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};
- nodes().push(n);selected=new Set([n.id]);editingId=null;$('name').value='';setDirty();render();notify('Создан элемент «'+name+'». Изменения пока в черновике.');
+ const kind=$('kind').value,direction=$('direction').value,tags=parseTags($('tags').value);
+ const n={id:uid(kind),kind,name,attributes:{...(direction?{sourceDirection:direction}:{}),...(tags.length?{tags}:{})},createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};
+ nodes().push(n);selected=new Set([n.id]);editingId=null;$('name').value='';$('tags').value='';setDirty();render();notify('Создан элемент «'+name+'». Изменения пока в черновике.');
 });
 $('rename').addEventListener('click',()=>{
  if(selected.size!==1){notify('Выбери ровно один элемент.',true);return;}
  const n=getNode([...selected][0]),name=$('name').value.trim();if(!n||!name){notify('Выбери элемент и укажи название.',true);return;}
  const before=n.name+' · '+(kindLabels[n.kind]||n.kind)+' · '+(dir(n)||'без направления');
- n.name=name;n.kind=$('kind').value;n.attributes=n.attributes||{};if($('direction').value)n.attributes.sourceDirection=$('direction').value;else delete n.attributes.sourceDirection;n.updatedAt=new Date().toISOString();
+ n.name=name;n.kind=$('kind').value;n.attributes=n.attributes||{};if($('direction').value)n.attributes.sourceDirection=$('direction').value;else delete n.attributes.sourceDirection;const tags=parseTags($('tags').value);if(tags.length)n.attributes.tags=tags;else delete n.attributes.tags;n.updatedAt=new Date().toISOString();
  const after=n.name+' · '+(kindLabels[n.kind]||n.kind)+' · '+(dir(n)||'без направления');
  changePreview.set(n.id,{before,after});
  setDirty();render();notify('Изменения показаны в строке элемента: «Было → Стало».');
