@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hot Wheels — редактор каталога</title>
+<style>
+:root{font-family:Inter,"Segoe UI",Arial,sans-serif;color:#172033;background:#f3f5f8}
+*{box-sizing:border-box}body{margin:0}header{background:#182235;color:#fff;padding:22px clamp(16px,4vw,42px);border-bottom:4px solid #ff5000}
+header h1{margin:0 0 6px;font-size:clamp(22px,3vw,32px)}header p{margin:0;color:#c8d0dc}
+main{max-width:1500px;margin:auto;padding:22px clamp(12px,3vw,30px) 48px}
+.toolbar,.panel{background:#fff;border:1px solid #e0e5ec;border-radius:14px;padding:16px;box-shadow:0 3px 12px #1522380a}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+button,select,input{font:inherit}button{border:0;border-radius:9px;padding:10px 13px;font-weight:650;cursor:pointer}
+button:disabled{opacity:.45;cursor:not-allowed}.primary{background:#ff5000;color:white}.secondary{background:#e9edf3;color:#172033}.danger{background:#fff0ed;color:#a52d16}
+input[type=text],select{border:1px solid #cbd3df;border-radius:9px;padding:10px;background:#fff;min-width:0}
+#search{flex:1;min-width:210px}.status{margin-left:auto;color:#536074;font-size:13px}
+.layout{display:grid;grid-template-columns:minmax(280px,360px) minmax(0,1fr);gap:16px;align-items:start}
+.panel h2{font-size:18px;margin:0 0 12px}.field{display:grid;gap:6px;margin-bottom:12px}.field label{font-size:13px;font-weight:700;color:#4d596b}
+.filters{display:grid;grid-template-columns:1fr 1fr;gap:8px}.filters select{width:100%}
+.hint{font-size:13px;line-height:1.45;color:#647084;margin:10px 0 0}
+.stats{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.chip{font-size:12px;background:#eef1f6;border-radius:99px;padding:5px 9px;color:#475368}
+.list-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;flex-wrap:wrap}.list{display:grid;gap:7px}
+.item{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;border:1px solid #e1e6ed;border-radius:10px;padding:10px 11px}
+.item.selected{border-color:#ff5000;background:#fff8f4}.item input{width:17px;height:17px;accent-color:#ff5000}
+.item-name{font-weight:650;overflow-wrap:anywhere}.item-meta{font-size:12px;color:#6a7587;margin-top:3px;overflow-wrap:anywhere}
+.item-actions{display:flex;gap:5px}.mini{padding:6px 8px;font-size:12px;background:#edf0f5}
+.empty{padding:28px;text-align:center;color:#6b7687;border:1px dashed #cbd3df;border-radius:10px}
+#notice{display:none;padding:11px 14px;border-radius:10px;margin:0 0 14px;background:#e8f7ed;color:#145b2e}
+#notice.error{background:#fff0ed;color:#8e2716}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+#edges{display:grid;gap:7px;margin-top:10px}.edge{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px;border-radius:8px;background:#f4f6f9;font-size:13px}
+.small{font-size:12px;color:#687487}.count{font-variant-numeric:tabular-nums}
+@media(max-width:850px){.layout{grid-template-columns:1fr}.status{margin-left:0;width:100%}}
+</style>
+</head>
+<body>
+<header><h1>Hot Wheels · редактор каталога</h1><p>Рабочая структура, связи и проверяемые изменения — отдельно от личной коллекции.</p></header>
+<main>
+<div id="notice" role="status"></div>
+<div class="toolbar">
+<input id="search" type="text" placeholder="Поиск по названию или ID…" aria-label="Поиск">
+<button id="apply" class="primary">Применить изменения</button>
+<button id="discard" class="secondary">Отменить черновик</button>
+<button id="export" class="secondary">Экспорт JSON</button>
+<span id="saveStatus" class="status">Загрузка каталога…</span>
+</div>
+<div class="stats" id="stats"></div>
+<div class="layout">
+<section class="panel">
+<h2>Создать или изменить элемент</h2>
+<div class="field"><label for="kind">Тип элемента</label><select id="kind"><option value="group">Группа</option><option value="collection">Коллекция</option><option value="series">Серия</option><option value="model">Модель</option></select></div>
+<div class="field"><label for="name">Название</label><input id="name" type="text" placeholder="Название элемента"></div>
+<div class="field"><label for="direction">Направление / источник</label><select id="direction"><option value="">Не указано</option><option>Character</option><option>Exclusive</option><option>Mainline</option><option>Playsets</option><option>Premium</option><option>Special</option></select></div>
+<div class="actions"><button id="create" class="primary">Создать элемент</button><button id="rename" class="secondary" disabled>Переименовать выбранный</button></div>
+<p class="hint">ID элемента стабилен. Переименование меняет название, но не создаёт новую запись. Для неоднозначных одноимённых записей сначала выбери нужную строку.</p>
+<hr style="border:0;border-top:1px solid #e4e8ee;margin:18px 0">
+<h2>Связи и перемещение</h2>
+<div class="field"><label for="parent">Родительский элемент</label><select id="parent"><option value="">— Выбрать родителя —</option></select></div>
+<div class="actions"><button id="link" class="primary">Добавить связь для выбранных</button><button id="unlink" class="secondary">Убрать связь с родителем</button></div>
+<p class="hint">Выбери один или несколько элементов слева, затем родителя. Добавление новой связи не удаляет другие размещения. Чтобы именно переместить элемент, сначала добавь новую связь, затем убери старую в блоке «Текущие связи».</p>
+<div id="edges"></div>
+<p class="hint">Циклические связи блокируются. Удаление связи не удаляет сам элемент или исходные данные.</p>
+</section>
+<section class="panel">
+<div class="list-head"><h2 style="margin:0">Элементы каталога</h2><span id="shown" class="small"></span></div>
+<div class="filters" style="margin-bottom:12px">
+<select id="filterKind" aria-label="Фильтр по типу"><option value="">Все типы</option><option value="group">Группы</option><option value="collection">Коллекции</option><option value="series">Серии</option><option value="model">Модели</option></select>
+<select id="filterDirection" aria-label="Фильтр по направлению"><option value="">Все направления</option><option>Character</option><option>Exclusive</option><option>Mainline</option><option>Playsets</option><option>Premium</option><option>Special</option></select>
+</div>
+<div class="list-head"><label class="small"><input id="selectVisible" type="checkbox"> Выбрать все видимые</label><button id="clearSelection" class="mini">Снять выбор</button></div>
+<div id="items" class="list"></div>
+<div class="actions"><button id="copySelection" class="secondary">Выбрать связи для выбранных</button></div>
+</section>
+</div>
+<p class="hint" style="margin-top:16px">Черновик и применённая рабочая версия сохраняются только в localStorage этого браузера. Экспорт JSON создаёт файл для ручного сохранения в репозитории. Эта страница пока не записывает изменения обратно в GitHub и не изменяет collection.json.</p>
+</main>
+<script>
+(function(){
+'use strict';
+const DATA='data/';
+const DRAFT_KEY='hotwheels.catalog.editor.draft.v1';
+const WORKING_KEY='hotwheels.catalog.editor.working.v1';
+const $=id=>document.getElementById(id);
+const kindLabels={group:'Группа',collection:'Коллекция',series:'Серия',model:'Модель'};
+let base=null, draft=null, selected=new Set(), editingId=null, dirty=false;
+const clone=x=>JSON.parse(JSON.stringify(x));
+function notify(message,error=false){const n=$('notice');n.textContent=message;n.className=error?'error':'';n.style.display='block';}
+function hideNotice(){$('notice').style.display='none';}
+function uid(kind){return kind+':custom:'+Date.now().toString(36)+':'+Math.random().toString(36).slice(2,8);}
+function nodes(){return draft.catalog_nodes}
+function edges(){return draft.catalog_edges}
+function getNode(id){return nodes().find(n=>n.id===id)}
+function dir(n){return n.attributes?.sourceDirection||''}
+function label(n){return (kindLabels[n.kind]||n.kind)+' · '+n.name}
+function setDirty(){dirty=true;$('saveStatus').textContent='Есть несохранённые изменения';localStorage.setItem(DRAFT_KEY,JSON.stringify(draft));renderStats();}
+function sortedNodes(arr){return arr.slice().sort((a,b)=>a.name.localeCompare(b.name,'ru',{sensitivity:'base'}))}
+function ancestorsWouldCycle(child,parent){
+ if(child===parent)return true;
+ const stack=[child],seen=new Set();
+ while(stack.length){const id=stack.pop();if(id===parent)return true;if(seen.has(id))continue;seen.add(id);edges().filter(e=>e.parentId===id).forEach(e=>stack.push(e.childId));}
+ return false;
+}
+function renderStats(){
+ if(!draft)return;
+ const counts={group:0,collection:0,series:0,model:0};
+ nodes().forEach(n=>counts[n.kind]=(counts[n.kind]||0)+1);
+ $('stats').innerHTML='<span class="chip">Всего: <b class="count">'+nodes().length+'</b></span>'+Object.keys(counts).map(k=>'<span class="chip">'+kindLabels[k]+': <b class="count">'+counts[k]+'</b></span>').join('')+'<span class="chip">Связей: <b class="count">'+edges().length+'</b></span><span class="chip">Выбрано: <b class="count">'+selected.size+'</b></span>';
+}
+function renderParentOptions(){
+ const old=$('parent').value;
+ $('parent').innerHTML='<option value="">— Выбрать родителя —</option>'+sortedNodes(nodes()).map(n=>'<option value="'+esc(n.id)+'">'+esc(label(n))+'</option>').join('');
+ if(getNode(old))$('parent').value=old;
+}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function renderItems(){
+ const q=$('search').value.trim().toLocaleLowerCase();
+ const k=$('filterKind').value, d=$('filterDirection').value;
+ const arr=sortedNodes(nodes()).filter(n=>(!k||n.kind===k)&&(!d||dir(n)===d)&&(!q||(n.name+' '+n.id).toLocaleLowerCase().includes(q)));
+ $('shown').textContent='Показано '+arr.length+' из '+nodes().length;
+ $('items').innerHTML=arr.length?arr.map(n=>'<article class="item '+(selected.has(n.id)?'selected':'')+'"><input type="checkbox" data-check="'+esc(n.id)+'" '+(selected.has(n.id)?'checked':'')+' aria-label="Выбрать '+esc(n.name)+'"><div><div class="item-name">'+esc(n.name)+'</div><div class="item-meta">'+esc(kindLabels[n.kind]||n.kind)+' · '+esc(dir(n)||'направление не указано')+'<br>'+esc(n.id)+'</div></div><div class="item-actions"><button class="mini" data-edit="'+esc(n.id)+'">Изменить</button></div></article>').join(''):'<div class="empty">Ничего не найдено.</div>';
+ $('selectVisible').checked=arr.length>0&&arr.every(n=>selected.has(n.id));
+ $('rename').disabled=selected.size!==1;
+}
+function renderEdges(){
+ const chosen=[...selected];
+ const relevant=edges().filter(e=>chosen.includes(e.childId)||chosen.includes(e.parentId));
+ $('edges').innerHTML=relevant.length?relevant.map(e=>{
+ const p=getNode(e.parentId),c=getNode(e.childId);
+ return '<div class="edge"><span>'+esc(p?.name||e.parentId)+' → <b>'+esc(c?.name||e.childId)+'</b></span><button class="mini danger" data-unlink="'+esc(e.id)+'">Убрать связь</button></div>';
+ }).join(''):'<div class="small">Для выбранных элементов связей пока нет. Это нормально: исходные списки не содержали иерархии.</div>';
+}
+function render(){renderStats();renderParentOptions();renderItems();renderEdges();}
+function toggleSelection(id,on){if(on)selected.add(id);else selected.delete(id);render();}
+function editNode(id){
+ const n=getNode(id);if(!n)return;
+ editingId=id;$('kind').value=n.kind;$('name').value=n.name;$('direction').value=dir(n);
+ $('create').textContent='Создать элемент';$('rename').disabled=selected.size!==1;
+ $('name').focus();notify('Выбран элемент для редактирования: '+n.name);
+}
+function validate(){
+ const ids=new Set();
+ for(const n of nodes()){if(ids.has(n.id))return 'Повторяется ID: '+n.id;ids.add(n.id);if(!n.name?.trim())return 'Есть элемент без названия.';}
+ const edgeKeys=new Set();
+ for(const e of edges()){
+  if(!getNode(e.parentId)||!getNode(e.childId))return 'Связь ссылается на отсутствующий элемент.';
+  if(e.parentId===e.childId)return 'Элемент не может быть родителем самого себя.';
+  const key=e.parentId+'→'+e.childId;if(edgeKeys.has(key))return 'Повторяется связь '+key;edgeKeys.add(key);
+ }
+ const color=new Map();
+ function visit(id){if(color.get(id)===1)return true;if(color.get(id)===2)return false;color.set(id,1);for(const e of edges().filter(x=>x.parentId===id)){if(visit(e.childId))return true;}color.set(id,2);return false;}
+ for(const n of nodes())if(visit(n.id))return 'Обнаружен цикл в иерархии. Изменения не применены.';
+ return '';
+}
+async function load(){
+ try{
+  const local=localStorage.getItem(DRAFT_KEY);
+  if(local){try{draft=JSON.parse(local);const valid=Array.isArray(draft.catalog_nodes)&&Array.isArray(draft.catalog_edges);if(!valid)draft=null;}catch{draft=null;}}
+  const working=localStorage.getItem(WORKING_KEY);
+  if(!draft&&working){try{draft=JSON.parse(working)}catch{}}
+  if(!draft){
+   const [n,e,s,m]=await Promise.all([
+    fetch(DATA+'catalog-nodes.json').then(r=>{if(!r.ok)throw Error('Не удалось загрузить список узлов');return r.json()}),
+    fetch(DATA+'catalog-edges.json').then(r=>{if(!r.ok)throw Error('Не удалось загрузить связи');return r.json()}),
+    fetch(DATA+'catalog-sources.json').then(r=>r.json()),
+    fetch(DATA+'source-memberships.json').then(r=>r.json())
+   ]);
+   draft={schemaVersion:1,catalog_nodes:n.catalog_nodes||n,catalog_edges:e.catalog_edges||e,catalog_sources:s.catalog_sources||s,source_memberships:m.source_memberships||m,editorMeta:{loadedAt:new Date().toISOString()}};
+  }
+  if(!Array.isArray(draft.catalog_nodes)||!Array.isArray(draft.catalog_edges))throw Error('Формат каталога не распознан.');
+  base=clone(draft);dirty=false;$('saveStatus').textContent=local?'Черновик восстановлен из браузера':'Каталог загружен';
+  render();notify(local?'Восстановлен локальный черновик. Проверь изменения перед применением.':'Каталог загружен. Связи не создавались автоматически.');
+ }catch(err){$('saveStatus').textContent='Ошибка загрузки';const localFile=window.location.protocol==='file:';notify(localFile?'Редактор открыт напрямую с диска (file://), поэтому Chrome блокирует fetch JSON. Запусти локальный сервер из корня проекта командой «py -m http.server 8000» и открой http://localhost:8000/catalog/editor.html. Также проверь, что папка catalog/data находится рядом с editor.html внутри папки catalog.':'Не удалось загрузить данные каталога: '+err.message+'. Проверь, что файлы JSON находятся в папке catalog/data и открой редактор через локальный веб-сервер или GitHub Pages.',true);}
+}
+$('search').addEventListener('input',renderItems);
+$('filterKind').addEventListener('change',renderItems);
+$('filterDirection').addEventListener('change',renderItems);
+$('items').addEventListener('change',e=>{const id=e.target.dataset.check;if(id)toggleSelection(id,e.target.checked);});
+$('items').addEventListener('click',e=>{const id=e.target.dataset.edit;if(id){selected=new Set([id]);editNode(id);render();}});
+$('edges').addEventListener('click',e=>{const id=e.target.dataset.unlink;if(!id)return;const edge=edges().find(x=>x.id===id);if(!edge)return;draft.catalog_edges=edges().filter(x=>x.id!==id);setDirty();render();notify('Связь удалена. Сами элементы сохранены.');});
+$('selectVisible').addEventListener('change',e=>{
+ const q=$('search').value.trim().toLocaleLowerCase(),k=$('filterKind').value,d=$('filterDirection').value;
+ nodes().filter(n=>(!k||n.kind===k)&&(!d||dir(n)===d)&&(!q||(n.name+' '+n.id).toLocaleLowerCase().includes(q))).forEach(n=>e.target.checked?selected.add(n.id):selected.delete(n.id));render();
+});
+$('clearSelection').addEventListener('click',()=>{selected.clear();render();});
+$('create').addEventListener('click',()=>{
+ const name=$('name').value.trim();if(!name){notify('Укажи название элемента.',true);return;}
+ const kind=$('kind').value,direction=$('direction').value;
+ const n={id:uid(kind),kind,name,attributes:{...(direction?{sourceDirection:direction}:{})},createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};
+ nodes().push(n);selected=new Set([n.id]);editingId=null;$('name').value='';setDirty();render();notify('Создан элемент «'+name+'». Изменения пока в черновике.');
+});
+$('rename').addEventListener('click',()=>{
+ if(selected.size!==1){notify('Выбери ровно один элемент.',true);return;}
+ const n=getNode([...selected][0]),name=$('name').value.trim();if(!n||!name){notify('Выбери элемент и укажи новое название.',true);return;}
+ n.name=name;n.attributes=n.attributes||{};if($('direction').value)n.attributes.sourceDirection=$('direction').value;else delete n.attributes.sourceDirection;n.updatedAt=new Date().toISOString();
+ setDirty();render();notify('Элемент обновлён. Его ID и связи сохранены.');
+});
+$('link').addEventListener('click',()=>{
+ const parentId=$('parent').value,ids=[...selected];if(!parentId||!ids.length){notify('Выбери элементы и родителя.',true);return;}
+ const parent=getNode(parentId);if(!parent)return;
+ const add=[];
+ for(const id of ids){if(id===parentId){notify('Нельзя связать элемент с самим собой.',true);return;}if(ancestorsWouldCycle(id,parentId)){notify('Связь для «'+(getNode(id)?.name||id)+'» создаст цикл. Ничего не изменено.',true);return;}if(!edges().some(e=>e.parentId===parentId&&e.childId===id))add.push({id:uid('edge'),parentId,childId:id,relation:'parent-child',createdAt:new Date().toISOString()});}
+ draft.catalog_edges.push(...add);setDirty();render();notify('Добавлено связей: '+add.length+'. Существующие размещения оставлены без изменений.');
+});
+$('unlink').addEventListener('click',()=>{
+ const parentId=$('parent').value,ids=[...selected];if(!parentId||!ids.length){notify('Выбери элементы и родителя, связь с которым нужно убрать.',true);return;}
+ const before=edges().length;draft.catalog_edges=edges().filter(e=>!(e.parentId===parentId&&ids.includes(e.childId)));
+ const removed=before-draft.catalog_edges.length;setDirty();render();notify(removed?'Удалено связей: '+removed+'. Элементы не удалены.':'Подходящих связей не найдено.');
+});
+$('copySelection').addEventListener('click',()=>{const ids=[...selected];if(!ids.length){notify('Сначала выбери элементы.',true);return;}const parents=edges().filter(e=>ids.includes(e.childId)).map(e=>e.parentId);if(parents.length)$('parent').value=parents[0];renderEdges();notify('Показаны текущие связи выбранных элементов.');});
+$('apply').addEventListener('click',()=>{
+ const err=validate();if(err){notify('Проверка не пройдена: '+err,true);return;}
+ draft.editorMeta={...(draft.editorMeta||{}),appliedAt:new Date().toISOString(),schemaVersion:1};
+ localStorage.setItem(WORKING_KEY,JSON.stringify(draft));localStorage.removeItem(DRAFT_KEY);base=clone(draft);dirty=false;$('saveStatus').textContent='Применено локально';render();notify('Изменения проверены и применены к рабочей версии в этом браузере. Для переноса в репозиторий используй «Экспорт JSON».');
+});
+$('discard').addEventListener('click',()=>{
+ if(!confirm('Отменить все изменения черновика и вернуться к последней применённой версии?'))return;
+ localStorage.removeItem(DRAFT_KEY);const w=localStorage.getItem(WORKING_KEY);
+ if(w){try{draft=JSON.parse(w)}catch{draft=clone(base)}}else draft=clone(base);
+ selected.clear();dirty=false;$('saveStatus').textContent='Черновик отменён';render();notify('Черновик отменён.');
+});
+$('export').addEventListener('click',()=>{
+ const err=validate();if(err){notify('Экспорт остановлен: '+err,true);return;}
+ const blob=new Blob([JSON.stringify(draft,null,2)],{type:'application/json;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');
+ a.href=url;a.download='hotwheels-catalog-working.json';document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);notify('JSON подготовлен к скачиванию. Экспорт не записывает данные в GitHub автоматически.');
+});
+window.addEventListener('beforeunload',()=>{if(draft&&dirty)localStorage.setItem(DRAFT_KEY,JSON.stringify(draft));});
+load();
+})();
+</script>
+</body>
+</html>
