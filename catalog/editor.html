@@ -56,7 +56,7 @@ input[type=text],select{border:1px solid #cbd3df;border-radius:9px;padding:10px;
 <hr style="border:0;border-top:1px solid #e4e8ee;margin:18px 0">
 <h2>Связи и перемещение</h2>
 <div class="field"><label for="parent">Куда переместить выбранные элементы</label><input id="parent" type="text" list="parentOptions" placeholder="Начни вводить название группы, коллекции или серии…"><datalist id="parentOptions"></datalist></div>
-<div class="actions"><button id="move" class="primary">Переместить сюда</button><button id="makeRoot" class="secondary">Сделать корневыми</button></div>
+<div class="actions"><button id="move" class="primary">Переместить сюда</button><button id="addPlacement" class="secondary">Добавить ещё одно размещение</button><button id="makeRoot" class="secondary">Сделать корневыми</button></div>
 <p class="hint">Выбери элементы в списке справа, начни вводить название места назначения и выбери подходящий вариант из подсказок. Перемещение заменяет их прежнее родительское размещение; сами элементы и их ID сохраняются. Для нескольких элементов операция выполняется сразу для всех выбранных.</p>
 <div id="edges"></div>
 <p class="hint">Циклические связи блокируются. Удаление связи не удаляет сам элемент или исходные данные.</p>
@@ -211,6 +211,15 @@ $('move').addEventListener('click',()=>{
  draft.catalog_edges=edges().filter(e=>!ids.includes(e.childId));
  ids.forEach(id=>draft.catalog_edges.push({id:uid('edge'),parentId:parent.id,childId:id,relation:'parent-child',createdAt:now}));
  setDirty();render();notify('Перемещено элементов: '+ids.length+' → '+parent.name+'. Изменения пока в черновике.');
+});
+$('addPlacement').addEventListener('click',()=>{
+ const parent=resolveParentInput(),ids=[...selected];
+ if(!ids.length){notify('Сначала выбери один или несколько элементов в списке справа.',true);return;}
+ if(!parent){notify('Выбери место назначения из подсказок под строкой поиска.',true);return;}
+ for(const id of ids){if(id===parent.id){notify('Нельзя разместить элемент внутри самого себя.',true);return;}if(ancestorsWouldCycle(id,parent.id)){notify('Размещение «'+(getNode(id)?.name||id)+'» создаст цикл. Ничего не изменено.',true);return;}}
+ const now=new Date().toISOString();let added=0;
+ ids.forEach(id=>{if(!edges().some(e=>e.parentId===parent.id&&e.childId===id)){draft.catalog_edges.push({id:uid('edge'),parentId:parent.id,childId:id,relation:'parent-child',createdAt:now});added++;}});
+ setDirty();render();notify('Добавлено дополнительных размещений: '+added+'. Прежние связи сохранены.');
 });
 $('makeRoot').addEventListener('click',()=>{
  const ids=[...selected];if(!ids.length){notify('Сначала выбери элементы в списке справа.',true);return;}
