@@ -1,0 +1,148 @@
+{
+  "schemaVersion": 1,
+  "summary": {
+    "sourceFileCount": 12,
+    "uniqueNodeCount": 2552,
+    "sourceMembershipCount": 2552,
+    "nonEmptySourceOccurrences": 2553,
+    "duplicateExtraOccurrencesConsolidated": 1
+  },
+  "files": [
+    {
+      "fileName": "character collection.txt",
+      "direction": "Character",
+      "kind": "collection",
+      "lineCount": 27,
+      "nonEmptyOccurrences": 27,
+      "uniqueNames": 27,
+      "duplicateExtraOccurrences": 0,
+      "repeatedNames": []
+    },
+    {
+      "fileName": "character series.txt",
+      "direction": "Character",
+      "kind": "series",
+      "lineCount": 93,
+      "nonEmptyOccurrences": 93,
+      "uniqueNames": 93,
+      "duplicateExtraOccurrences": 0,
+      "repeatedNames": []
+    },
+    {
+      "fileName": "exclusive collection.txt",
+      "direction": "Exclusive",
+      "kind": "collection",
+      "lineCount": 11,
+      "nonEmptyOccurrences": 11,
+      "uniqueNames": 11,
+      "duplicateExtraOccurrences": 0,
+      "repeatedNames": []
+    },
+    {
+      "fileName": "exclusive series.txt",
+      "direction": "Exclusive",
+      "kind": "series",
+      "lineCount": 215,
+      "nonEmptyOccurrences": 215,
+      "uniqueNames": 215,
+      "duplicateExtraOccurrences": 0,
+      "repeatedNames": []
+    },
+    {
+      "fileName": "mainline collection.txt",
+      "direction": "Mainline",
+      "kind": "collection",
+      "lineCount": 6,
+      "nonEmptyOccurrences": 6,
+      "uniqueNames": 6,
+      "duplicateExtraOccurrences": 0,
+      "repeatedNames": []
+    },
+    {
+      "fileName": "mainline series.txt",
+      "direction": "Mainline",
+      "kind": "series",
+      "lineCount": 763,
+      "nonEmptyOccurrences": 763,
+      "uniqueNames": 763,
+      "duplicateExtraOccurrences": 0,
+      "repeatedNames": []
+    },
+    {
+      "fileName": "playsets collection.txt",
+      "direction": "Playsets",
+      "kind": "collection",
+      "lineCount": 11,
+      "nonEmptyOccurrences": 11,
+      "uniqueNames": 11,
+      "duplicateExtraOccurrences": 0,
+      "repeatedNames": []
+    },
+    {
+      "fileName": "playsets series.txt",
+      "direction": "Playsets",
+      "kind": "series",
+      "lineCount": 186,
+      "nonEmptyOccurrences": 186,
+      "uniqueNames": 186,
+      "duplicateExtraOccurrences": 0,
+      "repeatedNames": []
+    },
+    {
+      "fileName": "premium collection.txt",
+      "direction": "Premium",
+      "kind": "collection",
+      "lineCount": 23,
+      "nonEmptyOccurrences": 23,
+      "uniqueNames": 23,
+      "duplicateExtraOccurrences": 0,
+      "repeatedNames": []
+    },
+    {
+      "fileName": "premium series.txt",
+      "direction": "Premium",
+      "kind": "series",
+      "lineCount": 653,
+      "nonEmptyOccurrences": 653,
+      "uniqueNames": 652,
+      "duplicateExtraOccurrences": 1,
+      "repeatedNames": [
+        {
+          "name": "Hot Rod",
+          "occurrenceCount": 2,
+          "sourcePositions": [
+            317,
+            318
+          ]
+        }
+      ]
+    },
+    {
+      "fileName": "special collection.txt",
+      "direction": "Special",
+      "kind": "collection",
+      "lineCount": 16,
+      "nonEmptyOccurrences": 16,
+      "uniqueNames": 16,
+      "duplicateExtraOccurrences": 0,
+      "repeatedNames": []
+    },
+    {
+      "fileName": "special series.txt",
+      "direction": "Special",
+      "kind": "series",
+      "lineCount": 549,
+      "nonEmptyOccurrences": 549,
+      "uniqueNames": 549,
+      "duplicateExtraOccurrences": 0,
+      "repeatedNames": []
+    }
+  ],
+  "rules": [
+    "Exact duplicates consolidated only within one source file.",
+    "Original 1-based line positions and occurrence counts retained.",
+    "Same names across different files or directions remain separate entities.",
+    "No parent-child hierarchy inferred from source list membership.",
+    "Source .txt files unchanged; data contains collection and series names, not vehicle models."
+  ]
+}
