@@ -305,7 +305,7 @@ $('treeMove').addEventListener('click',()=>{
  changePreview.set(n.id,{before:'Родитель: '+before,after:'Родитель: '+target.name});selected=new Set([n.id]);setDirty();render();notify('Перенос подготовлен. Проверь результат и нажми «Применить изменения».');
 });
 $('tree').addEventListener('click',e=>{
- const row=e.target.closest('[data-tree-node]');if(row&&!e.target.closest('[data-toggle]')){activeTreeId=row.dataset.treeNode;selected=new Set([activeTreeId]);const n=getNode(activeTreeId);if(n){$('kind').value=n.kind;$('name').value=n.name;$('direction').value=dir(n);}$('rename').disabled=false;render();return;}
+ const row=e.target.closest('[data-tree-node]');if(row&&!e.target.closest('[data-toggle]')){activeTreeId=row.dataset.treeNode;selected=new Set([activeTreeId]);const n=getNode(activeTreeId);if(n){$('kind').value=n.kind;$('name').value=n.name;$('direction').value=dir(n);$('tags').value=tagsOf(n).join(', ');}$('rename').disabled=false;render();return;}
  const toggle=e.target.closest('[data-toggle]'); if(toggle){const id=toggle.dataset.toggle;collapsed.has(id)?collapsed.delete(id):collapsed.add(id);renderTree();return;}
  const pick=e.target.closest('[data-tree-pick]');if(pick){selected=new Set([pick.dataset.treePick]);render();notify('Выбран элемент «'+(getNode(pick.dataset.treePick)?.name||'')+'». Теперь перетащи его на нового родителя или используй кнопку перемещения.');}
 });
@@ -374,7 +374,7 @@ $('filterTags').addEventListener('input',()=>{renderItems();renderContents();});
 $('groupDuplicates').addEventListener('change',renderContents);
 $('items').addEventListener('change',e=>{const id=e.target.dataset.check;if(id)toggleSelection(id,e.target.checked);});
 $('contents').addEventListener('change',e=>{const id=e.target.dataset.contentCheck;if(id)toggleSelection(id,e.target.checked);});
-$('items').addEventListener('click',e=>{const row=e.target.closest('[data-drop-node]');if(!row||e.target.closest('input,button'))return;const id=row.dataset.dropNode;if(id){selected=new Set([id]);activeTreeId=id;const n=getNode(id);if(n){$('kind').value=n.kind;$('name').value=n.name;$('direction').value=dir(n);}$('rename').disabled=false;render();}});
+$('items').addEventListener('click',e=>{const row=e.target.closest('[data-drop-node]');if(!row||e.target.closest('input,button'))return;const id=row.dataset.dropNode;if(id){selected=new Set([id]);activeTreeId=id;const n=getNode(id);if(n){$('kind').value=n.kind;$('name').value=n.name;$('direction').value=dir(n);$('tags').value=tagsOf(n).join(', ');}$('rename').disabled=false;render();}});
 $('edges').addEventListener('click',e=>{const id=e.target.dataset.unlink;if(!id)return;const edge=edges().find(x=>x.id===id);if(!edge)return;draft.catalog_edges=edges().filter(x=>x.id!==id);setDirty();render();notify('Связь удалена. Сами элементы сохранены.');});
 $('selectVisible').addEventListener('change',e=>{
  const q=$('search').value.trim().toLocaleLowerCase(),k=$('filterKind').value,d=$('filterDirection').value;
