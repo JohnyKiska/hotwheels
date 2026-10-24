@@ -36,6 +36,24 @@ input[type=text],select{border:1px solid #cbd3df;border-radius:9px;padding:10px;
 #edges{display:grid;gap:7px;margin-top:10px}.edge{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px;border-radius:8px;background:#f4f6f9;font-size:13px}
 .small{font-size:12px;color:#687487}.count{font-variant-numeric:tabular-nums}
 @media(max-width:850px){.layout{grid-template-columns:1fr}.status{margin-left:0;width:100%}}
+.mobile-quick-actions{display:none}
+#recordEditor{scroll-margin-top:16px}
+@media(max-width:850px){
+ .mobile-quick-actions{display:flex;position:sticky;top:0;z-index:20;gap:8px;padding:8px;margin:-8px 0 12px;background:#f3f5f8;border-bottom:1px solid #dce3ec}
+ .mobile-quick-actions button{flex:1;min-width:0;padding:11px 8px;font-size:13px}
+ #recordEditor{border:2px solid #ffb18f;background:#fffaf7}
+ #recordEditor h2{font-size:20px}
+ #recordEditor .parameter-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #recordEditor .custom-parameter-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+ #recordEditor input,#recordEditor select{font-size:16px}
+ #recordEditor .actions button{flex:1}
+ #recordEditor .parameter-list{gap:10px}
+ #recordEditor .custom-parameter-row{padding:10px}
+}
+@media(max-width:420px){
+ #recordEditor .parameter-grid{grid-template-columns:1fr}
+ .mobile-quick-actions button{font-size:12px}
+}
 </style>
 </head>
 <body>
@@ -50,6 +68,7 @@ input[type=text],select{border:1px solid #cbd3df;border-radius:9px;padding:10px;
 <span id="saveStatus" class="status">Загрузка каталога…</span>
 </div>
 <div class="stats" id="stats"></div>
+<div class="mobile-quick-actions" aria-label="Быстрые действия"><button id="mobileEditJump" class="primary" type="button">✎ Запись и параметры</button><button id="mobileTreeJump" class="secondary" type="button">☷ Дерево каталога</button></div>
 <div class="explorer-layout">
 <section class="panel explorer-pane">
 <div class="list-head"><h2 style="margin:0">Каталог</h2><button id="addRootGroup" class="mini">+ Уровень</button></div>
@@ -57,7 +76,7 @@ input[type=text],select{border:1px solid #cbd3df;border-radius:9px;padding:10px;
 <div class="tree-wrap"><div id="tree" class="tree"><div class="tree-empty">Загрузка дерева…</div></div></div>
 <p class="hint">Выбери узел слева, чтобы переименовать, удалить или перенести его в верхнюю группу.</p><div id="treeActions" class="tree-actions" hidden><strong id="treeActionTitle">Действия с элементом</strong><div class="tree-action-buttons"><button id="treeRename" class="secondary">Переименовать</button><button id="treeDelete" class="secondary">Удалить</button></div><label for="treeMoveGroup" class="small">Перенести в верхнюю группу</label><select id="treeMoveGroup"></select><button id="treeMove" class="primary">Перенести</button><div id="treeActionHint" class="small"></div></div>
 <hr style="border:0;border-top:1px solid #e4e8ee;margin:16px 0">
-<h2>Создать / переименовать</h2>
+<div id="recordEditor"><h2>Запись и параметры</h2>
 <div class="field"><label for="kind">Тип элемента</label><select id="kind"><option value="group">Группа</option><option value="collection">Коллекция</option><option value="series">Серия</option><option value="model">Модель</option></select></div>
 <div class="field"><label for="name">Название</label><input id="name" type="text" placeholder="Название элемента"></div>
 <div class="field"><label for="direction">Направление / источник</label><select id="direction"><option value="">Не указано</option><option>Character</option><option>Exclusive</option><option>Mainline</option><option>Playsets</option><option>Premium</option><option>Special</option></select></div>
@@ -65,7 +84,7 @@ input[type=text],select{border:1px solid #cbd3df;border-radius:9px;padding:10px;
 <div class="field"><label>Стандартные параметры</label><div id="standardParameters" class="parameter-grid"><p class="small">Выбери тип записи.</p></div></div>
 <div class="field"><label>Пользовательские параметры</label><div id="customParameters" class="parameter-list"></div><button id="addCustomParameter" type="button" class="mini">+ Добавить параметр</button><p class="hint">Параметры сохраняются в attributes.parameters и attributes.customParameters. Пустые значения не записываются.</p></div>
 <div class="actions"><button id="create" class="primary">Создать элемент</button><button id="rename" class="secondary" disabled>Переименовать выбранный</button></div>
-<div class="actions"><button id="makeRoot" class="secondary">Сделать корневым</button><button id="discard" class="secondary">Отменить черновик</button></div>
+<div class="actions"><button id="makeRoot" class="secondary">Сделать корневым</button><button id="discard" class="secondary">Отменить черновик</button></div></div>
 </section>
 <section class="panel explorer-pane">
 <div class="list-head"><div><h2 id="contentsTitle" style="margin:0">Содержимое</h2><div id="contentsSubtitle" class="small">Выбери раздел слева</div></div><span id="shown" class="small"></span></div>
@@ -425,6 +444,8 @@ $('selectVisible').addEventListener('change',e=>{
  nodes().filter(n=>(!k||n.kind===k)&&(!d||dir(n)===d)&&(!q||(n.name+' '+n.id).toLocaleLowerCase().includes(q))).forEach(n=>e.target.checked?selected.add(n.id):selected.delete(n.id));render();
 });
 $('clearSelection').addEventListener('click',()=>{selected.clear();render();});
+$('mobileEditJump').addEventListener('click',()=>{$('recordEditor').scrollIntoView({behavior:'smooth',block:'start'});$('name').focus({preventScroll:true});});
+$('mobileTreeJump').addEventListener('click',()=>{$('tree').scrollIntoView({behavior:'smooth',block:'start'});});
 $('kind').addEventListener('change',()=>loadParameterEditor(null));
 $('addCustomParameter').addEventListener('click',()=>{const rows=$('customParameters');const idx=rows.querySelectorAll('[data-custom-row]').length;rows.insertAdjacentHTML('beforeend',customParameterMarkup({},idx));});
 $('customParameters').addEventListener('click',e=>{if(e.target.closest('[data-remove-custom]'))e.target.closest('[data-custom-row]').remove();});
