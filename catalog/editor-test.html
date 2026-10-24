@@ -16,7 +16,7 @@ button:disabled{opacity:.45;cursor:not-allowed}.primary{background:#ff5000;color
 input[type=text],select{border:1px solid #cbd3df;border-radius:9px;padding:10px;background:#fff;min-width:0}
 #search{flex:1;min-width:210px}.status{margin-left:auto;color:#536074;font-size:13px}
 .layout{display:grid;grid-template-columns:minmax(280px,360px) minmax(0,1fr);gap:16px;align-items:start}.explorer-layout{display:grid;grid-template-columns:minmax(260px,320px) minmax(0,1fr);gap:12px;align-items:start}.explorer-pane{min-height:520px}.explorer-list{display:grid;gap:4px}.explorer-item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px;align-items:center;padding:3px 7px;border:1px solid #e1e6ed;border-left:3px solid #e1e6ed;border-radius:5px;background:#fff;min-height:0}.explorer-item[data-kind="group"]{border-left-color:var(--kind-group);background:color-mix(in srgb,var(--kind-group) 18%,white)}.explorer-item[data-kind="collection"]{border-left-color:var(--kind-collection);background:color-mix(in srgb,var(--kind-collection) 18%,white)}.explorer-item[data-kind="series"]{border-left-color:var(--kind-series);background:color-mix(in srgb,var(--kind-series) 20%,white)}.explorer-item[data-kind="model"]{border-left-color:var(--kind-model);background:color-mix(in srgb,var(--kind-model) 20%,white)}.explorer-item:hover{border-color:#aeb9ca;filter:saturate(1.08)}.explorer-item.selected{border-color:#ff5000;background:#fff2e9;box-shadow:inset 3px 0 0 #ff5000}.explorer-item.selected .item-name{color:#8f2f08}.explorer-item.drop-target{border-color:#29934a;background:#e9f7ec;box-shadow:inset 4px 0 0 #29934a}.explorer-item.drop-invalid{border-color:#c84a35;background:#fff0ed;box-shadow:inset 4px 0 0 #c84a35}.explorer-item .item-name{font-size:12px;line-height:1.15;font-weight:650}.explorer-item .item-meta{font-size:10px;line-height:1.1;margin-top:1px}.explorer-item .kind-tag{padding:1px 5px;font-size:10px;margin-right:3px}.explorer-item .direction-tag{padding:1px 5px;font-size:10px}.explorer-item .item-meta>div{display:none}.explorer-item .item-meta>div{margin-top:0!important}.explorer-item label.small{font-size:10px;white-space:nowrap}.explorer-item label.small input{margin:0;vertical-align:middle}.explorer-item .item-meta>div:not(:first-child){color:#687487}.explorer-item .kind-tag[data-kind="group"]{background:var(--kind-group);color:#172033}.explorer-item .kind-tag[data-kind="collection"]{background:var(--kind-collection);color:#172033}.explorer-item .kind-tag[data-kind="series"]{background:var(--kind-series);color:#172033}.explorer-item .kind-tag[data-kind="model"]{background:var(--kind-model);color:#172033}.explorer-empty{padding:28px;text-align:center;color:#687487;border:1px dashed #cbd3df;border-radius:10px}.duplicate-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 12px}.duplicate-tools label{display:flex;align-items:center;gap:7px;font-size:13px;color:#4b5565}.duplicate-summary{font-size:12px;color:#697386}.duplicate-group{border:1px solid #dfe5ed;border-radius:9px;padding:10px 12px;background:#fff}.duplicate-group+.duplicate-group{margin-top:8px}.duplicate-group-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.duplicate-group-head strong{font-size:14px}.duplicate-variants{margin-top:8px;display:grid;gap:6px}.duplicate-variant{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 9px;border-radius:7px;background:#f5f7fa;font-size:13px}.duplicate-variant small{color:#687487}.tree-row.active{background:#fff2e9;border-color:#ff5000}.tree-row .tree-name{flex:1}.tree-row .tree-pick{display:none}.tree{max-height:70vh}.tree-wrap{margin-bottom:0}.tree-search{margin:8px 0}.tree-actions{display:grid;gap:8px;padding:10px;border:1px solid #dce3ec;border-radius:9px;background:#f8fafc;margin-top:10px}.tree-action-buttons{display:flex;gap:6px;flex-wrap:wrap}.tree-actions select,.tree-search input{width:100%}.tree-row{cursor:pointer}
-.panel h2{font-size:18px;margin:0 0 12px}.field{display:grid;gap:6px;margin-bottom:12px}.field label{font-size:13px;font-weight:700;color:#4d596b}
+.panel h2{font-size:18px;margin:0 0 12px}.field{display:grid;gap:6px;margin-bottom:12px}.field label{font-size:13px;font-weight:700;color:#4d596b}.parameter-grid{display:grid;grid-template-columns:1fr;gap:8px}.parameter-field{display:grid;gap:4px}.parameter-field label{font-size:12px;font-weight:600}.parameter-field input,.parameter-field select,.custom-parameter-row input,.custom-parameter-row select{width:100%;min-width:0;border:1px solid #cbd3df;border-radius:7px;padding:8px;background:#fff}.parameter-list{display:grid;gap:8px}.custom-parameter-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:6px;padding:8px;border:1px solid #e1e6ed;border-radius:8px}.custom-parameter-row .custom-value{grid-column:1/-1}.custom-parameter-row .remove-custom{grid-column:1/-1;justify-self:start}
 .filters{display:grid;grid-template-columns:1fr 1fr;gap:8px}.filters select{width:100%}
 .hint{font-size:13px;line-height:1.45;color:#647084;margin:10px 0 0}
 .stats{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.chip{font-size:12px;background:#eef1f6;border-radius:99px;padding:5px 9px;color:#475368}
@@ -36,6 +36,24 @@ input[type=text],select{border:1px solid #cbd3df;border-radius:9px;padding:10px;
 #edges{display:grid;gap:7px;margin-top:10px}.edge{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px;border-radius:8px;background:#f4f6f9;font-size:13px}
 .small{font-size:12px;color:#687487}.count{font-variant-numeric:tabular-nums}
 @media(max-width:850px){.layout{grid-template-columns:1fr}.status{margin-left:0;width:100%}}
+.mobile-quick-actions{display:none}
+#recordEditor{scroll-margin-top:16px}
+@media(max-width:850px){
+ .mobile-quick-actions{display:flex;position:sticky;top:0;z-index:20;gap:8px;padding:8px;margin:-8px 0 12px;background:#f3f5f8;border-bottom:1px solid #dce3ec}
+ .mobile-quick-actions button{flex:1;min-width:0;padding:11px 8px;font-size:13px}
+ #recordEditor{border:2px solid #ffb18f;background:#fffaf7}
+ #recordEditor h2{font-size:20px}
+ #recordEditor .parameter-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #recordEditor .custom-parameter-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+ #recordEditor input,#recordEditor select{font-size:16px}
+ #recordEditor .actions button{flex:1}
+ #recordEditor .parameter-list{gap:10px}
+ #recordEditor .custom-parameter-row{padding:10px}
+}
+@media(max-width:420px){
+ #recordEditor .parameter-grid{grid-template-columns:1fr}
+ .mobile-quick-actions button{font-size:12px}
+}
 </style>
 </head>
 <body>
@@ -50,6 +68,7 @@ input[type=text],select{border:1px solid #cbd3df;border-radius:9px;padding:10px;
 <span id="saveStatus" class="status">Загрузка каталога…</span>
 </div>
 <div class="stats" id="stats"></div>
+<div class="mobile-quick-actions" aria-label="Быстрые действия"><button id="mobileEditJump" class="primary" type="button">✎ Запись и параметры</button><button id="mobileTreeJump" class="secondary" type="button">☷ Дерево каталога</button></div>
 <div class="explorer-layout">
 <section class="panel explorer-pane">
 <div class="list-head"><h2 style="margin:0">Каталог</h2><button id="addRootGroup" class="mini">+ Уровень</button></div>
@@ -57,13 +76,15 @@ input[type=text],select{border:1px solid #cbd3df;border-radius:9px;padding:10px;
 <div class="tree-wrap"><div id="tree" class="tree"><div class="tree-empty">Загрузка дерева…</div></div></div>
 <p class="hint">Выбери узел слева, чтобы переименовать, удалить или перенести его в верхнюю группу.</p><div id="treeActions" class="tree-actions" hidden><strong id="treeActionTitle">Действия с элементом</strong><div class="tree-action-buttons"><button id="treeRename" class="secondary">Переименовать</button><button id="treeDelete" class="secondary">Удалить</button></div><label for="treeMoveGroup" class="small">Перенести в верхнюю группу</label><select id="treeMoveGroup"></select><button id="treeMove" class="primary">Перенести</button><div id="treeActionHint" class="small"></div></div>
 <hr style="border:0;border-top:1px solid #e4e8ee;margin:16px 0">
-<h2>Создать / переименовать</h2>
+<div id="recordEditor"><h2>Запись и параметры</h2>
 <div class="field"><label for="kind">Тип элемента</label><select id="kind"><option value="group">Группа</option><option value="collection">Коллекция</option><option value="series">Серия</option><option value="model">Модель</option></select></div>
 <div class="field"><label for="name">Название</label><input id="name" type="text" placeholder="Название элемента"></div>
 <div class="field"><label for="direction">Направление / источник</label><select id="direction"><option value="">Не указано</option><option>Character</option><option>Exclusive</option><option>Mainline</option><option>Playsets</option><option>Premium</option><option>Special</option></select></div>
 <div class="field"><label for="tags">Теги (через запятую)</label><input id="tags" type="text" placeholder="японская, синий, фото днища"></div>
+<div class="field"><label>Стандартные параметры</label><div id="standardParameters" class="parameter-grid"><p class="small">Выбери тип записи.</p></div></div>
+<div class="field"><label>Пользовательские параметры</label><div id="customParameters" class="parameter-list"></div><button id="addCustomParameter" type="button" class="mini">+ Добавить параметр</button><p class="hint">Параметры сохраняются в attributes.parameters и attributes.customParameters. Пустые значения не записываются.</p></div>
 <div class="actions"><button id="create" class="primary">Создать элемент</button><button id="rename" class="secondary" disabled>Переименовать выбранный</button></div>
-<div class="actions"><button id="makeRoot" class="secondary">Сделать корневым</button><button id="discard" class="secondary">Отменить черновик</button></div>
+<div class="actions"><button id="makeRoot" class="secondary">Сделать корневым</button><button id="discard" class="secondary">Отменить черновик</button></div></div>
 </section>
 <section class="panel explorer-pane">
 <div class="list-head"><div><h2 id="contentsTitle" style="margin:0">Содержимое</h2><div id="contentsSubtitle" class="small">Выбери раздел слева</div></div><span id="shown" class="small"></span></div>
@@ -103,6 +124,48 @@ function getNode(id){return nodes().find(n=>n.id===id)}
 function dir(n){return n.attributes?.sourceDirection||''}
 function tagsOf(n){return Array.isArray(n.attributes?.tags)?n.attributes.tags:[]}
 function parseTags(v){return [...new Set(String(v||'').split(',').map(t=>t.trim()).filter(Boolean))]}
+const STANDARD_FIELDS={
+ group:[['purpose','Назначение','text'],['theme','Тематика','text'],['status','Статус','text']],
+ collection:[['collectionType','Тип коллекции','text'],['owner','Владелец','text'],['createdDate','Дата создания','date']],
+ series:[['brand','Бренд','text'],['line','Линейка','text'],['year','Год','number'],['country','Страна','text']],
+ model:[['vehicleManufacturer','Производитель автомобиля','text'],['generation','Поколение','text'],['scale','Масштаб','text'],['color','Цвет','text'],['baseCode','Базовый код','text']]
+};
+function standardValues(n){return n?.attributes?.parameters&&typeof n.attributes.parameters==='object'&&!Array.isArray(n.attributes.parameters)?n.attributes.parameters:{}}
+function customValues(n){return Array.isArray(n?.attributes?.customParameters)?n.attributes.customParameters:[]}
+function renderParameterEditor(n){
+ const kind=$('kind').value, values=standardValues(n), fields=STANDARD_FIELDS[kind]||[];
+ $('standardParameters').innerHTML=fields.map(([key,label,type])=>'<div class="parameter-field"><label for="param-'+key+'">'+label+'</label><input id="param-'+key+'" data-standard-param="'+key+'" type="'+type+'" value="'+esc(String(values[key]??''))+'"></div>').join('')||'<p class="small">Для этого типа нет стандартных полей.</p>';
+ const custom=customValues(n);
+ $('customParameters').innerHTML=custom.map((p,i)=>customParameterMarkup(p,i)).join('');
+}
+function customParameterMarkup(p={},i){
+ const type=['text','number','boolean','date'].includes(p.type)?p.type:'text';
+ const val=type==='boolean'?(p.value===true?'true':p.value===false?'false':String(p.value??'')):String(p.value??'');
+ return '<div class="custom-parameter-row" data-custom-row="'+i+'" data-param-id="'+esc(String(p.id||''))+'"><input data-custom-name aria-label="Название параметра" placeholder="Название параметра" value="'+esc(String(p.name||''))+'"><select data-custom-type aria-label="Тип параметра"><option value="text" '+(type==='text'?'selected':'')+'>Текст</option><option value="number" '+(type==='number'?'selected':'')+'>Число</option><option value="boolean" '+(type==='boolean'?'selected':'')+'>Да/нет</option><option value="date" '+(type==='date'?'selected':'')+'>Дата</option></select><input class="custom-value" data-custom-value aria-label="Значение параметра" type="'+(type==='boolean'?'text':type)+'" '+(type==='boolean'?'placeholder="true или false"':'')+' value="'+esc(val)+'"><button type="button" class="mini remove-custom" data-remove-custom>Удалить параметр</button></div>';
+}
+function readParameterEditor(){
+ const parameters={};
+ document.querySelectorAll('[data-standard-param]').forEach(input=>{const v=input.value.trim();if(v)parameters[input.dataset.standardParam]=input.type==='number'?Number(v):v;});
+ const customParameters=[];
+ document.querySelectorAll('[data-custom-row]').forEach(row=>{
+  const name=row.querySelector('[data-custom-name]').value.trim(),type=row.querySelector('[data-custom-type]').value,raw=row.querySelector('[data-custom-value]').value.trim();
+  if(!name&&!raw)return;
+  if(!name)throw new Error('Укажи название для каждого пользовательского параметра.');
+  if(type==='number'&&raw!==''&&!Number.isFinite(Number(raw)))throw new Error('Параметр «'+name+'» должен содержать число.');
+  if(type==='boolean'&&raw!==''&&!['true','false','да','нет','1','0'].includes(raw.toLocaleLowerCase()))throw new Error('Для параметра «'+name+'» укажи true/false или да/нет.');
+  let value=raw;
+  if(type==='number'&&raw!=='')value=Number(raw);
+  if(type==='boolean'&&raw!=='')value=['true','да','1'].includes(raw.toLocaleLowerCase());
+  customParameters.push({id:row.dataset.paramId||uid('param'),name,type,...(raw!==''?{value}: {})});
+ });
+ return {parameters,customParameters};
+}
+function loadParameterEditor(n){renderParameterEditor(n||null);}
+function saveParameters(n){
+ const parsed=readParameterEditor();n.attributes=n.attributes||{};
+ if(Object.keys(parsed.parameters).length)n.attributes.parameters=parsed.parameters;else delete n.attributes.parameters;
+ if(parsed.customParameters.length)n.attributes.customParameters=parsed.customParameters;else delete n.attributes.customParameters;
+}
 function tagsMatch(n,v){const q=String(v||'').trim().toLocaleLowerCase();return !q||tagsOf(n).some(t=>t.toLocaleLowerCase().includes(q))}
 function label(n){return (kindLabels[n.kind]||n.kind)+' · '+n.name}
 function setDirty(){dirty=true;$('saveStatus').textContent='Есть несохранённые изменения';localStorage.setItem(DRAFT_KEY,JSON.stringify(draft));renderStats();}
@@ -305,7 +368,7 @@ $('treeMove').addEventListener('click',()=>{
  changePreview.set(n.id,{before:'Родитель: '+before,after:'Родитель: '+target.name});selected=new Set([n.id]);setDirty();render();notify('Перенос подготовлен. Проверь результат и нажми «Применить изменения».');
 });
 $('tree').addEventListener('click',e=>{
- const row=e.target.closest('[data-tree-node]');if(row&&!e.target.closest('[data-toggle]')){activeTreeId=row.dataset.treeNode;selected=new Set([activeTreeId]);const n=getNode(activeTreeId);if(n){$('kind').value=n.kind;$('name').value=n.name;$('direction').value=dir(n);$('tags').value=tagsOf(n).join(', ');}$('rename').disabled=false;render();return;}
+ const row=e.target.closest('[data-tree-node]');if(row&&!e.target.closest('[data-toggle]')){activeTreeId=row.dataset.treeNode;selected=new Set([activeTreeId]);const n=getNode(activeTreeId);if(n){$('kind').value=n.kind;$('name').value=n.name;$('direction').value=dir(n);$('tags').value=tagsOf(n).join(', ');loadParameterEditor(n);}$('rename').disabled=false;render();return;}
  const toggle=e.target.closest('[data-toggle]'); if(toggle){const id=toggle.dataset.toggle;collapsed.has(id)?collapsed.delete(id):collapsed.add(id);renderTree();return;}
  const pick=e.target.closest('[data-tree-pick]');if(pick){selected=new Set([pick.dataset.treePick]);render();notify('Выбран элемент «'+(getNode(pick.dataset.treePick)?.name||'')+'». Теперь перетащи его на нового родителя или используй кнопку перемещения.');}
 });
@@ -374,31 +437,37 @@ $('filterTags').addEventListener('input',()=>{renderItems();renderContents();});
 $('groupDuplicates').addEventListener('change',renderContents);
 $('items').addEventListener('change',e=>{const id=e.target.dataset.check;if(id)toggleSelection(id,e.target.checked);});
 $('contents').addEventListener('change',e=>{const id=e.target.dataset.contentCheck;if(id)toggleSelection(id,e.target.checked);});
-$('items').addEventListener('click',e=>{const row=e.target.closest('[data-drop-node]');if(!row||e.target.closest('input,button'))return;const id=row.dataset.dropNode;if(id){selected=new Set([id]);activeTreeId=id;const n=getNode(id);if(n){$('kind').value=n.kind;$('name').value=n.name;$('direction').value=dir(n);$('tags').value=tagsOf(n).join(', ');}$('rename').disabled=false;render();}});
+$('items').addEventListener('click',e=>{const row=e.target.closest('[data-drop-node]');if(!row||e.target.closest('input,button'))return;const id=row.dataset.dropNode;if(id){selected=new Set([id]);activeTreeId=id;const n=getNode(id);if(n){$('kind').value=n.kind;$('name').value=n.name;$('direction').value=dir(n);$('tags').value=tagsOf(n).join(', ');loadParameterEditor(n);}$('rename').disabled=false;render();}});
 $('edges').addEventListener('click',e=>{const id=e.target.dataset.unlink;if(!id)return;const edge=edges().find(x=>x.id===id);if(!edge)return;draft.catalog_edges=edges().filter(x=>x.id!==id);setDirty();render();notify('Связь удалена. Сами элементы сохранены.');});
 $('selectVisible').addEventListener('change',e=>{
  const q=$('search').value.trim().toLocaleLowerCase(),k=$('filterKind').value,d=$('filterDirection').value;
  nodes().filter(n=>(!k||n.kind===k)&&(!d||dir(n)===d)&&(!q||(n.name+' '+n.id).toLocaleLowerCase().includes(q))).forEach(n=>e.target.checked?selected.add(n.id):selected.delete(n.id));render();
 });
 $('clearSelection').addEventListener('click',()=>{selected.clear();render();});
+$('mobileEditJump').addEventListener('click',()=>{$('recordEditor').scrollIntoView({behavior:'smooth',block:'start'});$('name').focus({preventScroll:true});});
+$('mobileTreeJump').addEventListener('click',()=>{$('tree').scrollIntoView({behavior:'smooth',block:'start'});});
+$('kind').addEventListener('change',()=>loadParameterEditor(null));
+$('addCustomParameter').addEventListener('click',()=>{const rows=$('customParameters');const idx=rows.querySelectorAll('[data-custom-row]').length;rows.insertAdjacentHTML('beforeend',customParameterMarkup({},idx));});
+$('customParameters').addEventListener('click',e=>{if(e.target.closest('[data-remove-custom]'))e.target.closest('[data-custom-row]').remove();});
+$('customParameters').addEventListener('change',e=>{if(e.target.matches('[data-custom-type]')){const row=e.target.closest('[data-custom-row]'),v=row.querySelector('[data-custom-value]');const old=v.value;v.type=e.target.value==='boolean'?'text':e.target.value;v.placeholder=e.target.value==='boolean'?'true или false':'';v.value=old;}});
 $('create').addEventListener('click',()=>{
  const name=$('name').value.trim();if(!name){notify('Укажи название элемента.',true);return;}
- const kind=$('kind').value,direction=$('direction').value,tags=parseTags($('tags').value);
+ const kind=$('kind').value,direction=$('direction').value,tags=parseTags($('tags').value);let parsedParams;try{parsedParams=readParameterEditor();}catch(err){notify(err.message,true);return;}
  const duplicate=nodes().find(x=>x.kind===kind&&String(x.name||'').trim().toLocaleLowerCase()===name.toLocaleLowerCase());
  if(duplicate){
   const useExisting=confirm('Элемент типа «'+(kindLabels[kind]||kind)+'» с названием «'+duplicate.name+'» уже существует.\n\nOK — выбрать существующий элемент для редактирования.\nОтмена — не создавать дубликат.');
-  if(useExisting){selected=new Set([duplicate.id]);activeTreeId=duplicate.id;$('kind').value=duplicate.kind;$('name').value=duplicate.name;$('direction').value=dir(duplicate);$('tags').value=(duplicate.attributes?.tags||[]).join(', ');$('rename').disabled=false;render();notify('Выбран существующий элемент. Отредактируй его и нажми «Переименовать выбранный».');}
+  if(useExisting){selected=new Set([duplicate.id]);activeTreeId=duplicate.id;$('kind').value=duplicate.kind;$('name').value=duplicate.name;$('direction').value=dir(duplicate);$('tags').value=(duplicate.attributes?.tags||[]).join(', ');loadParameterEditor(duplicate);$('rename').disabled=false;render();notify('Выбран существующий элемент. Отредактируй его и нажми «Переименовать выбранный».');}
   else notify('Создание отменено: дубликат не добавлен.');
   return;
  }
- const n={id:uid(kind),kind,name,attributes:{...(direction?{sourceDirection:direction}:{}),...(tags.length?{tags}:{})},createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};
- nodes().push(n);selected=new Set([n.id]);editingId=null;$('name').value='';$('tags').value='';setDirty();render();notify('Создан элемент «'+name+'». Изменения пока в черновике.');
+ const n={id:uid(kind),kind,name,attributes:{...(direction?{sourceDirection:direction}:{}),...(tags.length?{tags}:{}),...(Object.keys(parsedParams.parameters).length?{parameters:parsedParams.parameters}:{}),...(parsedParams.customParameters.length?{customParameters:parsedParams.customParameters}:{})},createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};
+ nodes().push(n);selected=new Set([n.id]);editingId=null;$('name').value='';$('tags').value='';loadParameterEditor(null);setDirty();render();notify('Создан элемент «'+name+'». Изменения пока в черновике.');
 });
 $('rename').addEventListener('click',()=>{
  if(selected.size!==1){notify('Выбери ровно один элемент.',true);return;}
- const n=getNode([...selected][0]),name=$('name').value.trim();if(!n||!name){notify('Выбери элемент и укажи название.',true);return;}
+ const n=getNode([...selected][0]),name=$('name').value.trim();if(!n||!name){notify('Выбери элемент и укажи название.',true);return;}try{readParameterEditor();}catch(err){notify(err.message,true);return;}
  const before=n.name+' · '+(kindLabels[n.kind]||n.kind)+' · '+(dir(n)||'без направления');
- n.name=name;n.kind=$('kind').value;n.attributes=n.attributes||{};if($('direction').value)n.attributes.sourceDirection=$('direction').value;else delete n.attributes.sourceDirection;const tags=parseTags($('tags').value);if(tags.length)n.attributes.tags=tags;else delete n.attributes.tags;n.updatedAt=new Date().toISOString();
+ n.name=name;n.kind=$('kind').value;n.attributes=n.attributes||{};if($('direction').value)n.attributes.sourceDirection=$('direction').value;else delete n.attributes.sourceDirection;const tags=parseTags($('tags').value);if(tags.length)n.attributes.tags=tags;else delete n.attributes.tags;try{saveParameters(n);}catch(err){notify(err.message,true);return;}n.updatedAt=new Date().toISOString();
  const after=n.name+' · '+(kindLabels[n.kind]||n.kind)+' · '+(dir(n)||'без направления');
  changePreview.set(n.id,{before,after});
  setDirty();render();notify('Изменения показаны в строке элемента: «Было → Стало».');
