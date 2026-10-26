@@ -93,7 +93,10 @@ class CastingVariant(TimestampMixin, Base):
 
     casting: Mapped[Casting] = relationship(back_populates="variants")
     releases: Mapped[list[Release]] = relationship(
-        back_populates="casting_variant", foreign_keys="Release.casting_variant_id"
+        back_populates="casting_variant",
+        foreign_keys="Release.casting_variant_id",
+        # Let the database RESTRICT constraint protect referenced variants.
+        passive_deletes="all",
     )
 
 

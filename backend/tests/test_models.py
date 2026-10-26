@@ -193,3 +193,41 @@ def test_deleting_series_removes_its_release_links(session):
     assert session.get(Series, series_id) is None
     assert session.query(ReleaseSeries).count() == 0
     assert session.query(Release).count() == 1
+
+
+
+def test_deleting_variant_referenced_by_release_is_rejected(session):
+    casting = Casting(name="Twin Mill")
+    variant = CastingVariant(casting=casting, name="Different wheels")
+    release = Release(casting=casting, casting_variant=variant, catalog_year=2026)
+    session.add(release)
+    session.commit()
+    variant_id = variant.id
+    release_id = release.id
+
+    session.delete(variant)
+    with pytest.raises(IntegrityError):
+        session.commit()
+    session.rollback()
+
+    assert session.get(CastingVariant, variant_id) is not None
+    persisted_release = session.get(Release, release_id)
+    assert persisted_release is not None
+    assert persisted_release.casting_variant_id == variant_id
+
+
+def test_variant_cannot_be_reassigned_to_different_casting_when_referenced(session):
+    casting_a = Casting(name="Casting A")
+    casting_b = Casting(name="Casting B")
+    variant = CastingVariant(casting=casting_a, name="Variant A")
+    release = Release(casting=casting_a, casting_variant=variant, catalog_year=2026)
+    session.add_all([casting_b, release])
+    session.commit()
+
+    variant.casting = casting_b
+    with pytest.raises(IntegrityError):
+        session.commit()
+    session.rollback()
+
+    assert session.get(CastingVariant, variant.id).casting_id == casting_a.id
+    assert session.get(Release, release.id).casting_id == casting_a.id
