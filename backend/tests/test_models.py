@@ -379,3 +379,83 @@ def test_database_restricts_direct_delete_of_casting_with_variants(session):
 
     assert session.get(Casting, casting_id) is not None
     assert session.get(CastingVariant, variant_id) is not None
+
+
+def test_evidence_can_link_to_multiple_entity_types_once(session):
+    from app.models import Evidence, EvidenceCasting, EvidenceRelease, Source, SourceRecord
+
+    source = Source(name="Official catalog", source_type="catalog", is_official=True)
+    record = SourceRecord(source=source, record_type="catalog_entry", raw_data={"year": 2026})
+    evidence = Evidence(source_record=record, attribute_name="catalog_year", observed_value="2026")
+    casting = Casting(name="Twin Mill")
+    release = Release(casting=casting, catalog_year=2026)
+    session.add_all([evidence, casting, release])
+    session.flush()
+    evidence.casting_links.append(EvidenceCasting(casting=casting))
+    evidence.release_links.append(EvidenceRelease(release=release))
+    session.commit()
+
+    loaded = session.get(Evidence, evidence.id)
+    assert loaded.source_record.source.name == "Official catalog"
+    assert len(loaded.casting_links) == 1
+    assert len(loaded.release_links) == 1
+    assert loaded.source_record.raw_data == {"year": 2026}
+
+
+def test_media_metadata_is_stored_without_media_bytes(session):
+    from app.models import MediaAsset, Source, SourceRecord
+
+    record = SourceRecord(source=Source(name="Physical blister", source_type="photo"), record_type="photo")
+    asset = MediaAsset(source_record=record, storage_key="evidence/sha256/abc.webp",
+                       checksum_sha256="a" * 64, mime_type="image/webp")
+    session.add(asset)
+    session.commit()
+    loaded = session.get(MediaAsset, asset.id)
+    assert loaded.storage_key == "evidence/sha256/abc.webp"
+    assert loaded.checksum_sha256 == "a" * 64
+
+
+def test_conflict_and_change_log_can_reference_same_evidence(session):
+    from app.models import ChangeLog, ChangeLogEvidence, Conflict, ConflictEvidence, Evidence, Source, SourceRecord
+
+    evidence = Evidence(source_record=SourceRecord(
+        source=Source(name="Catalog", source_type="web"), record_type="entry"
+    ), attribute_name="wheel_type", observed_value="5-spoke")
+    conflict = Conflict(conflict_type="wheel_type_disagreement", attribute_name="wheel_type")
+    change = ChangeLog(entity_type="release", entity_id="release-id", action="updated",
+                      old_values={"wheel_type": "5-spoke"}, new_values={"wheel_type": "pr5"},
+                      reason="Manual verification")
+    session.add_all([evidence, conflict, change])
+    session.flush()
+    conflict.evidence_links.append(ConflictEvidence(evidence=evidence, role="contradicts"))
+    change.evidence_links.append(ChangeLogEvidence(evidence=evidence))
+    session.commit()
+
+    assert session.query(ConflictEvidence).count() == 1
+    assert session.query(ChangeLogEvidence).count() == 1
+    assert session.get(ChangeLog, change.id).reason == "Manual verification"
+
+
+def test_evidence_rejects_invalid_assessment(session):
+    from app.models import Evidence, Source, SourceRecord
+    session.add(Evidence(source_record=SourceRecord(
+        source=Source(name="Catalog", source_type="web"), record_type="entry"
+    ), attribute_name="sku", assessment="guess"))
+    with pytest.raises(IntegrityError):
+        session.commit()
+    session.rollback()
+
+
+def test_duplicate_evidence_entity_link_is_rejected(session):
+    from app.models import Evidence, EvidenceCasting, Source, SourceRecord
+    evidence = Evidence(source_record=SourceRecord(
+        source=Source(name="Catalog", source_type="web"), record_type="entry"
+    ), attribute_name="name", observed_value="Twin Mill")
+    casting = Casting(name="Twin Mill")
+    session.add_all([evidence, casting])
+    session.flush()
+    session.add_all([EvidenceCasting(evidence=evidence, casting=casting),
+                     EvidenceCasting(evidence=evidence, casting=casting)])
+    with pytest.raises(IntegrityError):
+        session.commit()
+    session.rollback()
