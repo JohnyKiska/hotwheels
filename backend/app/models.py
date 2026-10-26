@@ -216,7 +216,11 @@ class Source(TimestampMixin, Base):
         CheckConstraint("access_status IN ('unknown', 'available', 'restricted', 'blocked', 'retired')",
                         name="ck_sources_access_status"),
     )
-    records: Mapped[list[SourceRecord]] = relationship(back_populates="source", cascade="all, delete-orphan")
+    records: Mapped[list[SourceRecord]] = relationship(
+        back_populates="source",
+        # Source records are historical snapshots; deleting a source must not erase them.
+        passive_deletes="all",
+    )
 
 
 class SourceRecord(TimestampMixin, Base):
@@ -239,8 +243,15 @@ class SourceRecord(TimestampMixin, Base):
                         name="ck_source_records_status"),
     )
     source: Mapped[Source] = relationship(back_populates="records")
-    evidence: Mapped[list[Evidence]] = relationship(back_populates="source_record", cascade="all, delete-orphan")
-    media_assets: Mapped[list[MediaAsset]] = relationship(back_populates="source_record", cascade="all, delete-orphan")
+    evidence: Mapped[list[Evidence]] = relationship(
+        back_populates="source_record",
+        # Evidence is an audit trail and must not disappear with a source snapshot.
+        passive_deletes="all",
+    )
+    media_assets: Mapped[list[MediaAsset]] = relationship(
+        back_populates="source_record",
+        passive_deletes="all",
+    )
 
 
 class Evidence(TimestampMixin, Base):

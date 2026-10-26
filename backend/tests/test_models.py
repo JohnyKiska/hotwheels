@@ -459,3 +459,85 @@ def test_duplicate_evidence_entity_link_is_rejected(session):
     with pytest.raises(IntegrityError):
         session.commit()
     session.rollback()
+
+
+
+def test_source_snapshot_and_evidence_are_not_cascade_deleted(session):
+    from app.models import Evidence, Source, SourceRecord
+
+    source = Source(name="Catalog source", source_type="web")
+    record = SourceRecord(source=source, record_type="catalog_entry", raw_data={"sku": "ABC"})
+    evidence = Evidence(source_record=record, attribute_name="sku", observed_value="ABC")
+    session.add(evidence)
+    session.commit()
+
+    session.delete(source)
+    with pytest.raises(IntegrityError):
+        session.commit()
+    session.rollback()
+
+    assert session.get(Source, source.id) is not None
+    assert session.get(SourceRecord, record.id) is not None
+    assert session.get(Evidence, evidence.id) is not None
+
+
+def test_source_record_with_evidence_cannot_be_deleted(session):
+    from app.models import Evidence, Source, SourceRecord
+
+    record = SourceRecord(
+        source=Source(name="Catalog source", source_type="web"),
+        record_type="catalog_entry",
+        raw_data={"sku": "ABC"},
+    )
+    evidence = Evidence(source_record=record, attribute_name="sku", observed_value="ABC")
+    session.add(evidence)
+    session.commit()
+
+    session.delete(record)
+    with pytest.raises(IntegrityError):
+        session.commit()
+    session.rollback()
+
+    assert session.get(SourceRecord, record.id) is not None
+    assert session.get(Evidence, evidence.id) is not None
+
+
+def test_alembic_upgrade_is_safe_on_initialized_existing_database(tmp_path, monkeypatch):
+    from alembic import command
+    from alembic.config import Config
+    from sqlalchemy import create_engine, inspect, text
+    from sqlalchemy.orm import Session
+
+    from app import models  # noqa: F401
+    from app.db import Base
+
+    database_path = tmp_path / "existing.db"
+    url = f"sqlite:///{database_path}"
+    engine = create_engine(url)
+    Base.metadata.create_all(engine)
+    with Session(engine) as db:
+        casting = Casting(name="Existing record must survive")
+        db.add(casting)
+        db.commit()
+        casting_id = casting.id
+    engine.dispose()
+
+    config = Config("alembic.ini")
+    config.set_main_option("sqlalchemy.url", url)
+    monkeypatch.setenv("DATABASE_URL", url)
+    command.upgrade(config, "head")
+
+    check_engine = create_engine(url)
+    try:
+        inspector = inspect(check_engine)
+        tables = set(inspector.get_table_names())
+        assert "alembic_version" in tables
+        assert "sources" in tables
+        assert "evidence" in tables
+        with check_engine.connect() as connection:
+            assert connection.execute(
+                text("SELECT name FROM castings WHERE id = :id"), {"id": casting_id}
+            ).scalar_one() == "Existing record must survive"
+            assert connection.execute(text("SELECT version_num FROM alembic_version")).scalar_one() == "20261026_evidence_layer"
+    finally:
+        check_engine.dispose()
