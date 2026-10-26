@@ -231,3 +231,42 @@ def test_variant_cannot_be_reassigned_to_different_casting_when_referenced(sessi
 
     assert session.get(CastingVariant, variant.id).casting_id == casting_a.id
     assert session.get(Release, release.id).casting_id == casting_a.id
+
+def test_release_cannot_be_reassigned_to_casting_that_does_not_own_its_variant(session):
+    casting_a = Casting(name="Casting A")
+    casting_b = Casting(name="Casting B")
+    variant_a = CastingVariant(casting=casting_a, name="Variant A")
+    release = Release(casting=casting_a, casting_variant=variant_a, catalog_year=2026)
+    session.add_all([casting_b, release])
+    session.commit()
+
+    release.casting = casting_b
+    with pytest.raises(IntegrityError):
+        session.commit()
+    session.rollback()
+
+    persisted_release = session.get(Release, release.id)
+    assert persisted_release is not None
+    assert persisted_release.casting_id == casting_a.id
+    assert persisted_release.casting_variant_id == variant_a.id
+
+
+def test_release_cannot_switch_to_variant_owned_by_another_casting(session):
+    casting_a = Casting(name="Casting A")
+    casting_b = Casting(name="Casting B")
+    variant_a = CastingVariant(casting=casting_a, name="Variant A")
+    variant_b = CastingVariant(casting=casting_b, name="Variant B")
+    release = Release(casting=casting_a, casting_variant=variant_a, catalog_year=2026)
+    session.add_all([casting_b, release, variant_b])
+    session.commit()
+
+    release.casting_variant = variant_b
+    with pytest.raises(IntegrityError):
+        session.commit()
+    session.rollback()
+
+    persisted_release = session.get(Release, release.id)
+    assert persisted_release is not None
+    assert persisted_release.casting_id == casting_a.id
+    assert persisted_release.casting_variant_id == variant_a.id
+
