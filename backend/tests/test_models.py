@@ -145,3 +145,51 @@ def test_casting_rejects_out_of_range_first_known_year(session, bad_year):
     with pytest.raises(IntegrityError):
         session.commit()
     session.rollback()
+
+
+
+def test_deleting_casting_with_release_is_rejected(session):
+    casting = Casting(name="Twin Mill")
+    release = Release(casting=casting, catalog_year=2026)
+    session.add(release)
+    session.commit()
+
+    session.delete(casting)
+    with pytest.raises(IntegrityError):
+        session.commit()
+    session.rollback()
+
+    assert session.get(Casting, casting.id) is not None
+    assert session.get(Release, release.id) is not None
+
+
+def test_deleting_release_removes_its_series_links(session):
+    release = Release(casting=Casting(name="Twin Mill"), catalog_year=2026)
+    series = Series(name="HW Dream Garage")
+    link = ReleaseSeries(release=release, series=series)
+    session.add_all([release, series, link])
+    session.commit()
+    release_id = release.id
+
+    session.delete(release)
+    session.commit()
+
+    assert session.get(Release, release_id) is None
+    assert session.query(ReleaseSeries).count() == 0
+    assert session.query(Series).count() == 1
+
+
+def test_deleting_series_removes_its_release_links(session):
+    release = Release(casting=Casting(name="Twin Mill"), catalog_year=2026)
+    series = Series(name="HW Dream Garage")
+    link = ReleaseSeries(release=release, series=series)
+    session.add_all([release, series, link])
+    session.commit()
+    series_id = series.id
+
+    session.delete(series)
+    session.commit()
+
+    assert session.get(Series, series_id) is None
+    assert session.query(ReleaseSeries).count() == 0
+    assert session.query(Release).count() == 1
