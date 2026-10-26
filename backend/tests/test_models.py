@@ -312,3 +312,70 @@ def test_database_restricts_direct_reassignment_of_referenced_variant(session):
     assert persisted_release.casting_id == casting_a.id
     assert persisted_release.casting_variant_id == variant.id
 
+
+
+
+def test_deleting_casting_removes_unreferenced_variants(session):
+    casting = Casting(name="Twin Mill")
+    variants = [
+        CastingVariant(casting=casting, name="Variant A"),
+        CastingVariant(casting=casting, name="Variant B"),
+    ]
+    session.add(casting)
+    session.commit()
+    casting_id = casting.id
+    variant_ids = [variant.id for variant in variants]
+
+    session.delete(casting)
+    session.commit()
+
+    assert session.get(Casting, casting_id) is None
+    assert all(session.get(CastingVariant, variant_id) is None for variant_id in variant_ids)
+
+
+def test_deleting_casting_with_multiple_variants_is_blocked_if_one_is_referenced(session):
+    casting = Casting(name="Twin Mill")
+    referenced_variant = CastingVariant(casting=casting, name="Real Riders")
+    unreferenced_variant = CastingVariant(casting=casting, name="Basic wheels")
+    release = Release(
+        casting=casting,
+        casting_variant=referenced_variant,
+        catalog_year=2026,
+    )
+    session.add(release)
+    session.commit()
+    casting_id = casting.id
+    referenced_variant_id = referenced_variant.id
+    unreferenced_variant_id = unreferenced_variant.id
+    release_id = release.id
+
+    session.delete(casting)
+    with pytest.raises(IntegrityError):
+        session.commit()
+    session.rollback()
+
+    assert session.get(Casting, casting_id) is not None
+    assert session.get(CastingVariant, referenced_variant_id) is not None
+    assert session.get(CastingVariant, unreferenced_variant_id) is not None
+    persisted_release = session.get(Release, release_id)
+    assert persisted_release is not None
+    assert persisted_release.casting_id == casting_id
+    assert persisted_release.casting_variant_id == referenced_variant_id
+
+
+def test_database_restricts_direct_delete_of_casting_with_variants(session):
+    casting = Casting(name="Twin Mill")
+    variant = CastingVariant(casting=casting, name="Real Riders")
+    session.add(variant)
+    session.commit()
+    casting_id = casting.id
+    variant_id = variant.id
+
+    # Raw SQLAlchemy Core DELETE bypasses the ORM's configured child cascade.
+    with pytest.raises(IntegrityError):
+        session.execute(delete(Casting).where(Casting.id == casting_id))
+        session.commit()
+    session.rollback()
+
+    assert session.get(Casting, casting_id) is not None
+    assert session.get(CastingVariant, variant_id) is not None
