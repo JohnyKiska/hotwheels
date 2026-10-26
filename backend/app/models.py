@@ -12,6 +12,7 @@ from sqlalchemy import (
     CheckConstraint,
     DateTime,
     ForeignKey,
+    ForeignKeyConstraint,
     Integer,
     String,
     Text,
@@ -86,10 +87,14 @@ class CastingVariant(TimestampMixin, Base):
             "status IN ('candidate', 'under_review', 'confirmed', 'rejected')",
             name="ck_casting_variants_status",
         ),
+        # Required as the target of Release's composite foreign key.
+        UniqueConstraint("id", "casting_id", name="uq_variant_id_casting"),
     )
 
     casting: Mapped[Casting] = relationship(back_populates="variants")
-    releases: Mapped[list[Release]] = relationship(back_populates="casting_variant")
+    releases: Mapped[list[Release]] = relationship(
+        back_populates="casting_variant", foreign_keys="Release.casting_variant_id"
+    )
 
 
 class Series(TimestampMixin, Base):
@@ -148,9 +153,7 @@ class Release(TimestampMixin, Base):
         ForeignKey("castings.id", ondelete="RESTRICT"), nullable=False, index=True
     )
     # Nullable until the particular construction variant has enough evidence.
-    casting_variant_id: Mapped[str | None] = mapped_column(
-        ForeignKey("casting_variants.id", ondelete="RESTRICT"), nullable=True, index=True
-    )
+    casting_variant_id: Mapped[str | None] = mapped_column(String(36), nullable=True, index=True)
     catalog_year: Mapped[int | None] = mapped_column(Integer, index=True)
     name: Mapped[str | None] = mapped_column(String(240))
     assortment_number: Mapped[str | None] = mapped_column(String(80))
@@ -170,11 +173,18 @@ class Release(TimestampMixin, Base):
             "casting_id", "catalog_year", "assortment_number",
             name="uq_release_casting_year_assortment",
         ),
+        # SQLite checks that a selected variant belongs to this exact casting.
+        ForeignKeyConstraint(
+            ["casting_variant_id", "casting_id"],
+            ["casting_variants.id", "casting_variants.casting_id"],
+            name="fk_release_variant_same_casting",
+            ondelete="RESTRICT",
+        ),
     )
 
-    casting: Mapped[Casting] = relationship(back_populates="releases")
+    casting: Mapped[Casting] = relationship(back_populates="releases", foreign_keys=[casting_id])
     casting_variant: Mapped[CastingVariant | None] = relationship(
-        back_populates="releases"
+        back_populates="releases", foreign_keys=[casting_variant_id]
     )
     series_links: Mapped[list[ReleaseSeries]] = relationship(
         back_populates="release", cascade="all, delete-orphan"
