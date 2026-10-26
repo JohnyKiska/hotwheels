@@ -46,17 +46,25 @@ def run_migrations_online() -> None:
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
-    with connectable.connect() as connection:
-        if connection.dialect.name == "sqlite":
-            connection.exec_driver_sql("PRAGMA foreign_keys=ON")
-        context.configure(
-            connection=connection,
-            target_metadata=target_metadata,
-            compare_type=True,
-        )
-        with context.begin_transaction():
-            context.run_migrations()
-    connectable.dispose()
+    try:
+        with connectable.connect() as connection:
+            is_sqlite = connection.dialect.name == "sqlite"
+            if is_sqlite:
+                connection.exec_driver_sql("PRAGMA foreign_keys=ON")
+            context.configure(
+                connection=connection,
+                target_metadata=target_metadata,
+                compare_type=True,
+                # SQLite's default Alembic implementation treats DDL as
+                # non-transactional. For this migration, explicitly manage
+                # the transaction so the alembic_version write is committed
+                # along with the migration bookkeeping.
+                transactional_ddl=True if is_sqlite else None,
+            )
+            with context.begin_transaction():
+                context.run_migrations()
+    finally:
+        connectable.dispose()
 
 
 if context.is_offline_mode():
