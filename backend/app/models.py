@@ -1,17 +1,30 @@
+"""Core SQLAlchemy models for the Hot Wheels test catalog.
+
+Identity decisions and source evidence are deliberately kept separate from these
+core records; those supporting models will be added in later steps.
+"""
+from __future__ import annotations
+
+import uuid
 from datetime import datetime, timezone
-from uuid import uuid4
 
 from sqlalchemy import (
-    Boolean, CheckConstraint, DateTime, ForeignKey, Index, Integer, String,
-    Text, UniqueConstraint,
+    CheckConstraint,
+    DateTime,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+    UniqueConstraint,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.db import Base
+from .db import Base
 
 
 def new_id() -> str:
-    return str(uuid4())
+    """Return a stable, opaque internal ID independent of catalog numbers."""
+    return str(uuid.uuid4())
 
 
 def utc_now() -> datetime:
@@ -19,139 +32,153 @@ def utc_now() -> datetime:
 
 
 class TimestampMixin:
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
-    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, onupdate=utc_now, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utc_now, nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utc_now, onupdate=utc_now, nullable=False
+    )
 
 
 class Casting(TimestampMixin, Base):
+    """Base casting identity, independent of a particular year's release."""
+
     __tablename__ = "castings"
+
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
-    name: Mapped[str] = mapped_column(String(250), nullable=False, index=True)
-    first_known_year: Mapped[int | None] = mapped_column(Integer)
+    name: Mapped[str] = mapped_column(String(240), nullable=False, index=True)
     description: Mapped[str | None] = mapped_column(Text)
+    first_known_year: Mapped[int | None] = mapped_column(Integer)
     status: Mapped[str] = mapped_column(String(24), default="candidate", nullable=False)
-    releases: Mapped[list["Release"]] = relationship(back_populates="casting")
-    variants: Mapped[list["CastingVariant"]] = relationship(back_populates="casting")
-    __table_args__ = (CheckConstraint("status IN ('candidate','under_review','confirmed','rejected')", name="ck_casting_status"),)
+
+    __table_args__ = (
+        CheckConstraint(
+            "status IN ('candidate', 'under_review', 'confirmed', 'rejected')",
+            name="ck_castings_status",
+        ),
+        CheckConstraint(
+            "first_known_year IS NULL OR first_known_year BETWEEN 1968 AND 2100",
+            name="ck_castings_first_known_year",
+        ),
+    )
+
+    variants: Mapped[list[CastingVariant]] = relationship(
+        back_populates="casting", cascade="all, delete-orphan"
+    )
+    releases: Mapped[list[Release]] = relationship(back_populates="casting")
 
 
 class CastingVariant(TimestampMixin, Base):
+    """A supported construction variant within a casting."""
+
     __tablename__ = "casting_variants"
-    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
-    casting_id: Mapped[str] = mapped_column(ForeignKey("castings.id", ondelete="RESTRICT"), nullable=False, index=True)
-    name: Mapped[str | None] = mapped_column(String(250))
-    description: Mapped[str | None] = mapped_column(Text)
-    status: Mapped[str] = mapped_column(String(24), default="candidate", nullable=False)
-    casting: Mapped["Casting"] = relationship(back_populates="variants")
-    releases: Mapped[list["Release"]] = relationship(back_populates="variant")
-    __table_args__ = (CheckConstraint("status IN ('candidate','under_review','confirmed','rejected')", name="ck_variant_status"),)
 
-
-class Release(TimestampMixin, Base):
-    __tablename__ = "releases"
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
-    casting_id: Mapped[str] = mapped_column(ForeignKey("castings.id", ondelete="RESTRICT"), nullable=False, index=True)
-    variant_id: Mapped[str | None] = mapped_column(ForeignKey("casting_variants.id", ondelete="RESTRICT"), index=True)
-    catalog_year: Mapped[int | None] = mapped_column(Integer, index=True)
-    name: Mapped[str | None] = mapped_column(String(250))
-    description: Mapped[str | None] = mapped_column(Text)
-    status: Mapped[str] = mapped_column(String(24), default="candidate", nullable=False)
-    casting: Mapped["Casting"] = relationship(back_populates="releases")
-    variant: Mapped["CastingVariant | None"] = relationship(back_populates="releases")
-    identifiers: Mapped[list["ProductIdentifier"]] = relationship(back_populates="release")
-    __table_args__ = (
-        CheckConstraint("status IN ('candidate','under_review','confirmed','rejected')", name="ck_release_status"),
-        CheckConstraint("catalog_year IS NULL OR (catalog_year >= 1968 AND catalog_year <= 2200)", name="ck_release_year"),
+    casting_id: Mapped[str] = mapped_column(
+        ForeignKey("castings.id", ondelete="RESTRICT"), nullable=False, index=True
     )
+    name: Mapped[str | None] = mapped_column(String(240))
+    description: Mapped[str | None] = mapped_column(Text)
+    status: Mapped[str] = mapped_column(String(24), default="candidate", nullable=False)
+
+    __table_args__ = (
+        CheckConstraint(
+            "status IN ('candidate', 'under_review', 'confirmed', 'rejected')",
+            name="ck_casting_variants_status",
+        ),
+    )
+
+    casting: Mapped[Casting] = relationship(back_populates="variants")
+    releases: Mapped[list[Release]] = relationship(back_populates="casting_variant")
 
 
 class Series(TimestampMixin, Base):
+    """A named series; catalog navigation/grouping is modelled separately."""
+
     __tablename__ = "series"
+
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
-    name: Mapped[str] = mapped_column(String(250), nullable=False, index=True)
+    name: Mapped[str] = mapped_column(String(240), nullable=False, index=True)
     description: Mapped[str | None] = mapped_column(Text)
+    series_type: Mapped[str | None] = mapped_column(String(80))
     status: Mapped[str] = mapped_column(String(24), default="candidate", nullable=False)
-    release_links: Mapped[list["ReleaseSeries"]] = relationship(back_populates="series")
-    __table_args__ = (CheckConstraint("status IN ('candidate','under_review','confirmed','rejected')", name="ck_series_status"),)
 
-
-class ReleaseSeries(Base):
-    __tablename__ = "release_series"
-    release_id: Mapped[str] = mapped_column(ForeignKey("releases.id", ondelete="CASCADE"), primary_key=True)
-    series_id: Mapped[str] = mapped_column(ForeignKey("series.id", ondelete="RESTRICT"), primary_key=True)
-    series: Mapped["Series"] = relationship(back_populates="release_links")
-
-
-class Source(TimestampMixin, Base):
-    __tablename__ = "sources"
-    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
-    name: Mapped[str] = mapped_column(String(250), nullable=False, index=True)
-    source_type: Mapped[str] = mapped_column(String(40), nullable=False, default="website")
-    base_url: Mapped[str | None] = mapped_column(Text)
-    notes: Mapped[str | None] = mapped_column(Text)
-    active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
-
-
-class SourceAssertion(Base):
-    __tablename__ = "source_assertions"
-    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
-    source_id: Mapped[str] = mapped_column(ForeignKey("sources.id", ondelete="RESTRICT"), nullable=False, index=True)
-    target_type: Mapped[str] = mapped_column(String(40), nullable=False)
-    target_id: Mapped[str] = mapped_column(String(36), nullable=False, index=True)
-    field_name: Mapped[str] = mapped_column(String(120), nullable=False, index=True)
-    raw_value: Mapped[str | None] = mapped_column(Text)
-    normalized_value: Mapped[str | None] = mapped_column(Text)
-    field_status: Mapped[str] = mapped_column(String(24), nullable=False, default="observed")
-    source_url: Mapped[str | None] = mapped_column(Text)
-    observed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
-    parser_version: Mapped[str | None] = mapped_column(String(80))
     __table_args__ = (
-        CheckConstraint("field_status IN ('observed','not_provided','not_found','parse_error','ambiguous','not_applicable')", name="ck_assertion_field_status"),
-        Index("ix_assertion_target_field", "target_type", "target_id", "field_name"),
+        CheckConstraint(
+            "status IN ('candidate', 'under_review', 'confirmed', 'rejected')",
+            name="ck_series_status",
+        ),
+    )
+
+    release_links: Mapped[list[ReleaseSeries]] = relationship(
+        back_populates="series", cascade="all, delete-orphan"
+    )
+    releases: Mapped[list[Release]] = relationship(
+        secondary="release_series", back_populates="series", viewonly=True
     )
 
 
-class Evidence(Base):
-    __tablename__ = "evidence"
+class ReleaseSeries(Base):
+    """Many-to-many link: a release can belong to multiple series."""
+
+    __tablename__ = "release_series"
+
+    release_id: Mapped[str] = mapped_column(
+        ForeignKey("releases.id", ondelete="RESTRICT"), primary_key=True
+    )
+    series_id: Mapped[str] = mapped_column(
+        ForeignKey("series.id", ondelete="RESTRICT"), primary_key=True
+    )
+    relation_note: Mapped[str | None] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utc_now, nullable=False
+    )
+
+    release: Mapped[Release] = relationship(back_populates="series_links")
+    series: Mapped[Series] = relationship(back_populates="release_links")
+
+
+class Release(TimestampMixin, Base):
+    """A distinct catalog-year release of a casting."""
+
+    __tablename__ = "releases"
+
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
-    evidence_type: Mapped[str] = mapped_column(String(40), nullable=False)
-    title: Mapped[str | None] = mapped_column(String(250))
-    uri: Mapped[str | None] = mapped_column(Text)
-    content_sha256: Mapped[str | None] = mapped_column(String(64), index=True)
-    captured_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
-    notes: Mapped[str | None] = mapped_column(Text)
+    casting_id: Mapped[str] = mapped_column(
+        ForeignKey("castings.id", ondelete="RESTRICT"), nullable=False, index=True
+    )
+    # Nullable until the particular construction variant has enough evidence.
+    casting_variant_id: Mapped[str | None] = mapped_column(
+        ForeignKey("casting_variants.id", ondelete="RESTRICT"), nullable=True, index=True
+    )
+    catalog_year: Mapped[int | None] = mapped_column(Integer, index=True)
+    name: Mapped[str | None] = mapped_column(String(240))
+    assortment_number: Mapped[str | None] = mapped_column(String(80))
+    description: Mapped[str | None] = mapped_column(Text)
+    status: Mapped[str] = mapped_column(String(24), default="candidate", nullable=False)
 
+    __table_args__ = (
+        CheckConstraint(
+            "status IN ('candidate', 'under_review', 'confirmed', 'rejected')",
+            name="ck_releases_status",
+        ),
+        CheckConstraint(
+            "catalog_year IS NULL OR catalog_year BETWEEN 1968 AND 2100",
+            name="ck_releases_catalog_year",
+        ),
+        UniqueConstraint(
+            "casting_id", "catalog_year", "assortment_number",
+            name="uq_release_casting_year_assortment",
+        ),
+    )
 
-class AssertionEvidence(Base):
-    __tablename__ = "assertion_evidence"
-    assertion_id: Mapped[str] = mapped_column(ForeignKey("source_assertions.id", ondelete="CASCADE"), primary_key=True)
-    evidence_id: Mapped[str] = mapped_column(ForeignKey("evidence.id", ondelete="RESTRICT"), primary_key=True)
-    supports: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
-    rationale: Mapped[str | None] = mapped_column(Text)
-
-
-class ProductIdentifier(TimestampMixin, Base):
-    __tablename__ = "product_identifiers"
-    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
-    release_id: Mapped[str | None] = mapped_column(ForeignKey("releases.id", ondelete="RESTRICT"), index=True)
-    identifier_type: Mapped[str] = mapped_column(String(40), nullable=False)
-    raw_value: Mapped[str] = mapped_column(String(160), nullable=False)
-    normalized_value: Mapped[str | None] = mapped_column(String(160), index=True)
-    verification_status: Mapped[str] = mapped_column(String(24), default="provisional", nullable=False)
-    notes: Mapped[str | None] = mapped_column(Text)
-    release: Mapped["Release | None"] = relationship(back_populates="identifiers")
-    __table_args__ = (CheckConstraint("verification_status IN ('confirmed','provisional','contradictory','unknown')", name="ck_identifier_status"),)
-
-
-class AuditEvent(Base):
-    __tablename__ = "audit_events"
-    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
-    actor_type: Mapped[str] = mapped_column(String(24), nullable=False, default="system")
-    actor_id: Mapped[str | None] = mapped_column(String(36))
-    actor_name_snapshot: Mapped[str | None] = mapped_column(String(250))
-    action_type: Mapped[str] = mapped_column(String(80), nullable=False)
-    entity_type: Mapped[str] = mapped_column(String(40), nullable=False)
-    entity_id: Mapped[str] = mapped_column(String(36), nullable=False, index=True)
-    occurred_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
-    reason: Mapped[str | None] = mapped_column(Text)
-    result: Mapped[str | None] = mapped_column(Text)
+    casting: Mapped[Casting] = relationship(back_populates="releases")
+    casting_variant: Mapped[CastingVariant | None] = relationship(
+        back_populates="releases"
+    )
+    series_links: Mapped[list[ReleaseSeries]] = relationship(
+        back_populates="release", cascade="all, delete-orphan"
+    )
+    series: Mapped[list[Series]] = relationship(
+        secondary="release_series", back_populates="releases", viewonly=True
+    )
