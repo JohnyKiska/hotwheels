@@ -1,5 +1,5 @@
 import pytest
-from sqlalchemy import create_engine, select
+from sqlalchemy import create_engine, delete, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -269,4 +269,46 @@ def test_release_cannot_switch_to_variant_owned_by_another_casting(session):
     assert persisted_release is not None
     assert persisted_release.casting_id == casting_a.id
     assert persisted_release.casting_variant_id == variant_a.id
+
+def test_database_restricts_direct_delete_of_referenced_variant(session):
+    casting = Casting(name="Twin Mill")
+    variant = CastingVariant(casting=casting, name="Different wheels")
+    release = Release(casting=casting, casting_variant=variant, catalog_year=2026)
+    session.add(release)
+    session.commit()
+
+    # Bypass ORM relationship handling to verify the SQLite foreign key itself.
+    with pytest.raises(IntegrityError):
+        session.execute(
+            delete(CastingVariant).where(CastingVariant.id == variant.id)
+        )
+        session.commit()
+    session.rollback()
+
+    assert session.get(CastingVariant, variant.id) is not None
+    assert session.get(Release, release.id).casting_variant_id == variant.id
+
+
+def test_database_restricts_direct_reassignment_of_referenced_variant(session):
+    casting_a = Casting(name="Casting A")
+    casting_b = Casting(name="Casting B")
+    variant = CastingVariant(casting=casting_a, name="Variant A")
+    release = Release(casting=casting_a, casting_variant=variant, catalog_year=2026)
+    session.add_all([casting_b, release])
+    session.commit()
+
+    # Bypass ORM relationship synchronization and test the composite FK directly.
+    with pytest.raises(IntegrityError):
+        session.execute(
+            update(CastingVariant)
+            .where(CastingVariant.id == variant.id)
+            .values(casting_id=casting_b.id)
+        )
+        session.commit()
+    session.rollback()
+
+    assert session.get(CastingVariant, variant.id).casting_id == casting_a.id
+    persisted_release = session.get(Release, release.id)
+    assert persisted_release.casting_id == casting_a.id
+    assert persisted_release.casting_variant_id == variant.id
 
