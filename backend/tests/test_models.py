@@ -94,3 +94,54 @@ def test_internal_ids_do_not_depend_on_names(session):
     session.add_all([first, second])
     session.commit()
     assert first.id != second.id
+
+
+
+def test_duplicate_release_identity_is_rejected(session):
+    casting = Casting(name="Twin Mill")
+    session.add_all([
+        Release(casting=casting, catalog_year=2026, assortment_number="001"),
+        Release(casting=casting, catalog_year=2026, assortment_number="001"),
+    ])
+    with pytest.raises(IntegrityError):
+        session.commit()
+    session.rollback()
+
+
+def test_same_release_identity_can_differ_by_year(session):
+    casting = Casting(name="Twin Mill")
+    session.add_all([
+        Release(casting=casting, catalog_year=2025, assortment_number="001"),
+        Release(casting=casting, catalog_year=2026, assortment_number="001"),
+    ])
+    session.commit()
+    assert session.query(Release).count() == 2
+
+
+def test_duplicate_release_series_link_is_rejected(session):
+    release = Release(casting=Casting(name="Twin Mill"), catalog_year=2026)
+    series = Series(name="HW Dream Garage")
+    session.add_all([release, series])
+    session.flush()
+    session.add_all([
+        ReleaseSeries(release=release, series=series),
+        ReleaseSeries(release=release, series=series),
+    ])
+    with pytest.raises(IntegrityError):
+        session.commit()
+    session.rollback()
+
+
+def test_series_rejects_unknown_status(session):
+    session.add(Series(name="Bad series", status="published"))
+    with pytest.raises(IntegrityError):
+        session.commit()
+    session.rollback()
+
+
+@pytest.mark.parametrize("bad_year", [1900, 2200])
+def test_casting_rejects_out_of_range_first_known_year(session, bad_year):
+    session.add(Casting(name="Invalid year casting", first_known_year=bad_year))
+    with pytest.raises(IntegrityError):
+        session.commit()
+    session.rollback()
