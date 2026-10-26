@@ -33,3 +33,16 @@ uvicorn app.main:app --reload
 ```
 
 Then open `/health` or `/docs` on the local server.
+
+
+## SQLite model foundation
+
+Initial model files are being added incrementally. The database will be created locally only when explicitly initialized; no database file is committed. The existing root-level `collection.json` is not imported or modified.
+
+Local bootstrap (once the model files are present):
+
+```bash
+python -m pip install -r requirements.txt
+python -m app.init_db
+uvicorn app.main:app --reload
+```
