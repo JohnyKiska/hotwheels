@@ -761,3 +761,32 @@ def test_duplicate_normalized_identifier_in_same_namespace_is_rejected(session):
     with pytest.raises(IntegrityError):
         session.commit()
     session.rollback()
+
+
+def test_shared_identifier_creates_review_conflict_once(session):
+    from app.identifier_conflicts import create_identifier_collision_conflicts
+    from app.models import CatalogIdentifier, IdentifierType, ReleaseIdentifier, Conflict
+
+    identifier_type = IdentifierType(code="sku", label="SKU")
+    identifier = CatalogIdentifier(
+        identifier_type=identifier_type, value="SKU-77", normalized_value="SKU-77"
+    )
+    release_a = Release(casting=Casting(name="Car A"), catalog_year=2025)
+    release_b = Release(casting=Casting(name="Car B"), catalog_year=2026)
+    session.add_all([identifier, release_a, release_b])
+    session.flush()
+    session.add_all([
+        ReleaseIdentifier(release=release_a, identifier=identifier),
+        ReleaseIdentifier(release=release_b, identifier=identifier),
+    ])
+    session.flush()
+
+    created = create_identifier_collision_conflicts(session)
+    assert len(created) == 1
+    assert created[0].conflict_type == "identifier_collision"
+    assert created[0].attribute_name == "sku:SKU-77"
+    assert created[0].status == "open"
+
+    assert create_identifier_collision_conflicts(session) == []
+    assert session.query(Conflict).filter_by(conflict_type="identifier_collision").count() == 1
+    session.commit()
