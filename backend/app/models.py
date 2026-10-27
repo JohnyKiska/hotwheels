@@ -383,3 +383,63 @@ class ChangeLogEvidence(Base):
     note: Mapped[str | None] = mapped_column(Text)
     change_log: Mapped[ChangeLog] = relationship(back_populates="evidence_links")
     evidence: Mapped[Evidence] = relationship()
+
+
+class IdentifierType(TimestampMixin, Base):
+    """A namespace for catalog identifiers; values are not globally unique by default."""
+    __tablename__ = "identifier_types"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    code: Mapped[str] = mapped_column(String(60), unique=True, nullable=False)
+    label: Mapped[str] = mapped_column(String(120), nullable=False)
+    description: Mapped[str | None] = mapped_column(Text)
+    normalization_rule: Mapped[str | None] = mapped_column(String(80))
+    is_globally_unique: Mapped[bool] = mapped_column(default=False, nullable=False)
+
+
+class CatalogIdentifier(TimestampMixin, Base):
+    """Canonical identifier value, separated from observations and entity assignments."""
+    __tablename__ = "catalog_identifiers"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    identifier_type_id: Mapped[str] = mapped_column(
+        ForeignKey("identifier_types.id", ondelete="RESTRICT"), nullable=False, index=True
+    )
+    value: Mapped[str] = mapped_column(String(240), nullable=False, index=True)
+    normalized_value: Mapped[str] = mapped_column(String(240), nullable=False, index=True)
+    notes: Mapped[str | None] = mapped_column(Text)
+
+    __table_args__ = (
+        UniqueConstraint("identifier_type_id", "normalized_value", name="uq_identifier_type_normalized_value"),
+    )
+    identifier_type: Mapped[IdentifierType] = relationship()
+
+
+class ReleaseIdentifier(Base):
+    __tablename__ = "release_identifiers"
+    release_id: Mapped[str] = mapped_column(ForeignKey("releases.id", ondelete="RESTRICT"), primary_key=True)
+    identifier_id: Mapped[str] = mapped_column(ForeignKey("catalog_identifiers.id", ondelete="RESTRICT"), primary_key=True)
+    role: Mapped[str] = mapped_column(String(32), default="primary", nullable=False)
+    source_note: Mapped[str | None] = mapped_column(Text)
+    release: Mapped[Release] = relationship()
+    identifier: Mapped[CatalogIdentifier] = relationship()
+
+
+class CastingIdentifier(Base):
+    __tablename__ = "casting_identifiers"
+    casting_id: Mapped[str] = mapped_column(ForeignKey("castings.id", ondelete="RESTRICT"), primary_key=True)
+    identifier_id: Mapped[str] = mapped_column(ForeignKey("catalog_identifiers.id", ondelete="RESTRICT"), primary_key=True)
+    role: Mapped[str] = mapped_column(String(32), default="primary", nullable=False)
+    source_note: Mapped[str | None] = mapped_column(Text)
+    casting: Mapped[Casting] = relationship()
+    identifier: Mapped[CatalogIdentifier] = relationship()
+
+
+class CastingVariantIdentifier(Base):
+    __tablename__ = "casting_variant_identifiers"
+    casting_variant_id: Mapped[str] = mapped_column(ForeignKey("casting_variants.id", ondelete="RESTRICT"), primary_key=True)
+    identifier_id: Mapped[str] = mapped_column(ForeignKey("catalog_identifiers.id", ondelete="RESTRICT"), primary_key=True)
+    role: Mapped[str] = mapped_column(String(32), default="primary", nullable=False)
+    source_note: Mapped[str | None] = mapped_column(Text)
+    casting_variant: Mapped[CastingVariant] = relationship()
+    identifier: Mapped[CatalogIdentifier] = relationship()
