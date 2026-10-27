@@ -112,6 +112,7 @@ def register_identifier(
         )
     )
     identifier_created = identifier is None
+    identifier_previous_notes = identifier.notes if identifier is not None else None
     identifier_notes_changed = False
     if identifier is None:
         identifier = CatalogIdentifier(
@@ -132,6 +133,8 @@ def register_identifier(
     }
     link = session.get(link_model, tuple(filters.values()))
     link_created = link is None
+    link_previous_role = link.role if link is not None else None
+    link_previous_source_note = link.source_note if link is not None else None
     link_metadata_changed = False
     if link is None:
         link = link_model(
@@ -186,9 +189,10 @@ def register_identifier(
             action="register_identifier",
             old_values={
                 "identifier_exists": not identifier_created,
+                "identifier_notes": identifier_previous_notes,
                 "link_exists": not link_created,
-                "identifier_notes_changed": False,
-                "link_metadata_changed": False,
+                "link_role": link_previous_role,
+                "link_source_note": link_previous_source_note,
             },
             new_values={
                 "identifier_id": identifier.id,
