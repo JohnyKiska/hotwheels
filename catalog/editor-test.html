@@ -143,6 +143,18 @@ function customParameterMarkup(p={},i){
  const val=type==='boolean'?(p.value===true?'true':p.value===false?'false':String(p.value??'')):String(p.value??'');
  return '<div class="custom-parameter-row" data-custom-row="'+i+'" data-param-id="'+esc(String(p.id||''))+'"><input data-custom-name aria-label="Название параметра" placeholder="Название параметра" value="'+esc(String(p.name||''))+'"><select data-custom-type aria-label="Тип параметра"><option value="text" '+(type==='text'?'selected':'')+'>Текст</option><option value="number" '+(type==='number'?'selected':'')+'>Число</option><option value="boolean" '+(type==='boolean'?'selected':'')+'>Да/нет</option><option value="date" '+(type==='date'?'selected':'')+'>Дата</option></select><input class="custom-value" data-custom-value aria-label="Значение параметра" type="'+(type==='boolean'?'text':type)+'" '+(type==='boolean'?'placeholder="true или false"':'')+' value="'+esc(val)+'"><button type="button" class="mini remove-custom" data-remove-custom>Удалить параметр</button></div>';
 }
+function readCustomParameterEditor(){
+ const customParameters=[];
+ document.querySelectorAll('[data-custom-row]').forEach(row=>{
+  const name=row.querySelector('[data-custom-name]').value.trim(),type=row.querySelector('[data-custom-type]').value,raw=row.querySelector('[data-custom-value]').value.trim();
+  if(!name&&!raw)return;
+  let value=raw;
+  if(type==='number'&&raw!==''&&Number.isFinite(Number(raw)))value=Number(raw);
+  if(type==='boolean'&&raw!=='')value=['true','да','1'].includes(raw.toLocaleLowerCase());
+  customParameters.push({id:row.dataset.paramId||uid('param'),name,type,...(raw!==''?{value}: {})});
+ });
+ return customParameters;
+}
 function readParameterEditor(){
  const parameters={};
  document.querySelectorAll('[data-standard-param]').forEach(input=>{const v=input.value.trim();if(v)parameters[input.dataset.standardParam]=input.type==='number'?Number(v):v;});
@@ -447,7 +459,7 @@ $('clearSelection').addEventListener('click',()=>{selected.clear();render();});
 $('mobileEditJump').addEventListener('click',()=>{$('recordEditor').scrollIntoView({behavior:'smooth',block:'start'});$('name').focus({preventScroll:true});});
 $('mobileTreeJump').addEventListener('click',()=>{$('tree').scrollIntoView({behavior:'smooth',block:'start'});});
 $('mobileContentsJump').addEventListener('click',()=>{$('contentsPane').scrollIntoView({behavior:'smooth',block:'start'});});
-$('kind').addEventListener('change',()=>loadParameterEditor(null));
+$('kind').addEventListener('change',()=>{const customParameters=readCustomParameterEditor();renderParameterEditor({attributes:{customParameters}});});
 $('addCustomParameter').addEventListener('click',()=>{const rows=$('customParameters');const idx=rows.querySelectorAll('[data-custom-row]').length;rows.insertAdjacentHTML('beforeend',customParameterMarkup({},idx));});
 $('customParameters').addEventListener('click',e=>{if(e.target.closest('[data-remove-custom]'))e.target.closest('[data-custom-row]').remove();});
 $('customParameters').addEventListener('change',e=>{if(e.target.matches('[data-custom-type]')){const row=e.target.closest('[data-custom-row]'),v=row.querySelector('[data-custom-value]');const old=v.value;v.type=e.target.value==='boolean'?'text':e.target.value;v.placeholder=e.target.value==='boolean'?'true или false':'';v.value=old;}});
