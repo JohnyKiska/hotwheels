@@ -14,15 +14,15 @@ class InvalidIdentifier(ValueError):
 
 
 _DIGIT_ONLY_TYPES = {"upc", "ean"}
-_WHITESPACE = re.compile(r"\s+")
+_WHITESPACE = re.compile(r"\\s+")
 
 
 def normalize_identifier(type_code: str, value: str) -> str:
-    """Return a stable lookup key without discarding meaningful identifier data.
+    """Return a stable lookup key while preserving meaningful identifier data.
 
-    UPC/EAN separators are removed but leading zeroes are preserved. Product
-    numbers and SKUs are case-insensitive and have surrounding/internal spacing
-    normalized; punctuation such as hyphens is retained.
+    UPC/EAN spaces and hyphen separators are removed, with leading zeroes
+    preserved. Other namespaces only receive Unicode normalization, case
+    normalization, and whitespace collapsing; punctuation is never stripped.
     """
     if not isinstance(type_code, str) or not type_code.strip():
         raise InvalidIdentifier("Identifier type is required")
@@ -35,12 +35,11 @@ def normalize_identifier(type_code: str, value: str) -> str:
         raise InvalidIdentifier("Identifier value cannot be empty")
 
     if code in _DIGIT_ONLY_TYPES:
-        normalized = re.sub(r"[\s-]", "", raw)
+        normalized = re.sub(r"[\\s-]", "", raw)
         if not normalized.isascii() or not normalized.isdigit():
             raise InvalidIdentifier(f"{code.upper()} must contain only digits and separators")
         return normalized
 
-    # Case folding handles ASCII catalog codes and Unicode consistently.
     normalized = _WHITESPACE.sub(" ", raw).casefold().upper()
     if not normalized:
         raise InvalidIdentifier("Identifier value cannot be empty")
