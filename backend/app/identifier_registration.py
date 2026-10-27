@@ -82,6 +82,9 @@ def register_identifier(
     A release collision creates/reuses a review conflict; it never merges
     releases or changes their status.
     """
+    if actor_type not in {"human", "system"}:
+        raise ValueError("actor_type must be 'human' or 'system'")
+
     code = type_code.strip().casefold() if isinstance(type_code, str) else type_code
     normalized = normalize_identifier(code, value)
 
@@ -181,8 +184,6 @@ def register_identifier(
         audit_reason = (reason or "").strip()
         if not audit_reason:
             audit_reason = (source_note or notes or "Identifier registration").strip()
-        if actor_type not in {"human", "system"}:
-            raise ValueError("actor_type must be 'human' or 'system'")
         session.add(ChangeLog(
             entity_type=entity_type,
             entity_id=entity_id,
