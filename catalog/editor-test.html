@@ -35,7 +35,7 @@ input[type=text],select{border:1px solid #cbd3df;border-radius:9px;padding:10px;
 #notice.error{background:#fff0ed;color:#8e2716}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 #edges{display:grid;gap:7px;margin-top:10px}.edge{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px;border-radius:8px;background:#f4f6f9;font-size:13px}
 .small{font-size:12px;color:#687487}.count{font-variant-numeric:tabular-nums}
-@media(max-width:850px){.layout{grid-template-columns:1fr}.status{margin-left:0;width:100%}}
+@media(max-width:850px){.layout{grid-template-columns:1fr}.explorer-layout{grid-template-columns:minmax(0,1fr)}.status{margin-left:0;width:100%}}
 .mobile-quick-actions{display:none}
 #recordEditor{scroll-margin-top:16px}
 @media(max-width:850px){
@@ -68,7 +68,7 @@ input[type=text],select{border:1px solid #cbd3df;border-radius:9px;padding:10px;
 <span id="saveStatus" class="status">Загрузка каталога…</span>
 </div>
 <div class="stats" id="stats"></div>
-<div class="mobile-quick-actions" aria-label="Быстрые действия"><button id="mobileEditJump" class="primary" type="button">✎ Запись и параметры</button><button id="mobileTreeJump" class="secondary" type="button">☷ Дерево каталога</button></div>
+<div class="mobile-quick-actions" aria-label="Быстрые действия"><button id="mobileEditJump" class="primary" type="button">✎ Запись и параметры</button><button id="mobileTreeJump" class="secondary" type="button">☷ Дерево каталога</button><button id="mobileContentsJump" class="secondary" type="button">▤ Содержимое</button></div>
 <div class="explorer-layout">
 <section class="panel explorer-pane">
 <div class="list-head"><h2 style="margin:0">Каталог</h2><button id="addRootGroup" class="mini">+ Уровень</button></div>
@@ -86,7 +86,7 @@ input[type=text],select{border:1px solid #cbd3df;border-radius:9px;padding:10px;
 <div class="actions"><button id="create" class="primary">Создать элемент</button><button id="rename" class="secondary" disabled>Переименовать выбранный</button></div>
 <div class="actions"><button id="makeRoot" class="secondary">Сделать корневым</button><button id="discard" class="secondary">Отменить черновик</button></div></div>
 </section>
-<section class="panel explorer-pane">
+<section id="contentsPane" class="panel explorer-pane">
 <div class="list-head"><div><h2 id="contentsTitle" style="margin:0">Содержимое</h2><div id="contentsSubtitle" class="small">Выбери раздел слева</div></div><span id="shown" class="small"></span></div>
 <div class="toolbar" style="padding:8px;box-shadow:none;margin-bottom:10px"><input id="contentsSearch" type="text" placeholder="Поиск по названию или ID…" aria-label="Поиск содержимого"><button id="applyContents" class="primary">Применить</button><button id="exportContents" class="secondary">Экспорт JSON</button></div>
 <div class="duplicate-tools"><label><input id="groupDuplicates" type="checkbox"> Сгруппировать одинаковые названия</label><span id="duplicateSummary" class="duplicate-summary"></span></div><div class="filters" style="margin-bottom:12px"><select id="filterKind" aria-label="Фильтр по типу"><option value="">Все типы</option><option value="group">Группы</option><option value="collection">Коллекции</option><option value="series">Серии</option><option value="model">Модели</option></select><select id="filterDirection" aria-label="Фильтр по направлению"><option value="">Все направления</option><option>Character</option><option>Exclusive</option><option>Mainline</option><option>Playsets</option><option>Premium</option><option>Special</option></select><input id="filterTags" type="text" placeholder="Фильтр по тегам…" aria-label="Фильтр по тегам"></div>
@@ -446,6 +446,7 @@ $('selectVisible').addEventListener('change',e=>{
 $('clearSelection').addEventListener('click',()=>{selected.clear();render();});
 $('mobileEditJump').addEventListener('click',()=>{$('recordEditor').scrollIntoView({behavior:'smooth',block:'start'});$('name').focus({preventScroll:true});});
 $('mobileTreeJump').addEventListener('click',()=>{$('tree').scrollIntoView({behavior:'smooth',block:'start'});});
+$('mobileContentsJump').addEventListener('click',()=>{$('contentsPane').scrollIntoView({behavior:'smooth',block:'start'});});
 $('kind').addEventListener('change',()=>loadParameterEditor(null));
 $('addCustomParameter').addEventListener('click',()=>{const rows=$('customParameters');const idx=rows.querySelectorAll('[data-custom-row]').length;rows.insertAdjacentHTML('beforeend',customParameterMarkup({},idx));});
 $('customParameters').addEventListener('click',e=>{if(e.target.closest('[data-remove-custom]'))e.target.closest('[data-custom-row]').remove();});
