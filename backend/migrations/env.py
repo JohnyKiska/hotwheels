@@ -50,7 +50,11 @@ def run_migrations_online() -> None:
         with connectable.connect() as connection:
             is_sqlite = connection.dialect.name == "sqlite"
             if is_sqlite:
+                # SQLAlchemy 2.x autobegins a transaction for this statement.
+                # Commit it before Alembic starts its migration transaction;
+                # otherwise the version-row write can be rolled back on close.
                 connection.exec_driver_sql("PRAGMA foreign_keys=ON")
+                connection.commit()
             context.configure(
                 connection=connection,
                 target_metadata=target_metadata,
