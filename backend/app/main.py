@@ -2,7 +2,7 @@ from fastapi import FastAPI, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from .db import get_db
-from .conflict_queue import list_conflicts
+from .conflict_queue import get_conflict_detail, list_conflicts
 
 app = FastAPI(
     title="Hot Wheels Catalog API",
@@ -38,3 +38,16 @@ def get_conflicts(
         )
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+
+@app.get("/conflicts/{conflict_id}", tags=["review"])
+def get_conflict(
+    conflict_id: str,
+    session: Session = Depends(get_db),
+) -> dict:
+    """Return one conflict with its evidence and source metadata."""
+    conflict = get_conflict_detail(session, conflict_id)
+    if conflict is None:
+        raise HTTPException(status_code=404, detail="Conflict not found")
+    return conflict
