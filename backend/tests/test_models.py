@@ -541,7 +541,7 @@ def test_alembic_upgrade_is_safe_on_initialized_existing_database(tmp_path, monk
             assert connection.execute(
                 text("SELECT name FROM castings WHERE id = :id"), {"id": casting_id}
             ).scalar_one() == "Existing record must survive"
-            assert connection.execute(text("SELECT version_num FROM alembic_version")).scalar_one() == "20261027_catalog_identifiers"
+            assert connection.execute(text("SELECT version_num FROM alembic_version")).scalar_one() == "20261027_change_log_append_only"
             assert connection.execute(text("SELECT COUNT(*) FROM alembic_version")).scalar_one() == 1
     finally:
         check_engine.dispose()
@@ -790,3 +790,69 @@ def test_shared_identifier_creates_review_conflict_once(session):
     assert create_identifier_collision_conflicts(session) == []
     assert session.query(Conflict).filter_by(conflict_type="identifier_collision").count() == 1
     session.commit()
+
+
+
+def test_change_log_is_append_only_after_migrations(tmp_path, monkeypatch):
+    """SQLite must reject edits/deletes while allowing new audit entries."""
+    from alembic import command
+    from alembic.config import Config
+    from sqlalchemy import create_engine, text
+    from sqlalchemy.exc import DBAPIError
+
+    database_path = tmp_path / "append_only.db"
+    url = f"sqlite:///{database_path}"
+    config = Config("alembic.ini")
+    config.set_main_option("sqlalchemy.url", url)
+    monkeypatch.setenv("DATABASE_URL", url)
+    command.upgrade(config, "head")
+
+    engine = create_engine(url)
+    try:
+        with engine.begin() as connection:
+            connection.execute(
+                text("""
+                    INSERT INTO change_log
+                        (id, entity_type, entity_id, action, reason, actor_type, created_at)
+                    VALUES
+                        ('audit-test-1', 'release', 'release-test-1', 'created',
+                         'Initial audit event', 'test', CURRENT_TIMESTAMP)
+                """)
+            )
+
+        with pytest.raises(DBAPIError, match="append-only"):
+            with engine.begin() as connection:
+                connection.execute(
+                    text("UPDATE change_log SET reason = 'rewritten' WHERE id = 'audit-test-1'")
+                )
+
+        with pytest.raises(DBAPIError, match="cannot be deleted"):
+            with engine.begin() as connection:
+                connection.execute(
+                    text("DELETE FROM change_log WHERE id = 'audit-test-1'")
+                )
+
+        # Failed mutation attempts must not damage the original historical fact.
+        with engine.connect() as connection:
+            row = connection.execute(
+                text("SELECT reason FROM change_log WHERE id = 'audit-test-1'")
+            ).scalar_one()
+            assert row == "Initial audit event"
+
+        # A later correction is represented by a new row, not an update.
+        with engine.begin() as connection:
+            connection.execute(
+                text("""
+                    INSERT INTO change_log
+                        (id, entity_type, entity_id, action, reason, actor_type, created_at)
+                    VALUES
+                        ('audit-test-2', 'release', 'release-test-1', 'corrected',
+                         'Correction recorded as a new event', 'test', CURRENT_TIMESTAMP)
+                """)
+            )
+        with engine.connect() as connection:
+            assert connection.execute(
+                text("SELECT COUNT(*) FROM change_log WHERE entity_id = 'release-test-1'")
+            ).scalar_one() == 2
+    finally:
+        engine.dispose()
