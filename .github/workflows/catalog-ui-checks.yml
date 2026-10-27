@@ -1,0 +1,113 @@
+name: Catalog UI checks
+
+on:
+  pull_request:
+    paths:
+      - "catalog/conflicts.html"
+      - ".github/workflows/catalog-ui-checks.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "catalog/conflicts.html"
+      - ".github/workflows/catalog-ui-checks.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate-conflict-review-ui:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Check inline JavaScript syntax
+        shell: bash
+        run: |
+          python - <<'PY'
+          from html.parser import HTMLParser
+          from pathlib import Path
+
+          class InlineScripts(HTMLParser):
+              def __init__(self):
+                  super().__init__()
+                  self.in_script = False
+                  self.external = False
+                  self.parts = []
+                  self.current = []
+
+              def handle_starttag(self, tag, attrs):
+                  if tag.lower() == "script":
+                      attrs = dict(attrs)
+                      self.in_script = True
+                      self.external = bool(attrs.get("src"))
+                      self.current = []
+
+              def handle_data(self, data):
+                  if self.in_script and not self.external:
+                      self.current.append(data)
+
+              def handle_endtag(self, tag):
+                  if tag.lower() == "script" and self.in_script:
+                      if not self.external:
+                          self.parts.append("".join(self.current))
+                      self.in_script = False
+                      self.external = False
+
+          html = Path("catalog/conflicts.html").read_text(encoding="utf-8")
+          parser = InlineScripts()
+          parser.feed(html)
+          if not parser.parts or not any(part.strip() for part in parser.parts):
+              raise SystemExit("No inline JavaScript found in catalog/conflicts.html")
+          Path("/tmp/catalog-conflicts-inline.js").write_text(
+              "\n;\n".join(parser.parts), encoding="utf-8"
+          )
+          print(f"Extracted {len(parser.parts)} inline script block(s)")
+          PY
+          node --check /tmp/catalog-conflicts-inline.js
+
+      - name: Smoke-check UI structure and API routes
+        run: |
+          python - <<'PY'
+          from html.parser import HTMLParser
+          from pathlib import Path
+
+          path = Path("catalog/conflicts.html")
+          html = path.read_text(encoding="utf-8")
+
+          class IDs(HTMLParser):
+              def __init__(self):
+                  super().__init__()
+                  self.ids = set()
+              def handle_starttag(self, tag, attrs):
+                  for key, value in attrs:
+                      if key == "id" and value:
+                          if value in self.ids:
+                              raise AssertionError(f"Duplicate HTML id: {value}")
+                          self.ids.add(value)
+
+          parser = IDs()
+          parser.feed(html)
+          required_ids = {
+              "apiBase", "status", "severity", "kind", "load", "refresh",
+              "queue", "queueStatus", "total", "detail",
+          }
+          missing = required_ids - parser.ids
+          if missing:
+              raise SystemExit(f"Missing required UI elements: {sorted(missing)}")
+
+          for route in ("/conflicts?", '"/conflicts/"+encodeURIComponent(id)',
+                        '"/conflicts/"+encodeURIComponent(selectedId)+"/resolve"'):
+              if route not in html:
+                  raise SystemExit(f"Expected API route not found: {route}")
+
+          if "name=\\"viewport\\"" not in html or "@media(max-width:850px)" not in html:
+              raise SystemExit("Responsive viewport or mobile layout rule is missing")
+          print("Conflict review UI structure, API route references, and mobile layout checks passed.")
+          PY
