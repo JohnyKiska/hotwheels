@@ -2,14 +2,18 @@ from sqlalchemy import create_engine, select, func
 from sqlalchemy.orm import Session
 
 from app.db import Base
-from app.identifier_registration import register_identifier
+from app.identifier_registration import register_identifier, UnknownSourceRecord
 from app.models import (
     CatalogIdentifier,
     Casting,
     Conflict,
+    Evidence,
+    EvidenceRelease,
     IdentifierType,
     Release,
     ReleaseIdentifier,
+    Source,
+    SourceRecord,
 )
 
 
@@ -44,6 +48,24 @@ def seed(session):
     return casting, release_a, release_b
 
 
+def seed_source_record(session):
+    source = Source(
+        name="Physical blister photo",
+        source_type="physical_reference",
+        access_status="available",
+    )
+    session.add(source)
+    session.flush()
+    record = SourceRecord(
+        source_id=source.id,
+        record_type="package_photo",
+        raw_data={"filename": "JHW40-front.jpg"},
+    )
+    session.add(record)
+    session.flush()
+    return record
+
+
 def test_register_reuses_normalized_identifier_and_is_idempotent():
     with make_session() as session:
         _, release, _ = seed(session)
@@ -71,8 +93,58 @@ def test_register_reuses_normalized_identifier_and_is_idempotent():
         assert first["identifier"].id == second["identifier"].id
         assert session.scalar(select(func.count()).select_from(CatalogIdentifier)) == 1
         assert session.scalar(select(func.count()).select_from(ReleaseIdentifier)) == 1
-        # The first non-empty provenance is not overwritten.
         assert second["link"].source_note == "package photo"
+        assert first["evidence"] is None
+        assert second["evidence"] is None
+
+
+def test_source_observation_creates_separate_evidence_linked_to_release():
+    with make_session() as session:
+        _, release, _ = seed(session)
+        source_record = seed_source_record(session)
+
+        result = register_identifier(
+            session,
+            type_code="sku",
+            value="JHW40-K5N7",
+            entity_type="release",
+            entity_id=release.id,
+            source_record_id=source_record.id,
+        )
+
+        evidence = result["evidence"]
+        assert evidence is not None
+        assert evidence.source_record_id == source_record.id
+        assert evidence.attribute_name == "identifier:sku"
+        assert evidence.observed_value == "JHW40-K5N7"
+        assert evidence.review_status == "pending"
+        evidence_link = session.get(EvidenceRelease, (evidence.id, release.id))
+        assert evidence_link is not None
+        assert evidence_link.role == "identifier_observation"
+        assert session.scalar(select(func.count()).select_from(Evidence)) == 1
+
+
+def test_each_source_observation_is_preserved_even_when_identifier_is_reused():
+    with make_session() as session:
+        _, release, _ = seed(session)
+        first_source = seed_source_record(session)
+        second_source = seed_source_record(session)
+
+        first = register_identifier(
+            session, type_code="sku", value="JHW40-K5N7",
+            entity_type="release", entity_id=release.id,
+            source_record_id=first_source.id,
+        )
+        second = register_identifier(
+            session, type_code="sku", value="JHW40-K5N7",
+            entity_type="release", entity_id=release.id,
+            source_record_id=second_source.id,
+        )
+
+        assert first["identifier"].id == second["identifier"].id
+        assert first["link"].release_id == second["link"].release_id
+        assert first["evidence"].id != second["evidence"].id
+        assert session.scalar(select(func.count()).select_from(Evidence)) == 2
 
 
 def test_punctuation_different_skus_remain_separate_identifiers():
@@ -115,7 +187,6 @@ def test_identifier_linked_to_two_releases_creates_one_review_conflict():
         assert release_a.status == "confirmed"
         assert release_b.status == "candidate"
 
-        # Running registration again must not create a duplicate link/conflict.
         again = register_identifier(
             session, type_code="upc", value="001234567890",
             entity_type="release", entity_id=release_b.id,
