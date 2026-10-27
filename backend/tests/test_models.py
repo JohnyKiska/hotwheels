@@ -668,3 +668,45 @@ def test_catalog_relationships_round_trip_with_evidence_and_multiple_series(sess
     assert {link.series.name for link in loaded_evidence.series_links} == {
         "Car Culture", "Japan Historics"
     }
+
+
+
+def test_media_assets_require_unique_storage_keys_and_protect_source_snapshots(session):
+    from app.models import MediaAsset, Source, SourceRecord
+
+    record = SourceRecord(
+        source=Source(name="Physical blister photo", source_type="physical_reference"),
+        record_type="photo_reference",
+        raw_data={"item_number": "JHW40", "visible_number": 149},
+    )
+    first_asset = MediaAsset(
+        source_record=record,
+        storage_key="hotwheels/reference/JHW40-front.webp",
+        original_filename="JHW40.webp",
+        mime_type="image/webp",
+        checksum_sha256="a" * 64,
+    )
+    session.add(first_asset)
+    session.commit()
+    record_id, asset_id = record.id, first_asset.id
+
+    # Storage keys identify one stored object and must not be reused.
+    session.add(MediaAsset(
+        source_record=record,
+        storage_key="hotwheels/reference/JHW40-front.webp",
+        original_filename="duplicate.webp",
+        mime_type="image/webp",
+        checksum_sha256="b" * 64,
+    ))
+    with pytest.raises(IntegrityError):
+        session.commit()
+    session.rollback()
+
+    # The source snapshot cannot be deleted while its media evidence exists.
+    session.execute(delete(SourceRecord).where(SourceRecord.id == record_id))
+    with pytest.raises(IntegrityError):
+        session.commit()
+    session.rollback()
+
+    assert session.get(SourceRecord, record_id) is not None
+    assert session.get(MediaAsset, asset_id) is not None
