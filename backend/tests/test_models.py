@@ -703,8 +703,8 @@ def test_media_assets_require_unique_storage_keys_and_protect_source_snapshots(s
     session.rollback()
 
     # The source snapshot cannot be deleted while its media evidence exists.
-    session.execute(delete(SourceRecord).where(SourceRecord.id == record_id))
     with pytest.raises(IntegrityError):
+        session.execute(delete(SourceRecord).where(SourceRecord.id == record_id))
         session.commit()
     session.rollback()
 
