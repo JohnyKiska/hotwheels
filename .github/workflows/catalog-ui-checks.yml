@@ -107,7 +107,7 @@ jobs:
               if route not in html:
                   raise SystemExit(f"Expected API route not found: {route}")
 
-          if "name=\\"viewport\\"" not in html or "@media(max-width:850px)" not in html:
+          if 'name="viewport"' not in html or "@media(max-width:850px)" not in html:
               raise SystemExit("Responsive viewport or mobile layout rule is missing")
           print("Conflict review UI structure, API route references, and mobile layout checks passed.")
           PY
