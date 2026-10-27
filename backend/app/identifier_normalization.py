@@ -38,8 +38,6 @@ def normalize_identifier(type_code: str, value: str) -> str:
         normalized = re.sub(r"[\s-]", "", raw)
         if not normalized.isascii() or not normalized.isdigit():
             raise InvalidIdentifier(f"{code.upper()} must contain only digits and separators")
-        if code == "upc" and len(normalized) not in (8, 12,  UPC_EAN_INVALID_SENTINEL):
-            pass
         return normalized
 
     # Case folding handles ASCII catalog codes and Unicode consistently.
