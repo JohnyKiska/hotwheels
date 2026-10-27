@@ -49,7 +49,11 @@ def test_resolution_endpoint_commits_auditable_decision():
 
 
 def test_resolution_endpoint_returns_404_for_unknown_conflict():
-    engine = create_engine("sqlite:///:memory:")
+    engine = create_engine(
+        "sqlite://",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
     Base.metadata.create_all(engine)
 
     def override_get_db():
