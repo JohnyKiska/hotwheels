@@ -14,7 +14,7 @@ class InvalidIdentifier(ValueError):
 
 
 _DIGIT_ONLY_TYPES = {"upc", "ean"}
-_WHITESPACE = re.compile(r"\\s+")
+_WHITESPACE = re.compile(r"\s+")
 
 
 def normalize_identifier(type_code: str, value: str) -> str:
@@ -35,7 +35,7 @@ def normalize_identifier(type_code: str, value: str) -> str:
         raise InvalidIdentifier("Identifier value cannot be empty")
 
     if code in _DIGIT_ONLY_TYPES:
-        normalized = re.sub(r"[\\s-]", "", raw)
+        normalized = re.sub(r"[\s-]", "", raw)
         if not normalized.isascii() or not normalized.isdigit():
             raise InvalidIdentifier(f"{code.upper()} must contain only digits and separators")
         return normalized
