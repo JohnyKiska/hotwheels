@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hot Wheels — проверка конфликтов</title>
+<style>
+:root{color-scheme:light;--bg:#f4f6f9;--panel:#fff;--ink:#202938;--muted:#657184;--line:#dce2ea;--blue:#2457c5;--red:#b42318;--green:#18794e}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
+header{background:#17243b;color:#fff;padding:20px clamp(16px,3vw,32px)}header h1{font-size:clamp(20px,3vw,28px);margin:0 0 4px}header p{margin:0;color:#cbd5e1}
+main{max-width:1500px;margin:auto;padding:20px;display:grid;grid-template-columns:minmax(300px, .85fr) minmax(0,1.5fr);gap:18px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;min-width:0;overflow:hidden}.panel-head{padding:16px;border-bottom:1px solid var(--line)}.panel-head h2{font-size:18px;margin:0 0 10px}.filters{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+input,select,textarea,button{font:inherit}input,select,textarea{width:100%;padding:10px;border:1px solid #c9d2df;border-radius:8px;background:#fff;color:var(--ink)}label{display:block;font-size:13px;color:var(--muted);margin-bottom:5px}.field{margin-bottom:12px}button{border:0;border-radius:8px;padding:10px 13px;cursor:pointer;font-weight:650}.primary{background:var(--blue);color:#fff}.secondary{background:#e9eef6;color:#25334a}.danger{background:#fff0ef;color:var(--red)}button:disabled{opacity:.5;cursor:wait}
+#queue{max-height:70vh;overflow:auto}.item{display:block;width:100%;text-align:left;background:white;border-radius:0;border-bottom:1px solid var(--line);padding:14px}.item:hover,.item.active{background:#eef4ff}.item strong{display:block;overflow-wrap:anywhere;margin:4px 0}.meta{display:flex;gap:6px;flex-wrap:wrap;color:var(--muted);font-size:12px}.pill{display:inline-block;border-radius:999px;background:#edf1f6;padding:3px 8px;font-size:12px}.pill.high,.pill.critical{background:#fff0ef;color:#a32118}.pill.medium{background:#fff7df;color:#805800}.pill.resolved,.pill.accepted_difference{background:#e8f7ef;color:#176b45}
+.content{padding:18px}.empty{padding:28px;color:var(--muted)}.detail-title{font-size:21px;margin:0 0 8px;overflow-wrap:anywhere}.detail-meta{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:18px}.evidence{border:1px solid var(--line);border-radius:10px;padding:13px;margin:10px 0}.evidence h3{font-size:15px;margin:0 0 8px}.observed{font-size:17px;font-weight:700;overflow-wrap:anywhere;white-space:pre-wrap}.small{font-size:12px;color:var(--muted);overflow-wrap:anywhere}.source-link{display:inline-block;margin-top:7px;overflow-wrap:anywhere}.resolution{border-top:1px solid var(--line);margin-top:20px;padding-top:18px}.notice{padding:11px;border-radius:8px;background:#fff7df;color:#6d5000;margin-bottom:14px}.status{color:var(--muted);font-size:13px;padding:10px 16px}.error{color:var(--red)}.success{color:var(--green)}
+@media(max-width:850px){main{grid-template-columns:1fr;padding:12px}.filters{grid-template-columns:1fr 1fr}#queue{max-height:38vh}.content{padding:14px}}
+</style>
+</head>
+<body>
+<header><h1>Hot Wheels · Проверка конфликтов</h1><p>Сравнение источников и документирование ручных решений</p></header>
+<main>
+<section class="panel">
+  <div class="panel-head">
+    <h2>Очередь <span id="total" class="pill">—</span></h2>
+    <div class="field"><label for="apiBase">Адрес API</label><input id="apiBase" value="" placeholder="например, https://catalog.example.com"></div>
+    <div class="filters">
+      <div><label for="status">Статус</label><select id="status"><option value="">Неразрешённые</option><option value="open">Открытые</option><option value="under_review">На проверке</option><option value="resolved">Разрешённые</option><option value="accepted_difference">Принято как различие</option></select></div>
+      <div><label for="severity">Серьёзность</label><select id="severity"><option value="">Любая</option><option>low</option><option>medium</option><option>high</option><option>critical</option></select></div>
+      <div style="grid-column:1/-1"><label for="kind">Тип конфликта</label><input id="kind" placeholder="например, evidence_disagreement"></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:12px"><button class="primary" id="load">Загрузить</button><button class="secondary" id="refresh">Обновить</button></div>
+  </div>
+  <div id="queue"><div class="empty">Укажите адрес API и нажмите «Загрузить».</div></div>
+  <div class="status" id="queueStatus" aria-live="polite"></div>
+</section>
+<section class="panel">
+  <div class="content" id="detail"><div class="empty">Выберите конфликт в очереди, чтобы увидеть доказательства и источники.</div></div>
+</section>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+let selectedId = null;
+let selectedConflict = null;
+const escapeHtml = value => String(value ?? "").replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+const api = () => $("apiBase").value.trim().replace(/\/+$/, "");
+function endpoint(path){const base=api();return (base || "") + path}
+async function request(path, options={}){
+  const response=await fetch(endpoint(path),{...options,headers:{"Content-Type":"application/json",...(options.headers||{})}});
+  let data={};try{data=await response.json()}catch{}
+  if(!response.ok) throw new Error(data.detail || ("HTTP "+response.status));
+  return data;
+}
+function pill(text,extra=""){return '<span class="pill '+escapeHtml(extra||text)+'">'+escapeHtml(text||"—")+'</span>'}
+function renderQueue(data){
+  $("total").textContent=data.total;
+  const items=data.items||[];
+  if(!items.length){$("queue").innerHTML='<div class="empty">По этим фильтрам конфликтов нет.</div>';return}
+  $("queue").innerHTML=items.map(item=>'<button class="item '+(item.id===selectedId?'active':'')+'" data-id="'+escapeHtml(item.id)+'"><div class="meta">'+pill(item.severity,item.severity)+' '+pill(item.status,item.status)+'</div><strong>'+escapeHtml(item.attribute_name||item.conflict_type)+'</strong><div class="meta">'+escapeHtml(item.conflict_type)+' · доказательств: '+(item.evidence||[]).length+'</div><div class="small">'+escapeHtml(item.id)+'</div></button>').join("");
+  $("queue").querySelectorAll("[data-id]").forEach(button=>button.addEventListener("click",()=>openConflict(button.dataset.id)));
+}
+async function loadQueue(){
+  $("queueStatus").textContent="Загрузка…";$("queueStatus").className="status";
+  try{
+    const params=new URLSearchParams({limit:"100",offset:"0"});
+    if($("status").value)params.set("status",$("status").value);
+    if($("severity").value)params.set("severity",$("severity").value);
+    if($("kind").value.trim())params.set("conflict_type",$("kind").value.trim());
+    const data=await request("/conflicts?"+params.toString());
+    renderQueue(data);$("queueStatus").textContent="Показано "+data.items.length+" из "+data.total+".";
+  }catch(error){$("queueStatus").textContent=error.message+" — проверьте адрес API и настройки CORS."; $("queueStatus").className="status error"}
+}
+function renderDetail(c){
+  const evidence=c.evidence||[];
+  $("detail").innerHTML='<h2 class="detail-title">Конфликт</h2><div class="detail-meta">'+pill(c.severity,c.severity)+pill(c.status,c.status)+pill(c.conflict_type)+'</div>'+
+    '<div class="field"><label>ID конфликта</label><div class="small">'+escapeHtml(c.id)+'</div></div>'+
+    '<div class="field"><label>Поле / атрибут</label><div><strong>'+escapeHtml(c.attribute_name||"—")+'</strong></div></div>'+
+    '<div class="field"><label>Создан</label><div>'+escapeHtml(c.created_at||"—")+'</div></div>'+
+    '<h3>Доказательства и источники ('+evidence.length+')</h3>'+
+    (evidence.length?evidence.map((e,i)=>'<article class="evidence"><h3>Утверждение '+(i+1)+'</h3><div class="observed">'+escapeHtml(e.observed_value||"(значение не указано)")+'</div><div class="meta" style="margin-top:8px">'+pill(e.assessment)+pill(e.review_status)+'</div><p class="small">Поле: '+escapeHtml(e.attribute_name||"—")+' · Тип: '+escapeHtml(e.evidence_type||"—")+'</p><p><strong>'+escapeHtml(e.source_name||"Источник не указан")+'</strong></p><div class="small">'+escapeHtml(e.source_publisher||"")+(e.source_is_official===true?" · официальный источник":e.source_is_official===false?" · неофициальный источник":"")+'</div><div class="small">ID записи источника: '+escapeHtml(e.source_record_id||"—")+'</div><div class="small">Получено: '+escapeHtml(e.retrieved_at||"—")+'</div>'+(e.record_url?'<a class="source-link" href="'+escapeHtml(e.record_url)+'" target="_blank" rel="noopener noreferrer">Открыть исходную запись ↗</a>':"")+(e.source_url?'<div><a class="source-link" href="'+escapeHtml(e.source_url)+'" target="_blank" rel="noopener noreferrer">Сайт источника ↗</a></div>':"")+(e.evidence_notes?'<p class="small">'+escapeHtml(e.evidence_notes)+'</p>':"")+'<label style="margin-top:12px"><input type="checkbox" class="evidence-check" value="'+escapeHtml(e.evidence_id)+'" style="width:auto;margin-right:6px">Использовать как обоснование решения</label></article>').join(""):'<div class="notice">К этому конфликту пока не прикреплены доказательства.</div>')+
+    (["open","under_review"].includes(c.status)?'<div class="resolution"><h3>Зафиксировать решение</h3><div class="notice">Решение не объединяет карточки автоматически. Укажите, почему выбран именно этот вывод.</div><div class="field"><label for="decision">Итог</label><select id="decision"><option value="resolved">Конфликт разрешён</option><option value="accepted_difference">Принято как реальное различие</option></select></div><div class="field"><label for="resolutionText">Решение / вывод</label><textarea id="resolutionText" rows="3" placeholder="Какое значение или вывод принят?"></textarea></div><div class="field"><label for="reasonText">Обоснование</label><textarea id="reasonText" rows="3" placeholder="Какие факты подтверждают решение?"></textarea></div><button class="primary" id="submitDecision">Сохранить решение</button><div id="decisionStatus" class="status" aria-live="polite"></div></div>':'<div class="resolution"><h3>Решение уже зафиксировано</h3><p>'+escapeHtml(c.resolution||"—")+'</p><p class="small">'+escapeHtml(c.resolution_reason||"")+'</p></div>');
+  const submit=$("submitDecision");
+  if(submit)submit.addEventListener("click",submitResolution);
+}
+async function openConflict(id){
+  selectedId=id;$("detail").innerHTML='<div class="empty">Загружаю детали конфликта…</div>';
+  try{selectedConflict=await request("/conflicts/"+encodeURIComponent(id));renderDetail(selectedConflict);document.querySelectorAll(".item").forEach(el=>el.classList.toggle("active",el.dataset.id===id))}
+  catch(error){$("detail").innerHTML='<div class="empty error">'+escapeHtml(error.message)+'</div>'}
+}
+async function submitResolution(){
+  const resolution=$("resolutionText").value.trim(),reason=$("reasonText").value.trim(),status=$("decision").value;
+  const statusNode=$("decisionStatus");
+  if(!resolution||!reason){statusNode.textContent="Заполните решение и обоснование.";statusNode.className="status error";return}
+  const evidence_ids=[...document.querySelectorAll(".evidence-check:checked")].map(el=>el.value);
+  const button=$("submitDecision");button.disabled=true;statusNode.textContent="Сохраняю…";statusNode.className="status";
+  try{
+    await request("/conflicts/"+encodeURIComponent(selectedId)+"/resolve",{method:"POST",body:JSON.stringify({status,resolution,reason,actor_type:"human",evidence_ids})});
+    statusNode.textContent="Решение сохранено в журнале изменений.";statusNode.className="status success";
+    await openConflict(selectedId);await loadQueue();
+  }catch(error){statusNode.textContent=error.message;statusNode.className="status error"}
+  finally{const current=$("submitDecision");if(current)current.disabled=false}
+}
+$("load").addEventListener("click",loadQueue);$("refresh").addEventListener("click",loadQueue);
+$("status").addEventListener("change",loadQueue);$("severity").addEventListener("change",loadQueue);
+$("apiBase").addEventListener("keydown",e=>{if(e.key==="Enter")loadQueue()});
+</script>
+</body>
+</html>
