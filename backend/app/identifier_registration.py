@@ -1,7 +1,8 @@
 """Register catalog identifiers and attach them to explicit catalog entities.
 
 Registration is deliberately conservative: normalized equality reuses the
-identifier row, but never merges catalog entities or confirms identity.
+identifier row, but never merges catalog entities or confirms identity. When a
+source record is supplied, the observed identifier is also recorded as evidence.
 """
 from __future__ import annotations
 
@@ -16,15 +17,25 @@ from .models import (
     CastingIdentifier,
     CastingVariant,
     CastingVariantIdentifier,
+    Evidence,
+    EvidenceCasting,
+    EvidenceCastingVariant,
+    EvidenceRelease,
     IdentifierType,
     Release,
     ReleaseIdentifier,
+    SourceRecord,
 )
 
 _ENTITY_CONFIG = {
     "release": (Release, ReleaseIdentifier, "release_id"),
     "casting": (Casting, CastingIdentifier, "casting_id"),
     "casting_variant": (CastingVariant, CastingVariantIdentifier, "casting_variant_id"),
+}
+_EVIDENCE_LINK_CONFIG = {
+    "release": (EvidenceRelease, "release_id"),
+    "casting": (EvidenceCasting, "casting_id"),
+    "casting_variant": (EvidenceCastingVariant, "casting_variant_id"),
 }
 
 
@@ -40,6 +51,10 @@ class InvalidEntityType(ValueError):
     """The requested target type is not supported."""
 
 
+class UnknownSourceRecord(ValueError):
+    """The supplied source snapshot does not exist."""
+
+
 def register_identifier(
     session: Session,
     *,
@@ -50,10 +65,16 @@ def register_identifier(
     role: str = "primary",
     source_note: str | None = None,
     notes: str | None = None,
+    source_record_id: str | None = None,
 ) -> dict:
     """Create/reuse an identifier and link it to one existing catalog entity.
 
     The caller owns the transaction. The function flushes but does not commit.
+    If source_record_id is supplied, a separate Evidence row records the exact
+    observed value and links it to both that source snapshot and the target
+    entity. Repeated registrations may reuse the canonical identifier/link,
+    but each supplied source observation remains independently auditable.
+
     A release collision creates/reuses a review conflict; it never merges
     releases or changes their status.
     """
@@ -62,6 +83,12 @@ def register_identifier(
 
     if entity_type not in _ENTITY_CONFIG:
         raise InvalidEntityType(f"Unsupported catalog entity type: {entity_type}")
+
+    source_record = None
+    if source_record_id is not None:
+        source_record = session.get(SourceRecord, source_record_id)
+        if source_record is None:
+            raise UnknownSourceRecord(f"Source record not found: {source_record_id}")
 
     entity_model, link_model, entity_fk = _ENTITY_CONFIG[entity_type]
     entity = session.get(entity_model, entity_id)
@@ -113,6 +140,26 @@ def register_identifier(
         if role and not link.role:
             link.role = role
 
+    evidence = None
+    if source_record is not None:
+        evidence = Evidence(
+            source_record_id=source_record.id,
+            attribute_name=f"identifier:{code}",
+            observed_value=value.strip(),
+            evidence_type="text",
+            assessment="supports",
+            review_status="pending",
+            notes="Identifier observed in source record; registration does not establish entity identity.",
+        )
+        session.add(evidence)
+        session.flush()
+        evidence_link_model, evidence_fk = _EVIDENCE_LINK_CONFIG[entity_type]
+        session.add(evidence_link_model(
+            evidence_id=evidence.id,
+            **{evidence_fk: entity_id},
+            role="identifier_observation",
+        ))
+
     session.flush()
     new_conflicts = []
     if entity_type == "release":
@@ -123,5 +170,6 @@ def register_identifier(
         "link": link,
         "identifier_created": identifier_created,
         "link_created": link_created,
+        "evidence": evidence,
         "new_conflicts": new_conflicts,
     }
