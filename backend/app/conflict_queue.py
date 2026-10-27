@@ -95,3 +95,60 @@ def list_conflicts(
             "evidence": evidence_items,
         })
     return {"items": items, "total": total, "limit": limit, "offset": offset}
+
+
+def get_conflict_detail(session: Session, conflict_id: str) -> dict | None:
+    """Return one conflict with its evidence and source snapshot metadata, read-only."""
+    stmt = (
+        select(Conflict)
+        .where(Conflict.id == conflict_id)
+        .options(
+            selectinload(Conflict.evidence_links)
+            .joinedload(ConflictEvidence.evidence)
+            .joinedload(Evidence.source_record)
+            .joinedload(SourceRecord.source)
+        )
+    )
+    conflict = session.scalars(stmt).unique().one_or_none()
+    if conflict is None:
+        return None
+
+    evidence_items = []
+    for link in sorted(conflict.evidence_links, key=lambda item: item.evidence_id):
+        evidence = link.evidence
+        record = evidence.source_record
+        source = record.source
+        evidence_items.append({
+            "evidence_id": evidence.id,
+            "role": link.role,
+            "note": link.note,
+            "attribute_name": evidence.attribute_name,
+            "observed_value": evidence.observed_value,
+            "evidence_type": evidence.evidence_type,
+            "assessment": evidence.assessment,
+            "review_status": evidence.review_status,
+            "evidence_notes": evidence.notes,
+            "source_record_id": record.id,
+            "source_name": source.name,
+            "source_type": source.source_type,
+            "source_url": source.base_url,
+            "source_publisher": source.publisher,
+            "source_is_official": source.is_official,
+            "record_url": record.record_url,
+            "external_id": record.external_id,
+            "record_type": record.record_type,
+            "content_hash": record.content_hash,
+            "retrieved_at": record.retrieved_at.isoformat() if record.retrieved_at else None,
+        })
+    return {
+        "id": conflict.id,
+        "conflict_type": conflict.conflict_type,
+        "status": conflict.status,
+        "severity": conflict.severity,
+        "attribute_name": conflict.attribute_name,
+        "resolution": conflict.resolution,
+        "resolution_reason": conflict.resolution_reason,
+        "created_at": conflict.created_at.isoformat() if conflict.created_at else None,
+        "resolved_at": conflict.resolved_at.isoformat() if conflict.resolved_at else None,
+        "evidence": evidence_items,
+    }
