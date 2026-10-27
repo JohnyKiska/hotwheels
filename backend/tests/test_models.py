@@ -597,3 +597,74 @@ def test_source_and_source_record_cannot_be_deleted_while_audit_evidence_depends
     assert session.get(Source, source_id) is not None
     assert session.get(SourceRecord, record_id) is not None
     assert session.get(Evidence, evidence_id) is not None
+
+
+
+def test_catalog_relationships_round_trip_with_evidence_and_multiple_series(session):
+    from app.models import (
+        Evidence,
+        EvidenceCasting,
+        EvidenceCastingVariant,
+        EvidenceRelease,
+        EvidenceSeries,
+        Source,
+        SourceRecord,
+    )
+
+    casting = Casting(name="Twin Mill", status="confirmed")
+    variant = CastingVariant(casting=casting, name="Real Riders", status="confirmed")
+    release = Release(
+        casting=casting,
+        casting_variant=variant,
+        catalog_year=2026,
+        assortment_number="001",
+        status="confirmed",
+    )
+    series_a = Series(name="Car Culture", series_type="collection", status="confirmed")
+    series_b = Series(name="Japan Historics", series_type="series", status="confirmed")
+    release.series_links.extend([
+        ReleaseSeries(series=series_a, relation_note="collection membership"),
+        ReleaseSeries(series=series_b, relation_note="series membership"),
+    ])
+    evidence = Evidence(
+        source_record=SourceRecord(
+            source=Source(name="Official catalog", source_type="catalog", is_official=True),
+            record_type="catalog_entry",
+            raw_data={"name": "Twin Mill", "year": 2026, "number": "001"},
+        ),
+        attribute_name="catalog_entry",
+        observed_value="Twin Mill / 2026 / 001",
+        review_status="manually_verified",
+    )
+    session.add_all([release, evidence])
+    session.flush()
+    evidence.casting_links.append(EvidenceCasting(casting=casting))
+    evidence.variant_links.append(EvidenceCastingVariant(casting_variant=variant))
+    evidence.release_links.append(EvidenceRelease(release=release))
+    evidence.series_links.extend([
+        EvidenceSeries(series=series_a),
+        EvidenceSeries(series=series_b),
+    ])
+    session.commit()
+
+    # Reload all objects from the database to verify persisted relationships,
+    # not just the in-memory object graph assembled by the ORM.
+    session.expire_all()
+    loaded_release = session.get(Release, release.id)
+    loaded_evidence = session.get(Evidence, evidence.id)
+
+    assert loaded_release is not None
+    assert loaded_release.casting.name == "Twin Mill"
+    assert loaded_release.casting_variant.name == "Real Riders"
+    assert {series.name for series in loaded_release.series} == {"Car Culture", "Japan Historics"}
+    assert {link.relation_note for link in loaded_release.series_links} == {
+        "collection membership", "series membership"
+    }
+    assert loaded_evidence is not None
+    assert loaded_evidence.source_record.raw_data["number"] == "001"
+    assert {link.casting.name for link in loaded_evidence.casting_links} == {"Twin Mill"}
+    assert {link.casting_variant.name for link in loaded_evidence.variant_links} == {"Real Riders"}
+    assert {link.release.assortment_number for link in loaded_evidence.release_links} == {"001"}
+    assert {link.series.name for link in loaded_evidence.series_links} == {
+        "Car Culture", "Japan Historics"
+    }
