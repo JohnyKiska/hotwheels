@@ -545,3 +545,55 @@ def test_alembic_upgrade_is_safe_on_initialized_existing_database(tmp_path, monk
             assert connection.execute(text("SELECT COUNT(*) FROM alembic_version")).scalar_one() == 1
     finally:
         check_engine.dispose()
+
+
+
+def test_database_rejects_orphan_source_record_and_evidence(session):
+    from app.models import Evidence, SourceRecord
+
+    orphan_record = SourceRecord(source_id="missing-source", record_type="catalog_entry")
+    session.add(orphan_record)
+    with pytest.raises(IntegrityError):
+        session.commit()
+    session.rollback()
+
+    orphan_evidence = Evidence(
+        source_record_id="missing-record",
+        attribute_name="catalog_year",
+        observed_value="2026",
+    )
+    session.add(orphan_evidence)
+    with pytest.raises(IntegrityError):
+        session.commit()
+    session.rollback()
+
+
+def test_source_and_source_record_cannot_be_deleted_while_audit_evidence_depends_on_them(session):
+    from app.models import Evidence, Source, SourceRecord
+
+    source = Source(name="Official catalog", source_type="catalog")
+    record = SourceRecord(source=source, record_type="catalog_entry")
+    evidence = Evidence(
+        source_record=record,
+        attribute_name="catalog_year",
+        observed_value="2026",
+    )
+    session.add(evidence)
+    session.commit()
+    source_id, record_id, evidence_id = source.id, record.id, evidence.id
+
+    # Audit history must remain intact; database RESTRICT constraints, not only
+    # ORM behavior, must prevent deleting the source or its captured record.
+    with pytest.raises(IntegrityError):
+        session.delete(source)
+        session.commit()
+    session.rollback()
+
+    with pytest.raises(IntegrityError):
+        session.execute(delete(SourceRecord).where(SourceRecord.id == record_id))
+        session.commit()
+    session.rollback()
+
+    assert session.get(Source, source_id) is not None
+    assert session.get(SourceRecord, record_id) is not None
+    assert session.get(Evidence, evidence_id) is not None
