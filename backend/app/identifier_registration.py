@@ -13,6 +13,7 @@ from .identifier_conflicts import create_identifier_collision_conflicts
 from .identifier_normalization import normalize_identifier
 from .models import (
     CatalogIdentifier,
+    ChangeLog,
     Casting,
     CastingIdentifier,
     CastingVariant,
@@ -66,6 +67,9 @@ def register_identifier(
     source_note: str | None = None,
     notes: str | None = None,
     source_record_id: str | None = None,
+    reason: str | None = None,
+    actor_type: str = "system",
+    actor_id: str | None = None,
 ) -> dict:
     """Create/reuse an identifier and link it to one existing catalog entity.
 
@@ -78,6 +82,9 @@ def register_identifier(
     A release collision creates/reuses a review conflict; it never merges
     releases or changes their status.
     """
+    if actor_type not in {"human", "system"}:
+        raise ValueError("actor_type must be 'human' or 'system'")
+
     code = type_code.strip().casefold() if isinstance(type_code, str) else type_code
     normalized = normalize_identifier(code, value)
 
@@ -108,6 +115,8 @@ def register_identifier(
         )
     )
     identifier_created = identifier is None
+    identifier_previous_notes = identifier.notes if identifier is not None else None
+    identifier_notes_changed = False
     if identifier is None:
         identifier = CatalogIdentifier(
             identifier_type_id=identifier_type.id,
@@ -119,6 +128,7 @@ def register_identifier(
         session.flush()
     elif notes and not identifier.notes:
         identifier.notes = notes
+        identifier_notes_changed = True
 
     filters = {
         entity_fk: entity_id,
@@ -126,6 +136,9 @@ def register_identifier(
     }
     link = session.get(link_model, tuple(filters.values()))
     link_created = link is None
+    link_previous_role = link.role if link is not None else None
+    link_previous_source_note = link.source_note if link is not None else None
+    link_metadata_changed = False
     if link is None:
         link = link_model(
             **filters,
@@ -137,8 +150,10 @@ def register_identifier(
         # Preserve existing provenance; only fill blank fields.
         if source_note and not link.source_note:
             link.source_note = source_note
+            link_metadata_changed = True
         if role and not link.role:
             link.role = role
+            link_metadata_changed = True
 
     evidence = None
     if source_record is not None:
@@ -161,6 +176,45 @@ def register_identifier(
         ))
 
     session.flush()
+
+    # Audit every effective registration change and every source observation.
+    # A repeated no-op registration without a new observation creates no noise.
+    if (identifier_created or link_created or identifier_notes_changed
+            or link_metadata_changed or evidence is not None):
+        audit_reason = (reason or "").strip()
+        if not audit_reason:
+            audit_reason = (source_note or notes or "Identifier registration").strip()
+        session.add(ChangeLog(
+            entity_type=entity_type,
+            entity_id=entity_id,
+            action="register_identifier",
+            old_values={
+                "identifier_exists": not identifier_created,
+                "identifier_notes": identifier_previous_notes,
+                "link_exists": not link_created,
+                "link_role": link_previous_role,
+                "link_source_note": link_previous_source_note,
+            },
+            new_values={
+                "identifier_id": identifier.id,
+                "identifier_type": code,
+                "identifier_value": identifier.value,
+                "normalized_value": identifier.normalized_value,
+                "link_created": link_created,
+                "role": link.role,
+                "source_note": link.source_note,
+                "source_record_id": source_record.id if source_record else None,
+                "evidence_id": evidence.id if evidence else None,
+                "identifier_created": identifier_created,
+                "identifier_notes_changed": identifier_notes_changed,
+                "link_metadata_changed": link_metadata_changed,
+            },
+            reason=audit_reason,
+            actor_type=actor_type,
+            actor_id=actor_id,
+        ))
+        session.flush()
+
     new_conflicts = []
     if entity_type == "release":
         new_conflicts = create_identifier_collision_conflicts(session)
