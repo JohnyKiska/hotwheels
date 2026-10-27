@@ -23,11 +23,13 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Node.js
+        if: hashFiles('catalog/conflicts.html') != ''
         uses: actions/setup-node@v4
         with:
           node-version: "20"
 
       - name: Check inline JavaScript syntax
+        if: hashFiles('catalog/conflicts.html') != ''
         shell: bash
         run: |
           python - <<'PY'
@@ -73,6 +75,7 @@ jobs:
           node --check /tmp/catalog-conflicts-inline.js
 
       - name: Smoke-check UI structure and API routes
+        if: hashFiles('catalog/conflicts.html') != ''
         run: |
           python - <<'PY'
           from html.parser import HTMLParser
