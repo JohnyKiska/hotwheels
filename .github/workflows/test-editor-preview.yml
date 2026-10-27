@@ -1,0 +1,56 @@
+name: Preview test catalog editor
+
+on:
+  push:
+    branches:
+      - feature/test-editor-parameters
+    paths:
+      - 'catalog/editor-test.html'
+      - 'catalog/test-data/catalog-nodes.json'
+      - 'catalog/test-data/catalog-edges.json'
+      - 'catalog/test-data/catalog-sources.json'
+      - 'catalog/test-data/source-memberships.json'
+      - '.github/workflows/test-editor-preview.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: test-editor-preview
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out preview branch
+        uses: actions/checkout@v4
+
+      - name: Assemble isolated preview
+        run: |
+          mkdir -p _site/test-data
+          cp catalog/editor-test.html _site/index.html
+          cp catalog/test-data/catalog-nodes.json _site/test-data/
+          cp catalog/test-data/catalog-edges.json _site/test-data/
+          cp catalog/test-data/catalog-sources.json _site/test-data/
+          cp catalog/test-data/source-memberships.json _site/test-data/
+          touch _site/.nojekyll
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy isolated preview
+        id: deployment
+        uses: actions/deploy-pages@v4
