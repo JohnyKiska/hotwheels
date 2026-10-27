@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.db import Base, get_db
 from app.main import app
-from app.models import Conflict
+from app.models import ChangeLog, Conflict
 
 
 def test_resolution_endpoint_commits_auditable_decision():
@@ -47,6 +47,19 @@ def test_resolution_endpoint_commits_auditable_decision():
     assert response.status_code == 200
     assert response.json()["status"] == "resolved"
 
+    with Session(engine) as session:
+        saved_conflict = session.get(Conflict, conflict_id)
+        assert saved_conflict.status == "resolved"
+        assert saved_conflict.resolution == "Keep PR5 as the supported value"
+        assert saved_conflict.resolution_reason == "Compared the source observations"
+        audit_entries = session.query(ChangeLog).filter_by(
+            entity_type="conflict",
+            entity_id=conflict_id,
+            action="resolve_conflict",
+        ).all()
+        assert len(audit_entries) == 1
+        assert audit_entries[0].reason == "Compared the source observations"
+
 
 def test_resolution_endpoint_returns_404_for_unknown_conflict():
     engine = create_engine(
@@ -74,3 +87,88 @@ def test_resolution_endpoint_returns_404_for_unknown_conflict():
         app.dependency_overrides.pop(get_db, None)
 
     assert response.status_code == 404
+
+
+
+def test_resolution_endpoint_returns_422_for_blank_reason():
+    engine = create_engine(
+        "sqlite://",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    Base.metadata.create_all(engine)
+    with Session(engine) as session:
+        conflict = Conflict(
+            conflict_type="evidence_disagreement",
+            status="open",
+            severity="medium",
+            attribute_name="wheel_type",
+        )
+        session.add(conflict)
+        session.commit()
+        conflict_id = conflict.id
+
+    def override_get_db():
+        with Session(engine) as session:
+            yield session
+
+    app.dependency_overrides[get_db] = override_get_db
+    try:
+        response = TestClient(app).post(
+            f"/conflicts/{conflict_id}/resolve",
+            json={
+                "status": "resolved",
+                "resolution": "Keep the supported value",
+                "reason": "   ",
+            },
+        )
+    finally:
+        app.dependency_overrides.pop(get_db, None)
+
+    assert response.status_code == 422
+    with Session(engine) as session:
+        saved_conflict = session.get(Conflict, conflict_id)
+        assert saved_conflict.status == "open"
+        assert session.query(ChangeLog).count() == 0
+
+
+def test_resolution_endpoint_rejects_unknown_final_status():
+    engine = create_engine(
+        "sqlite://",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    Base.metadata.create_all(engine)
+    with Session(engine) as session:
+        conflict = Conflict(
+            conflict_type="evidence_disagreement",
+            status="open",
+            severity="medium",
+            attribute_name="wheel_type",
+        )
+        session.add(conflict)
+        session.commit()
+        conflict_id = conflict.id
+
+    def override_get_db():
+        with Session(engine) as session:
+            yield session
+
+    app.dependency_overrides[get_db] = override_get_db
+    try:
+        response = TestClient(app).post(
+            f"/conflicts/{conflict_id}/resolve",
+            json={
+                "status": "closed",
+                "resolution": "Keep the supported value",
+                "reason": "Compared source observations",
+            },
+        )
+    finally:
+        app.dependency_overrides.pop(get_db, None)
+
+    assert response.status_code == 422
+    with Session(engine) as session:
+        saved_conflict = session.get(Conflict, conflict_id)
+        assert saved_conflict.status == "open"
+        assert session.query(ChangeLog).count() == 0
