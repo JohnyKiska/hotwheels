@@ -1,8 +1,14 @@
 from fastapi import FastAPI, Depends, HTTPException, Query
+from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from .db import get_db
 from .conflict_queue import get_conflict_detail, list_conflicts
+from .conflict_resolution import (
+    InvalidConflictResolution,
+    UnknownConflict,
+    resolve_conflict,
+)
 
 app = FastAPI(
     title="Hot Wheels Catalog API",
@@ -51,3 +57,50 @@ def get_conflict(
     if conflict is None:
         raise HTTPException(status_code=404, detail="Conflict not found")
     return conflict
+
+
+class ConflictResolutionRequest(BaseModel):
+    status: str
+    resolution: str = Field(min_length=1)
+    reason: str = Field(min_length=1)
+    actor_type: str = "human"
+    actor_id: str | None = None
+    evidence_ids: list[str] = Field(default_factory=list)
+
+
+@app.post("/conflicts/{conflict_id}/resolve", tags=["review"])
+def post_conflict_resolution(
+    conflict_id: str,
+    request: ConflictResolutionRequest,
+    session: Session = Depends(get_db),
+) -> dict:
+    """Record an explicit, auditable manual conflict decision."""
+    try:
+        conflict = resolve_conflict(
+            session,
+            conflict_id=conflict_id,
+            status=request.status,
+            resolution=request.resolution,
+            reason=request.reason,
+            actor_type=request.actor_type,
+            actor_id=request.actor_id,
+            evidence_ids=request.evidence_ids,
+        )
+        session.commit()
+    except UnknownConflict as exc:
+        session.rollback()
+        raise HTTPException(status_code=404, detail="Conflict not found") from exc
+    except InvalidConflictResolution as exc:
+        session.rollback()
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except Exception:
+        session.rollback()
+        raise
+
+    return {
+        "id": conflict.id,
+        "status": conflict.status,
+        "resolution": conflict.resolution,
+        "resolution_reason": conflict.resolution_reason,
+        "resolved_at": conflict.resolved_at.isoformat() if conflict.resolved_at else None,
+    }
