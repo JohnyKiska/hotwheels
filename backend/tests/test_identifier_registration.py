@@ -280,3 +280,26 @@ def test_each_identifier_source_observation_gets_its_own_audit_event():
         assert {event.new_values["evidence_id"] for event in events} == {
             first["evidence"].id, second["evidence"].id
         }
+
+
+def test_invalid_actor_type_fails_before_mutating_registration_state():
+    with make_session() as session:
+        _, release, _ = seed(session)
+
+        try:
+            register_identifier(
+                session,
+                type_code="sku",
+                value="JHW40-K5N7",
+                entity_type="release",
+                entity_id=release.id,
+                actor_type="robot",
+            )
+        except ValueError as exc:
+            assert "actor_type" in str(exc)
+        else:
+            raise AssertionError("invalid actor_type should be rejected")
+
+        assert session.scalar(select(func.count()).select_from(CatalogIdentifier)) == 0
+        assert session.scalar(select(func.count()).select_from(ReleaseIdentifier)) == 0
+        assert session.scalar(select(func.count()).select_from(ChangeLog)) == 0
