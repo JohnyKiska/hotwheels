@@ -112,8 +112,24 @@ const cars=[
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 function carSvg(color){const body={orange:"#ef6a2c",blue:"#2863b8",green:"#218c68",silver:"#7d8794",purple:"#7853a7",yellow:"#d6a421"}[color]||"#e65c28";return '<svg viewBox="0 0 320 145" aria-hidden="true"><ellipse cx="160" cy="118" rx="112" ry="11" fill="#29364b" opacity=".12"/><path d="M43 91 L55 70 Q61 62 82 59 L117 38 Q128 31 153 33 L198 38 Q211 40 224 58 L256 67 Q272 71 277 86 L278 103 L42 103Z" fill="'+body+'" stroke="#303b4b" stroke-width="2.5" stroke-linejoin="round"/><path d="M91 60 L125 42 Q133 39 153 41 L164 60Z" fill="#9fd3ec" stroke="#303b4b" stroke-width="2"/><path d="M173 42 L196 45 Q207 48 218 61 L174 60Z" fill="#9fd3ec" stroke="#303b4b" stroke-width="2"/><path d="M45 86 L77 83 L86 91 L55 94Z" fill="#f7d9a5"/><path d="M229 75 L260 80 L268 89 L235 88Z" fill="#f8d7b7"/><path d="M103 68 L214 68" stroke="#fff" stroke-width="2" opacity=".55"/><circle cx="91" cy="103" r="22" fill="#273244" stroke="#111a29" stroke-width="3"/><circle cx="91" cy="103" r="11" fill="#b8c1cc" stroke="#596475" stroke-width="3"/><circle cx="232" cy="103" r="22" fill="#273244" stroke="#111a29" stroke-width="3"/><circle cx="232" cy="103" r="11" fill="#b8c1cc" stroke="#596475" stroke-width="3"/><path d="M123 79 L171 79" stroke="#fff" stroke-width="3" opacity=".65"/><path d="M144 91 L193 91" stroke="#273244" stroke-width="2" opacity=".55"/></svg>'}
 const catalogCars=()=>cars;
-const linkedPackagesFor=id=>cars.filter(c=>c.type==="Package"&&((c.relatedReleaseIds||[]).includes(Number(id))||c.relatedReleaseId===Number(id)));
-const linkedReleasesFor=id=>{const p=cars.find(c=>c.type==="Package"&&c.id===Number(id));return cars.filter(c=>c.type==="Release"&&((c.packageIds||[]).includes(Number(id))||c.packageId===Number(id)||(p&&(p.relatedReleaseIds||[]).includes(c.id))||(p&&p.relatedReleaseId===c.id)));};
+const packageHasExplicitLinks=p=>Array.isArray(p.relatedReleaseIds)||p.relatedReleaseId!=null;
+const packageContainsRelease=(p,releaseId)=>{
+  if(Array.isArray(p.relatedReleaseIds)) return p.relatedReleaseIds.includes(Number(releaseId));
+  if(p.relatedReleaseId!=null) return p.relatedReleaseId===Number(releaseId);
+  return false;
+};
+const releaseReferencesPackage=(r,packageId)=>(r.packageIds||[]).includes(Number(packageId))||r.packageId===Number(packageId);
+const linkedPackagesFor=id=>cars.filter(p=>p.type==="Package"&&(
+  packageHasExplicitLinks(p)
+    ? packageContainsRelease(p,id)
+    : cars.some(r=>r.type==="Release"&&r.id===Number(id)&&releaseReferencesPackage(r,p.id))
+));
+const linkedReleasesFor=id=>{
+  const p=cars.find(c=>c.type==="Package"&&c.id===Number(id));
+  if(!p) return [];
+  if(packageHasExplicitLinks(p)) return cars.filter(r=>r.type==="Release"&&packageContainsRelease(p,r.id));
+  return cars.filter(r=>r.type==="Release"&&releaseReferencesPackage(r,p.id));
+};
 const linkedPackageFor=id=>linkedPackagesFor(id)[0];
 const linkedReleaseFor=id=>linkedReleasesFor(id)[0];
 const statusInfo={ok:{label:"Проверено",cls:"status-ok",detail:"Проверено"},review:{label:"Проверить",cls:"status-review",detail:"Требует проверки"},unknown:{label:"Неизвестно",cls:"status-unknown",detail:"Есть неизвестные поля"}};
