@@ -23,7 +23,8 @@ const initial={version:1,nodes:[
 {id:"source",name:"Источник / доказательство",kind:"evidence",desc:"Фиксирует происхождение сведений и материалы, которыми подтверждаются поля.",fields:["ID","Источник / URL","Дата получения","Фото / файл / фрагмент","Какие поля подтверждает","Надёжность / примечание"],x:70,y:570,w:230,h:150},
 {id:"history",name:"История изменений",kind:"evidence",desc:"Журнал значимых изменений с причиной и связью с доказательствами.",fields:["ID","Сущность и поле","Старое / новое значение","Дата изменения","Причина","Автор / источник"],x:390,y:570,w:250,h:145},
 {id:"custom",name:"Пользовательские параметры",kind:"custom",desc:"Расширяемые поля без перестройки основной схемы.",fields:["ID сущности","Ключ параметра","Значение","Тип значения","Источник / подтверждение"],x:730,y:570,w:250,h:135}
-],edges:[
+,
+{id:"origin",name:"Исходный объект",kind:"catalog",desc:"Реальный автомобиль, техника или прототип, на котором может основываться одна или несколько конструкций Hot Wheels. Связь необязательна; сама по себе не объединяет Casting.",fields:["Внутренний ID","Марка оригинала","Модель","Поколение / модификация","Тип объекта","Годы производства (если известны)","Описание","Ссылки на источники и фото"],x:70,y:500,w:270,h:180}],edges:[
 {id:"e1",from:"model",to:"release",label:"имеет выпуски",cardinality:"1 → N"},
 {id:"e2",from:"release",to:"package",label:"входит в упаковку",cardinality:"N ↔ N"},
 {id:"e3",from:"line",to:"release",label:"классифицирует",cardinality:"1 → N"},
@@ -36,7 +37,11 @@ const initial={version:1,nodes:[
 {id:"e10",from:"history",to:"release",label:"фиксирует изменения",cardinality:"N ↔ N"},
 {id:"e11",from:"custom",to:"model",label:"расширяет поля",cardinality:"N ↔ N"},
 {id:"e12",from:"custom",to:"release",label:"расширяет поля",cardinality:"N ↔ N"}
-]};
+,
+{id:"e13",from:"origin",to:"model",label:"является прототипом для",cardinality:"1 → N"},
+{id:"e14",from:"source",to:"origin",label:"подтверждает сведения",cardinality:"N ↔ N"},
+{id:"e15",from:"history",to:"origin",label:"фиксирует изменения",cardinality:"N ↔ N"},
+{id:"e16",from:"custom",to:"origin",label:"расширяет поля",cardinality:"N ↔ N"}]};
 let data=JSON.parse(JSON.stringify(initial)),selectedNode=null,selectedEdge=null,drag=null,linkMode=false;
 const svg=document.getElementById("diagram"),NS="http://www.w3.org/2000/svg",colors={core:"#4776d0",catalog:"#29966b",evidence:"#8a5cc2",custom:"#f36b35"};
 const $=id=>document.getElementById(id), clone=o=>JSON.parse(JSON.stringify(o));
