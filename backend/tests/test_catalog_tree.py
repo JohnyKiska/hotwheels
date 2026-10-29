@@ -117,7 +117,11 @@ def test_catalog_node_rejects_orphan_foreign_keys_and_protects_referenced_entiti
     session.add(line)
     session.commit()
 
-    node = CatalogNode(node_type="product_line", product_line_id=line.id)
+    node = CatalogNode(
+        node_type="product_line",
+        product_line_id="missing-product-line",
+        parent=CatalogNode(node_type="root"),
+    )
     session.add(node)
     with pytest.raises(IntegrityError):
         session.commit()
