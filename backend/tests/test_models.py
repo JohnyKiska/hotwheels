@@ -4,7 +4,11 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.db import Base
-from app.models import (\n    CatalogIdentifier, Casting, CastingVariant, Evidence, EvidencePackage,\n    IdentifierType, Package, PackageIdentifier, PackageRelease, Release, ReleaseSeries,\n    Series, Source, SourceRecord,\n)
+from app.models import (
+    CatalogIdentifier, Casting, CastingVariant, Evidence, EvidencePackage,
+    IdentifierType, Package, PackageIdentifier, PackageRelease, Release, ReleaseSeries,
+    Series, Source, SourceRecord,
+)
 
 
 @pytest.fixture
