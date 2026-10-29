@@ -8,6 +8,7 @@ from .conflict_resolution import (
     InvalidConflictResolution,
     UnknownConflict,
     resolve_conflict,
+    revise_conflict_resolution,
 )
 
 app = FastAPI(
@@ -77,6 +78,54 @@ def post_conflict_resolution(
     """Record an explicit, auditable manual conflict decision."""
     try:
         conflict = resolve_conflict(
+            session,
+            conflict_id=conflict_id,
+            status=request.status,
+            resolution=request.resolution,
+            reason=request.reason,
+            actor_type=request.actor_type,
+            actor_id=request.actor_id,
+            evidence_ids=request.evidence_ids,
+        )
+        session.commit()
+    except UnknownConflict as exc:
+        session.rollback()
+        raise HTTPException(status_code=404, detail="Conflict not found") from exc
+    except InvalidConflictResolution as exc:
+        session.rollback()
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except Exception:
+        session.rollback()
+        raise
+
+    return {
+        "id": conflict.id,
+        "status": conflict.status,
+        "resolution": conflict.resolution,
+        "resolution_reason": conflict.resolution_reason,
+        "resolved_at": conflict.resolved_at.isoformat() if conflict.resolved_at else None,
+    }
+
+
+
+class ConflictResolutionRevisionRequest(BaseModel):
+    status: str
+    resolution: str = Field(min_length=1)
+    reason: str = Field(min_length=1)
+    actor_type: str = "human"
+    actor_id: str | None = None
+    evidence_ids: list[str] = Field(default_factory=list)
+
+
+@app.post("/conflicts/{conflict_id}/revise-resolution", tags=["review"])
+def post_conflict_resolution_revision(
+    conflict_id: str,
+    request: ConflictResolutionRevisionRequest,
+    session: Session = Depends(get_db),
+) -> dict:
+    """Revise a final decision by appending a new audit event."""
+    try:
+        conflict = revise_conflict_resolution(
             session,
             conflict_id=conflict_id,
             status=request.status,
