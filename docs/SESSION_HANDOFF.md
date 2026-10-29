@@ -12,6 +12,12 @@
 - Следующий шаг: отдельные `Manufacturer` и `Brand` и их связи с Casting/Release. См. `docs/SCHEMA_ALIGNMENT.md`.
 - Не менять production `collection.json`; PR #29 и #52 всё ещё открыты, их статус не путать с merge PR #54–#56.
 
+## Работа в процессе — Manufacturer/Brand (2026-10-29)
+
+- Ветка: `feature/manufacturer-brand-model`.
+- Добавлены `Manufacturer`, `Brand`, `ManufacturerBrand`, `CastingBrand`, `ReleaseBrand`, `EvidenceManufacturer`, `EvidenceBrand`, миграция `20261029_manufacturer_brand` и тесты.
+- Следующий шаг: открыть PR, дождаться CI, проверить миграцию и все тесты; не объединять при красных/неполных checks. Производственный `collection.json` не трогать.
+
 ## Перед любыми изменениями
 
 1. Прочитать `START_HERE.md` и `PROJECT_CONTEXT.md`.
