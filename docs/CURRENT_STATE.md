@@ -5,13 +5,23 @@
 
 ## 1. Проверенные факты о репозитории
 
+### Обновление 2026-10-29 — аудит пересмотра конфликтов
+
+- Создана ветка `feat/auditable-conflict-revisions`.
+- Открыт draft PR #54: [Add auditable conflict decision revisions](https://github.com/JohnyKiska/hotwheels/pull/54).
+- Добавлен сервис `revise_conflict_resolution`, API `POST /conflicts/{conflict_id}/revise-resolution`, выдача истории в detail API и UI пересмотра.
+- Первоначальные записи `ChangeLog` не изменяются; пересмотр добавляет отдельное событие `revise_conflict_resolution`.
+- GitHub Actions для commit `0afdd745aae3cd2bacc5b6253a8b83735ac32d1b`: backend `pytest` — success; UI syntax/smoke checks — success. Эти результаты относятся к указанному commit; после последующих изменений документации код не менялся.
+- Пользователь подтвердил, что ручная проверка Skyline → Supra, независимость состава упаковок и предыдущая проверка GitHub Actions/conflict review уже выполнены. Конкретный commit для этих ручных проверок не зафиксирован.
+
+
 Репозиторий `JohnyKiska/hotwheels` доступен через GitHub-инструменты. Проверены следующие файлы/ветки:
 
 | Объект | Проверенное состояние | Ссылка |
 |---|---|---|
 | `main:catalog/conflicts.html` | Файл существует; интерфейс проверки конфликтов | [файл](https://github.com/JohnyKiska/hotwheels/blob/main/catalog/conflicts.html) |
 | `main:.github/workflows/catalog-ui-checks.yml` | Workflow существует; запускает UI-проверки для соответствующих изменений | [workflow](https://github.com/JohnyKiska/hotwheels/blob/main/.github/workflows/catalog-ui-checks.yml) |
-| Последний просмотренный коммит main | `295e2256090e2270cdcca746ff6672775a945c63`, заголовок: Audit identifier registration changes (current main) (#51) | [коммит](https://github.com/JohnyKiska/hotwheels/commit/295e2256090e2270cdcca746ff6672775a945c63) |
+| Текущий main на момент проверки PR #54 | `8d3989fbf6d82886f68f7dad3e769e890d5e7e17`, документация handoff | [коммит](https://github.com/JohnyKiska/hotwheels/commit/8d3989fbf6d82886f68f7dad3e769e890d5e7e17) |
 | Предыдущий важный коммит | `1037d33ecc0f21220bdbc52c0903268a6882e25d`, обновление conflict review UI и обязательных UI-проверок (#50) | [коммит](https://github.com/JohnyKiska/hotwheels/commit/1037d33ecc0f21220bdbc52c0903268a6882e25d) |
 | Журнал изменений | Коммит `c9f7af6c0aa95376b3e17ed780d691c09bac6fc7` добавил append-only защиту SQLite change log триггерами и тесты | [коммит](https://github.com/JohnyKiska/hotwheels/commit/c9f7af6c0aa95376b3e17ed780d691c09bac6fc7) |
 | `feature/test-editor-parameters:catalog/editor-test.html` | Файл существует; тестовый редактор с полями и параметрами | [файл](https://github.com/JohnyKiska/hotwheels/blob/feature/test-editor-parameters/catalog/editor-test.html) |
@@ -59,8 +69,7 @@
 - Какие PR открыты прямо сейчас и какие CI runs являются последними.
 - Каков точный результат анализа архива `logs_109634179782.zip` после последних изменений.
 - Какой из параллельных потоков пользователь хочет продолжить первым в текущей сессии, если это не следует из текущего диалога.
-- Прошёл ли ручной тест Skyline → Supra.
-- Прошла ли проверка независимости состава двух упаковок.
+- Ручные проверки Skyline → Supra и независимости состава упаковок подтверждены пользователем; конкретные commit/version для них не указаны.
 - Актуальны ли GitHub Pages и выбранная для них ветка.
 - Состояние тестов, миграций и БД нужно проверять в актуальном коде, а не выводить только из commit message.
 
