@@ -165,19 +165,26 @@ const cars=[
 ];
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 function carSvg(color,group,status){
- const body={orange:"#ef6a2c",blue:"#2863b8",green:"#218c68",silver:"#7d8794",purple:"#7853a7",yellow:"#d6a421"}[color]||"#e65c28",glass="#9fd3ec",stroke="#303b4b";let shape,details;
- if(group==="premium"){
- shape='<path d="M34 91 L47 75 Q54 68 83 65 L119 43 Q132 35 164 37 L208 42 Q221 44 238 66 L270 72 Q285 76 290 91 L289 103 L31 103Z"/><path d="M91 64 L126 46 Q139 41 163 44 L176 65Z" fill="'+glass+'"/><path d="M184 45 L207 48 Q219 51 232 67 L184 65Z" fill="'+glass+'"/>';
- details='<path d="M115 76 L224 76" stroke="#fff" stroke-width="3" opacity=".75"/><path d="M52 88 L76 85 L83 92 L47 94Z" fill="#fff0c9"/><path d="M235 79 L269 83 L278 91 L239 90Z" fill="#fff0c9"/><path d="M250 62 L276 62 L279 68 L254 68Z" fill="'+stroke+'"/><path d="M133 91 L203 91" stroke="'+stroke+'" stroke-width="3"/>';
- }else if(group==="silver"){
- shape='<path d="M38 91 L55 77 Q66 68 96 66 L126 48 Q138 41 164 43 L203 47 Q220 49 238 68 L269 76 Q282 80 285 92 L282 103 L38 103Z"/><path d="M104 65 L131 50 Q141 46 162 48 L176 66Z" fill="'+glass+'"/><path d="M185 49 L202 51 Q216 54 229 69 L185 66Z" fill="'+glass+'"/>';
- details='<path d="M53 86 L79 82 L88 89 L54 92Z" fill="#f4fbff"/><path d="M239 78 L269 84 L276 90 L242 89Z" fill="#f4fbff"/><path d="M112 74 L222 74" stroke="#fff" stroke-width="2" opacity=".8"/><path d="M143 85 L195 85" stroke="'+stroke+'" stroke-width="2" opacity=".5"/><path d="M127 42 L139 38 L162 40" fill="none" stroke="#fff" stroke-width="2" opacity=".7"/>';
- }else{
- shape='<path d="M43 91 L55 70 Q61 62 82 59 L117 38 Q128 31 153 33 L198 38 Q211 40 224 58 L256 67 Q272 71 277 86 L278 103 L42 103Z"/><path d="M91 60 L125 42 Q133 39 153 41 L164 60Z" fill="'+glass+'"/><path d="M173 42 L196 45 Q207 48 218 61 L174 60Z" fill="'+glass+'"/>';
- details='<path d="M45 86 L77 83 L86 91 L55 94Z" fill="#f7d9a5"/><path d="M229 75 L260 80 L268 89 L235 88Z" fill="#f8d7b7"/><path d="M103 68 L214 68" stroke="#fff" stroke-width="2" opacity=".55"/><path d="M123 79 L171 79" stroke="#fff" stroke-width="3" opacity=".65"/><path d="M144 91 L193 91" stroke="'+stroke+'" stroke-width="2" opacity=".55"/>';
- }
- const mark=status==="ok"?'<path d="M153 99 l5 5 10 -12" fill="none" stroke="#e8fff2" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>':status==="review"?'<path d="M151 96 l12 12 M163 96 l-12 12" stroke="#fff2d2" stroke-width="3" stroke-linecap="round"/>':'';
- return '<svg viewBox="0 0 320 145" aria-hidden="true"><ellipse cx="160" cy="118" rx="112" ry="11" fill="#29364b" opacity=".12"/><g fill="'+body+'" stroke="'+stroke+'" stroke-width="2.5" stroke-linejoin="round">'+shape+'</g>'+details+'<circle cx="86" cy="103" r="22" fill="#273244" stroke="#111a29" stroke-width="3"/><circle cx="86" cy="103" r="11" fill="#b8c1cc" stroke="#596475" stroke-width="3"/><circle cx="235" cy="103" r="22" fill="#273244" stroke="#111a29" stroke-width="3"/><circle cx="235" cy="103" r="11" fill="#b8c1cc" stroke="#596475" stroke-width="3"/>'+mark+'</svg>';
+ const body={orange:"#f36b35",blue:"#3976ce",green:"#2b9b76",silver:"#8995a4",purple:"#8862c2",yellow:"#e5b638"}[color]||"#f36b35";
+ const dark={orange:"#b93f20",blue:"#214b91",green:"#176b52",silver:"#596576",purple:"#583b8e",yellow:"#a87912"}[color]||"#b93f20";
+ const glass="#bfe9f7",ink="#263449";
+ const isPremium=group==="premium",isSilver=group==="silver";
+ const roof=isPremium
+  ? '<path d="M92 75 L126 48 Q137 39 160 40 L194 44 Q209 47 225 73Z" fill="'+dark+'" opacity=".35"/>'
+  : '<path d="M95 74 L126 48 Q137 40 158 41 L194 45 Q207 48 221 73Z" fill="'+dark+'" opacity=".28"/>';
+ const windows='<path d="M104 70 L132 49 Q140 45 158 46 L165 70Z" fill="'+glass"/><path d="M174 47 L193 49 Q207 52 217 70 L174 70Z" fill="'+glass+'"/><path d="M135 49 L141 48 L168 48 L168 70 L143 70Z" fill="#fff" opacity=".18"/>';
+ const bodyShape=isPremium
+  ? 'M35 91 L47 80 Q55 74 79 72 L103 70 L124 48 Q133 39 157 39 L192 43 Q209 45 225 70 L260 77 Q278 81 286 94 L284 104 L35 104Z'
+  : isSilver
+  ? 'M36 92 L51 81 Q62 74 84 73 L105 70 L125 49 Q135 42 157 42 L194 46 Q211 49 228 72 L263 79 Q279 83 285 95 L283 104 L36 104Z'
+  : 'M38 92 L50 79 Q59 72 82 70 L103 68 L125 45 Q134 37 158 38 L195 43 Q211 46 225 69 L258 77 Q276 81 283 94 L282 104 L38 104Z';
+ const stripe=isPremium
+  ? '<path d="M112 78 L231 78" stroke="#fff" stroke-width="3.5" stroke-linecap="round" opacity=".82"/><path d="M119 84 L217 84" stroke="'+dark+'" stroke-width="2" stroke-linecap="round" opacity=".45"/>'
+  : '<path d="M111 78 L222 78" stroke="#fff" stroke-width="2.5" stroke-linecap="round" opacity=".72"/>';
+ const lights='<path d="M45 87 L69 83 L79 88 L50 93Z" fill="#fff4cf"/><path d="M246 82 L267 86 L274 92 L246 91Z" fill="#fff0c1"/><path d="M58 98 L266 98" stroke="'+dark+'" stroke-width="2" opacity=".4"/>';
+ const wheel=(x)=>'<g><circle cx="'+x+'" cy="103" r="22" fill="'+ink+'"/><circle cx="'+x+'" cy="103" r="15" fill="#e6ebf1" stroke="#596779" stroke-width="2.5"/><circle cx="'+x+'" cy="103" r="8.5" fill="#8d9aab"/><circle cx="'+x+'" cy="103" r="3.5" fill="#f8fafc"/><path d="M'+(x-10)+' 94 L'+(x+9)+' 112 M'+(x+10)+' 94 L'+(x-9)+' 112" stroke="#657286" stroke-width="1.6" opacity=".75"/></g>';
+ const accent=isSilver?'<path d="M117 43 Q140 35 161 41" fill="none" stroke="#fff" stroke-width="2.5" opacity=".9"/>':'<path d="M120 44 Q143 36 163 42" fill="none" stroke="#fff" stroke-width="2.5" opacity=".8"/>';
+ return '<svg viewBox="0 0 320 150" role="img" aria-label="Иллюстрация автомобиля-заглушка" xmlns="http://www.w3.org/2000/svg"><ellipse cx="160" cy="126" rx="113" ry="8" fill="#31445f" opacity=".12"/><ellipse cx="160" cy="122" rx="82" ry="4" fill="#31445f" opacity=".07"/>'+wheel(87)+wheel(237)+'<path d="'+bodyShape+'" fill="'+body+'" stroke="'+dark+'" stroke-width="2.5" stroke-linejoin="round"/>'+roof+windows+'<path d="M106 73 L218 73" stroke="'+dark+'" stroke-width="1.5" opacity=".45"/>'+stripe+lights+accent+'<path d="M67 79 Q84 74 101 76" fill="none" stroke="#fff" stroke-width="2" opacity=".4"/><path d="M225 73 Q240 76 253 80" fill="none" stroke="#fff" stroke-width="2" opacity=".45"/></svg>';
 }
 const catalogCars=()=>cars;
 const packageHasExplicitLinks=p=>Array.isArray(p.relatedReleaseIds)||p.relatedReleaseId!=null;
