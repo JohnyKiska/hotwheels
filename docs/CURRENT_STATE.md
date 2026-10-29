@@ -11,8 +11,9 @@
 - Открыт draft PR #54: [Add auditable conflict decision revisions](https://github.com/JohnyKiska/hotwheels/pull/54).
 - Добавлен сервис `revise_conflict_resolution`, API `POST /conflicts/{conflict_id}/revise-resolution`, выдача истории в detail API и UI пересмотра.
 - Первоначальные записи `ChangeLog` не изменяются; пересмотр добавляет отдельное событие `revise_conflict_resolution`.
-- GitHub Actions для commit `0afdd745aae3cd2bacc5b6253a8b83735ac32d1b`: backend `pytest` — success; UI syntax/smoke checks — success. Эти результаты относятся к указанному commit; после последующих изменений документации код не менялся.
-- Пользователь подтвердил, что ручная проверка Skyline → Supra, независимость состава упаковок и предыдущая проверка GitHub Actions/conflict review уже выполнены. Конкретный commit для этих ручных проверок не зафиксирован.
+- GitHub Actions для кода на commit `e346a5d7c6c61c349ed87b37ebf047c5270fa2cf`: `pytest` — success; `validate-conflict-review-ui` — success (оба завершены 2026-10-29). Проверки относятся к этому head PR #54.
+- 2026-10-29 пользователь подтвердил ручную проверку новой функции пересмотра конфликтного решения: работает. Также ранее подтверждены ручные проверки Skyline → Supra, независимости состава упаковок и предыдущего conflict review/Actions; для тех проверок точные commit/version не зафиксированы.
+- Перед объединением нужно обновить документацию на ветке PR, запустить проверки на итоговом head, снять draft-статус и убедиться, что PR всё ещё чисто объединяется.
 
 
 Репозиторий `JohnyKiska/hotwheels` доступен через GitHub-инструменты. Проверены следующие файлы/ветки:
