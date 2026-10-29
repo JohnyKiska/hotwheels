@@ -476,7 +476,7 @@ class Package(TimestampMixin, Base):
     )
 
     release_links: Mapped[list[PackageRelease]] = relationship(
-        back_populates="package", cascade="all, delete-orphan"
+        back_populates="package", cascade="all, delete-orphan", order_by="PackageRelease.position"
     )
     identifier_links: Mapped[list[PackageIdentifier]] = relationship(
         back_populates="package", cascade="all, delete-orphan"
