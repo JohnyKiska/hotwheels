@@ -63,10 +63,10 @@ class Manufacturer(TimestampMixin, Base):
     )
 
     brand_links: Mapped[list[ManufacturerBrand]] = relationship(
-        back_populates="manufacturer", cascade="all, delete-orphan"
+        back_populates="manufacturer", passive_deletes="all"
     )
     brand_links_evidence: Mapped[list[EvidenceManufacturer]] = relationship(
-        back_populates="manufacturer", cascade="all, delete-orphan"
+        back_populates="manufacturer", passive_deletes="all"
     )
 
 
@@ -89,16 +89,16 @@ class Brand(TimestampMixin, Base):
     )
 
     manufacturer_links: Mapped[list[ManufacturerBrand]] = relationship(
-        back_populates="brand", cascade="all, delete-orphan"
+        back_populates="brand", passive_deletes="all"
     )
     casting_links: Mapped[list[CastingBrand]] = relationship(
-        back_populates="brand", cascade="all, delete-orphan"
+        back_populates="brand", passive_deletes="all"
     )
     release_links: Mapped[list[ReleaseBrand]] = relationship(
-        back_populates="brand", cascade="all, delete-orphan"
+        back_populates="brand", passive_deletes="all"
     )
     evidence_links: Mapped[list[EvidenceBrand]] = relationship(
-        back_populates="brand", cascade="all, delete-orphan"
+        back_populates="brand", passive_deletes="all"
     )
 
 
