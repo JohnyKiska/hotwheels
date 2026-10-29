@@ -16,7 +16,7 @@
 
 - Ветка: `feature/manufacturer-brand-model`.
 - Добавлены `Manufacturer`, `Brand`, `ManufacturerBrand`, `CastingBrand`, `ReleaseBrand`, `EvidenceManufacturer`, `EvidenceBrand`, миграция `20261029_manufacturer_brand` и тесты.
-- Следующий шаг: открыть PR, дождаться CI, проверить миграцию и все тесты; не объединять при красных/неполных checks. Производственный `collection.json` не трогать.
+- PR #58 открыт: https://github.com/JohnyKiska/hotwheels/pull/58. Дождаться свежего CI на последнем head, проверить миграцию и все тесты; не объединять при красных/неполных checks. Производственный `collection.json` не трогать.
 
 ## Перед любыми изменениями
 
