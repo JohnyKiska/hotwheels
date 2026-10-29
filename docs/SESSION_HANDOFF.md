@@ -5,12 +5,12 @@
 
 ## Последнее обновление — 2026-10-29
 
-- Рабочая ветка: `feat/auditable-conflict-revisions`.
-- PR #54 [Add auditable conflict decision revisions](https://github.com/JohnyKiska/hotwheels/pull/54), ветка `feat/auditable-conflict-revisions`.
-- Реализованы сервис/API пересмотра финального решения, выдача истории и UI-форма отдельного пересмотра.
-- На исходном кодовом head `e346a5d7c6c61c349ed87b37ebf047c5270fa2cf` CI прошёл: `pytest` — success; `validate-conflict-review-ui` — success. После обновления документации нужно проверить свежие runs на итоговом head.
-- Пользователь 2026-10-29 подтвердил, что ручная проверка новой функции пересмотра решения прошла успешно. Ранее также подтверждены проверки Skyline → Supra, независимости состава упаковок и предыдущего conflict review/Actions. Не повторять эти ручные сценарии без причины.
-- До merge: проверить итоговый diff и актуальные checks, отметить PR ready for review, объединять только если проверки зелёные и PR clean/mergeable.
+- PR #54: аудитируемый пересмотр финальных конфликтных решений; merge commit `3a8c0bd53e4b9bbf9ab6aa55ea9a9be2c15f0ff5`; post-merge backend, UI и Pages checks прошли.
+- PR #55: документация по сверке схемы; merge commit `891485b9e8d09c9b7cd49ef17c197ed283610297`.
+- PR #56: `Package`, упорядоченный состав `PackageRelease`, идентификаторы и evidence-связь упаковки; merge commit `3d31fb1283a1ae5312d546b48d98a63b83141fc4`.
+- CI PR #56: после исправления устаревшего ожидания Alembic версии — 94 passed; post-merge backend `pytest`, Pages build и deploy прошли.
+- Следующий шаг: отдельные `Manufacturer` и `Brand` и их связи с Casting/Release. См. `docs/SCHEMA_ALIGNMENT.md`.
+- Не менять production `collection.json`; PR #29 и #52 всё ещё открыты, их статус не путать с merge PR #54–#56.
 
 ## Перед любыми изменениями
 
