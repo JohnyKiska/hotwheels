@@ -70,6 +70,14 @@ async function loadQueue(){
     renderQueue(data);$("queueStatus").textContent="Показано "+data.items.length+" из "+data.total+".";
   }catch(error){$("queueStatus").textContent=error.message+" — проверьте адрес API и настройки CORS."; $("queueStatus").className="status error"}
 }
+function renderHistory(history){
+  if(!history.length)return '<div class="resolution"><h3>История решений</h3><p class="small">Записей пока нет.</p></div>';
+  return '<div class="resolution"><h3>История решений ('+history.length+')</h3>'+history.map((entry,index)=>{
+    const values=entry.new_values||{};
+    const action=entry.action==="revise_conflict_resolution"?"Пересмотр решения":"Первоначальное решение";
+    return '<article class="evidence"><h3>'+action+' · '+(index+1)+'</h3><div><strong>'+escapeHtml(values.resolution||"—")+'</strong></div><div class="meta" style="margin-top:6px">'+pill(values.status||"—",values.status||"")+'</div><p>'+escapeHtml(entry.reason||"Причина не указана")+'</p><div class="small">Автор: '+escapeHtml(entry.actor_id||entry.actor_type||"не указан")+' · '+escapeHtml(entry.created_at||"время не указано")+'</div><div class="small">Доказательств в записи: '+((entry.evidence_ids||[]).length)+'</div></article>';
+  }).join("")+'</div>';
+}
 function renderDetail(c){
   const evidence=c.evidence||[];
   $("detail").innerHTML='<h2 class="detail-title">Конфликт</h2><div class="detail-meta">'+pill(c.severity,c.severity)+pill(c.status,c.status)+pill(c.conflict_type)+'</div>'+
@@ -78,9 +86,13 @@ function renderDetail(c){
     '<div class="field"><label>Создан</label><div>'+escapeHtml(c.created_at||"—")+'</div></div>'+
     '<h3>Доказательства и источники ('+evidence.length+')</h3>'+
     (evidence.length?evidence.map((e,i)=>'<article class="evidence"><h3>Утверждение '+(i+1)+'</h3><div class="observed">'+escapeHtml(e.observed_value||"(значение не указано)")+'</div><div class="meta" style="margin-top:8px">'+pill(e.assessment)+pill(e.review_status)+'</div><p class="small">Поле: '+escapeHtml(e.attribute_name||"—")+' · Тип: '+escapeHtml(e.evidence_type||"—")+'</p><p><strong>'+escapeHtml(e.source_name||"Источник не указан")+'</strong></p><div class="small">'+escapeHtml(e.source_publisher||"")+(e.source_is_official===true?" · официальный источник":e.source_is_official===false?" · неофициальный источник":"")+'</div><div class="small">ID записи источника: '+escapeHtml(e.source_record_id||"—")+'</div><div class="small">Получено: '+escapeHtml(e.retrieved_at||"—")+'</div>'+(safeHttpUrl(e.record_url)?'<a class="source-link" href="'+escapeHtml(safeHttpUrl(e.record_url))+'" target="_blank" rel="noopener noreferrer">Открыть исходную запись ↗</a>':"")+(safeHttpUrl(e.source_url)?'<div><a class="source-link" href="'+escapeHtml(safeHttpUrl(e.source_url))+'" target="_blank" rel="noopener noreferrer">Сайт источника ↗</a></div>':"")+(e.evidence_notes?'<p class="small">'+escapeHtml(e.evidence_notes)+'</p>':"")+'<label style="margin-top:12px"><input type="checkbox" class="evidence-check" value="'+escapeHtml(e.evidence_id)+'" style="width:auto;margin-right:6px">Использовать как обоснование решения</label></article>').join(""):'<div class="notice">К этому конфликту пока не прикреплены доказательства.</div>')+
-    (["open","under_review"].includes(c.status)?'<div class="resolution"><h3>Зафиксировать решение</h3><div class="notice">Решение не объединяет карточки автоматически. Укажите, почему выбран именно этот вывод.</div><div class="field"><label for="decision">Итог</label><select id="decision"><option value="resolved">Конфликт разрешён</option><option value="accepted_difference">Принято как реальное различие</option></select></div><div class="field"><label for="resolutionText">Решение / вывод</label><textarea id="resolutionText" rows="3" placeholder="Какое значение или вывод принят?"></textarea></div><div class="field"><label for="reasonText">Обоснование</label><textarea id="reasonText" rows="3" placeholder="Какие факты подтверждают решение?"></textarea></div><button class="primary" id="submitDecision">Сохранить решение</button><div id="decisionStatus" class="status" aria-live="polite"></div></div>':'<div class="resolution"><h3>Решение уже зафиксировано</h3><p>'+escapeHtml(c.resolution||"—")+'</p><p class="small">'+escapeHtml(c.resolution_reason||"")+'</p></div>');
+    (["open","under_review"].includes(c.status)?'<div class="resolution"><h3>Зафиксировать решение</h3><div class="notice">Решение не объединяет карточки автоматически. Укажите, почему выбран именно этот вывод.</div><div class="field"><label for="decision">Итог</label><select id="decision"><option value="resolved">Конфликт разрешён</option><option value="accepted_difference">Принято как реальное различие</option></select></div><div class="field"><label for="resolutionText">Решение / вывод</label><textarea id="resolutionText" rows="3" placeholder="Какое значение или вывод принят?"></textarea></div><div class="field"><label for="reasonText">Обоснование</label><textarea id="reasonText" rows="3" placeholder="Какие факты подтверждают решение?"></textarea></div><button class="primary" id="submitDecision">Сохранить решение</button><div id="decisionStatus" class="status" aria-live="polite"></div></div>':'<div class="resolution"><h3>Текущее решение</h3><p>'+escapeHtml(c.resolution||"—")+'</p><p class="small">'+escapeHtml(c.resolution_reason||"")+'</p></div>')+
+    renderHistory(c.history||[]) +
+    (["resolved","accepted_difference"].includes(c.status)?'<div class="resolution"><h3>Пересмотреть решение</h3><div class="notice">Пересмотр добавит новую запись в журнал. Предыдущие решения останутся в истории.</div><div class="field"><label for="revisionDecision">Новый итог</label><select id="revisionDecision"><option value="resolved">Конфликт разрешён</option><option value="accepted_difference">Принято как реальное различие</option></select></div><div class="field"><label for="revisionText">Новое решение / вывод</label><textarea id="revisionText" rows="3" placeholder="Какой вывод принимается теперь?"></textarea></div><div class="field"><label for="revisionReason">Причина пересмотра</label><textarea id="revisionReason" rows="3" placeholder="Почему первоначальное решение нужно изменить?"></textarea></div><button class="primary" id="submitRevision">Сохранить пересмотр</button><div id="revisionStatus" class="status" aria-live="polite"></div></div>':'');
   const submit=$("submitDecision");
   if(submit)submit.addEventListener("click",submitResolution);
+  const revise=$("submitRevision");
+  if(revise)revise.addEventListener("click",submitRevision);
 }
 async function openConflict(id){
   selectedId=id;$("detail").innerHTML='<div class="empty">Загружаю детали конфликта…</div>';
@@ -99,6 +111,20 @@ async function submitResolution(){
     await openConflict(selectedId);await loadQueue();
   }catch(error){statusNode.textContent=error.message;statusNode.className="status error"}
   finally{const current=$("submitDecision");if(current)current.disabled=false}
+}
+
+async function submitRevision(){
+  const resolution=$("revisionText").value.trim(),reason=$("revisionReason").value.trim(),status=$("revisionDecision").value;
+  const statusNode=$("revisionStatus");
+  if(!resolution||!reason){statusNode.textContent="Заполните новое решение и причину пересмотра.";statusNode.className="status error";return}
+  const evidence_ids=[...document.querySelectorAll(".evidence-check:checked")].map(el=>el.value);
+  const button=$("submitRevision");button.disabled=true;statusNode.textContent="Сохраняю пересмотр…";statusNode.className="status";
+  try{
+    await request("/conflicts/"+encodeURIComponent(selectedId)+"/revise-resolution",{method:"POST",body:JSON.stringify({status,resolution,reason,actor_type:"human",evidence_ids})});
+    statusNode.textContent="Пересмотр сохранён отдельной записью в журнале.";statusNode.className="status success";
+    await openConflict(selectedId);await loadQueue();
+  }catch(error){statusNode.textContent=error.message;statusNode.className="status error"}
+  finally{const current=$("submitRevision");if(current)current.disabled=false}
 }
 $("load").addEventListener("click",loadQueue);$("refresh").addEventListener("click",loadQueue);
 $("status").addEventListener("change",loadQueue);$("severity").addEventListener("change",loadQueue);

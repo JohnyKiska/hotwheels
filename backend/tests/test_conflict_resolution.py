@@ -180,3 +180,93 @@ def test_final_conflict_cannot_be_resolved_again_and_unknown_id_is_rejected():
             pass
         else:
             raise AssertionError("unknown conflict must be rejected")
+
+
+def test_revising_final_conflict_appends_history_and_updates_current_decision():
+    with make_session() as session:
+        conflict, evidence_rows, _ = seed_conflict(session)
+        resolve_conflict(
+            session,
+            conflict_id=conflict.id,
+            status="resolved",
+            resolution="Use PR5",
+            reason="First review of the sources",
+            actor_id="reviewer-1",
+        )
+        original = session.scalar(
+            select(ChangeLog).where(ChangeLog.action == "resolve_conflict")
+        )
+        original_new_values = dict(original.new_values)
+
+        from app.conflict_resolution import revise_conflict_resolution
+        result = revise_conflict_resolution(
+            session,
+            conflict_id=conflict.id,
+            status="accepted_difference",
+            resolution="Both wheel types are valid release variants",
+            reason="Physical package evidence shows two distinct releases",
+            actor_id="reviewer-2",
+            evidence_ids=[evidence_rows[1].id],
+        )
+
+        assert result.status == "accepted_difference"
+        assert result.resolution == "Both wheel types are valid release variants"
+        assert result.resolution_reason == "Physical package evidence shows two distinct releases"
+        assert original.new_values == original_new_values
+        entries = session.scalars(
+            select(ChangeLog).where(ChangeLog.entity_id == conflict.id)
+            .order_by(ChangeLog.created_at.asc(), ChangeLog.id.asc())
+        ).all()
+        assert [entry.action for entry in entries] == [
+            "resolve_conflict", "revise_conflict_resolution"
+        ]
+        revision = entries[1]
+        assert revision.old_values["resolution"] == "Use PR5"
+        assert revision.new_values["resolution"] == "Both wheel types are valid release variants"
+        assert revision.reason == "Physical package evidence shows two distinct releases"
+        assert revision.actor_id == "reviewer-2"
+        links = session.scalars(
+            select(ChangeLogEvidence).where(ChangeLogEvidence.change_log_id == revision.id)
+        ).all()
+        assert [link.evidence_id for link in links] == [evidence_rows[1].id]
+
+
+def test_revision_requires_a_final_conflict_and_nonblank_reason():
+    from app.conflict_resolution import revise_conflict_resolution
+
+    with make_session() as session:
+        conflict, _, _ = seed_conflict(session)
+        try:
+            revise_conflict_resolution(
+                session,
+                conflict_id=conflict.id,
+                status="resolved",
+                resolution="Decision",
+                reason="Revision reason",
+            )
+        except InvalidConflictResolution as exc:
+            assert "final conflict" in str(exc)
+        else:
+            raise AssertionError("an unresolved conflict must not use the revision action")
+
+        resolve_conflict(
+            session,
+            conflict_id=conflict.id,
+            status="resolved",
+            resolution="Initial decision",
+            reason="Initial reason",
+        )
+        try:
+            revise_conflict_resolution(
+                session,
+                conflict_id=conflict.id,
+                status="resolved",
+                resolution="Replacement",
+                reason="   ",
+            )
+        except InvalidConflictResolution as exc:
+            assert "revision reason" in str(exc)
+        else:
+            raise AssertionError("a blank revision reason must be rejected")
+        assert session.scalar(select(func.count()).select_from(ChangeLog)) == 1
+
