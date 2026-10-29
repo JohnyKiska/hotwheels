@@ -6,10 +6,11 @@
 ## Последнее обновление — 2026-10-29
 
 - Рабочая ветка: `feat/auditable-conflict-revisions`.
-- Draft PR: [#54 Add auditable conflict decision revisions](https://github.com/JohnyKiska/hotwheels/pull/54).
+- PR #54 [Add auditable conflict decision revisions](https://github.com/JohnyKiska/hotwheels/pull/54), ветка `feat/auditable-conflict-revisions`.
 - Реализованы сервис/API пересмотра финального решения, выдача истории и UI-форма отдельного пересмотра.
-- CI для commit `0afdd745aae3cd2bacc5b6253a8b83735ac32d1b`: `pytest` — success; `validate-conflict-review-ui` — success. Не объединять PR до просмотра diff и проверки итогового статуса.
-- Ручные проверки Skyline → Supra, независимости состава упаковок и предыдущая проверка conflict review/Actions подтверждены пользователем как завершённые. Не повторять их без причины.
+- На исходном кодовом head `e346a5d7c6c61c349ed87b37ebf047c5270fa2cf` CI прошёл: `pytest` — success; `validate-conflict-review-ui` — success. После обновления документации нужно проверить свежие runs на итоговом head.
+- Пользователь 2026-10-29 подтвердил, что ручная проверка новой функции пересмотра решения прошла успешно. Ранее также подтверждены проверки Skyline → Supra, независимости состава упаковок и предыдущего conflict review/Actions. Не повторять эти ручные сценарии без причины.
+- До merge: проверить итоговый diff и актуальные checks, отметить PR ready for review, объединять только если проверки зелёные и PR clean/mergeable.
 
 ## Перед любыми изменениями
 
