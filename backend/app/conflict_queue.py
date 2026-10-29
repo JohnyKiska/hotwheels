@@ -4,7 +4,7 @@ from __future__ import annotations
 from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload, selectinload
 
-from .models import Conflict, ConflictEvidence, Evidence, SourceRecord, Source
+from .models import ChangeLog, Conflict, ConflictEvidence, Evidence, SourceRecord, Source
 
 
 ALLOWED_STATUSES = {"open", "under_review", "resolved", "accepted_difference"}
@@ -140,6 +140,28 @@ def get_conflict_detail(session: Session, conflict_id: str) -> dict | None:
             "content_hash": record.content_hash,
             "retrieved_at": record.retrieved_at.isoformat() if record.retrieved_at else None,
         })
+    audit_entries = session.scalars(
+        select(ChangeLog)
+        .where(
+            ChangeLog.entity_type == "conflict",
+            ChangeLog.entity_id == conflict.id,
+            ChangeLog.action.in_(("resolve_conflict", "revise_conflict_resolution")),
+        )
+        .order_by(ChangeLog.created_at.asc(), ChangeLog.id.asc())
+    ).all()
+    history = []
+    for entry in audit_entries:
+        history.append({
+            "action": entry.action,
+            "old_values": entry.old_values,
+            "new_values": entry.new_values,
+            "reason": entry.reason,
+            "actor_type": entry.actor_type,
+            "actor_id": entry.actor_id,
+            "created_at": entry.created_at.isoformat() if entry.created_at else None,
+            "evidence_ids": [link.evidence_id for link in entry.evidence_links],
+        })
+
     return {
         "id": conflict.id,
         "conflict_type": conflict.conflict_type,
@@ -151,4 +173,5 @@ def get_conflict_detail(session: Session, conflict_id: str) -> dict | None:
         "created_at": conflict.created_at.isoformat() if conflict.created_at else None,
         "resolved_at": conflict.resolved_at.isoformat() if conflict.resolved_at else None,
         "evidence": evidence_items,
+        "history": history,
     }
