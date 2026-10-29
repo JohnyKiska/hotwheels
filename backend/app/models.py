@@ -42,6 +42,160 @@ class TimestampMixin:
     )
 
 
+class Manufacturer(TimestampMixin, Base):
+    """A legal or operating company that produces, owns, or distributes brands."""
+
+    __tablename__ = "manufacturers"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    name: Mapped[str] = mapped_column(String(240), nullable=False, index=True)
+    legal_name: Mapped[str | None] = mapped_column(String(240))
+    country: Mapped[str | None] = mapped_column(String(120))
+    website: Mapped[str | None] = mapped_column(Text)
+    description: Mapped[str | None] = mapped_column(Text)
+    status: Mapped[str] = mapped_column(String(24), default="candidate", nullable=False)
+
+    __table_args__ = (
+        CheckConstraint(
+            "status IN ('candidate', 'under_review', 'confirmed', 'rejected')",
+            name="ck_manufacturers_status",
+        ),
+    )
+
+    brand_links: Mapped[list[ManufacturerBrand]] = relationship(
+        back_populates="manufacturer", passive_deletes="all"
+    )
+    brand_links_evidence: Mapped[list[EvidenceManufacturer]] = relationship(
+        back_populates="manufacturer", passive_deletes="all"
+    )
+
+
+class Brand(TimestampMixin, Base):
+    """A product brand, distinct from the company that owns or uses it."""
+
+    __tablename__ = "brands"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    name: Mapped[str] = mapped_column(String(240), nullable=False, index=True)
+    description: Mapped[str | None] = mapped_column(Text)
+    website: Mapped[str | None] = mapped_column(Text)
+    status: Mapped[str] = mapped_column(String(24), default="candidate", nullable=False)
+
+    __table_args__ = (
+        CheckConstraint(
+            "status IN ('candidate', 'under_review', 'confirmed', 'rejected')",
+            name="ck_brands_status",
+        ),
+    )
+
+    manufacturer_links: Mapped[list[ManufacturerBrand]] = relationship(
+        back_populates="brand", passive_deletes="all"
+    )
+    casting_links: Mapped[list[CastingBrand]] = relationship(
+        back_populates="brand", passive_deletes="all"
+    )
+    release_links: Mapped[list[ReleaseBrand]] = relationship(
+        back_populates="brand", passive_deletes="all"
+    )
+    evidence_links: Mapped[list[EvidenceBrand]] = relationship(
+        back_populates="brand", passive_deletes="all"
+    )
+
+
+class ManufacturerBrand(Base):
+    """A time-aware relationship between a company and a brand."""
+
+    __tablename__ = "manufacturer_brands"
+
+    manufacturer_id: Mapped[str] = mapped_column(
+        ForeignKey("manufacturers.id", ondelete="RESTRICT"), primary_key=True
+    )
+    brand_id: Mapped[str] = mapped_column(
+        ForeignKey("brands.id", ondelete="RESTRICT"), primary_key=True
+    )
+    relationship_type: Mapped[str] = mapped_column(
+        String(32), default="owner", nullable=False
+    )
+    valid_from_year: Mapped[int | None] = mapped_column(Integer)
+    valid_to_year: Mapped[int | None] = mapped_column(Integer)
+    note: Mapped[str | None] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utc_now, nullable=False
+    )
+
+    __table_args__ = (
+        CheckConstraint(
+            "relationship_type IN ('owner', 'producer', 'distributor', 'licensee', 'other')",
+            name="ck_manufacturer_brands_relationship_type",
+        ),
+        CheckConstraint(
+            "valid_from_year IS NULL OR valid_from_year BETWEEN 1800 AND 2100",
+            name="ck_manufacturer_brands_valid_from_year",
+        ),
+        CheckConstraint(
+            "valid_to_year IS NULL OR valid_to_year BETWEEN 1800 AND 2100",
+            name="ck_manufacturer_brands_valid_to_year",
+        ),
+        CheckConstraint(
+            "valid_from_year IS NULL OR valid_to_year IS NULL OR valid_to_year >= valid_from_year",
+            name="ck_manufacturer_brands_year_range",
+        ),
+    )
+
+    manufacturer: Mapped[Manufacturer] = relationship(back_populates="brand_links")
+    brand: Mapped[Brand] = relationship(back_populates="manufacturer_links")
+
+
+class CastingBrand(Base):
+    """A brand associated with a casting; a casting can have multiple brands."""
+
+    __tablename__ = "casting_brands"
+
+    casting_id: Mapped[str] = mapped_column(
+        ForeignKey("castings.id", ondelete="RESTRICT"), primary_key=True
+    )
+    brand_id: Mapped[str] = mapped_column(
+        ForeignKey("brands.id", ondelete="RESTRICT"), primary_key=True
+    )
+    role: Mapped[str] = mapped_column(String(32), default="primary", nullable=False)
+    note: Mapped[str | None] = mapped_column(Text)
+
+    __table_args__ = (
+        CheckConstraint(
+            "role IN ('primary', 'secondary', 'licensed', 'promotional', 'other')",
+            name="ck_casting_brands_role",
+        ),
+    )
+
+    casting: Mapped[Casting] = relationship(back_populates="brand_links")
+    brand: Mapped[Brand] = relationship(back_populates="casting_links")
+
+
+class ReleaseBrand(Base):
+    """A brand associated with a specific release, independently of casting-level brands."""
+
+    __tablename__ = "release_brands"
+
+    release_id: Mapped[str] = mapped_column(
+        ForeignKey("releases.id", ondelete="RESTRICT"), primary_key=True
+    )
+    brand_id: Mapped[str] = mapped_column(
+        ForeignKey("brands.id", ondelete="RESTRICT"), primary_key=True
+    )
+    role: Mapped[str] = mapped_column(String(32), default="primary", nullable=False)
+    note: Mapped[str | None] = mapped_column(Text)
+
+    __table_args__ = (
+        CheckConstraint(
+            "role IN ('primary', 'secondary', 'licensed', 'promotional', 'other')",
+            name="ck_release_brands_role",
+        ),
+    )
+
+    release: Mapped[Release] = relationship(back_populates="brand_links")
+    brand: Mapped[Brand] = relationship(back_populates="release_links")
+
+
 class Casting(TimestampMixin, Base):
     """Base casting identity, independent of a particular year's release."""
 
@@ -64,6 +218,9 @@ class Casting(TimestampMixin, Base):
         ),
     )
 
+    brand_links: Mapped[list[CastingBrand]] = relationship(
+        back_populates="casting", cascade="all, delete-orphan"
+    )
     variants: Mapped[list[CastingVariant]] = relationship(
         back_populates="casting", cascade="all, delete-orphan"
     )
@@ -186,6 +343,9 @@ class Release(TimestampMixin, Base):
         ),
     )
 
+    brand_links: Mapped[list[ReleaseBrand]] = relationship(
+        back_populates="release", cascade="all, delete-orphan"
+    )
     casting: Mapped[Casting] = relationship(back_populates="releases", foreign_keys=[casting_id])
     casting_variant: Mapped[CastingVariant | None] = relationship(
         back_populates="releases", foreign_keys=[casting_variant_id]
@@ -278,6 +438,8 @@ class Evidence(TimestampMixin, Base):
     release_links: Mapped[list[EvidenceRelease]] = relationship(back_populates="evidence", cascade="all, delete-orphan")
     series_links: Mapped[list[EvidenceSeries]] = relationship(back_populates="evidence", cascade="all, delete-orphan")
     package_links: Mapped[list[EvidencePackage]] = relationship(back_populates="evidence", cascade="all, delete-orphan")
+    manufacturer_links: Mapped[list[EvidenceManufacturer]] = relationship(back_populates="evidence", cascade="all, delete-orphan")
+    brand_links: Mapped[list[EvidenceBrand]] = relationship(back_populates="evidence", cascade="all, delete-orphan")
 
 
 class MediaAsset(TimestampMixin, Base):
@@ -544,3 +706,38 @@ class EvidencePackage(Base):
 
     evidence: Mapped[Evidence] = relationship(back_populates="package_links")
     package: Mapped[Package] = relationship(back_populates="evidence_links")
+
+
+
+class EvidenceManufacturer(Base):
+    """Link source evidence to a manufacturer record."""
+
+    __tablename__ = "evidence_manufacturers"
+
+    evidence_id: Mapped[str] = mapped_column(
+        ForeignKey("evidence.id", ondelete="CASCADE"), primary_key=True
+    )
+    manufacturer_id: Mapped[str] = mapped_column(
+        ForeignKey("manufacturers.id", ondelete="RESTRICT"), primary_key=True
+    )
+    role: Mapped[str] = mapped_column(String(32), default="about", nullable=False)
+
+    evidence: Mapped[Evidence] = relationship(back_populates="manufacturer_links")
+    manufacturer: Mapped[Manufacturer] = relationship(back_populates="brand_links_evidence")
+
+
+class EvidenceBrand(Base):
+    """Link source evidence to a brand record."""
+
+    __tablename__ = "evidence_brands"
+
+    evidence_id: Mapped[str] = mapped_column(
+        ForeignKey("evidence.id", ondelete="CASCADE"), primary_key=True
+    )
+    brand_id: Mapped[str] = mapped_column(
+        ForeignKey("brands.id", ondelete="RESTRICT"), primary_key=True
+    )
+    role: Mapped[str] = mapped_column(String(32), default="about", nullable=False)
+
+    evidence: Mapped[Evidence] = relationship(back_populates="brand_links")
+    brand: Mapped[Brand] = relationship(back_populates="evidence_links")
