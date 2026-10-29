@@ -22,7 +22,7 @@
 |---|---|---|
 | `main:catalog/conflicts.html` | Файл существует; интерфейс проверки конфликтов | [файл](https://github.com/JohnyKiska/hotwheels/blob/main/catalog/conflicts.html) |
 | `main:.github/workflows/catalog-ui-checks.yml` | Workflow существует; запускает UI-проверки для соответствующих изменений | [workflow](https://github.com/JohnyKiska/hotwheels/blob/main/.github/workflows/catalog-ui-checks.yml) |
-| Текущий main на момент проверки PR #54 | `8d3989fbf6d82886f68f7dad3e769e890d5e7e17`, документация handoff | [коммит](https://github.com/JohnyKiska/hotwheels/commit/8d3989fbf6d82886f68f7dad3e769e890d5e7e17) |
+| `main` после merge PR #54 | `3a8c0bd53e4b9bbf9ab6aa55ea9a9be2c15f0ff5`; backend tests, UI checks, Pages build и deploy прошли | [коммит](https://github.com/JohnyKiska/hotwheels/commit/3a8c0bd53e4b9bbf9ab6aa55ea9a9be2c15f0ff5) |
 | Предыдущий важный коммит | `1037d33ecc0f21220bdbc52c0903268a6882e25d`, обновление conflict review UI и обязательных UI-проверок (#50) | [коммит](https://github.com/JohnyKiska/hotwheels/commit/1037d33ecc0f21220bdbc52c0903268a6882e25d) |
 | Журнал изменений | Коммит `c9f7af6c0aa95376b3e17ed780d691c09bac6fc7` добавил append-only защиту SQLite change log триггерами и тесты | [коммит](https://github.com/JohnyKiska/hotwheels/commit/c9f7af6c0aa95376b3e17ed780d691c09bac6fc7) |
 | `feature/test-editor-parameters:catalog/editor-test.html` | Файл существует; тестовый редактор с полями и параметрами | [файл](https://github.com/JohnyKiska/hotwheels/blob/feature/test-editor-parameters/catalog/editor-test.html) |
