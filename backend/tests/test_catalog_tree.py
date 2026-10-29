@@ -143,9 +143,9 @@ def test_catalog_tree_move_prevents_cycles_and_invalid_parent_types_and_audits(s
     session.commit()
 
     with pytest.raises(ValueError, match="cycle"):
-        move_catalog_node(session, line_node.id, group.id, reason="bad move")
+        move_catalog_node(session, year.id, group.id, reason="bad move")
     with pytest.raises(ValueError, match="cannot be placed"):
-        move_catalog_node(session, year.id, root.id, reason="invalid structure")
+        move_catalog_node(session, line_node.id, year.id, reason="invalid structure")
 
     moved = move_catalog_node(
         session, group.id, line_node.id, reason="Organize theme group", sort_order=3
