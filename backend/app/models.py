@@ -277,6 +277,7 @@ class Evidence(TimestampMixin, Base):
     variant_links: Mapped[list[EvidenceCastingVariant]] = relationship(back_populates="evidence", cascade="all, delete-orphan")
     release_links: Mapped[list[EvidenceRelease]] = relationship(back_populates="evidence", cascade="all, delete-orphan")
     series_links: Mapped[list[EvidenceSeries]] = relationship(back_populates="evidence", cascade="all, delete-orphan")
+    package_links: Mapped[list[EvidencePackage]] = relationship(back_populates="evidence", cascade="all, delete-orphan")
 
 
 class MediaAsset(TimestampMixin, Base):
@@ -443,3 +444,103 @@ class CastingVariantIdentifier(Base):
     source_note: Mapped[str | None] = mapped_column(Text)
     casting_variant: Mapped[CastingVariant] = relationship()
     identifier: Mapped[CatalogIdentifier] = relationship()
+
+
+
+class Package(TimestampMixin, Base):
+    """A sellable package or multipack, distinct from the individual releases inside it."""
+
+    __tablename__ = "packages"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    name: Mapped[str | None] = mapped_column(String(240), index=True)
+    package_type: Mapped[str] = mapped_column(String(40), default="unknown", nullable=False)
+    catalog_year: Mapped[int | None] = mapped_column(Integer, index=True)
+    declared_quantity: Mapped[int | None] = mapped_column(Integer)
+    description: Mapped[str | None] = mapped_column(Text)
+    status: Mapped[str] = mapped_column(String(24), default="candidate", nullable=False)
+
+    __table_args__ = (
+        CheckConstraint(
+            "status IN ('candidate', 'under_review', 'confirmed', 'rejected')",
+            name="ck_packages_status",
+        ),
+        CheckConstraint(
+            "catalog_year IS NULL OR catalog_year BETWEEN 1968 AND 2100",
+            name="ck_packages_catalog_year",
+        ),
+        CheckConstraint(
+            "declared_quantity IS NULL OR declared_quantity >= 1",
+            name="ck_packages_declared_quantity",
+        ),
+    )
+
+    release_links: Mapped[list[PackageRelease]] = relationship(
+        back_populates="package", cascade="all, delete-orphan"
+    )
+    identifier_links: Mapped[list[PackageIdentifier]] = relationship(
+        back_populates="package", cascade="all, delete-orphan"
+    )
+    evidence_links: Mapped[list[EvidencePackage]] = relationship(
+        back_populates="package", cascade="all, delete-orphan"
+    )
+
+
+class PackageRelease(Base):
+    """Ordered composition entry; one release may appear more than once in a package."""
+
+    __tablename__ = "package_releases"
+
+    package_id: Mapped[str] = mapped_column(
+        ForeignKey("packages.id", ondelete="CASCADE"), primary_key=True
+    )
+    position: Mapped[int] = mapped_column(Integer, primary_key=True)
+    release_id: Mapped[str] = mapped_column(
+        ForeignKey("releases.id", ondelete="RESTRICT"), nullable=False, index=True
+    )
+    quantity: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
+    note: Mapped[str | None] = mapped_column(Text)
+
+    __table_args__ = (
+        UniqueConstraint("package_id", "position", name="uq_package_release_position"),
+        CheckConstraint("position >= 1", name="ck_package_release_position"),
+        CheckConstraint("quantity >= 1", name="ck_package_release_quantity"),
+    )
+
+    package: Mapped[Package] = relationship(back_populates="release_links")
+    release: Mapped[Release] = relationship()
+
+
+class PackageIdentifier(Base):
+    """Assign a typed catalog identifier to a package without reusing a car's identifier."""
+
+    __tablename__ = "package_identifiers"
+
+    package_id: Mapped[str] = mapped_column(
+        ForeignKey("packages.id", ondelete="CASCADE"), primary_key=True
+    )
+    identifier_id: Mapped[str] = mapped_column(
+        ForeignKey("catalog_identifiers.id", ondelete="RESTRICT"), primary_key=True
+    )
+    role: Mapped[str] = mapped_column(String(32), default="primary", nullable=False)
+    source_note: Mapped[str | None] = mapped_column(Text)
+
+    package: Mapped[Package] = relationship(back_populates="identifier_links")
+    identifier: Mapped[CatalogIdentifier] = relationship()
+
+
+class EvidencePackage(Base):
+    """Link source evidence to a package independently of the releases it contains."""
+
+    __tablename__ = "evidence_packages"
+
+    evidence_id: Mapped[str] = mapped_column(
+        ForeignKey("evidence.id", ondelete="CASCADE"), primary_key=True
+    )
+    package_id: Mapped[str] = mapped_column(
+        ForeignKey("packages.id", ondelete="RESTRICT"), primary_key=True
+    )
+    role: Mapped[str] = mapped_column(String(32), default="about", nullable=False)
+
+    evidence: Mapped[Evidence] = relationship(back_populates="package_links")
+    package: Mapped[Package] = relationship(back_populates="evidence_links")
