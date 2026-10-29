@@ -541,11 +541,15 @@ def test_alembic_upgrade_is_safe_on_initialized_existing_database(tmp_path, monk
         assert "alembic_version" in tables
         assert "sources" in tables
         assert "evidence" in tables
+        assert "packages" in tables
+        assert "package_releases" in tables
+        assert "package_identifiers" in tables
+        assert "evidence_packages" in tables
         with check_engine.connect() as connection:
             assert connection.execute(
                 text("SELECT name FROM castings WHERE id = :id"), {"id": casting_id}
             ).scalar_one() == "Existing record must survive"
-            assert connection.execute(text("SELECT version_num FROM alembic_version")).scalar_one() == "20261027_change_log_append_only"
+            assert connection.execute(text("SELECT version_num FROM alembic_version")).scalar_one() == "20261029_packages"
             assert connection.execute(text("SELECT COUNT(*) FROM alembic_version")).scalar_one() == 1
     finally:
         check_engine.dispose()
