@@ -38,8 +38,9 @@
 - [x] Реализован отдельный сервис и endpoint `POST /conflicts/{conflict_id}/revise-resolution`.
 - [x] Пересмотр пишет `revise_conflict_resolution` с old/new values, причиной, автором/временем и evidence links; исходное событие не перезаписывается.
 - [x] Detail API и UI показывают историю и отдельную форму пересмотра.
-- [x] Backend pytest и UI syntax/smoke checks прошли на commit `0afdd745aae3cd2bacc5b6253a8b83735ac32d1b`.
-- [ ] Проверить PR #54, свежие CI после любых дальнейших изменений и только затем решить вопрос объединения.
+- [x] Backend `pytest` и `validate-conflict-review-ui` прошли на кодовом head `e346a5d7c6c61c349ed87b37ebf047c5270fa2cf`.
+- [x] Ручная проверка пересмотра финального решения подтверждена пользователем 2026-10-29.
+- [ ] После обновления документации проверить свежие CI на итоговом head, перевести PR #54 из draft в ready и объединить только при зелёных checks и `mergeable_state=clean`.
 
 ## Этап 3. Схема данных и идентификация
 - [ ] Сверить проектируемую схему с фактическими backend-моделями и миграциями.
