@@ -9,14 +9,15 @@
 - PR #55: документация по сверке схемы; merge commit `891485b9e8d09c9b7cd49ef17c197ed283610297`.
 - PR #56: `Package`, упорядоченный состав `PackageRelease`, идентификаторы и evidence-связь упаковки; merge commit `3d31fb1283a1ae5312d546b48d98a63b83141fc4`.
 - CI PR #56: после исправления устаревшего ожидания Alembic версии — 94 passed; post-merge backend `pytest`, Pages build и deploy прошли.
-- Следующий шаг: отдельные `Manufacturer` и `Brand` и их связи с Casting/Release. См. `docs/SCHEMA_ALIGNMENT.md`.
+- PR #58 реализовал `Manufacturer`/`Brand` и связи с Casting/Release; post-merge CI прошёл. Следующий шаг — согласовать `docs/CATALOG_HIERARCHY_DESIGN.md`.
 - Не менять production `collection.json`; PR #29 и #52 всё ещё открыты, их статус не путать с merge PR #54–#56.
 
-## Работа в процессе — Manufacturer/Brand (2026-10-29)
+## Обновление 2026-10-29 — иерархия каталога
 
-- Ветка: `feature/manufacturer-brand-model`.
-- Добавлены `Manufacturer`, `Brand`, `ManufacturerBrand`, `CastingBrand`, `ReleaseBrand`, `EvidenceManufacturer`, `EvidenceBrand`, миграция `20261029_manufacturer_brand` и тесты.
-- PR #58 открыт: https://github.com/JohnyKiska/hotwheels/pull/58. Дождаться свежего CI на последнем head, проверить миграцию и все тесты; не объединять при красных/неполных checks. Производственный `collection.json` не трогать.
+- PR #58 объединён: https://github.com/JohnyKiska/hotwheels/pull/58. Merge commit `6ae1dc8e451b86c1fce59859768e404254e6e8dd`; post-merge backend tests и Pages build/deploy завершились успешно.
+- Ветка `docs/catalog-hierarchy-design` добавляет проектное предложение `docs/CATALOG_HIERARCHY_DESIGN.md` и синхронизирует документы состояния.
+- Следующий шаг: прочитать проектное предложение, получить согласование пользователя, затем отдельный PR на ProductLine/CatalogNode и тесты. OriginObject/CastingOrigin — отдельным PR после дерева.
+- Не менять производственный `collection.json`.
 
 ## Перед любыми изменениями
 
