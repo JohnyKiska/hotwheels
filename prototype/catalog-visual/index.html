@@ -104,7 +104,7 @@ main{padding:24px clamp(16px,2vw,30px) 44px;max-width:none;background:#f9fbfd}
   </section>
   <div class="content-toolbar">
     <div class="filter-search"><span>⌕</span><input id="localSearch" type="search" placeholder="Искать в текущем разделе…"></div>
-    <select class="select" id="typeFilter" aria-label="Тип записи"><option value="all">Все типы записей</option><option value="Release">Выпуски</option><option value="Casting">Модели</option><option value="Series">Серии</option><option value="Package">Упаковки</option></select>
+    <select class="select" id="typeFilter" aria-label="Тип записи"><option value="all">Все типы записей</option><option value="Release">Выпуски</option><option value="Casting">Модели</option><option value="Series">Серии</option></select>
     <select class="select" id="statusFilter" aria-label="Статус проверки"><option value="all">Любой статус</option><option value="ok">Проверено</option><option value="review">Требует проверки</option><option value="unknown">Есть неизвестные поля</option></select>
     <button type="button" class="clear-filters toolbar-clear" id="clearFiltersButton" hidden>Сбросить всё</button>
     <div class="spacer"></div>
@@ -175,7 +175,7 @@ function carSvg(color,group,status){
 <path d="M7332.86 2637.68l666.28 0.6c-58.44,-86.18 -254.4,-155.45 -380.62,-200.28 -85.04,-30.19 -375.93,-119.19 -462.51,-121.91 71.37,72.49 137.06,187.33 176.85,321.59z"/>
 <path d="M2769.7 2481.98l186.37 2.52c-21,-99.67 -448.59,-495.28 -726.15,-495.78 159.16,57.02 290.82,137.52 387.05,252 18.28,21.75 40.67,52.51 58.4,77.32 40.89,57.2 56.27,98.87 94.33,163.94z"/></g></svg>`;
 }
-const catalogCars=()=>cars;
+const catalogCars=()=>cars.filter(c=>c.type!=="Package");
 const packageHasExplicitLinks=p=>Array.isArray(p.relatedReleaseIds)||p.relatedReleaseId!=null;
 const packageContainsRelease=(p,releaseId)=>{
   if(Array.isArray(p.relatedReleaseIds)) return p.relatedReleaseIds.includes(Number(releaseId));
