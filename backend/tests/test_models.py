@@ -4,7 +4,11 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.db import Base
-from app.models import Casting, CastingVariant, Release, ReleaseSeries, Series
+from app.models import (
+    CatalogIdentifier, Casting, CastingVariant, Evidence, EvidencePackage,
+    IdentifierType, Package, PackageIdentifier, PackageRelease, Release, ReleaseSeries,
+    Series, Source, SourceRecord,
+)
 
 
 @pytest.fixture
@@ -537,11 +541,15 @@ def test_alembic_upgrade_is_safe_on_initialized_existing_database(tmp_path, monk
         assert "alembic_version" in tables
         assert "sources" in tables
         assert "evidence" in tables
+        assert "packages" in tables
+        assert "package_releases" in tables
+        assert "package_identifiers" in tables
+        assert "evidence_packages" in tables
         with check_engine.connect() as connection:
             assert connection.execute(
                 text("SELECT name FROM castings WHERE id = :id"), {"id": casting_id}
             ).scalar_one() == "Existing record must survive"
-            assert connection.execute(text("SELECT version_num FROM alembic_version")).scalar_one() == "20261027_change_log_append_only"
+            assert connection.execute(text("SELECT version_num FROM alembic_version")).scalar_one() == "20261029_packages"
             assert connection.execute(text("SELECT COUNT(*) FROM alembic_version")).scalar_one() == 1
     finally:
         check_engine.dispose()
@@ -856,3 +864,111 @@ def test_change_log_is_append_only_after_migrations(tmp_path, monkeypatch):
             ).scalar_one() == 2
     finally:
         engine.dispose()
+
+
+
+def test_package_preserves_ordered_contents_and_does_not_merge_release_identity(session):
+    casting = Casting(name="Package test casting")
+    first = Release(casting=casting, catalog_year=2026, name="First car")
+    second = Release(casting=casting, catalog_year=2026, name="Second car")
+    package = Package(name="Test 2-pack", package_type="multi_pack", declared_quantity=2)
+    session.add_all([first, second, package])
+    session.flush()
+    session.add_all([
+        PackageRelease(package=package, position=2, release=second),
+        PackageRelease(package=package, position=1, release=first),
+    ])
+    session.commit()
+
+    loaded = session.get(Package, package.id)
+    assert loaded is not None
+    assert [(link.position, link.release.name) for link in loaded.release_links] == [
+        (1, "First car"),
+        (2, "Second car"),
+    ]
+    assert session.get(Release, first.id) is not None
+    assert session.get(Release, second.id) is not None
+
+
+def test_package_contents_reject_duplicate_positions(session):
+    release_a = Release(casting=Casting(name="Casting A"), catalog_year=2026)
+    release_b = Release(casting=Casting(name="Casting B"), catalog_year=2026)
+    package = Package(name="Test package")
+    session.add_all([release_a, release_b, package])
+    session.flush()
+    session.add_all([
+        PackageRelease(package=package, position=1, release=release_a),
+        PackageRelease(package=package, position=1, release=release_b),
+    ])
+    with pytest.raises(IntegrityError):
+        session.commit()
+    session.rollback()
+
+
+def test_package_identifier_and_evidence_are_linked_to_package(session):
+    package = Package(name="Test blister")
+    identifier_type = IdentifierType(
+        code="package_test_number", label="Package test number"
+    )
+    identifier = CatalogIdentifier(
+        identifier_type=identifier_type,
+        value="JHW-TEST-PACK",
+        normalized_value="JHW-TEST-PACK",
+    )
+    source = Source(name="Physical package", source_type="physical_reference")
+    source_record = SourceRecord(
+        source=source,
+        record_type="package",
+        raw_data={"package_number": "JHW-TEST-PACK"},
+    )
+    evidence = Evidence(
+        source_record=source_record,
+        attribute_name="package_number",
+        observed_value="JHW-TEST-PACK",
+    )
+    session.add_all([package, identifier, evidence])
+    session.flush()
+    session.add(PackageIdentifier(package=package, identifier=identifier))
+    session.add(EvidencePackage(evidence=evidence, package=package, role="supports"))
+    session.commit()
+
+    loaded = session.get(Package, package.id)
+    assert loaded is not None
+    assert len(loaded.identifier_links) == 1
+    assert loaded.identifier_links[0].identifier.value == "JHW-TEST-PACK"
+    assert len(loaded.evidence_links) == 1
+    assert loaded.evidence_links[0].evidence.observed_value == "JHW-TEST-PACK"
+
+
+def test_deleting_package_removes_links_but_preserves_release(session):
+    release = Release(casting=Casting(name="Included car"), catalog_year=2026)
+    package = Package(name="Test pack")
+    session.add_all([release, package])
+    session.flush()
+    session.add(PackageRelease(package=package, position=1, release=release))
+    session.commit()
+    package_id, release_id = package.id, release.id
+
+    session.delete(package)
+    session.commit()
+
+    assert session.get(Package, package_id) is None
+    assert session.query(PackageRelease).count() == 0
+    assert session.get(Release, release_id) is not None
+
+
+def test_release_cannot_be_deleted_while_referenced_by_package(session):
+    release = Release(casting=Casting(name="Included car"), catalog_year=2026)
+    package = Package(name="Test pack")
+    session.add_all([release, package])
+    session.flush()
+    session.add(PackageRelease(package=package, position=1, release=release))
+    session.commit()
+    release_id = release.id
+
+    session.delete(release)
+    with pytest.raises(IntegrityError):
+        session.commit()
+    session.rollback()
+
+    assert session.get(Release, release_id) is not None
