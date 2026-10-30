@@ -517,6 +517,19 @@ class Conflict(TimestampMixin, Base):
         CheckConstraint("severity IN ('low', 'medium', 'high', 'critical')", name="ck_conflicts_severity"),
     )
     evidence_links: Mapped[list[ConflictEvidence]] = relationship(back_populates="conflict", cascade="all, delete-orphan")
+    release_links: Mapped[list[ConflictRelease]] = relationship(back_populates="conflict", cascade="all, delete-orphan")
+
+
+class ConflictRelease(Base):
+    """An explicit catalog release implicated in a review conflict."""
+    __tablename__ = "conflict_releases"
+
+    conflict_id: Mapped[str] = mapped_column(ForeignKey("conflicts.id", ondelete="CASCADE"), primary_key=True)
+    release_id: Mapped[str] = mapped_column(ForeignKey("releases.id", ondelete="RESTRICT"), primary_key=True)
+    role: Mapped[str] = mapped_column(String(32), default="affected", nullable=False)
+    note: Mapped[str | None] = mapped_column(Text)
+    conflict: Mapped[Conflict] = relationship(back_populates="release_links")
+    release: Mapped[Release] = relationship()
 
 
 class ConflictEvidence(Base):
