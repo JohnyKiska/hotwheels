@@ -20,10 +20,12 @@
 Пользователь 2026-10-30 подтвердил семейство специализированных обработчиков: Mainline первым, Premium отдельно, остальные по мере необходимости.
 
 В Draft PR #74 (`feat/mainline-importer-preview`) добавлены:
-- `backend/app/importers/mainline.py`: TSV parser под формат старого `converter.html`, возвращает preview кандидатов, исходные строки, предупреждения и ошибки.
-- `POST /imports/mainline/preview`: API endpoint без доступа к сессии БД и без записи данных.
+- `backend/app/importers/mainline.py`: TSV parser под формат старого `converter.html` и parser основной таблицы Fandom yearly-list HTML.
+- `POST /imports/mainline/preview` и `POST /imports/mainline/fandom-html-preview`: API endpoints без доступа к сессии БД и без записи данных.
+- Для Fandom `Col.#` хранится отдельно как `collector_number`; год страницы сверяется с запрошенным годом.
 - Parser- и API-тесты на синтетических примерах.
 - Дубли Toy number сохраняются отдельными строками и помечаются для ручной проверки.
+- В переданном наборе Fandom за 2025 год найдена строка JBC25, '85 Honda City Turbo II, Col.# 141, HW J-Imports Treasure Hunt, 5/5. Другие приложенные карточки: Raphael (2020 Character Cars), Enforcer (2015 Themed Entertainment), Mitsubishi Eclipse (2026 Fast & Furious Premium); это полезные отрицательные примеры, не Mainline.
 
 Это первый рабочий вертикальный срез, не полный импорт. CI на head коммите PR #74 нужно проверить отдельно. Пока нет сопоставления с существующими Casting/Release, записи SourceRecord/Evidence и явного подтверждения импорта.
 
