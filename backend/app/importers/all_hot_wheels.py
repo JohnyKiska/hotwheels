@@ -70,11 +70,11 @@ class _PageParser(HTMLParser):
 
 
 def _clean(value: str | None) -> str:
-    return re.sub(r"\\s+", " ", value or "").strip()
+    return re.sub(r"\s+", " ", value or "").strip()
 
 
 def _fraction(value: str) -> tuple[int | None, int | None]:
-    match = re.fullmatch(r"\\s*(\\d+)\\s*/\\s*(\\d+)\\s*", value)
+    match = re.fullmatch(r"\s*(\d+)\s*/\s*(\d+)\s*", value)
     if not match:
         return None, None
     index, total = int(match.group(1)), int(match.group(2))
@@ -189,7 +189,7 @@ def preview_all_hot_wheels_html(text: str, expected_year: int | None = None) -> 
         raise ValueError("На странице не найден корректный Toy Number в поле SKU.")
 
     year_text = fields.get("Release year")
-    year_match = re.fullmatch(r"\\d{4}", year_text or "")
+    year_match = re.fullmatch(r"\d{4}", year_text or "")
     if not year_match:
         raise ValueError("На странице не найден корректный Release year.")
     release_year = int(year_text)
@@ -201,7 +201,7 @@ def preview_all_hot_wheels_html(text: str, expected_year: int | None = None) -> 
     canonical = _canonical_url(root)
     category_slug = None
     if canonical:
-        match = re.search(r"/car/\\d{4}/([^/]+)/", canonical)
+        match = re.search(r"/car/\d{4}/([^/]+)/", canonical)
         category_slug = match.group(1) if match else None
 
     category = {
@@ -216,7 +216,7 @@ def preview_all_hot_wheels_html(text: str, expected_year: int | None = None) -> 
     category_series_line = None
     for paragraph in root.descendants("p"):
         paragraph_text = _clean(paragraph.text())
-        match = re.fullmatch(r"(.+?)\\s*[·•]\\s*(.+?)\\s*[·•]\\s*#\\s*(\\d+\\s*/\\s*\\d+)", paragraph_text)
+        match = re.fullmatch(r"(.+?)\s*[·•]\s*(.+?)\s*[·•]\s*#\s*(\d+\s*/\s*\d+)", paragraph_text)
         if match:
             category_series_line = (match.group(1).strip(), match.group(2).strip(), match.group(3))
             break
