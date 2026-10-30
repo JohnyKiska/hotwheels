@@ -4,8 +4,9 @@ from sqlalchemy.orm import Session
 from app.conflict_queue import get_conflict_detail
 from app.db import Base
 from app.identifier_registration import register_identifier
+from app.identifier_conflicts import create_identifier_collision_conflicts
 from app.models import (
-    Conflict, ConflictEvidence, ConflictRelease, Evidence, IdentifierType,
+    Conflict, ConflictEvidence, ConflictRelease, Evidence, EvidenceRelease, IdentifierType,
     Casting, Release, Source, SourceRecord,
 )
 
@@ -95,3 +96,40 @@ def test_existing_collision_is_reconciled_and_retry_is_idempotent_without_eviden
         assert detail["evidence"] == []
         assert session.scalar(select(func.count()).select_from(Conflict)) == 1
         assert session.scalar(select(func.count()).select_from(ConflictRelease)) == 2
+
+
+def test_collision_does_not_attach_evidence_for_another_identifier_value():
+    with make_session() as session:
+        release_a, release_b = seed(session)
+        register_identifier(
+            session, type_code="upc", value="001234567890",
+            entity_type="release", entity_id=release_a.id,
+        )
+        result = register_identifier(
+            session, type_code="upc", value="001234567890",
+            entity_type="release", entity_id=release_b.id,
+        )
+        conflict = result["new_conflicts"][0]
+
+        unrelated_source = source_record(session, "Synthetic unrelated UPC source")
+        unrelated_evidence = Evidence(
+            source_record_id=unrelated_source.id,
+            attribute_name="identifier:upc",
+            observed_value="009999999999",
+            evidence_type="text",
+            assessment="supports",
+            review_status="pending",
+        )
+        session.add(unrelated_evidence)
+        session.flush()
+        session.add(EvidenceRelease(
+            evidence_id=unrelated_evidence.id,
+            release_id=release_a.id,
+            role="identifier_observation",
+        ))
+        session.flush()
+
+        create_identifier_collision_conflicts(session)
+        detail = get_conflict_detail(session, conflict.id)
+        assert detail["evidence"] == []
+        assert session.scalar(select(func.count()).select_from(ConflictEvidence)) == 0
