@@ -40,7 +40,7 @@ Read-only аудит показал:
 
 ## Следующий шаг для чата «Разработка импортеров HW Catalog»
 
-Проект спецификации уже подготовлен: [docs/importers/MAINLINE_IMPORTER_SPEC.md](importers/MAINLINE_IMPORTER_SPEC.md), ветка \`docs/mainline-importer-spec-v1\`.
+Проект спецификации уже подготовлен: [docs/importers/MAINLINE_IMPORTER_SPEC.md](importers/MAINLINE_IMPORTER_SPEC.md), ветка `docs/mainline-importer-spec-v1`.
 
 1. Получить замечания пользователя и согласовать спецификацию.
 2. Провести технический аудит конкретных источников и разрешённых способов доступа.
