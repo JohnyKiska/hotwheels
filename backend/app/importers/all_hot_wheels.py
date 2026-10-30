@@ -148,18 +148,44 @@ def _extract_tags(section: _Node | None) -> list[str]:
 
 
 def _extract_colors(section: _Node | None) -> list[dict[str, str]]:
+    """Extract color attributes grouped by the physical component they describe.
+
+    The source renders one group per component (body/interior/base/window), with
+    individual chips labelled color, detailed, source, or premium. Keep the
+    source values intact while exposing premium as the normalized finish field.
+    """
     if section is None:
         return []
+
     colors: list[dict[str, str]] = []
-    for chip in section.descendants("div"):
-        spans = [span for span in chip.child_nodes("span") if _clean(span.text())]
-        if len(spans) >= 2:
+    for group in section.child_nodes("div"):
+        group_children = group.child_nodes("div")
+        if len(group_children) < 2:
+            continue
+
+        component = _clean(group_children[0].text()).casefold()
+        if not component:
+            continue
+
+        attributes: dict[str, str] = {"component": component}
+        chips_container = group_children[1]
+        for chip in chips_container.child_nodes("div"):
+            spans = [span for span in chip.child_nodes("span") if _clean(span.text())]
+            if len(spans) < 2:
+                continue
+
             label = _clean(spans[0].text()).rstrip(":").strip().casefold()
             value = _clean(spans[-1].text())
-            if label in {"color", "detailed", "source", "premium"} and value:
-                parent_text = _clean(chip.text())
-                if parent_text and len(parent_text) < 100:
-                    colors.append({"attribute": label, "value": value})
+            if not value:
+                continue
+            if label in {"color", "detailed", "source"}:
+                attributes[label] = value
+            elif label == "premium":
+                attributes["finish"] = value
+
+        if len(attributes) > 1:
+            colors.append(attributes)
+
     return colors
 
 
