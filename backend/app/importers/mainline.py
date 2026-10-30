@@ -6,6 +6,7 @@ legacy converter's tab-separated clipboard format into reviewable candidates.
 from __future__ import annotations
 
 import re
+from html.parser import HTMLParser
 from collections import defaultdict
 from typing import Any
 
@@ -174,7 +175,7 @@ def preview_mainline_tsv(text: str, catalog_year: int) -> dict[str, Any]:
     }
 
 
-class _FandomListParser(__import__("html.parser", fromlist=["HTMLParser"]).HTMLParser):
+class _FandomListParser(HTMLParser):
     """Extract the primary sortable wikitable without interpreting page chrome."""
 
     def __init__(self) -> None:
