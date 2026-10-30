@@ -63,6 +63,7 @@ PR #60–#68 объединены с main. В этой серии реализо
 ### All Hot Wheels card HTML preview
 - Добавлен `backend/app/importers/all_hot_wheels.py` и endpoint `POST /imports/all-hot-wheels/html-preview`.
 - Извлекаются SKU, название, год, категория (из canonical URL), специальная метка, scale, base material, series badge, Series index, явно подписанный `Mainline #`, доступные сведения о колёсах, цветах и Tags.
+- Цвета группируются по компонентам `body`, `interior`, `base`, `window`; `color`, `detailed`, `source` и `finish` (из исходного `premium`) остаются отдельными атрибутами.
 - Исходные метки сохраняются: `chase` не преобразуется в TH/STH; `treasure hunt` не переименовывается в STH.
 - Категория, серия, позиция в серии и special label представлены раздельно. `Mainline #` остаётся независимым от Fandom `Col.#`.
 - Добавлены синтетические parser/API-тесты. Четыре предоставленных реальных карточки (JBC25, GJJ06, CKJ44, JHW68) материализованы и изучены на уровне структуры и состава полей. Полный прогон именно committed parser на четырёх файлах ещё требуется отдельно подтвердить.
