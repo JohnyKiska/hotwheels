@@ -186,6 +186,7 @@ class _FandomListParser(HTMLParser):
         self.current_row: list[str] | None = None
         self.current_cell: list[str] | None = None
         self.title_parts: list[str] = []
+        self.page_text_parts: list[str] = []
         self.in_title = False
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
@@ -226,6 +227,7 @@ class _FandomListParser(HTMLParser):
             self.table_depth = max(0, self.table_depth - 1)
 
     def handle_data(self, data: str) -> None:
+        self.page_text_parts.append(data)
         if self.in_title:
             self.title_parts.append(data)
         if self.current_cell is not None and self.target_table_depth == self.table_depth:
@@ -266,6 +268,13 @@ def preview_mainline_fandom_html(text: str, catalog_year: int) -> dict[str, Any]
         raise ValueError("Таблица Fandom не содержит ожидаемые колонки Toy #, Col.#, Model Name, Series и Series #.")
 
     column_indexes = {header: index for index, header in enumerate(headers)}
+    page_text = _clean(" ".join(parser.page_text_parts))
+    numbering_statement = re.search(
+        r"mainline\s+is\s+numbered\s+(\d+)\s+through\s+(\d+)",
+        page_text,
+        re.IGNORECASE,
+    )
+    mainline_total = int(numbering_statement.group(2)) if numbering_statement else None
     records: list[dict[str, Any]] = []
     issues: list[dict[str, Any]] = []
 
@@ -332,10 +341,20 @@ def preview_mainline_fandom_html(text: str, catalog_year: int) -> dict[str, Any]
         if rarity != "Mainline":
             notes.append(rarity)
 
+        parsed_mainline_number = (
+            int(collector_number)
+            if numbering_statement and collector_number.isdigit()
+            and 1 <= int(collector_number) <= mainline_total
+            else None
+        )
         records.append({
             "source_row": source_row,
             "toy_number": toy_number,
             "collector_number": collector_number or None,
+            "mainline_number": parsed_mainline_number,
+            "mainline_total": mainline_total,
+            "mainline_number_source": "Fandom Col.# + yearly Mainline numbering statement" if parsed_mainline_number is not None else None,
+            "mainline_total_source": "Fandom yearly page numbering statement" if mainline_total is not None else None,
             "assortment_number": None,
             "name": name,
             "catalog_year": catalog_year,
@@ -385,6 +404,8 @@ def preview_mainline_fandom_html(text: str, catalog_year: int) -> dict[str, Any]
         "writes_to_catalog": False,
         "catalog_year": catalog_year,
         "source_title": title or None,
+        "mainline_total": mainline_total,
+        "mainline_total_source": "Fandom yearly page numbering statement" if mainline_total is not None else None,
         "records": records,
         "issues": issues,
         "summary": {
