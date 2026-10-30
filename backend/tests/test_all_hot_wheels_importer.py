@@ -9,6 +9,12 @@ client = TestClient(app)
 
 def _page(*, category="mainline", special="treasure hunt", sku="JBC25",
           year="2025", mainline_number="141", series="HW J-IMPORT"):
+    category_label = {
+        "mainline": "Mainline",
+        "fast-furious": "Fast & Furious",
+        "character-cars": "Character Cars",
+        "themed-entertainment": "Themed Entertainment",
+    }[category]
     return f"""<!doctype html>
     <html><head>
       <title>{sku} '85 HONDA CITY TURBO II Hot Wheels ({year}) | All Hot Wheels</title>
@@ -20,6 +26,7 @@ def _page(*, category="mainline", special="treasure hunt", sku="JBC25",
       </div>
       <h1>'85 HONDA CITY TURBO II</h1>
       <p>City</p>
+      <p>{category_label} · {series} · #5/5</p>
       <div class="mt-3"><span class="bg-brand-indigo"> {series} </span></div>
       <div class="grid">
         <div class="bg-card"><div>SKU</div><div>{sku}</div></div>
