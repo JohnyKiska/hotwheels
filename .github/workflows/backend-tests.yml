@@ -34,3 +34,48 @@ jobs:
         run: python -m pip install -r requirements.txt
       - name: Run tests
         run: python -m pytest -q
+
+  browser-e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+      - name: Install backend and browser-test dependencies
+        working-directory: backend
+        run: |
+          python -m pip install -r requirements.txt
+          python -m pip install playwright
+          python -m playwright install --with-deps chromium
+      - name: Create isolated test database and seed catalog
+        working-directory: backend
+        run: PYTHONPATH=. python e2e/seed_catalog_tree_browser_db.py
+      - name: Start backend and static page server
+        shell: bash
+        run: |
+          (cd backend && python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 > /tmp/hw-backend.log 2>&1 & echo $! > /tmp/hw-backend.pid)
+          (python -m http.server 5500 --bind 127.0.0.1 > /tmp/hw-static.log 2>&1 & echo $! > /tmp/hw-static.pid)
+          for i in $(seq 1 40); do
+            if curl --silent --fail http://127.0.0.1:8000/health >/dev/null && curl --silent --fail http://127.0.0.1:5500/catalog/tree.html >/dev/null; then
+              echo "Backend and static page are reachable."
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "Servers did not become ready."
+          cat /tmp/hw-backend.log || true
+          cat /tmp/hw-static.log || true
+          exit 1
+      - name: Exercise browser-to-HTTP API flow
+        working-directory: backend
+        run: PYTHONPATH=. python e2e/run_catalog_tree_browser_e2e.py
+      - name: Show server logs on failure
+        if: failure()
+        run: |
+          cat /tmp/hw-backend.log || true
+          cat /tmp/hw-static.log || true
