@@ -12,7 +12,6 @@ from .models import (
 )
 from .identifier_normalization import normalize_identifier
 
-#)
 
 
 def create_identifier_collision_conflicts(session: Session) -> list[Conflict]:
