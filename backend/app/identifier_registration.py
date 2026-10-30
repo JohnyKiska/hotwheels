@@ -173,7 +173,8 @@ def register_identifier(
         evidence = next(
             (
                 candidate for candidate in evidence_candidates
-                if normalize_identifier(code, candidate.observed_value) == normalized
+                if candidate.observed_value is not None
+                and normalize_identifier(code, candidate.observed_value) == normalized
             ),
             None,
         )
