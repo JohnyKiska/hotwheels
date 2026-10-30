@@ -211,6 +211,20 @@ def preview_all_hot_wheels_html(text: str, expected_year: int | None = None) -> 
         "themed-entertainment": "Themed Entertainment",
     }.get(category_slug, category_slug.replace("-", " ").title() if category_slug else None)
 
+    # The detail page prints a compact "Category · Series · #x/y" line.
+    # Prefer it over decorative badges elsewhere in the site navigation.
+    category_series_line = None
+    for paragraph in root.descendants("p"):
+        paragraph_text = _clean(paragraph.text())
+        match = re.fullmatch(r"(.+?)\\s*[·•]\\s*(.+?)\\s*[·•]\\s*#\\s*(\\d+\\s*/\\s*\\d+)", paragraph_text)
+        if match:
+            category_series_line = (match.group(1).strip(), match.group(2).strip(), match.group(3))
+            break
+    if category_series_line:
+        category, summary_series_name, summary_fraction = category_series_line
+    else:
+        summary_series_name, summary_fraction = None, None
+
     # The first primary badge beside the model heading carries the source's own
     # special-label wording. Do not translate "chase" into TH/STH.
     special_label = None
@@ -228,9 +242,11 @@ def preview_all_hot_wheels_html(text: str, expected_year: int | None = None) -> 
         and _clean(node.text())
         and _clean(node.text()).casefold() not in {"a", "all hot wheels"}
     ]
-    series_name = max(series_badges, key=len) if series_badges else None
+    series_name = summary_series_name or (max(series_badges, key=len) if series_badges else None)
 
     series_index, series_total = _fraction(fields.get("Series index", ""))
+    if series_index is None and summary_fraction:
+        series_index, series_total = _fraction(summary_fraction)
     mainline_number_text = fields.get("Mainline #", "")
     mainline_number = int(mainline_number_text) if mainline_number_text.isdigit() else None
 
@@ -244,7 +260,7 @@ def preview_all_hot_wheels_html(text: str, expected_year: int | None = None) -> 
         "release_year": "Release year",
         "scale": "Scale",
         "base_material": "Base material",
-        "series_name": "series badge",
+        "series_name": "category/series summary or series badge",
         "series_index": "Series index",
         "mainline_number": "Mainline #",
         "special_label": "primary badge",
