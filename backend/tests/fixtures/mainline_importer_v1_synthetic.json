@@ -1,0 +1,56 @@
+{
+  "fixture_set": "mainline-importer-v1-synthetic",
+  "fixture_version": 1,
+  "notice": "All names, identifiers, and catalog values are invented test data, not factual Hot Wheels release records.",
+  "cases": [
+    {
+      "case_id": "new_release_candidate",
+      "purpose": "Unseen release becomes a review candidate.",
+      "source_record": {"source_key": "synthetic-source-a", "external_record_id": "SYN-A-001", "catalog_year": 2026, "model_name": "Synthetic Comet Runner", "toy_number": "SYN-026", "sku": "SYN-A001", "wheel_type": "PR5-SYN", "base_marking": "SYNTHETIC BASE A"},
+      "existing_catalog": [],
+      "expected": {"match_result": "no_match", "preview_action": "create_candidate", "canonical_write_before_confirmation": false, "unknown_fields_remain_null": true}
+    },
+    {
+      "case_id": "same_record_reimport",
+      "purpose": "Reprocessing an identical source snapshot is idempotent.",
+      "source_record": {"source_key": "synthetic-source-a", "external_record_id": "SYN-A-002", "catalog_year": 2026, "model_name": "Synthetic Harbor Van", "toy_number": "SYN-027", "sku": "SYN-A002", "content_hash": "sha256:synthetic-identical-payload"},
+      "existing_catalog": [{"synthetic_id": "release-syn-002", "catalog_year": 2026, "model_name": "Synthetic Harbor Van", "toy_number": "SYN-027", "source_key": "synthetic-source-a", "external_record_id": "SYN-A-002", "content_hash": "sha256:synthetic-identical-payload"}],
+      "expected": {"match_result": "same_source_record", "preview_action": "no_change", "repeat_run_idempotent": true, "duplicate_evidence_created": false}
+    },
+    {
+      "case_id": "wheel_type_difference",
+      "purpose": "Wheel difference is a possible release distinction, never an automatic overwrite.",
+      "source_record": {"source_key": "synthetic-source-b", "external_record_id": "SYN-B-003", "catalog_year": 2026, "model_name": "Synthetic Ridge Racer", "toy_number": "SYN-028", "sku": "SYN-B003", "wheel_type": "OH5-SYN"},
+      "existing_catalog": [{"synthetic_id": "release-syn-003", "catalog_year": 2026, "model_name": "Synthetic Ridge Racer", "toy_number": "SYN-028", "wheel_type": "PR5-SYN", "status": "confirmed"}],
+      "expected": {"match_result": "possible_existing_release_with_variation", "preview_action": "review_possible_variant_or_release", "confirmed_value_overwritten": false, "automatic_new_release": false}
+    },
+    {
+      "case_id": "base_marking_difference",
+      "purpose": "Base-marking difference is preserved as evidence for review.",
+      "source_record": {"source_key": "synthetic-source-b", "external_record_id": "SYN-B-004", "catalog_year": 2026, "model_name": "Synthetic Canyon Buggy", "toy_number": "SYN-029", "base_marking": "SYNTHETIC BASE B / REV 2"},
+      "existing_catalog": [{"synthetic_id": "release-syn-004", "catalog_year": 2026, "model_name": "Synthetic Canyon Buggy", "toy_number": "SYN-029", "base_marking": "SYNTHETIC BASE B", "status": "confirmed"}],
+      "expected": {"match_result": "possible_existing_release_with_variation", "preview_action": "record_evidence_and_review", "confirmed_value_overwritten": false}
+    },
+    {
+      "case_id": "identifier_collision",
+      "purpose": "Matching identifier but conflicting model/year context must not merge silently.",
+      "source_record": {"source_key": "synthetic-source-c", "external_record_id": "SYN-C-005", "catalog_year": 2026, "model_name": "Synthetic Solar Coupe", "toy_number": "SYN-030", "sku": "SYN-C005"},
+      "existing_catalog": [{"synthetic_id": "release-syn-005a", "catalog_year": 2025, "model_name": "Synthetic Moon Coupe", "sku": "SYN-C005", "status": "confirmed"}],
+      "expected": {"match_result": "identifier_conflict", "preview_action": "manual_review", "automatic_merge": false, "conflict_is_auditable": true}
+    },
+    {
+      "case_id": "conflicting_source_evidence",
+      "purpose": "Two sources disagree about one release attribute.",
+      "source_record": {"source_key": "synthetic-source-d", "external_record_id": "SYN-D-006", "catalog_year": 2026, "model_name": "Synthetic Aurora Wagon", "toy_number": "SYN-031", "wheel_type": "PR5-SYN"},
+      "existing_catalog": [{"synthetic_id": "release-syn-006", "catalog_year": 2026, "model_name": "Synthetic Aurora Wagon", "toy_number": "SYN-031", "wheel_type": "OH5-SYN", "evidence_source_key": "synthetic-source-e"}],
+      "expected": {"match_result": "same_release_with_evidence_disagreement", "preview_action": "show_both_claims", "both_observations_preserved": true, "automatic_winner_selected": false}
+    },
+    {
+      "case_id": "unknown_fields",
+      "purpose": "Missing values stay unknown; no inference from neighboring records.",
+      "source_record": {"source_key": "synthetic-source-f", "external_record_id": "SYN-F-007", "catalog_year": 2026, "model_name": "Synthetic Cloud Skimmer", "toy_number": "SYN-032", "wheel_type": null, "base_marking": null, "country_of_manufacture": null, "color": null},
+      "existing_catalog": [],
+      "expected": {"match_result": "no_match", "preview_action": "create_incomplete_candidate", "missing_fields_preserved_as_null": true, "inferred_values_added": false}
+    }
+  ]
+}
