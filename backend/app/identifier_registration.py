@@ -156,31 +156,57 @@ def register_identifier(
             link_metadata_changed = True
 
     evidence = None
+    evidence_created = False
+    evidence_link_created = False
     if source_record is not None:
-        evidence = Evidence(
-            source_record_id=source_record.id,
-            attribute_name=f"identifier:{code}",
-            observed_value=value.strip(),
-            evidence_type="text",
-            assessment="supports",
-            review_status="pending",
-            notes="Identifier observed in source record; registration does not establish entity identity.",
+        evidence_attribute = f"identifier:{code}"
+        evidence_candidates = session.scalars(
+            select(Evidence).where(
+                Evidence.source_record_id == source_record.id,
+                Evidence.attribute_name == evidence_attribute,
+            )
+        ).all()
+        # A source snapshot is immutable input: reprocessing the same normalized
+        # identifier claim must reuse its evidence, not mint a duplicate audit row.
+        # A different SourceRecord remains a distinct observation even when the
+        # identifier value is identical.
+        evidence = next(
+            (
+                candidate for candidate in evidence_candidates
+                if normalize_identifier(code, candidate.observed_value) == normalized
+            ),
+            None,
         )
-        session.add(evidence)
-        session.flush()
+        if evidence is None:
+            evidence = Evidence(
+                source_record_id=source_record.id,
+                attribute_name=evidence_attribute,
+                observed_value=value.strip(),
+                evidence_type="text",
+                assessment="supports",
+                review_status="pending",
+                notes="Identifier observed in source record; registration does not establish entity identity.",
+            )
+            session.add(evidence)
+            session.flush()
+            evidence_created = True
+
         evidence_link_model, evidence_fk = _EVIDENCE_LINK_CONFIG[entity_type]
-        session.add(evidence_link_model(
-            evidence_id=evidence.id,
-            **{evidence_fk: entity_id},
-            role="identifier_observation",
-        ))
+        evidence_link = session.get(evidence_link_model, (evidence.id, entity_id))
+        if evidence_link is None:
+            session.add(evidence_link_model(
+                evidence_id=evidence.id,
+                **{evidence_fk: entity_id},
+                role="identifier_observation",
+            ))
+            evidence_link_created = True
 
     session.flush()
 
-    # Audit every effective registration change and every source observation.
-    # A repeated no-op registration without a new observation creates no noise.
+    # Audit effective changes, newly observed source claims, and newly added
+    # links between an existing claim and an entity. Exact retries are no-ops.
     if (identifier_created or link_created or identifier_notes_changed
-            or link_metadata_changed or evidence is not None):
+            or link_metadata_changed or evidence_created or evidence_link_created):
         audit_reason = (reason or "").strip()
         if not audit_reason:
             audit_reason = (source_note or notes or "Identifier registration").strip()
@@ -225,5 +251,7 @@ def register_identifier(
         "identifier_created": identifier_created,
         "link_created": link_created,
         "evidence": evidence,
+        "evidence_created": evidence_created,
+        "evidence_link_created": evidence_link_created,
         "new_conflicts": new_conflicts,
     }
