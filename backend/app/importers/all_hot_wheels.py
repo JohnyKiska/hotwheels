@@ -130,7 +130,7 @@ def _extract_wheels(section: _Node | None) -> list[dict[str, str]]:
                           if "font-mono" in (node.attrs.get("class") or "")), None)
         if code_node:
             code = _clean(code_node.text())
-            name = _clean(badge.text()).replace(code, "", 1)
+            name = _clean(_clean(badge.text()).replace(code, "", 1))
             if code and name:
                 wheels.append({"code": code, "name": name})
     return wheels
@@ -221,13 +221,14 @@ def preview_all_hot_wheels_html(text: str, expected_year: int | None = None) -> 
             special_label = badge_text
             break
 
-    series_name = None
-    for node in root.descendants("span"):
-        classes = node.attrs.get("class") or ""
-        value = _clean(node.text())
-        if "bg-brand-indigo" in classes and value:
-            series_name = value
-            break
+    series_badges = [
+        _clean(node.text())
+        for node in root.descendants("span")
+        if "bg-brand-indigo" in (node.attrs.get("class") or "")
+        and _clean(node.text())
+        and _clean(node.text()).casefold() not in {"a", "all hot wheels"}
+    ]
+    series_name = max(series_badges, key=len) if series_badges else None
 
     series_index, series_total = _fraction(fields.get("Series index", ""))
     mainline_number_text = fields.get("Mainline #", "")
