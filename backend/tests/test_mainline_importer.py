@@ -78,3 +78,53 @@ def test_unrecognized_nonempty_input_returns_actionable_preview_issue():
     assert result["records"] == []
     assert result["summary"]["ready_for_review"] is False
     assert any(issue["code"] == "no_records" for issue in result["issues"])
+
+
+
+def test_fandom_yearly_html_preview_extracts_collector_number_and_treasure_hunt():
+    from app.importers.mainline import preview_mainline_fandom_html
+
+    text = """<!doctype html>
+    <html><head><title>List of 2025 Hot Wheels | Hot Wheels Wiki</title></head>
+    <body><table class="sortable wikitable">
+    <tr><th>Toy #</th><th>Col.#</th><th>Model Name</th><th>Series</th><th>Series #</th><th>Photo</th></tr>
+    <tr><td>JBC25</td><td>141</td><td>'85 Honda City Turbo II</td>
+    <td>HW J-Imports Treasure Hunt</td><td>5/5</td><td></td></tr>
+    <tr><td>HYW18</td><td>001</td><td>Mazda MX-5 Miata</td>
+    <td>HW Dream Garage New for 2025!</td><td>2/5</td><td></td></tr>
+    </table></body></html>"""
+
+    result = preview_mainline_fandom_html(text, 2025)
+
+    assert result["mode"] == "preview_only"
+    assert result["writes_to_catalog"] is False
+    assert result["source_format"] == "fandom_yearly_html"
+    assert result["summary"]["records_found"] == 2
+    first, second = result["records"]
+    assert first["toy_number"] == "JBC25"
+    assert first["collector_number"] == "141"
+    assert first["assortment_number"] is None
+    assert first["name"] == "'85 Honda City Turbo II"
+    assert first["series_name"] == "HW J-Imports"
+    assert first["series_index"] == 5
+    assert first["series_total"] == 5
+    assert first["rarity"] == "Treasure Hunt (TH)"
+    assert second["collector_number"] == "001"
+    assert second["series_name"] == "HW Dream Garage"
+    assert "New for 2025" in second["notes"]
+
+
+def test_fandom_html_preview_rejects_wrong_year_and_model_detail_pages():
+    import pytest
+    from app.importers.mainline import preview_mainline_fandom_html
+
+    with pytest.raises(ValueError, match="выбран год"):
+        preview_mainline_fandom_html(
+            '<title>List of 2025 Hot Wheels</title><table class="sortable wikitable"></table>',
+            2026,
+        )
+    with pytest.raises(ValueError, match="основная таблица Fandom"):
+        preview_mainline_fandom_html(
+            '<title>JHW68 Mitsubishi Eclipse</title><p>Individual model page</p>',
+            2026,
+        )
