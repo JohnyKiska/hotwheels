@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HW Catalog — дерево каталога</title>
+<style>
+:root{font-family:Inter,"Segoe UI",Arial,sans-serif;color:#172033;background:#f3f5f8;--accent:#ff5000}
+*{box-sizing:border-box}body{margin:0}header{background:#182235;color:#fff;padding:22px clamp(16px,4vw,42px);border-bottom:4px solid var(--accent)}
+header h1{margin:0 0 6px;font-size:clamp(22px,3vw,32px)}header p{margin:0;color:#c8d0dc;line-height:1.5}
+main{max-width:1400px;margin:auto;padding:22px clamp(12px,3vw,30px) 48px}
+.panel{background:#fff;border:1px solid #e0e5ec;border-radius:14px;padding:16px;box-shadow:0 3px 12px #1522380a;margin-bottom:16px}
+.panel h2{font-size:18px;margin:0 0 12px}.toolbar{display:flex;gap:10px;align-items:end;flex-wrap:wrap}
+.field{display:grid;gap:6px;min-width:0;flex:1}.field label{font-size:13px;font-weight:700;color:#4d596b}
+input,select,textarea,button{font:inherit}input,select,textarea{width:100%;border:1px solid #cbd3df;border-radius:9px;padding:10px;background:#fff;color:#172033}
+button{border:0;border-radius:9px;padding:10px 14px;font-weight:700;cursor:pointer}button:disabled{opacity:.45;cursor:not-allowed}.primary{background:var(--accent);color:white}.secondary{background:#e9edf3;color:#172033}
+.status{font-size:13px;color:#536074;line-height:1.5;margin-top:10px}.status.error{color:#a52d16}.status.success{color:#18713b}
+.layout{display:grid;grid-template-columns:minmax(300px,1fr) minmax(300px,.9fr);gap:16px;align-items:start}
+.tree{display:grid;gap:5px;max-height:68vh;overflow:auto}.tree-row{display:flex;gap:8px;align-items:center;min-width:0;padding:8px 9px;border:1px solid transparent;border-radius:8px;cursor:pointer}.tree-row:hover{background:#eef2f8}.tree-row.selected{background:#fff2e9;border-color:var(--accent);box-shadow:inset 3px 0 0 var(--accent)}.tree-row .toggle{flex:0 0 25px;width:25px;padding:3px;background:transparent;color:#687487}.tree-row .toggle:disabled{opacity:.35}.tree-row .label{min-width:0;flex:1;overflow-wrap:anywhere;font-weight:650;font-size:14px}.kind{font-size:11px;background:#eef1f6;padding:4px 6px;border-radius:5px;white-space:nowrap}.tree-row[data-type="year"] .kind{background:#dceafe}.tree-row[data-type="product_line"] .kind{background:#dff5e5}.tree-row[data-type="series"] .kind{background:#ffedcf}.tree-row[data-type="release"] .kind{background:#f1ddff}.tree-row[data-type="package"] .kind{background:#d9f0f5}
+.empty{padding:28px;text-align:center;color:#687487;border:1px dashed #cbd3df;border-radius:10px;line-height:1.5}.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.detail{background:#f7f9fc;border-radius:8px;padding:10px;min-width:0}.detail small{display:block;color:#647084;margin-bottom:4px}.detail strong{overflow-wrap:anywhere;font-size:13px}.field+.field{margin-top:12px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.notice{border-left:3px solid #e5a000;padding:10px 12px;background:#fff9e8;color:#684d00;border-radius:4px;font-size:13px;line-height:1.5;margin-top:12px}
+@media(max-width:850px){.layout{grid-template-columns:1fr}.tree{max-height:none}.toolbar{align-items:stretch}.toolbar>.field{flex-basis:100%}.detail-grid{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<header>
+  <h1>HW Catalog · Дерево каталога</h1>
+  <p>Просмотр структуры и безопасное перемещение узлов. Перемещение меняет размещение в дереве, но не идентичность выпуска.</p>
+</header>
+<main>
+  <section class="panel" aria-labelledby="connectionHeading">
+    <h2 id="connectionHeading">Подключение к API</h2>
+    <div class="toolbar">
+      <div class="field"><label for="apiBase">Базовый URL API</label><input id="apiBase" type="url" placeholder="http://localhost:8000" autocomplete="url"></div>
+      <button class="primary" id="connect">Подключиться и загрузить</button>
+      <button class="secondary" id="reload" disabled>Обновить дерево</button>
+    </div>
+    <div id="connectionStatus" class="status" role="status" aria-live="polite">Укажи адрес запущенного backend API. Адрес сохраняется только в этом браузере.</div>
+    <div class="notice">Если страница открыта на GitHub Pages, backend должен быть доступен по сети и разрешать CORS для origin страницы. Адрес API не публикуется в репозитории. Пока API не подключён, страница не подставляет вымышленные данные.</div>
+  </section>
+
+  <div class="layout">
+    <section class="panel">
+      <h2>Структура каталога</h2>
+      <div id="treeSummary" class="status">Дерево ещё не загружено.</div>
+      <div id="tree" class="tree" role="tree" aria-label="Дерево каталога">
+        <div class="empty">Подключись к API, чтобы загрузить реальное дерево каталога.</div>
+      </div>
+    </section>
+    <section class="panel">
+      <h2>Выбранный узел</h2>
+      <div id="emptyDetail" class="empty">Выбери узел слева — здесь появятся его сведения и действия.</div>
+      <div id="nodeDetail" hidden>
+        <div id="nodeFacts" class="detail-grid"></div>
+        <h2 style="margin-top:18px">Переместить узел</h2>
+        <div class="field"><label for="newParent">Новый родитель</label><select id="newParent"></select></div>
+        <div class="field"><label for="moveReason">Причина изменения (обязательна)</label><textarea id="moveReason" rows="3" maxlength="2000" placeholder="Например: исправлено размещение по официальному каталогу"></textarea></div>
+        <div class="actions"><button id="move" class="primary" disabled>Переместить узел</button><button id="cancel" class="secondary">Сбросить выбор</button></div>
+        <div id="moveStatus" class="status" role="status" aria-live="polite"></div>
+        <p class="hint">Перед сохранением проверь родителя и причину. Сервер повторно проверяет допустимость перемещения и записывает действие в журнал изменений.</p>
+      </div>
+    </section>
+  </div>
+</main>
+<script>
+(() => {
+  "use strict";
+  const $ = (id) => document.getElementById(id);
+  const typeLabels = {
+    root: "Корень", product_line: "Линейка продуктов", year: "Год",
+    group: "Группа", theme: "Тема", series: "Серия", release: "Выпуск", package: "Упаковка"
+  };
+  const typeIcons = {root:"⌂",product_line:"▤",year:"◷",group:"▦",theme:"◇",series:"▧",release:"▣",package:"▱"};
+  let roots = [];
+  let flatNodes = [];
+  let selectedId = null;
+  let collapsed = new Set();
+
+  function apiBase() {
+    return $("apiBase").value.trim().replace(/\/+$/, "");
+  }
+  function setStatus(id, message, kind = "") {
+    const el = $(id);
+    el.textContent = message;
+    el.className = "status" + (kind ? " " + kind : "");
+  }
+  function flatten(nodes, depth = 0, output = []) {
+    for (const node of nodes) {
+      output.push({node, depth});
+      flatten(node.children || [], depth + 1, output);
+    }
+    return output;
+  }
+  function visibleNodes() {
+    const result = [];
+    function walk(nodes, depth = 0) {
+      for (const node of nodes) {
+        result.push({node, depth});
+        if (!collapsed.has(node.id)) walk(node.children || [], depth + 1);
+      }
+    }
+    walk(roots);
+    return result;
+  }
+  function findNode(id, nodes = roots) {
+    for (const node of nodes) {
+      if (node.id === id) return node;
+      const found = findNode(id, node.children || []);
+      if (found) return found;
+    }
+    return null;
+  }
+  function hasDescendant(node, targetId) {
+    return (node.children || []).some(child => child.id === targetId || hasDescendant(child, targetId));
+  }
+  function el(tag, className, text) {
+    const item = document.createElement(tag);
+    if (className) item.className = className;
+    if (text !== undefined) item.textContent = text;
+    return item;
+  }
+  function renderTree() {
+    const host = $("tree");
+    host.replaceChildren();
+    const items = visibleNodes();
+    if (!items.length) {
+      host.append(el("div","empty","API вернул пустое дерево. Узлы можно создать отдельным этапом."));
+      $("treeSummary").textContent = "Узлов: 0";
+      return;
+    }
+    for (const {node, depth} of items) {
+      const row = el("div","tree-row" + (node.id === selectedId ? " selected" : ""));
+      row.setAttribute("role","treeitem");
+      row.setAttribute("aria-level",String(depth + 1));
+      row.setAttribute("aria-selected",String(node.id === selectedId));
+      row.dataset.id = node.id;
+      row.dataset.type = node.node_type;
+      row.style.paddingLeft = (9 + depth * 19) + "px";
+      const children = node.children || [];
+      const toggle = el("button","toggle",children.length ? (collapsed.has(node.id) ? "▸" : "▾") : "·");
+      toggle.type = "button";
+      toggle.disabled = !children.length;
+      toggle.title = children.length ? (collapsed.has(node.id) ? "Развернуть" : "Свернуть") : "Нет вложенных узлов";
+      toggle.setAttribute("aria-label",toggle.title);
+      toggle.addEventListener("click", event => {
+        event.stopPropagation();
+        collapsed.has(node.id) ? collapsed.delete(node.id) : collapsed.add(node.id);
+        renderTree();
+      });
+      const label = el("span","label",node.label || "(без названия)");
+      const kind = el("span","kind",typeLabels[node.node_type] || node.node_type || "Узел");
+      row.append(toggle,label,kind);
+      row.addEventListener("click",() => selectNode(node.id));
+      row.addEventListener("keydown",event => {
+        if (event.key === "Enter" || event.key === " ") { event.preventDefault(); selectNode(node.id); }
+      });
+      row.tabIndex = 0;
+      host.append(row);
+    }
+    $("treeSummary").textContent = "Узлов: " + flatNodes.length + " · Видно: " + items.length;
+  }
+  function fact(label, value) {
+    const box = el("div","detail");
+    box.append(el("small","",label),el("strong","",value === null || value === undefined || value === "" ? "—" : String(value)));
+    return box;
+  }
+  function selectNode(id) {
+    selectedId = id;
+    const node = findNode(id);
+    $("emptyDetail").hidden = !!node;
+    $("nodeDetail").hidden = !node;
+    $("moveStatus").textContent = "";
+    if (!node) { renderTree(); return; }
+    $("nodeFacts").replaceChildren(
+      fact("Название",node.label),
+      fact("Тип",typeLabels[node.node_type] || node.node_type),
+      fact("ID узла",node.id),
+      fact("Родитель",node.parent_id || "Корневой узел"),
+      fact("Статус",node.status),
+      fact("Год каталога",node.catalog_year),
+      fact("ProductLine ID",node.product_line_id),
+      fact("Series ID",node.series_id),
+      fact("Release ID",node.release_id),
+      fact("Package ID",node.package_id)
+    );
+    const select = $("newParent");
+    select.replaceChildren();
+    const rootOption = el("option","","— Без родителя (корневой узел) —");
+    rootOption.value = "";
+    select.append(rootOption);
+    const candidates = flatNodes.filter(({node: candidate}) =>
+      candidate.id !== node.id && !hasDescendant(node,candidate.id)
+    );
+    for (const {node: candidate, depth} of candidates) {
+      const option = el("option","", "　".repeat(Math.min(depth,8)) + (candidate.label || candidate.id) + " · " + (typeLabels[candidate.node_type] || candidate.node_type));
+      option.value = candidate.id;
+      select.append(option);
+    }
+    select.value = node.parent_id || "";
+    $("moveReason").value = "";
+    $("move").disabled = true;
+    renderTree();
+  }
+  function validateMove() {
+    const reason = $("moveReason").value.trim();
+    $("move").disabled = !selectedId || !reason || !apiBase();
+  }
+  async function request(path, options = {}) {
+    const response = await fetch(apiBase() + path, {
+      ...options,
+      headers: {"Content-Type":"application/json",...(options.headers || {})}
+    });
+    const raw = await response.text();
+    let data = {};
+    try { data = raw ? JSON.parse(raw) : {}; } catch { data = {detail:raw}; }
+    if (!response.ok) throw new Error(data.detail || ("HTTP " + response.status));
+    return data;
+  }
+  async function connect() {
+    if (!apiBase()) { setStatus("connectionStatus","Введи базовый URL API.","error"); return; }
+    $("connect").disabled = true;
+    $("reload").disabled = true;
+    setStatus("connectionStatus","Проверяем API и загружаем дерево…");
+    try {
+      await request("/health");
+      const data = await request("/catalog/tree");
+      roots = Array.isArray(data.items) ? data.items : [];
+      flatNodes = flatten(roots);
+      selectedId = null;
+      $("nodeDetail").hidden = true;
+      $("emptyDetail").hidden = false;
+      $("emptyDetail").textContent = "Выбери узел слева — здесь появятся его сведения и действия.";
+      renderTree();
+      localStorage.setItem("hwCatalogTreeApiBase",apiBase());
+      $("reload").disabled = false;
+      setStatus("connectionStatus","Подключение успешно. Дерево загружено с сервера.","success");
+    } catch (error) {
+      roots = []; flatNodes = []; selectedId = null;
+      renderTree();
+      setStatus("connectionStatus","Не удалось подключиться: " + error.message + ". Проверь URL, доступность API и CORS.","error");
+    } finally {
+      $("connect").disabled = false;
+    }
+  }
+  async function moveSelected() {
+    const node = findNode(selectedId);
+    const reason = $("moveReason").value.trim();
+    if (!node || !reason) { validateMove(); return; }
+    const newParentId = $("newParent").value || null;
+    if (newParentId === node.parent_id) {
+      setStatus("moveStatus","Новый родитель совпадает с текущим — изменений нет.","error");
+      return;
+    }
+    const target = newParentId ? findNode(newParentId) : null;
+    const destination = target ? target.label : "корень каталога";
+    if (!confirm("Переместить «" + node.label + "» в «" + destination + "»?\n\nПричина будет записана в журнал изменений.")) return;
+    $("move").disabled = true;
+    setStatus("moveStatus","Сохраняем перемещение…");
+    try {
+      await request("/catalog/nodes/" + encodeURIComponent(node.id) + "/move", {
+        method:"POST",
+        body:JSON.stringify({new_parent_id:newParentId,reason,actor_type:"human"})
+      });
+      setStatus("moveStatus","Перемещение сохранено. Обновляем дерево…","success");
+      await connect();
+      selectNode(node.id);
+      setStatus("moveStatus","Перемещение сохранено, журнал изменений обновлён.","success");
+    } catch (error) {
+      setStatus("moveStatus","Сервер отклонил перемещение: " + error.message,"error");
+    } finally {
+      validateMove();
+    }
+  }
+  $("connect").addEventListener("click",connect);
+  $("reload").addEventListener("click",connect);
+  $("moveReason").addEventListener("input",validateMove);
+  $("newParent").addEventListener("change",validateMove);
+  $("move").addEventListener("click",moveSelected);
+  $("cancel").addEventListener("click",() => {
+    selectedId = null;
+    $("nodeDetail").hidden = true;
+    $("emptyDetail").hidden = false;
+    $("emptyDetail").textContent = "Выбери узел слева — здесь появятся его сведения и действия.";
+    $("tree").querySelectorAll(".tree-row").forEach(row => { row.classList.remove("selected"); row.setAttribute("aria-selected","false"); });
+  });
+  $("apiBase").value = localStorage.getItem("hwCatalogTreeApiBase") || "http://localhost:8000";
+})();
+</script>
+</body>
+</html>
