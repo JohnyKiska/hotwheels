@@ -27,7 +27,7 @@
 - Дубли Toy number сохраняются отдельными строками и помечаются для ручной проверки.
 - В переданном наборе Fandom за 2025 год найдена строка JBC25, '85 Honda City Turbo II, Col.# 141, HW J-Imports Treasure Hunt, 5/5. Другие приложенные карточки: Raphael (2020 Character Cars), Enforcer (2015 Themed Entertainment), Mitsubishi Eclipse (2026 Fast & Furious Premium); это полезные отрицательные примеры, не Mainline.
 
-Это первый рабочий вертикальный срез, не полный импорт. На workflow run #119 обе jobs (`pytest` и `browser-e2e`) завершились success. В том же PR добавлен `backend/app/importers/all_hot_wheels.py` и `POST /imports/all-hot-wheels/html-preview`: read-only parser индивидуальной карточки All Hot Wheels. Он извлекает SKU, название, год, категорию, special label, scale, base material, серию, Series index, `Mainline #`, доступные колёса, цвета и теги. `chase` и `treasure hunt` сохраняются как исходные метки. Синтетические parser/API-тесты добавлены. Четыре реальные страницы JBC25, GJJ06, CKJ44 и JHW68 доступны в приложенных файлах и материализованы в рабочую папку `/mnt/data/hw_import_samples`; прогон parser на них и CI нового HEAD ещё не подтверждены.
+Это первый рабочий вертикальный срез, не полный импорт. На workflow run #119 обе jobs (`pytest` и `browser-e2e`) завершились success. В том же PR добавлен `backend/app/importers/all_hot_wheels.py` и `POST /imports/all-hot-wheels/html-preview`: read-only parser индивидуальной карточки All Hot Wheels. Он извлекает SKU, название, год, категорию, special label, scale, base material, серию, Series index, `Mainline #`, доступные колёса, цвета и теги. `chase` и `treasure hunt` сохраняются как исходные метки. Синтетические parser/API-тесты добавлены. Четыре реальные страницы JBC25, GJJ06, CKJ44 и JHW68 доступны в приложенных файлах и материализованы в рабочую папку `/mnt/data/hw_import_samples`; они изучены на уровне структуры и полей, но полный запуск committed parser на этих файлах ещё нужно подтвердить. Workflow run #140 (`41079292033`) на commit `8624ea0966e847b3fc899db724fc32e495806ef5` прошёл: `pytest` — 145 passed, 8 warnings; `browser-e2e` — success.
 
 Пока нет сопоставления с существующими Casting/Release, записи SourceRecord/Evidence и явного подтверждения импорта.
 
@@ -47,7 +47,7 @@ Read-only аудит показал:
 
 ## Следующий шаг для чата «Разработка импортеров HW Catalog»
 
-Продолжить с PR #74: проверить новый All Hot Wheels parser на четырёх реальных HTML-файлах (JBC25, GJJ06, CKJ44, JHW68), исправить найденные расхождения DOM-разбора, дождаться CI на актуальном HEAD, затем сделать единый preview-сопоставитель Fandom + All Hot Wheels. Не объединять значения автоматически и не включать запись в БД до отдельного согласования.
+Продолжить с PR #74: выполнить прямой запуск committed All Hot Wheels parser на четырёх реальных HTML-файлах (JBC25, GJJ06, CKJ44, JHW68) и сохранить отчёт о фактически извлечённых полях. Синтетический CI на commit `8624ea0966e847b3fc899db724fc32e495806ef5` прошёл (`pytest`: 145 passed; `browser-e2e`: success). Затем сделать единый preview-сопоставитель Fandom + All Hot Wheels, показывающий совпадения, source-only поля и расхождения. Не объединять значения автоматически и не включать запись в БД до отдельного согласования.
 
 1. Проверить актуальный main, ветки, PR и CI.
 2. Изучить importer.html подробнее и проверить связанные инструменты/форматы, в частности converter.html и структуру старых входных данных, если они используются.
