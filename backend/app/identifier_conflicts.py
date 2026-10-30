@@ -10,6 +10,9 @@ from .models import (
     CatalogIdentifier, Conflict, ConflictEvidence, ConflictRelease,
     Evidence, EvidenceRelease, IdentifierType, ReleaseIdentifier,
 )
+from .identifier_normalization import normalize_identifier
+
+#)
 
 
 def create_identifier_collision_conflicts(session: Session) -> list[Conflict]:
@@ -75,7 +78,7 @@ def create_identifier_collision_conflicts(session: Session) -> list[Conflict]:
 
         # Attach source observations about this identifier for each affected release.
         evidence_rows = session.execute(
-            select(Evidence.id, EvidenceRelease.release_id)
+            select(Evidence.id, EvidenceRelease.release_id, Evidence.observed_value)
             .join(EvidenceRelease, EvidenceRelease.evidence_id == Evidence.id)
             .where(
                 EvidenceRelease.release_id.in_(release_ids),
@@ -88,8 +91,18 @@ def create_identifier_collision_conflicts(session: Session) -> list[Conflict]:
                 ConflictEvidence.conflict_id == conflict.id
             )
         ).all())
-        for evidence_id, release_id in evidence_rows:
-            if evidence_id not in linked_evidence_ids:
+        for evidence_id, release_id, observed_value in evidence_rows:
+            # Evidence is scoped to an attribute and release, not to a specific
+            # CatalogIdentifier row, so compare normalized values before linking.
+            try:
+                matches_identifier = (
+                    observed_value is not None
+                    and normalize_identifier(type_code, observed_value)
+                    == normalize_identifier(type_code, value)
+                )
+            except ValueError:
+                matches_identifier = False
+            if matches_identifier and evidence_id not in linked_evidence_ids:
                 session.add(ConflictEvidence(
                     conflict_id=conflict.id,
                     evidence_id=evidence_id,
