@@ -159,3 +159,96 @@ def test_catalog_api_allows_configured_local_ui_origin_for_preflight():
     assert response.status_code == 200
     assert response.headers["access-control-allow-origin"] == "http://localhost:5500"
     assert "POST" in response.headers["access-control-allow-methods"]
+
+
+def test_catalog_tree_move_flow_updates_tree_and_rejects_invalid_move_without_side_effects():
+    engine = _test_engine()
+    try:
+        with Session(engine) as session:
+            root = CatalogNode(node_type="root", label_override="HW Catalog")
+            group_a = CatalogNode(node_type="group", parent=root, label_override="A")
+            group_b = CatalogNode(node_type="group", parent=root, label_override="B")
+            casting = Casting(name="Nissan Skyline")
+            release = Release(casting=casting, catalog_year=2026)
+            session.add_all([root, group_a, group_b, release])
+            session.flush()
+            release_node = CatalogNode(
+                node_type="release", parent=group_a, release=release
+            )
+            session.add(release_node)
+            session.commit()
+            root_id = root.id
+            group_a_id = group_a.id
+            group_b_id = group_b.id
+            release_node_id = release_node.id
+            release_id = release.id
+            casting_id = casting.id
+
+        _override_db(engine)
+        client = TestClient(app)
+
+        before = client.get("/catalog/tree")
+        assert before.status_code == 200
+        before_root = before.json()["items"][0]
+        before_groups = {node["label"]: node for node in before_root["children"]}
+        assert before_groups["A"]["children"][0]["id"] == release_node_id
+        assert before_groups["B"]["children"] == []
+
+        moved = client.post(
+            f"/catalog/nodes/{release_node_id}/move",
+            json={
+                "new_parent_id": group_b_id,
+                "reason": "End-to-end integration test",
+                "sort_order": 3,
+                "actor_type": "test",
+            },
+        )
+        assert moved.status_code == 200
+        assert moved.json()["parent_id"] == group_b_id
+        assert moved.json()["release_id"] == release_id
+
+        after = client.get("/catalog/tree")
+        assert after.status_code == 200
+        after_root = after.json()["items"][0]
+        after_groups = {node["label"]: node for node in after_root["children"]}
+        assert after_groups["A"]["children"] == []
+        assert after_groups["B"]["children"][0]["id"] == release_node_id
+        assert after_groups["B"]["children"][0]["release_id"] == release_id
+
+        invalid = client.post(
+            f"/catalog/nodes/{group_b_id}/move",
+            json={
+                "new_parent_id": release_node_id,
+                "reason": "This parent type is not allowed",
+            },
+        )
+        assert invalid.status_code == 422
+
+        # A rejected move must not change the saved tree or append another audit row.
+        after_rejection = client.get("/catalog/tree")
+        assert after_rejection.status_code == 200
+        rejected_root = after_rejection.json()["items"][0]
+        rejected_groups = {node["label"]: node for node in rejected_root["children"]}
+        assert rejected_groups["B"]["parent_id"] == root_id
+        assert rejected_groups["B"]["children"][0]["id"] == release_node_id
+
+        with Session(engine) as session:
+            stored_release = session.get(Release, release_id)
+            assert stored_release.casting_id == casting_id
+            assert session.get(CatalogNode, release_node_id).release_id == release_id
+            audits = (
+                session.query(ChangeLog)
+                .filter_by(
+                    entity_type="catalog_node",
+                    entity_id=release_node_id,
+                    action="moved",
+                )
+                .all()
+            )
+            assert len(audits) == 1
+            assert audits[0].reason == "End-to-end integration test"
+            assert audits[0].old_values["parent_id"] == group_a_id
+            assert audits[0].new_values["parent_id"] == group_b_id
+    finally:
+        app.dependency_overrides.pop(get_db, None)
+        engine.dispose()
