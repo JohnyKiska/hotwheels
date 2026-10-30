@@ -48,7 +48,7 @@ PR #60–#68 объединены с main. В этой серии реализо
 
 ## 3. Состояние импортеров
 
-**Mainline Importer реализуется в Draft PR #74. На последнем проверенном workflow run #119 обе jobs (`pytest`, `browser-e2e`) завершились success.**
+**Импортеры Mainline и All Hot Wheels развиваются в Draft PR #74.** Последняя ранее подтверждённая проверка базовой ветки PR: workflow run #128 на commit `e3f0def828a2628472a23408f3d2ed86cf94031b`, jobs `pytest` и `browser-e2e` — success. После этого в ветку добавлен All Hot Wheels parser; CI для нового HEAD ещё нужно проверить.
 
 ### Что уже добавлено в ветке `feat/mainline-importer-preview`
 - `backend/app/importers/mainline.py` — TSV parser для табличного текста старого `converter.html` и read-only parser основной таблицы HTML-страницы Fandom со списком Hot Wheels за год.
@@ -58,7 +58,15 @@ PR #60–#68 объединены с main. В этой серии реализо
 - Для Fandom-страницы, где текст явно сообщает диапазон нумерации Mainline (например, «numbered 1 through 250»), парсер извлекает `mainline_total` и связывает `Col.#` с `mainline_number`; `collector_number` при этом сохраняется отдельно как исходное поле. Без явного годового утверждения номер/итог не выводятся.
 - `POST /imports/mainline/preview` и `POST /imports/mainline/fandom-html-preview` возвращают preview. Оба endpoint не используют сессию БД и ничего не записывают.
 - Повторяющиеся Toy numbers не объединяются и не удаляются: они остаются отдельными строками и получают предупреждение для ручной проверки.
-- Добавлены parser- и API-тесты на синтетических данных. Реальный приложенный Fandom-файл ещё нужно проверить через CI/локальный тест до объявления парсинга подтверждённым.
+- Добавлены parser- и API-тесты на синтетических данных. Реальный приложенный Fandom-файл ещё нужно прогнать через parser до объявления парсинга подтверждённым.
+
+### All Hot Wheels card HTML preview
+- Добавлен `backend/app/importers/all_hot_wheels.py` и endpoint `POST /imports/all-hot-wheels/html-preview`.
+- Извлекаются SKU, название, год, категория (из canonical URL), специальная метка, scale, base material, series badge, Series index, явно подписанный `Mainline #`, доступные сведения о колёсах, цветах и Tags.
+- Исходные метки сохраняются: `chase` не преобразуется в TH/STH; `treasure hunt` не переименовывается в STH.
+- Категория, серия, позиция в серии и special label представлены раздельно. `Mainline #` остаётся независимым от Fandom `Col.#`.
+- Добавлены синтетические parser/API-тесты. Четыре предоставленных реальных карточки (JBC25, GJJ06, CKJ44, JHW68) материализованы для локальной проверки, но результат реального прогона parser ещё не подтверждён.
+- Подробное описание: `docs/ALL_HOT_WHEELS_IMPORTER.md`.
 
 ### Согласованное правило отображения годового номера Mainline
 - В карточке выпуска годовой номер отображается как `mainline_number/mainline_total`, например `141/250`, только если оба значения подтверждены.
@@ -69,7 +77,7 @@ PR #60–#68 объединены с main. В этой серии реализо
 ### Границы текущего результата
 - Это **preview-only вертикальный срез**, а не завершённый импорт в каталог.
 - Пока нет подтверждения/записи в БД, поиска кандидатов среди существующих Casting/Release, хранения SourceRecord/Evidence и полноценной идентификации выпусков.
-- На workflow run #119 обе jobs (`pytest`, `browser-e2e`) завершились success. Новое извлечение годового диапазона Fandom прошло workflow run #41075443073: `pytest` и `browser-e2e` — success.
+- До добавления All Hot Wheels parser workflow run #128 (`41075640434`) на commit `e3f0def828a2628472a23408f3d2ed86cf94031b` прошёл: `pytest` и `browser-e2e` — success. Это не подтверждает новый код после этого commit; актуальный workflow для нового HEAD проверить отдельно.
 - Старый `importer.html` остаётся отдельным редактором `collection.json`; новый endpoint не изменяет его поведение и не мигрирует старую базу.
 
 ### Согласованное направление
