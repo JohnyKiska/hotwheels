@@ -3,6 +3,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from .db import get_db
+from .catalog_tree_api import router as catalog_tree_router
 from .conflict_queue import get_conflict_detail, list_conflicts
 from .conflict_resolution import (
     InvalidConflictResolution,
@@ -16,6 +17,9 @@ app = FastAPI(
     version="0.1.0",
     description="Backend foundation for the test Hot Wheels catalog.",
 )
+
+
+app.include_router(catalog_tree_router)
 
 
 @app.get("/health", tags=["system"])
