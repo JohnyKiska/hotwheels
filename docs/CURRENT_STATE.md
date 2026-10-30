@@ -51,12 +51,13 @@ PR #60–#68 объединены с main. В этой серии реализо
 **Начата реализация Mainline Importer в Draft PR #74; CI на последнем коммите ещё ожидается.**
 
 ### Что уже добавлено в ветке `feat/mainline-importer-preview`
-- `backend/app/importers/mainline.py` — parser TSV, совместимый с табличным текстом старого `converter.html`.
-- `preview_mainline_tsv(text, catalog_year)` возвращает нормализованные кандидаты, исходные строки/номера строк, предупреждения, ошибки и сводку.
-- Поддерживаются номер Toy, номер каталога/ассортимента, название, серия, индекс/размер серии, пометки Treasure Hunt/Exclusive и комментарии.
+- `backend/app/importers/mainline.py` — TSV parser для табличного текста старого `converter.html` и read-only parser основной таблицы HTML-страницы Fandom со списком Hot Wheels за год.
+- `preview_mainline_tsv(text, catalog_year)` разбирает Toy number, номер из TSV, название, серию, позицию в серии и пометки/комментарии.
+- `preview_mainline_fandom_html(text, catalog_year)` извлекает строки из основной `sortable wikitable` Fandom: Toy #, Col.#, Model Name, Series и Series #. `Col.#` сохраняется как `collector_number`, не как assortment number.
+- HTML parser проверяет год в заголовке страницы и не принимает HTML отдельных карточек моделей как список Fandom.
+- `POST /imports/mainline/preview` и `POST /imports/mainline/fandom-html-preview` возвращают preview. Оба endpoint не используют сессию БД и ничего не записывают.
 - Повторяющиеся Toy numbers не объединяются и не удаляются: они остаются отдельными строками и получают предупреждение для ручной проверки.
-- `POST /imports/mainline/preview` предоставляет preview через API. Endpoint не использует сессию БД и ничего не записывает.
-- Добавлены parser- и API-тесты на синтетических данных.
+- Добавлены parser- и API-тесты на синтетических данных. Реальный приложенный Fandom-файл ещё нужно проверить через CI/локальный тест до объявления парсинга подтверждённым.
 
 ### Границы текущего результата
 - Это **preview-only вертикальный срез**, а не завершённый импорт в каталог.
