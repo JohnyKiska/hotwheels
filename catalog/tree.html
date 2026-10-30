@@ -69,7 +69,16 @@ button{border:0;border-radius:9px;padding:10px 14px;font-weight:700;cursor:point
     root: "Корень", product_line: "Линейка продуктов", year: "Год",
     group: "Группа", theme: "Тема", series: "Серия", release: "Выпуск", package: "Упаковка"
   };
-  const typeIcons = {root:"⌂",product_line:"▤",year:"◷",group:"▦",theme:"◇",series:"▧",release:"▣",package:"▱"};
+  const allowedChildren = {
+    root: ["product_line", "year", "group", "theme", "series", "release", "package"],
+    product_line: ["year", "group", "theme", "series", "release", "package"],
+    year: ["group", "theme", "series", "release", "package"],
+    series: ["group", "theme", "release"],
+    group: ["group", "theme", "year", "series", "release", "package"],
+    theme: ["group", "theme", "series", "release", "package"],
+    release: [],
+    package: []
+  };
   let roots = [];
   let flatNodes = [];
   let selectedId = null;
@@ -184,11 +193,15 @@ button{border:0;border-radius:9px;padding:10px 14px;font-weight:700;cursor:point
     );
     const select = $("newParent");
     select.replaceChildren();
-    const rootOption = el("option","","— Без родителя (корневой узел) —");
-    rootOption.value = "";
-    select.append(rootOption);
+    if (node.node_type === "root") {
+      const rootOption = el("option","","— Без родителя (корневой узел) —");
+      rootOption.value = "";
+      select.append(rootOption);
+    }
     const candidates = flatNodes.filter(({node: candidate}) =>
-      candidate.id !== node.id && !hasDescendant(node,candidate.id)
+      candidate.id !== node.id &&
+      !hasDescendant(node,candidate.id) &&
+      (allowedChildren[candidate.node_type] || []).includes(node.node_type)
     );
     for (const {node: candidate, depth} of candidates) {
       const option = el("option","", "　".repeat(Math.min(depth,8)) + (candidate.label || candidate.id) + " · " + (typeLabels[candidate.node_type] || candidate.node_type));
@@ -216,7 +229,7 @@ button{border:0;border-radius:9px;padding:10px 14px;font-weight:700;cursor:point
     return data;
   }
   async function connect() {
-    if (!apiBase()) { setStatus("connectionStatus","Введи базовый URL API.","error"); return; }
+    if (!apiBase()) { setStatus("connectionStatus","Введи базовый URL API.","error"); return false; }
     $("connect").disabled = true;
     $("reload").disabled = true;
     setStatus("connectionStatus","Проверяем API и загружаем дерево…");
@@ -233,10 +246,12 @@ button{border:0;border-radius:9px;padding:10px 14px;font-weight:700;cursor:point
       localStorage.setItem("hwCatalogTreeApiBase",apiBase());
       $("reload").disabled = false;
       setStatus("connectionStatus","Подключение успешно. Дерево загружено с сервера.","success");
+      return true;
     } catch (error) {
       roots = []; flatNodes = []; selectedId = null;
       renderTree();
       setStatus("connectionStatus","Не удалось подключиться: " + error.message + ". Проверь URL, доступность API и CORS.","error");
+      return false;
     } finally {
       $("connect").disabled = false;
     }
@@ -260,10 +275,14 @@ button{border:0;border-radius:9px;padding:10px 14px;font-weight:700;cursor:point
         method:"POST",
         body:JSON.stringify({new_parent_id:newParentId,reason,actor_type:"human"})
       });
-      setStatus("moveStatus","Перемещение сохранено. Обновляем дерево…","success");
-      await connect();
+      setStatus("moveStatus","Перемещение сохранено. Обновляем дерево…");
+      const refreshed = await connect();
+      if (!refreshed) {
+        setStatus("moveStatus","Перемещение сохранено на сервере, но обновить дерево не удалось. Нажми «Обновить дерево», чтобы повторить загрузку.","error");
+        return;
+      }
       selectNode(node.id);
-      setStatus("moveStatus","Перемещение сохранено, журнал изменений обновлён.","success");
+      setStatus("moveStatus","Перемещение сохранено, дерево обновлено. Запись аудита создана сервером.","success");
     } catch (error) {
       setStatus("moveStatus","Сервер отклонил перемещение: " + error.message,"error");
     } finally {
