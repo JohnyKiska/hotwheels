@@ -2,9 +2,23 @@
 
 **Снимок:** 2026-10-30.  
 **Основной репозиторий:** JohnyKiska/hotwheels.  
-**Последний подтверждённый main:** 68f1ed5a298bdb2479858ec93d32a1fca5fb1ebe (merge PR #68).
+**Актуальный main на 2026-10-30:** 93da500fb840719fd2f3cce2d1e08a94b8fef14b. (Документация обновлена этим commit.)
 
 Перед началом новой работы всё равно перепроверь актуальные ветки, PR и CI: этот документ фиксирует подтверждённое состояние на указанную дату.
+
+## Актуализация аудита на 2026-10-30
+
+- Текущий \`main\`: \`93da500fb840719fd2f3cce2d1e08a94b8fef14b\`.
+- Pages workflow на \`93da500f\`: success (run [41005790131](https://github.com/JohnyKiska/hotwheels/actions/runs/41005790131)).
+- Backend tests: success на \`68f1ed5a\` (run [41004219999](https://github.com/JohnyKiska/hotwheels/actions/runs/41004219999)); отдельный backend tests run на \`93da500f\` в проверенном списке не обнаружен.
+- Открытые PR на момент проверки: #59, #52, #29, #1. Ни один не является PR Mainline Importer.
+- В backend/app существуют сервисы идентификаторов, Evidence/conflict, очередь конфликтов и разрешение конфликтов; в моделях есть SourceRecord, MediaAsset, Package/PackageRelease, ProductLine/CatalogNode.
+- В текущем \`backend/app\` не обнаружены import endpoints, import-run/batch/item models или фоновый worker.
+- \`MediaAsset\` покрывает метаданные уже сохранённого файла, но не весь workflow внешних image candidates и их назначения на Release.
+- \`SourceRecord.raw_data\` и content hash покрывают структурированные снимки; архив больших исходных страниц требует отдельного хранения.
+- Проект спецификации: \`docs/importers/MAINLINE_IMPORTER_SPEC.md\`, ветка \`docs/mainline-importer-spec-v1\`. Реализация не начата.
+- Технический аудит конкретных сайтов и разрешённых способов доступа остаётся открытым.
+
 
 ## 1. Backend: интеграционный этап завершён
 
