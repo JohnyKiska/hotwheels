@@ -23,7 +23,7 @@ Endpoint: `POST /imports/all-hot-wheels/html-preview`.
 | `series_index/series_total` | `Series index` | Отдельно от Mainline number |
 | `mainline_number` | `Mainline #` | Читается только из явно подписанного поля; `-` становится null |
 | `wheels` | Wheels | Список code/name |
-| `colors` | Colors | Список attribute/value из доступного блока |
+| `colors` | Colors | Список объектов по компонентам (`body`, `interior`, `base`, `window`); поля `color`, `detailed`, `source` и `finish` (из исходного `premium`) сохраняются отдельно |
 | `tags` | Tags | Список текстовых тегов |
 | `source_url` | canonical link | URL страницы-источника |
 | `source_fields` | parser mapping | Подсказка происхождения каждого поля |
