@@ -741,3 +741,124 @@ class EvidenceBrand(Base):
 
     evidence: Mapped[Evidence] = relationship(back_populates="brand_links")
     brand: Mapped[Brand] = relationship(back_populates="evidence_links")
+
+
+
+class ProductLine(TimestampMixin, Base):
+    """A broad product family such as Mainline or Premium, distinct from Series."""
+
+    __tablename__ = "product_lines"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    name: Mapped[str] = mapped_column(String(240), nullable=False, index=True)
+    description: Mapped[str | None] = mapped_column(Text)
+    line_type: Mapped[str] = mapped_column(String(60), default="other", nullable=False)
+    status: Mapped[str] = mapped_column(String(24), default="candidate", nullable=False)
+
+    __table_args__ = (
+        CheckConstraint(
+            "status IN ('candidate', 'under_review', 'confirmed', 'rejected')",
+            name="ck_product_lines_status",
+        ),
+        CheckConstraint(
+            "line_type IN ('mainline', 'premium', 'silver_series', 'multipack', 'other')",
+            name="ck_product_lines_line_type",
+        ),
+        UniqueConstraint("name", "line_type", name="uq_product_lines_name_type"),
+    )
+
+    brand_links: Mapped[list[ProductLineBrand]] = relationship(
+        back_populates="product_line", cascade="all, delete-orphan"
+    )
+    catalog_nodes: Mapped[list[CatalogNode]] = relationship(
+        back_populates="product_line", passive_deletes="all"
+    )
+
+
+class ProductLineBrand(Base):
+    """Explicit many-to-many association between a product line and a brand."""
+
+    __tablename__ = "product_line_brands"
+
+    product_line_id: Mapped[str] = mapped_column(
+        ForeignKey("product_lines.id", ondelete="CASCADE"), primary_key=True
+    )
+    brand_id: Mapped[str] = mapped_column(
+        ForeignKey("brands.id", ondelete="RESTRICT"), primary_key=True
+    )
+    role: Mapped[str] = mapped_column(String(32), default="primary", nullable=False)
+    note: Mapped[str | None] = mapped_column(Text)
+
+    __table_args__ = (
+        CheckConstraint(
+            "role IN ('primary', 'secondary', 'licensed', 'promotional', 'other')",
+            name="ck_product_line_brands_role",
+        ),
+    )
+
+    product_line: Mapped[ProductLine] = relationship(back_populates="brand_links")
+    brand: Mapped[Brand] = relationship()
+
+
+class CatalogNode(TimestampMixin, Base):
+    """A placement in the navigation tree; it does not own the linked entity identity."""
+
+    __tablename__ = "catalog_nodes"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    parent_id: Mapped[str | None] = mapped_column(
+        ForeignKey("catalog_nodes.id", ondelete="RESTRICT"), index=True
+    )
+    node_type: Mapped[str] = mapped_column(String(24), nullable=False)
+    sort_order: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    label_override: Mapped[str | None] = mapped_column(String(240))
+    catalog_year: Mapped[int | None] = mapped_column(Integer)
+    product_line_id: Mapped[str | None] = mapped_column(
+        ForeignKey("product_lines.id", ondelete="RESTRICT"), index=True
+    )
+    series_id: Mapped[str | None] = mapped_column(
+        ForeignKey("series.id", ondelete="RESTRICT"), index=True
+    )
+    release_id: Mapped[str | None] = mapped_column(
+        ForeignKey("releases.id", ondelete="RESTRICT"), index=True
+    )
+    package_id: Mapped[str | None] = mapped_column(
+        ForeignKey("packages.id", ondelete="RESTRICT"), index=True
+    )
+    status: Mapped[str] = mapped_column(String(24), default="active", nullable=False)
+
+    __table_args__ = (
+        CheckConstraint(
+            "node_type IN ('root', 'product_line', 'year', 'group', 'theme', 'series', 'release', 'package')",
+            name="ck_catalog_nodes_node_type",
+        ),
+        CheckConstraint(
+            "status IN ('active', 'hidden', 'under_review')",
+            name="ck_catalog_nodes_status",
+        ),
+        CheckConstraint(
+            "(node_type = 'product_line' AND product_line_id IS NOT NULL AND series_id IS NULL AND release_id IS NULL AND package_id IS NULL AND catalog_year IS NULL) OR "
+            "(node_type = 'series' AND product_line_id IS NULL AND series_id IS NOT NULL AND release_id IS NULL AND package_id IS NULL AND catalog_year IS NULL) OR "
+            "(node_type = 'release' AND product_line_id IS NULL AND series_id IS NULL AND release_id IS NOT NULL AND package_id IS NULL AND catalog_year IS NULL) OR "
+            "(node_type = 'package' AND product_line_id IS NULL AND series_id IS NULL AND release_id IS NULL AND package_id IS NOT NULL AND catalog_year IS NULL) OR "
+            "(node_type = 'year' AND product_line_id IS NULL AND series_id IS NULL AND release_id IS NULL AND package_id IS NULL AND catalog_year IS NOT NULL) OR "
+            "(node_type IN ('root', 'group', 'theme') AND product_line_id IS NULL AND series_id IS NULL AND release_id IS NULL AND package_id IS NULL AND catalog_year IS NULL)",
+            name="ck_catalog_nodes_typed_reference",
+        ),
+        CheckConstraint(
+            "catalog_year IS NULL OR catalog_year BETWEEN 1968 AND 2100",
+            name="ck_catalog_nodes_catalog_year",
+        ),
+        CheckConstraint("sort_order >= 0", name="ck_catalog_nodes_sort_order"),
+    )
+
+    parent: Mapped[CatalogNode | None] = relationship(
+        back_populates="children", remote_side="CatalogNode.id"
+    )
+    children: Mapped[list[CatalogNode]] = relationship(
+        back_populates="parent", passive_deletes="all"
+    )
+    product_line: Mapped[ProductLine | None] = relationship(back_populates="catalog_nodes")
+    series: Mapped[Series | None] = relationship()
+    release: Mapped[Release | None] = relationship()
+    package: Mapped[Package | None] = relationship()
