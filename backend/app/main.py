@@ -14,7 +14,7 @@ from .conflict_resolution import (
     resolve_conflict,
     revise_conflict_resolution,
 )
-from .importers.mainline import preview_mainline_tsv
+from .importers.mainline import preview_mainline_fandom_html, preview_mainline_tsv
 
 app = FastAPI(
     title="Hot Wheels Catalog API",
@@ -63,6 +63,22 @@ def preview_mainline_import(request: MainlinePreviewRequest) -> dict:
     """Parse Mainline TSV for review only; never writes to the catalog database."""
     try:
         return preview_mainline_tsv(request.text, request.catalog_year)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+class MainlineHtmlPreviewRequest(BaseModel):
+    """A saved Fandom yearly list HTML page for a non-destructive preview."""
+
+    text: str = Field(min_length=1, max_length=2_000_000)
+    catalog_year: int = Field(ge=1968, le=2100)
+
+
+@app.post("/imports/mainline/fandom-html-preview", tags=["imports"])
+def preview_mainline_fandom_html_import(request: MainlineHtmlPreviewRequest) -> dict:
+    """Parse the primary Fandom yearly list table; never writes to the catalog."""
+    try:
+        return preview_mainline_fandom_html(request.text, request.catalog_year)
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
