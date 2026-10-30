@@ -170,14 +170,19 @@ def register_identifier(
         # identifier claim must reuse its evidence, not mint a duplicate audit row.
         # A different SourceRecord remains a distinct observation even when the
         # identifier value is identical.
-        evidence = next(
-            (
-                candidate for candidate in evidence_candidates
-                if candidate.observed_value is not None
-                and normalize_identifier(code, candidate.observed_value) == normalized
-            ),
-            None,
-        )
+        evidence = None
+        for candidate in evidence_candidates:
+            if candidate.observed_value is None:
+                continue
+            try:
+                candidate_normalized = normalize_identifier(code, candidate.observed_value)
+            except ValueError:
+                # Ignore malformed historical claims; do not let them block a
+                # valid registration or silently treat them as equivalent.
+                continue
+            if candidate_normalized == normalized:
+                evidence = candidate
+                break
         if evidence is None:
             evidence = Evidence(
                 source_record_id=source_record.id,
