@@ -1,9 +1,10 @@
 from sqlalchemy import create_engine, func, select
 from sqlalchemy.orm import Session
 
-from app.conflict_queue import get_conflict_detail
+from app.conflict_queue import get_conflict_detail, list_conflicts
 from app.db import Base
 from app.identifier_registration import register_identifier
+from app.conflict_resolution import resolve_conflict
 from app.identifier_conflicts import create_identifier_collision_conflicts
 from app.models import (
     Conflict, ConflictEvidence, ConflictRelease, Evidence, EvidenceRelease, IdentifierType,
@@ -160,3 +161,52 @@ def test_existing_conflict_backfills_release_links_without_resetting_review_stat
         assert len(detail["releases"]) == 2
         assert session.get(Conflict, conflict.id).status == "under_review"
         assert session.scalar(select(func.count()).select_from(Conflict)) == 1
+
+
+
+def test_resolved_collision_keeps_release_and_evidence_traceability_in_list_and_detail():
+    with make_session() as session:
+        release_a, release_b = seed(session)
+        source_a = source_record(session, "Synthetic resolution source A")
+        source_b = source_record(session, "Synthetic resolution source B")
+        register_identifier(
+            session, type_code="upc", value="001234567890",
+            entity_type="release", entity_id=release_a.id, source_record_id=source_a.id,
+        )
+        result = register_identifier(
+            session, type_code="upc", value="001234567890",
+            entity_type="release", entity_id=release_b.id, source_record_id=source_b.id,
+        )
+        conflict = result["new_conflicts"][0]
+        detail_before = get_conflict_detail(session, conflict.id)
+        evidence_ids_before = {item["evidence_id"] for item in detail_before["evidence"]}
+
+        resolve_conflict(
+            session,
+            conflict_id=conflict.id,
+            status="resolved",
+            resolution="Keep both release records for review",
+            reason="Synthetic test confirms resolution preserves traceability",
+            evidence_ids=sorted(evidence_ids_before)[:1],
+        )
+        session.flush()
+
+        detail_after = get_conflict_detail(session, conflict.id)
+        listed = list_conflicts(session, status="resolved")
+        list_item = next(item for item in listed["items"] if item["id"] == conflict.id)
+
+        assert {item["release_id"] for item in detail_after["releases"]} == {
+            release_a.id, release_b.id
+        }
+        assert {item["evidence_id"] for item in detail_after["evidence"]} == evidence_ids_before
+        assert {item["release_id"] for item in list_item["releases"]} == {
+            item["release_id"] for item in detail_after["releases"]
+        }
+        assert {item["evidence_id"] for item in list_item["evidence"]} == {
+            item["evidence_id"] for item in detail_after["evidence"]
+        }
+        assert detail_after["status"] == "resolved"
+        assert session.scalar(select(func.count()).select_from(ConflictRelease)) == 2
+        assert session.scalar(select(func.count()).select_from(ConflictEvidence)) == 2
+        assert release_a.status == "confirmed"
+        assert release_b.status == "candidate"
