@@ -49,7 +49,11 @@ PR #60–#68 объединены в main; итоговый main SHA: 68f1ed5a29
 
 ## Этап 3. Mainline Importer — первый специализированный обработчик
 
-**Первый вертикальный срез реализуется в Draft PR #74:** TSV preview parser (`POST /imports/mainline/preview`) и parser основной таблицы Fandom yearly-list HTML (`POST /imports/mainline/fandom-html-preview`). Оба endpoint только формируют preview и не пишут в БД. Для Fandom различаем `Col.#` как collector number, не assortment number. Добавлены синтетические parser/API-тесты; до подтверждения CI и проверки на приложенном HTML не считать реальный формат окончательно подтверждённым. Затем уточнить правила и проектировать сопоставление с каталогом и подтверждённую запись в отдельную тестовую БД.
+**Первый вертикальный срез реализуется в Draft PR #74:** TSV preview parser (`POST /imports/mainline/preview`) и parser основной таблицы Fandom yearly-list HTML (`POST /imports/mainline/fandom-html-preview`). Оба endpoint только формируют preview и не пишут в БД. Для Fandom различаем `Col.#` как collector number, не assortment number. Добавлены синтетические parser/API-тесты; до подтверждения CI и проверки на приложенном HTML не считать реальный формат окончательно подтверждённым.
+
+**Следующее расширение в той же Draft PR #74:** отдельный All Hot Wheels card HTML parser (`POST /imports/all-hot-wheels/html-preview`) в `backend/app/importers/all_hot_wheels.py`. Он извлекает SKU, название, год, категорию, специальную метку, scale, base material, серию и её позицию, `Mainline #`, колёса, доступные цвета и теги. Parser сохраняет `chase`/`treasure hunt` как исходные метки и не пишет в БД. Синтетические parser/API-тесты добавлены; проверка четырёх реальных HTML-файлов и CI текущего commit ещё ожидаются. Подробности: `docs/ALL_HOT_WHEELS_IMPORTER.md`.
+
+Далее нужно проверить реальные страницы, затем построить единый preview-сопоставитель Fandom + All Hot Wheels, показывающий совпадения, source-only поля и расхождения. Не объединять Casting/Release автоматически.
 
 
 - [ ] Зафиксировать точные источники и форматы входных данных Mainline.
