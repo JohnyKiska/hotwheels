@@ -1,4 +1,7 @@
+import os
+
 from fastapi import FastAPI, Depends, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
@@ -16,6 +19,25 @@ app = FastAPI(
     title="Hot Wheels Catalog API",
     version="0.1.0",
     description="Backend foundation for the test Hot Wheels catalog.",
+)
+
+
+def _configured_cors_origins() -> list[str]:
+    """Read explicitly allowed browser origins from the environment."""
+    configured = os.getenv(
+        "HW_CORS_ORIGINS",
+        "http://localhost:5500,http://127.0.0.1:5500,"
+        "http://localhost:8000,http://127.0.0.1:8000",
+    )
+    return [origin.strip().rstrip("/") for origin in configured.split(",") if origin.strip()]
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=_configured_cors_origins(),
+    allow_credentials=False,
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Content-Type"],
 )
 
 

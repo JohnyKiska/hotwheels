@@ -144,3 +144,18 @@ def test_catalog_node_move_api_rejects_invalid_parent_type():
     finally:
         app.dependency_overrides.pop(get_db, None)
         engine.dispose()
+
+
+
+def test_catalog_api_allows_configured_local_ui_origin_for_preflight():
+    response = TestClient(app).options(
+        "/catalog/nodes/example/move",
+        headers={
+            "Origin": "http://localhost:5500",
+            "Access-Control-Request-Method": "POST",
+            "Access-Control-Request-Headers": "content-type",
+        },
+    )
+    assert response.status_code == 200
+    assert response.headers["access-control-allow-origin"] == "http://localhost:5500"
+    assert "POST" in response.headers["access-control-allow-methods"]

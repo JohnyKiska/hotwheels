@@ -55,3 +55,19 @@ python -m app.init_db
 This creates tables for the current models, but does not import catalog data. It is
 a development bootstrap, not a replacement for versioned Alembic migrations. The
 generated `backend/hotwheels.db` file should remain local and must not be committed.
+
+
+## Browser UI and CORS
+
+The catalog-tree page can be opened from a separate local or hosted origin. Configure
+the exact browser origins allowed to call the API using the comma-separated
+`HW_CORS_ORIGINS` environment variable:
+
+```bash
+HW_CORS_ORIGINS="http://localhost:5500,http://127.0.0.1:5500" uvicorn app.main:app --reload
+```
+
+For a hosted preview, add its exact origin (scheme and host, without a path) to
+`HW_CORS_ORIGINS`. Do not use `*` for public deployments. The default only permits
+common local development origins; it does not automatically trust GitHub Pages or
+HTML Preview. CORS is a browser access policy, not authentication or API access control.
