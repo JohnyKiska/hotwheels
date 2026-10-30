@@ -1,6 +1,6 @@
 # All Hot Wheels HTML Importer
 
-**Статус:** первый read-only parser добавлен в Draft PR #74; автоматическая проверка текущего commit ожидается.
+**Статус:** первый read-only parser добавлен в Draft PR #74; synthetic CI run #140 прошёл (`pytest`: 145 passed, `browser-e2e`: success). Прямой запуск committed parser на четырёх реальных HTML-файлах ещё требуется подтвердить.
 
 ## Назначение
 
