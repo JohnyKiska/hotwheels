@@ -39,7 +39,35 @@ def _page(*, category="mainline", special="treasure hunt", sku="JBC25",
       <h3>Wheels</h3>
       <div><span><span class="font-mono">5SP</span>5-Spoke</span></div>
       <h3>Colors</h3>
-      <div><div><span>color:</span><span>Blue</span></div></div>
+      <div class="space-y-3">
+        <div>
+          <div>body</div>
+          <div>
+            <div><span>color:</span><span>Blue</span></div>
+            <div><span>detailed:</span><span>Turquoise</span></div>
+            <div><span>source:</span><span>Turquoise</span></div>
+            <div><span>premium:</span><span>Spectraflame</span></div>
+          </div>
+        </div>
+        <div>
+          <div>interior</div>
+          <div>
+            <div><span>color:</span><span>Black</span></div>
+            <div><span>detailed:</span><span>Black</span></div>
+          </div>
+        </div>
+        <div>
+          <div>base</div>
+          <div>
+            <div><span>color:</span><span>Black</span></div>
+            <div><span>source:</span><span>Black</span></div>
+          </div>
+        </div>
+        <div>
+          <div>window</div>
+          <div><div><span>source:</span><span>Clear (See-Through)</span></div></div>
+        </div>
+      </div>
       <h3>Tags</h3>
       <div><a href="/browse?q=turbo">turbo</a><a href="/browse?q=hatchback">hatchback</a></div>
     </body></html>"""
@@ -60,7 +88,29 @@ def test_all_hot_wheels_parser_extracts_labelled_fields_and_provenance():
     assert record["series_index"] == 5
     assert record["series_total"] == 5
     assert record["wheels"] == [{"code": "5SP", "name": "5-Spoke"}]
-    assert {"attribute": "color", "value": "Blue"} in record["colors"]
+    assert record["colors"] == [
+        {
+            "component": "body",
+            "color": "Blue",
+            "detailed": "Turquoise",
+            "source": "Turquoise",
+            "finish": "Spectraflame",
+        },
+        {
+            "component": "interior",
+            "color": "Black",
+            "detailed": "Black",
+        },
+        {
+            "component": "base",
+            "color": "Black",
+            "source": "Black",
+        },
+        {
+            "component": "window",
+            "source": "Clear (See-Through)",
+        },
+    ]
     assert record["tags"] == ["turbo", "hatchback"]
     assert record["source_fields"]["mainline_number"] == "Mainline #"
 
