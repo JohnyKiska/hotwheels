@@ -67,3 +67,29 @@ def test_invalid_filters_and_pagination_are_rejected():
                 pass
             else:
                 raise AssertionError(f"expected ValueError for {kwargs}")
+
+
+
+def test_release_traceability_is_additive_for_legacy_conflicts_without_release_links():
+    from app.conflict_queue import get_conflict_detail
+
+    with make_session() as session:
+        conflict, evidence = seed_conflict(session)
+        session.flush()
+
+        listed = list_conflicts(session)
+        item = next(row for row in listed["items"] if row["id"] == conflict.id)
+        detail = get_conflict_detail(session, conflict.id)
+
+        # Existing top-level fields remain available for older API consumers.
+        legacy_fields = {
+            "id", "conflict_type", "status", "severity", "attribute_name",
+            "resolution", "resolution_reason", "created_at", "resolved_at", "evidence",
+        }
+        assert legacy_fields.issubset(item.keys())
+        assert legacy_fields.issubset(detail.keys())
+        # The new field is additive and legacy conflicts serialize safely.
+        assert item["releases"] == []
+        assert detail["releases"] == []
+        assert item["evidence"][0]["evidence_id"] == evidence.id
+        assert detail["evidence"][0]["evidence_id"] == evidence.id

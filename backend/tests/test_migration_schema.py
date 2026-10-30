@@ -53,4 +53,4 @@ def test_fresh_database_upgrade_creates_complete_core_schema(tmp_path: Path) -> 
         revision = connection.execute(
             "SELECT version_num FROM alembic_version"
         ).fetchone()
-        assert revision == ("20261030_core_schema",)
+        assert revision == ("20261030_conflict_releases",)

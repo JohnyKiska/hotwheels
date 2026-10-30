@@ -4,7 +4,7 @@ from __future__ import annotations
 from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload, selectinload
 
-from .models import ChangeLog, Conflict, ConflictEvidence, Evidence, SourceRecord, Source
+from .models import ChangeLog, Conflict, ConflictEvidence, ConflictRelease, Evidence, Release, SourceRecord, Source
 
 
 ALLOWED_STATUSES = {"open", "under_review", "resolved", "accepted_difference"}
@@ -53,6 +53,9 @@ def list_conflicts(
         select(Conflict)
         .where(*predicates)
         .options(
+            selectinload(Conflict.release_links)
+            .joinedload(ConflictRelease.release)
+            .joinedload(Release.casting),
             selectinload(Conflict.evidence_links)
             .joinedload(ConflictEvidence.evidence)
             .joinedload(Evidence.source_record)
@@ -82,6 +85,16 @@ def list_conflicts(
                 "record_url": record.record_url,
                 "external_id": record.external_id,
             })
+        release_items = [{
+            "release_id": link.release.id,
+            "release_name": link.release.name,
+            "catalog_year": link.release.catalog_year,
+            "status": link.release.status,
+            "casting_id": link.release.casting.id,
+            "casting_name": link.release.casting.name,
+            "role": link.role,
+            "note": link.note,
+        } for link in sorted(conflict.release_links, key=lambda item: item.release_id)]
         items.append({
             "id": conflict.id,
             "conflict_type": conflict.conflict_type,
@@ -92,6 +105,7 @@ def list_conflicts(
             "resolution_reason": conflict.resolution_reason,
             "created_at": conflict.created_at.isoformat() if conflict.created_at else None,
             "resolved_at": conflict.resolved_at.isoformat() if conflict.resolved_at else None,
+            "releases": release_items,
             "evidence": evidence_items,
         })
     return {"items": items, "total": total, "limit": limit, "offset": offset}
@@ -140,6 +154,16 @@ def get_conflict_detail(session: Session, conflict_id: str) -> dict | None:
             "content_hash": record.content_hash,
             "retrieved_at": record.retrieved_at.isoformat() if record.retrieved_at else None,
         })
+    release_items = [{
+        "release_id": link.release.id,
+        "release_name": link.release.name,
+        "catalog_year": link.release.catalog_year,
+        "status": link.release.status,
+        "casting_id": link.release.casting.id,
+        "casting_name": link.release.casting.name,
+        "role": link.role,
+        "note": link.note,
+    } for link in sorted(conflict.release_links, key=lambda item: item.release_id)]
     audit_entries = session.scalars(
         select(ChangeLog)
         .where(
@@ -172,6 +196,7 @@ def get_conflict_detail(session: Session, conflict_id: str) -> dict | None:
         "resolution_reason": conflict.resolution_reason,
         "created_at": conflict.created_at.isoformat() if conflict.created_at else None,
         "resolved_at": conflict.resolved_at.isoformat() if conflict.resolved_at else None,
+        "releases": release_items,
         "evidence": evidence_items,
         "history": history,
     }
