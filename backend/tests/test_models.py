@@ -549,7 +549,7 @@ def test_alembic_upgrade_is_safe_on_initialized_existing_database(tmp_path, monk
             assert connection.execute(
                 text("SELECT name FROM castings WHERE id = :id"), {"id": casting_id}
             ).scalar_one() == "Existing record must survive"
-            assert connection.execute(text("SELECT version_num FROM alembic_version")).scalar_one() == "20261030_core_schema"
+            assert connection.execute(text("SELECT version_num FROM alembic_version")).scalar_one() == "20261030_conflict_releases"
             assert connection.execute(text("SELECT COUNT(*) FROM alembic_version")).scalar_one() == 1
     finally:
         check_engine.dispose()
