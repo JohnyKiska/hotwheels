@@ -133,3 +133,30 @@ def test_collision_does_not_attach_evidence_for_another_identifier_value():
         detail = get_conflict_detail(session, conflict.id)
         assert detail["evidence"] == []
         assert session.scalar(select(func.count()).select_from(ConflictEvidence)) == 0
+
+
+def test_existing_conflict_backfills_release_links_without_resetting_review_status():
+    with make_session() as session:
+        release_a, release_b = seed(session)
+        register_identifier(
+            session, type_code="upc", value="001234567890",
+            entity_type="release", entity_id=release_a.id,
+        )
+        result = register_identifier(
+            session, type_code="upc", value="001234567890",
+            entity_type="release", entity_id=release_b.id,
+        )
+        conflict = result["new_conflicts"][0]
+        conflict.status = "under_review"
+        session.query(ConflictRelease).filter_by(conflict_id=conflict.id).delete()
+        session.flush()
+        assert session.scalar(select(func.count()).select_from(ConflictRelease)) == 0
+
+        created = create_identifier_collision_conflicts(session)
+        session.flush()
+        detail = get_conflict_detail(session, conflict.id)
+
+        assert created == []
+        assert len(detail["releases"]) == 2
+        assert session.get(Conflict, conflict.id).status == "under_review"
+        assert session.scalar(select(func.count()).select_from(Conflict)) == 1
