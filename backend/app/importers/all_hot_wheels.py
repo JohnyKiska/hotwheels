@@ -152,9 +152,9 @@ def _extract_colors(section: _Node | None) -> list[dict[str, str]]:
         return []
     colors: list[dict[str, str]] = []
     for chip in section.descendants("div"):
-        spans = chip.child_nodes("span")
+        spans = [span for span in chip.child_nodes("span") if _clean(span.text())]
         if len(spans) >= 2:
-            label = _clean(spans[0].text()).rstrip(":")
+            label = _clean(spans[0].text()).rstrip(":").strip().casefold()
             value = _clean(spans[-1].text())
             if label in {"color", "detailed", "source", "premium"} and value:
                 parent_text = _clean(chip.text())
