@@ -225,6 +225,9 @@ class Casting(TimestampMixin, Base):
         back_populates="casting", cascade="all, delete-orphan"
     )
     releases: Mapped[list[Release]] = relationship(back_populates="casting")
+    origin_links: Mapped[list[CastingOrigin]] = relationship(
+        back_populates="casting", passive_deletes="all"
+    )
 
 
 class CastingVariant(TimestampMixin, Base):
@@ -440,6 +443,10 @@ class Evidence(TimestampMixin, Base):
     package_links: Mapped[list[EvidencePackage]] = relationship(back_populates="evidence", cascade="all, delete-orphan")
     manufacturer_links: Mapped[list[EvidenceManufacturer]] = relationship(back_populates="evidence", cascade="all, delete-orphan")
     brand_links: Mapped[list[EvidenceBrand]] = relationship(back_populates="evidence", cascade="all, delete-orphan")
+    origin_object_links: Mapped[list[EvidenceOriginObject]] = relationship(back_populates="evidence", cascade="all, delete-orphan")
+    origin_variant_links: Mapped[list[EvidenceOriginVariant]] = relationship(back_populates="evidence", cascade="all, delete-orphan")
+    origin_specification_links: Mapped[list[EvidenceOriginSpecification]] = relationship(back_populates="evidence", cascade="all, delete-orphan")
+    casting_origin_links: Mapped[list[EvidenceCastingOrigin]] = relationship(back_populates="evidence", cascade="all, delete-orphan")
 
 
 class MediaAsset(TimestampMixin, Base):
@@ -862,3 +869,269 @@ class CatalogNode(TimestampMixin, Base):
     series: Mapped[Series | None] = relationship()
     release: Mapped[Release | None] = relationship()
     package: Mapped[Package | None] = relationship()
+
+
+class OriginObject(TimestampMixin, Base):
+    """A real, fictional, concept, or other source object that may inspire a casting."""
+
+    __tablename__ = "origin_objects"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    object_type: Mapped[str] = mapped_column(String(32), default="car", nullable=False)
+    make_name: Mapped[str | None] = mapped_column(String(160), index=True)
+    model_name: Mapped[str] = mapped_column(String(240), nullable=False, index=True)
+    generation: Mapped[str | None] = mapped_column(String(120))
+    production_start_year: Mapped[int | None] = mapped_column(Integer)
+    production_end_year: Mapped[int | None] = mapped_column(Integer)
+    description: Mapped[str | None] = mapped_column(Text)
+    status: Mapped[str] = mapped_column(String(24), default="candidate", nullable=False)
+
+    __table_args__ = (
+        CheckConstraint(
+            "object_type IN ('car', 'truck', 'motorcycle', 'aircraft', 'fictional', 'concept', 'other')",
+            name="ck_origin_objects_type",
+        ),
+        CheckConstraint(
+            "status IN ('candidate', 'under_review', 'confirmed', 'rejected')",
+            name="ck_origin_objects_status",
+        ),
+        CheckConstraint(
+            "production_start_year IS NULL OR production_start_year BETWEEN 1800 AND 2100",
+            name="ck_origin_objects_start_year",
+        ),
+        CheckConstraint(
+            "production_end_year IS NULL OR production_end_year BETWEEN 1800 AND 2100",
+            name="ck_origin_objects_end_year",
+        ),
+        CheckConstraint(
+            "production_start_year IS NULL OR production_end_year IS NULL OR production_end_year >= production_start_year",
+            name="ck_origin_objects_year_range",
+        ),
+        UniqueConstraint("id", "generation", name="uq_origin_objects_id_generation"),
+    )
+
+    variants: Mapped[list[OriginVariant]] = relationship(
+        back_populates="origin_object", cascade="all, delete-orphan"
+    )
+    specifications: Mapped[list[OriginSpecification]] = relationship(
+        back_populates="origin_object", cascade="all, delete-orphan",
+        foreign_keys="OriginSpecification.origin_object_id",
+    )
+    casting_links: Mapped[list[CastingOrigin]] = relationship(
+        back_populates="origin_object", passive_deletes="all",
+        foreign_keys="CastingOrigin.origin_object_id",
+    )
+    evidence_links: Mapped[list[EvidenceOriginObject]] = relationship(
+        back_populates="origin_object", passive_deletes="all"
+    )
+
+
+class OriginVariant(TimestampMixin, Base):
+    """An optional, specifically identified trim or special version of an origin object."""
+
+    __tablename__ = "origin_variants"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    origin_object_id: Mapped[str] = mapped_column(
+        ForeignKey("origin_objects.id", ondelete="RESTRICT"), nullable=False, index=True
+    )
+    name: Mapped[str] = mapped_column(String(240), nullable=False)
+    production_start_year: Mapped[int | None] = mapped_column(Integer)
+    production_end_year: Mapped[int | None] = mapped_column(Integer)
+    description: Mapped[str | None] = mapped_column(Text)
+    status: Mapped[str] = mapped_column(String(24), default="candidate", nullable=False)
+
+    __table_args__ = (
+        CheckConstraint(
+            "status IN ('candidate', 'under_review', 'confirmed', 'rejected')",
+            name="ck_origin_variants_status",
+        ),
+        CheckConstraint(
+            "production_start_year IS NULL OR production_start_year BETWEEN 1800 AND 2100",
+            name="ck_origin_variants_start_year",
+        ),
+        CheckConstraint(
+            "production_end_year IS NULL OR production_end_year BETWEEN 1800 AND 2100",
+            name="ck_origin_variants_end_year",
+        ),
+        CheckConstraint(
+            "production_start_year IS NULL OR production_end_year IS NULL OR production_end_year >= production_start_year",
+            name="ck_origin_variants_year_range",
+        ),
+        UniqueConstraint("origin_object_id", "name", name="uq_origin_variants_object_name"),
+        UniqueConstraint("id", "origin_object_id", name="uq_origin_variants_id_object"),
+    )
+
+    origin_object: Mapped[OriginObject] = relationship(back_populates="variants")
+    specifications: Mapped[list[OriginSpecification]] = relationship(
+        back_populates="origin_variant", cascade="all, delete-orphan",
+        foreign_keys="OriginSpecification.origin_variant_id",
+    )
+    casting_links: Mapped[list[CastingOrigin]] = relationship(
+        back_populates="origin_variant", passive_deletes="all",
+        foreign_keys="CastingOrigin.origin_variant_id",
+    )
+    evidence_links: Mapped[list[EvidenceOriginVariant]] = relationship(
+        back_populates="origin_variant", passive_deletes="all"
+    )
+
+
+class OriginSpecification(TimestampMixin, Base):
+    """A structured technical fact scoped either to an object or to one variant."""
+
+    __tablename__ = "origin_specifications"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    origin_object_id: Mapped[str | None] = mapped_column(
+        ForeignKey("origin_objects.id", ondelete="RESTRICT"), index=True
+    )
+    origin_variant_id: Mapped[str | None] = mapped_column(
+        ForeignKey("origin_variants.id", ondelete="RESTRICT"), index=True
+    )
+    key: Mapped[str] = mapped_column(String(120), nullable=False, index=True)
+    value: Mapped[str] = mapped_column(Text, nullable=False)
+    unit: Mapped[str | None] = mapped_column(String(48))
+    applicability: Mapped[str | None] = mapped_column(Text)
+    notes: Mapped[str | None] = mapped_column(Text)
+
+    __table_args__ = (
+        CheckConstraint(
+            "(origin_object_id IS NOT NULL AND origin_variant_id IS NULL) OR "
+            "(origin_object_id IS NULL AND origin_variant_id IS NOT NULL)",
+            name="ck_origin_specifications_exactly_one_scope",
+        ),
+        UniqueConstraint("origin_object_id", "key", "applicability", name="uq_origin_spec_object_key_scope"),
+        UniqueConstraint("origin_variant_id", "key", "applicability", name="uq_origin_spec_variant_key_scope"),
+    )
+
+    origin_object: Mapped[OriginObject | None] = relationship(
+        back_populates="specifications", foreign_keys=[origin_object_id]
+    )
+    origin_variant: Mapped[OriginVariant | None] = relationship(
+        back_populates="specifications", foreign_keys=[origin_variant_id]
+    )
+    evidence_links: Mapped[list[EvidenceOriginSpecification]] = relationship(
+        back_populates="origin_specification", passive_deletes="all"
+    )
+
+
+class CastingOrigin(Base):
+    """Optional link from a Hot Wheels casting to a prototype or inspiration candidate."""
+
+    __tablename__ = "casting_origins"
+
+    casting_id: Mapped[str] = mapped_column(
+        ForeignKey("castings.id", ondelete="RESTRICT"), primary_key=True
+    )
+    origin_object_id: Mapped[str] = mapped_column(
+        ForeignKey("origin_objects.id", ondelete="RESTRICT"), primary_key=True
+    )
+    origin_variant_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    role: Mapped[str] = mapped_column(String(32), default="depicts", nullable=False)
+    status: Mapped[str] = mapped_column(String(24), default="candidate", nullable=False)
+    confidence: Mapped[float | None] = mapped_column()
+    note: Mapped[str | None] = mapped_column(Text)
+
+    __table_args__ = (
+        CheckConstraint(
+            "role IN ('depicts', 'inspired_by', 'based_on', 'possible_match', 'other')",
+            name="ck_casting_origins_role",
+        ),
+        CheckConstraint(
+            "status IN ('candidate', 'under_review', 'confirmed', 'rejected')",
+            name="ck_casting_origins_status",
+        ),
+        CheckConstraint(
+            "confidence IS NULL OR (confidence >= 0 AND confidence <= 1)",
+            name="ck_casting_origins_confidence",
+        ),
+        ForeignKeyConstraint(
+            ["origin_variant_id", "origin_object_id"],
+            ["origin_variants.id", "origin_variants.origin_object_id"],
+            name="fk_casting_origins_variant_same_object",
+            ondelete="RESTRICT",
+        ),
+    )
+
+    casting: Mapped[Casting] = relationship()
+    origin_object: Mapped[OriginObject] = relationship(
+        back_populates="casting_links", foreign_keys=[origin_object_id]
+    )
+    origin_variant: Mapped[OriginVariant | None] = relationship(
+        back_populates="casting_links",
+        foreign_keys=[origin_variant_id, origin_object_id],
+        overlaps="origin_object,casting_links",
+    )
+    evidence_links: Mapped[list[EvidenceCastingOrigin]] = relationship(
+        back_populates="casting_origin", passive_deletes="all"
+    )
+
+
+class EvidenceOriginObject(Base):
+    __tablename__ = "evidence_origin_objects"
+
+    evidence_id: Mapped[str] = mapped_column(
+        ForeignKey("evidence.id", ondelete="CASCADE"), primary_key=True
+    )
+    origin_object_id: Mapped[str] = mapped_column(
+        ForeignKey("origin_objects.id", ondelete="RESTRICT"), primary_key=True
+    )
+    role: Mapped[str] = mapped_column(String(32), default="about", nullable=False)
+
+    evidence: Mapped[Evidence] = relationship(back_populates="origin_object_links")
+    origin_object: Mapped[OriginObject] = relationship(back_populates="evidence_links")
+
+
+class EvidenceOriginVariant(Base):
+    __tablename__ = "evidence_origin_variants"
+
+    evidence_id: Mapped[str] = mapped_column(
+        ForeignKey("evidence.id", ondelete="CASCADE"), primary_key=True
+    )
+    origin_variant_id: Mapped[str] = mapped_column(
+        ForeignKey("origin_variants.id", ondelete="RESTRICT"), primary_key=True
+    )
+    role: Mapped[str] = mapped_column(String(32), default="about", nullable=False)
+
+    evidence: Mapped[Evidence] = relationship(back_populates="origin_variant_links")
+    origin_variant: Mapped[OriginVariant] = relationship(back_populates="evidence_links")
+
+
+class EvidenceOriginSpecification(Base):
+    __tablename__ = "evidence_origin_specifications"
+
+    evidence_id: Mapped[str] = mapped_column(
+        ForeignKey("evidence.id", ondelete="CASCADE"), primary_key=True
+    )
+    origin_specification_id: Mapped[str] = mapped_column(
+        ForeignKey("origin_specifications.id", ondelete="RESTRICT"), primary_key=True
+    )
+    role: Mapped[str] = mapped_column(String(32), default="supports", nullable=False)
+
+    evidence: Mapped[Evidence] = relationship(back_populates="origin_specification_links")
+    origin_specification: Mapped[OriginSpecification] = relationship(
+        back_populates="evidence_links"
+    )
+
+
+class EvidenceCastingOrigin(Base):
+    __tablename__ = "evidence_casting_origins"
+
+    evidence_id: Mapped[str] = mapped_column(
+        ForeignKey("evidence.id", ondelete="CASCADE"), primary_key=True
+    )
+    casting_id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    origin_object_id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    role: Mapped[str] = mapped_column(String(32), default="supports", nullable=False)
+
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["casting_id", "origin_object_id"],
+            ["casting_origins.casting_id", "casting_origins.origin_object_id"],
+            name="fk_evidence_casting_origins_link",
+            ondelete="RESTRICT",
+        ),
+    )
+
+    evidence: Mapped[Evidence] = relationship(back_populates="casting_origin_links")
+    casting_origin: Mapped[CastingOrigin] = relationship(back_populates="evidence_links")
