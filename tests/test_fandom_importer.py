@@ -1,5 +1,6 @@
 import importlib.util
 from pathlib import Path
+import tempfile
 import unittest
 
 ROOT = Path(__file__).parents[1]
@@ -11,6 +12,7 @@ def load(name, path):
     return module
 
 fandom = load("import_fandom_mainline", "scripts/import_fandom_mainline.py")
+comparison = load("compare_fandom_allhw", "scripts/compare_fandom_allhw.py")
 
 
 class FandomImporterTests(unittest.TestCase):
@@ -29,6 +31,22 @@ class FandomImporterTests(unittest.TestCase):
         self.assertEqual(records[0]["series_number_raw"], "1/5")
         self.assertEqual(records[1]["series_name"], "HW Dream Garage")
         self.assertEqual(records[1]["source_annotations"]["series"], ["Walmart Exclusive"])
+
+    def test_extracts_series_name_from_allhw_page(self):
+        html = """
+        <html><head><title>MAZDA AUTOZAM</title>
+          <link rel="canonical" href="https://allhotwheels.com/car/2025/mainline/hyw66"/>
+        </head><body>
+          <h1>MAZDA AUTOZAM</h1>
+          <div>SKU HYW66 Release year 2025 Scale 1/64</div>
+          <h2>More from HW DREAM GARAGE</h2>
+        </body></html>
+        """
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "sample.html"
+            path.write_text(html, encoding="utf-8")
+            result = comparison.parse_allhw_page(path)
+        self.assertEqual(result["series_name"], "HW DREAM GARAGE")
 
     def test_rejects_page_without_expected_table(self):
         with self.assertRaises(ValueError):
