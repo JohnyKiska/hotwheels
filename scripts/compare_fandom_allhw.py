@@ -47,7 +47,7 @@ def parse_allhw_page(path: Path) -> dict | None:
          if heading.get_text(" ", strip=True).casefold().startswith("more from ")),
         None,
     )
-    parsed["series_name"] = re.sub(r"^More from\\s+", "", series_heading, flags=re.I) if series_heading else None
+    parsed["series_name"] = re.sub(r"^More from\s+", "", series_heading, flags=re.I) if series_heading else None
     parsed["page_title"] = soup.title.get_text(" ", strip=True) if soup.title else None
     return parsed
 
