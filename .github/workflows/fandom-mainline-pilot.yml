@@ -1,6 +1,11 @@
 name: Fandom Mainline pilot
 
 on:
+  push:
+    branches:
+      - feature/scheduled-market-data
+    paths:
+      - '.github/workflows/fandom-mainline-pilot.yml'
   workflow_dispatch:
     inputs:
       year:
