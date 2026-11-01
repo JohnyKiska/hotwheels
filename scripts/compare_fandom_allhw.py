@@ -78,6 +78,11 @@ def compare(fandom: dict, html_dir: Path) -> dict:
                 status = "not_comparable"
             elif method == "normalized_exact":
                 status = "match" if normalize(left) == normalize(right) else "conflict"
+            elif method == "numeric":
+                try:
+                    status = "match" if int(str(left).strip()) == int(str(right).strip()) else "conflict"
+                except (TypeError, ValueError):
+                    status = "conflict"
             else:
                 status = "match" if str(left).strip() == str(right).strip() else "conflict"
             checks.append({"field": field, "fandom": left, "allhw": right, "status": status})
@@ -85,7 +90,7 @@ def compare(fandom: dict, html_dir: Path) -> dict:
         add_check("model_name", record.get("model_name"), page.get("source_name"))
         add_check("release_year", fandom.get("year"), page.get("release_year"), "exact")
         add_check("collector_number_vs_mainline_number",
-                  record.get("collector_number"), page.get("mainline_number"), "exact")
+                  record.get("collector_number"), page.get("mainline_number"), "numeric")
         add_check("series_number_vs_series_index",
                   record.get("series_number_raw"), page.get("series_index"), "exact")
         comparisons.append({
