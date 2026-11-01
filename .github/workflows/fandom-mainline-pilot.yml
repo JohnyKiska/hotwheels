@@ -1,0 +1,40 @@
+name: Fandom Mainline pilot
+
+on:
+  workflow_dispatch:
+    inputs:
+      year:
+        description: Mainline year to import
+        required: true
+        default: '2025'
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  import-and-compare:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+      - name: Import Fandom Mainline snapshot
+        run: python scripts/import_fandom_mainline.py --year '${{ inputs.year }}' --output 'fandom-mainline-${{ inputs.year }}.json'
+      - name: Compare with saved AllHW pages
+        run: python scripts/compare_fandom_allhw.py --fandom 'fandom-mainline-${{ inputs.year }}.json' --html-dir ALLHW --output 'fandom-allhw-comparison-${{ inputs.year }}.json'
+      - name: Upload review artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fandom-mainline-${{ inputs.year }}-review
+          path: |
+            fandom-mainline-${{ inputs.year }}.json
+            fandom-allhw-comparison-${{ inputs.year }}.json
+          if-no-files-found: warn
+          retention-days: 14
