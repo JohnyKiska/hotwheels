@@ -6,6 +6,8 @@ on:
       - feature/scheduled-market-data
     paths:
       - '.github/workflows/fandom-mainline-pilot.yml'
+      - 'scripts/import_fandom_mainline.py'
+      - 'scripts/compare_fandom_allhw.py'
   workflow_dispatch:
     inputs:
       year:
