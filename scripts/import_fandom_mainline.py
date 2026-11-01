@@ -12,9 +12,9 @@ import re
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import urlencode
+from urllib.request import Request, urlopen
 
-import requests
 from bs4 import BeautifulSoup
 
 DEFAULT_PAGE = "List_of_{year}_Hot_Wheels"
@@ -84,20 +84,19 @@ def parse_table(html: str, year: int, source_url: str) -> list[dict]:
 
 def fetch_page(year: int, page_title: str, api_url: str) -> tuple[str, str]:
     title = page_title.format(year=year)
-    response = requests.get(
-        api_url,
-        params={
-            "action": "parse",
-            "page": title,
-            "prop": "text",
-            "format": "json",
-            "formatversion": "2",
-        },
-        headers={"User-Agent": USER_AGENT},
-        timeout=30,
+    query = urlencode({
+        "action": "parse",
+        "page": title,
+        "prop": "text",
+        "format": "json",
+        "formatversion": "2",
+    })
+    request = Request(
+        f"{api_url}?{query}",
+        headers={"User-Agent": USER_AGENT, "Accept": "application/json"},
     )
-    response.raise_for_status()
-    payload = response.json()
+    with urlopen(request, timeout=30) as response:
+        payload = json.loads(response.read().decode("utf-8"))
     if "error" in payload:
         raise RuntimeError(f"Fandom API error: {payload['error']}")
     html = payload.get("parse", {}).get("text")
