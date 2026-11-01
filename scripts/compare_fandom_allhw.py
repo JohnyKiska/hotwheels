@@ -42,6 +42,12 @@ def parse_allhw_page(path: Path) -> dict | None:
     soup = BeautifulSoup(path.read_text(encoding="utf-8", errors="replace"), "html.parser")
     parsed["mainline_number"] = labelled_value(soup, "Mainline #")
     parsed["series_index"] = labelled_value(soup, "Series index")
+    series_heading = next(
+        (heading.get_text(" ", strip=True) for heading in soup.find_all("h2")
+         if heading.get_text(" ", strip=True).casefold().startswith("more from ")),
+        None,
+    )
+    parsed["series_name"] = re.sub(r"^More from\\s+", "", series_heading, flags=re.I) if series_heading else None
     parsed["page_title"] = soup.title.get_text(" ", strip=True) if soup.title else None
     return parsed
 
@@ -91,6 +97,7 @@ def compare(fandom: dict, html_dir: Path) -> dict:
         add_check("release_year", fandom.get("year"), page.get("release_year"), "exact")
         add_check("collector_number_vs_mainline_number",
                   record.get("collector_number"), page.get("mainline_number"), "numeric")
+        add_check("series_name", record.get("series_name"), page.get("series_name"))
         add_check("series_number_vs_series_index",
                   record.get("series_number_raw"), page.get("series_index"), "exact")
         comparisons.append({
@@ -106,6 +113,7 @@ def compare(fandom: dict, html_dir: Path) -> dict:
                 "source_name": page.get("source_name"),
                 "release_year": page.get("release_year"),
                 "mainline_number": page.get("mainline_number"),
+                "series_name": page.get("series_name"),
                 "series_index": page.get("series_index"),
                 "wheel_description": page.get("wheel_description"),
                 "color_attributes": page.get("color_attributes"),
