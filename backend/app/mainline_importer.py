@@ -284,7 +284,7 @@ def import_mainline_snapshot(session: Session, snapshot: dict[str, Any]) -> dict
         if casting is None:
             casting = Casting(
                 name=casting_name,
-                first_known_year=year,
+                first_known_year=None,
                 status="candidate",
                 description="Candidate casting grouping generated from source model names; not manually confirmed.",
             )
