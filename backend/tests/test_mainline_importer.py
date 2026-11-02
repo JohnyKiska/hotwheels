@@ -3,9 +3,9 @@ from __future__ import annotations
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 
-from backend.app.db import Base
-from backend.app.mainline_importer import import_mainline_snapshot
-from backend.app.models import (
+from app.db import Base
+from app.mainline_importer import import_mainline_snapshot
+from app.models import (
     CatalogNode,
     Casting,
     Evidence,
@@ -64,15 +64,14 @@ def test_import_creates_candidate_releases_with_source_evidence_and_tree():
         session.commit()
 
         assert result["stats"]["releases_created"] == 2
-        assert session.scalar(select(Release).count()) if False else True
         releases = list(session.scalars(select(Release).order_by(Release.name)))
         assert len(releases) == 2
         assert all(release.status == "candidate" for release in releases)
         assert len(list(session.scalars(select(Casting)))) == 2
         assert len(list(session.scalars(select(Series)))) == 2
         assert len(list(session.scalars(select(SourceRecord)))) == 2
-        assert len(list(session.scalars(select(Evidence)))) >= 8
-        assert len(list(session.scalars(select(EvidenceRelease)))) >= 8
+        assert len(list(session.scalars(select(Evidence))) >= 8
+        assert len(list(session.scalars(select(EvidenceRelease))) >= 8
         assert session.scalar(select(CatalogNode).where(CatalogNode.node_type == "root")) is not None
         assert session.scalar(select(CatalogNode).where(CatalogNode.node_type == "release")) is not None
         assert all(e.review_status == "pending" for e in session.scalars(select(Evidence)))
