@@ -1,0 +1,55 @@
+name: Mainline importer isolated pilot
+
+on:
+  pull_request:
+    paths:
+      - "backend/app/mainline_importer.py"
+      - "backend/scripts/import_mainline.py"
+      - "backend/requirements.txt"
+      - ".github/workflows/mainline-importer-pilot.yml"
+  push:
+    branches:
+      - feat/mainline-importer-seed
+    paths:
+      - "backend/app/mainline_importer.py"
+      - "backend/scripts/import_mainline.py"
+      - "backend/requirements.txt"
+      - ".github/workflows/mainline-importer-pilot.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  import-2024-into-ephemeral-test-db:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      DATABASE_URL: sqlite:////tmp/hotwheels_test.db
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+      - name: Create isolated database schema
+        run: alembic upgrade head
+      - name: Import 2024 Mainline into ephemeral test database
+        env:
+          HW_IMPORT_ALLOW_WRITE: "1"
+        run: python scripts/import_mainline.py --year 2024 --apply --report-output mainline-2024-import-report.json
+      - name: Upload import report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mainline-2024-import-report
+          path: backend/mainline-2024-import-report.json
+          if-no-files-found: warn
+          retention-days: 14

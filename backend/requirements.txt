@@ -6,3 +6,4 @@ pydantic
 pillow
 pytest
 httpx
+beautifulsoup4
