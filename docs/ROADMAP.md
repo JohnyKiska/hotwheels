@@ -13,7 +13,7 @@
 
 ## Этап 1. Backend и базовая инфраструктура каталога — интегрировано
 
-PR #60–#68 объединены в main; итоговый main SHA: 68f1ed5a298bdb2479858ec93d32a1fca5fb1ebe.
+PR #60–#68 объединены в main; последний проверенный main SHA на 2026-11-02: 93da500fb840719fd2f3cce2d1e08a94b8fef14b.
 
 - [x] Модели и API дерева каталога.
 - [x] ProductLine/CatalogNode и Origin reference в составе интеграции.
@@ -51,7 +51,7 @@ PR #60–#68 объединены в main; итоговый main SHA: 68f1ed5a29
 
 **Первый вертикальный срез реализуется в Draft PR #74:** TSV preview parser (`POST /imports/mainline/preview`) и parser основной таблицы Fandom yearly-list HTML (`POST /imports/mainline/fandom-html-preview`). Оба endpoint только формируют preview и не пишут в БД. Для Fandom различаем `Col.#` как collector number, не assortment number. Добавлены синтетические parser/API-тесты; до подтверждения CI и проверки на приложенном HTML не считать реальный формат окончательно подтверждённым.
 
-**Следующее расширение в той же Draft PR #74:** отдельный All Hot Wheels card HTML parser (`POST /imports/all-hot-wheels/html-preview`) в `backend/app/importers/all_hot_wheels.py`. Он извлекает SKU, название, год, категорию, специальную метку, scale, base material, серию и её позицию, `Mainline #`, колёса, цвета и теги. Parser сохраняет `chase`/`treasure hunt` как исходные метки и не пишет в БД. На HEAD `2dd0ed27ec67e0b33f65250c68910cf659384b55` CI run #148 прошёл (`pytest`, `browser-e2e`: success). Source-level аудит реальных HTML выявил и исправляет обработку числовой позиции серии без знаменателя и некорректной дроби. Полный запуск committed parser на исходных реальных HTML всё ещё требуется подтвердить. Подробности: `docs/ALL_HOT_WHEELS_IMPORTER.md`.
+**Следующее расширение в той же Draft PR #74:** отдельный All Hot Wheels card HTML parser (`POST /imports/all-hot-wheels/html-preview`) в `backend/app/importers/all_hot_wheels.py`. Он извлекает SKU, название, год, категорию, специальную метку, scale, base material, серию и её позицию, `Mainline #`, колёса, цвета и теги. Parser сохраняет `chase`/`treasure hunt` как исходные метки и не пишет в БД. На HEAD `c8abd1be8498628f23d9de259b5544c85a0192f7` CI run #149 прошёл: `pytest` — 147 passed, 8 warnings; `browser-e2e` — success. Source-level аудит реальных HTML выявил и помог исправить обработку числовой позиции серии без знаменателя и некорректной дроби. Полный запуск committed parser на исходных реальных HTML всё ещё требуется подтвердить. Подробности: `docs/ALL_HOT_WHEELS_IMPORTER.md`.
 
 Далее нужно проверить реальные страницы, затем построить единый preview-сопоставитель Fandom + All Hot Wheels, показывающий совпадения, source-only поля и расхождения. Не объединять Casting/Release автоматически.
 
