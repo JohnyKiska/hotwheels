@@ -36,7 +36,7 @@ def test_parse_fandom_table_skips_non_sku_rows_and_rejects_empty_result():
     html = """
     <html><body><table>
       <tr><th>Toy #</th><th>Col.#</th><th>Model Name</th><th>Series</th><th>Series #</th></tr>
-      <tr><td>Notes</td><td></td><td>Not a model row</td><td></td><td></td></tr>
+      <tr><td>N/A</td><td></td><td>Not a model row</td><td></td><td></td></tr>
     </table></body></html>
     """
     try:
