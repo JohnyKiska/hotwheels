@@ -162,7 +162,9 @@ def test_reimport_of_identical_snapshot_is_idempotent():
         assert second["stats"]["rows_unchanged_skipped"] == 1
         assert session.query(Release).count() == 1
         assert session.query(SourceRecord).count() == 1
-        assert session.query(ReleaseIdentifier).count() == 1
+        # Each Release has a primary SKU and a secondary collector-number link.
+        assert session.query(ReleaseIdentifier).count() == 2
+        assert session.query(CatalogIdentifier).count() == 2
     finally:
         session.close()
         engine.dispose()
@@ -182,7 +184,10 @@ def test_duplicate_sku_is_reported_not_used_to_merge_rows():
 
         assert result["duplicate_skus"] == ["AAA01"]
         assert session.query(Release).count() == 2
-        assert session.query(ReleaseIdentifier).count() == 2
+        # The duplicate SKU remains linked to both distinct Releases; each
+        # Release also has its collector-number link.
+        assert session.query(ReleaseIdentifier).count() == 4
+        assert session.query(Release).count() == 2
     finally:
         session.close()
         engine.dispose()
