@@ -36,6 +36,7 @@ from .models import (
 SOURCE_NAME = "Hot Wheels Wiki (Fandom)"
 SOURCE_URL = "https://hotwheels.fandom.com/wiki/"
 SKU_TYPE_CODE = "sku"
+CATALOG_NUMBER_TYPE_CODE = "catalog_number"
 
 
 def _json_hash(value: Any) -> str:
@@ -83,6 +84,20 @@ def _ensure_sku_type(session: Session) -> tuple[IdentifierType, bool]:
         defaults={
             "label": "Toy SKU",
             "description": "Source-listed toy number/SKU; candidate match key, not proof of release identity.",
+            "normalization_rule": "unicode_case_whitespace",
+            "is_globally_unique": False,
+        },
+    )
+
+
+def _ensure_catalog_number_type(session: Session) -> tuple[IdentifierType, bool]:
+    return _first_or_create(
+        session,
+        IdentifierType,
+        code=CATALOG_NUMBER_TYPE_CODE,
+        defaults={
+            "label": "Collector number",
+            "description": "Source-listed annual collector number (Col. #); may repeat across years and is not a global release key.",
             "normalization_rule": "unicode_case_whitespace",
             "is_globally_unique": False,
         },
@@ -210,12 +225,13 @@ def import_mainline_snapshot(session: Session, snapshot: dict[str, Any]) -> dict
 
     source, source_created = _ensure_source(session)
     sku_type, sku_type_created = _ensure_sku_type(session)
+    catalog_number_type, catalog_number_type_created = _ensure_catalog_number_type(session)
     _root, _line, line_node, base_created = _ensure_tree_base(session)
     year_node, year_node_created = _ensure_year_node(session, line_node.id, year)
 
     stats: Counter[str] = Counter()
     stats["sources_created"] = int(source_created)
-    stats["identifier_types_created"] = int(sku_type_created)
+    stats["identifier_types_created"] = int(sku_type_created) + int(catalog_number_type_created)
     stats["tree_base_created"] = int(base_created)
     stats["year_nodes_created"] = int(year_node_created)
     warnings: list[dict[str, Any]] = []
@@ -336,6 +352,43 @@ def import_mainline_snapshot(session: Session, snapshot: dict[str, Any]) -> dict
                 source_note=f"Observed in {SOURCE_NAME} row {source_row}; candidate match key only.",
             ))
             stats["release_identifier_links_created"] += 1
+
+        # Col. # is a structured release identifier, not a Casting identity key.
+        collector_number = str(row.get("collector_number") or "").strip()
+        if collector_number:
+            normalized_collector_number = normalize_identifier(
+                CATALOG_NUMBER_TYPE_CODE, collector_number
+            )
+            collector_identifier = session.scalar(
+                select(CatalogIdentifier).where(
+                    CatalogIdentifier.identifier_type_id == catalog_number_type.id,
+                    CatalogIdentifier.normalized_value == normalized_collector_number,
+                ).limit(1)
+            )
+            if collector_identifier is None:
+                collector_identifier = CatalogIdentifier(
+                    identifier_type_id=catalog_number_type.id,
+                    value=collector_number,
+                    normalized_value=normalized_collector_number,
+                    notes="Observed source Col. #; annual collector number, not a globally unique release key.",
+                )
+                session.add(collector_identifier)
+                session.flush()
+                stats["catalog_number_identifiers_created"] += 1
+            collector_link = session.get(
+                ReleaseIdentifier, (release.id, collector_identifier.id)
+            )
+            if collector_link is None:
+                session.add(ReleaseIdentifier(
+                    release_id=release.id,
+                    identifier_id=collector_identifier.id,
+                    role="secondary",
+                    source_note=(
+                        f"Observed as Col. # in {SOURCE_NAME} row {source_row}; "
+                        "candidate identifier only."
+                    ),
+                ))
+                stats["release_catalog_number_links_created"] += 1
 
         series = None
         series_node = None
