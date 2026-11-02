@@ -70,8 +70,8 @@ def test_import_creates_candidate_releases_with_source_evidence_and_tree():
         assert len(list(session.scalars(select(Casting)))) == 2
         assert len(list(session.scalars(select(Series)))) == 2
         assert len(list(session.scalars(select(SourceRecord)))) == 2
-        assert len(list(session.scalars(select(Evidence))) >= 8
-        assert len(list(session.scalars(select(EvidenceRelease))) >= 8
+        assert len(list(session.scalars(select(Evidence)))) >= 8
+        assert len(list(session.scalars(select(EvidenceRelease)))) >= 8
         assert session.scalar(select(CatalogNode).where(CatalogNode.node_type == "root")) is not None
         assert session.scalar(select(CatalogNode).where(CatalogNode.node_type == "release")) is not None
         assert all(e.review_status == "pending" for e in session.scalars(select(Evidence)))
