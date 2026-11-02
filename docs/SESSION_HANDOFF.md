@@ -1,5 +1,24 @@
 # Передача текущей сессии
 
+**Актуализация:** 2026-11-02.
+
+## Продолжение работы по наполнению каталога
+
+Открыт PR #75: [Add isolated Mainline importer seed pipeline](https://github.com/JohnyKiska/hotwheels/pull/75), ветка `feat/mainline-importer-seed`.
+
+В PR добавлены `backend/app/mainline_importer.py`, `backend/scripts/import_mainline.py`, тесты и `docs/MAINLINE_IMPORTER_PILOT.md`. Импортер разбирает Fandom Mainline за выбранный год и подготавливает candidate Casting/Release/Series, SKU identifier, source snapshots, pending evidence и tree placements. По умолчанию выполняется dry-run с rollback; реальная запись разрешена только при явном флаге и явно указанной тестовой SQLite БД. Старый `collection.json` не затрагивается.
+
+### Следующие действия
+
+1. Проверить CI на актуальном head PR #75, исправить ошибки, если появятся.
+2. Запустить dry-run для 2024 на изолированной тестовой БД и сохранить JSON-отчёт.
+3. Просмотреть количество строк, duplicate SKU и предупреждения.
+4. Только после успешного dry-run выполнить `--apply` на отдельной тестовой БД, не на production.
+5. Проверить импортированные Release и placements в дереве каталога, затем сопоставить пять уже исследованных SKU (HRY49, HTD01, HTC50, HTF81, HTF65) с AllHW.
+6. После ручной проверки решить, какие дополнительные поля и API нужны для UI редакторов/классификаторов.
+
+Пока PR не объединён и не выполнен ручной тест на отдельной БД, считать массовое наполнение реализованным только частично.
+
 **Дата снимка:** 2026-10-30.  
 **Репозиторий:** JohnyKiska/hotwheels.  
 **Назначение:** передать следующему чату актуальный контекст и конкретный следующий шаг.
