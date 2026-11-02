@@ -1,5 +1,19 @@
 # Текущее состояние проекта
 
+**Актуализация:** 2026-11-02.  
+**Новая работа:** PR #75 — [Add isolated Mainline importer seed pipeline](https://github.com/JohnyKiska/hotwheels/pull/75), ветка `feat/mainline-importer-seed`. На момент записи PR открыт; CI текущего head ещё выполняется.
+
+## Mainline Importer: первая реализация в PR #75
+
+Добавлены:
+- `backend/scripts/import_mainline.py`: получает годовую таблицу Fandom через MediaWiki API, разбирает сохранённый HTML или читает подготовленный snapshot JSON;
+- `backend/app/mainline_importer.py`: создаёт candidate Casting/Release/Series, SKU identifier, SourceRecord, pending Evidence и узлы дерева каталога;
+- dry-run по умолчанию; запись требует `--apply`, `HW_IMPORT_ALLOW_WRITE=1` и явно заданного SQLite URL, содержащего `test` или `sandbox`;
+- тесты на варианты, идемпотентность, дубли SKU, provenance и разбор таблицы.
+
+**Ограничения:** PR не объединён; импорт в пользовательскую тестовую БД ещё не запускался. CI на предыдущем head прошёл pytest, но итоговую проверку нужно подтвердить на текущем head. Импортируемые сущности и свидетельства остаются candidate/pending. SKU не используется как безусловный ключ слияния. `collection.json` не меняется. Импортер пока не подключён к API.
+
+
 **Снимок:** 2026-10-30.  
 **Основной репозиторий:** JohnyKiska/hotwheels.  
 **Последний подтверждённый main:** 68f1ed5a298bdb2479858ec93d32a1fca5fb1ebe (merge PR #68).
