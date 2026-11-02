@@ -67,6 +67,7 @@ def test_import_creates_candidate_releases_with_source_evidence_and_tree():
         releases = list(session.scalars(select(Release).order_by(Release.name)))
         assert len(releases) == 2
         assert all(release.status == "candidate" for release in releases)
+        assert all(release.casting.first_known_year is None for release in releases)
         assert len(list(session.scalars(select(Casting)))) == 2
         assert len(list(session.scalars(select(Series)))) == 2
         assert len(list(session.scalars(select(SourceRecord)))) == 2
