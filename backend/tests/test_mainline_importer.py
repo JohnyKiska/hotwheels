@@ -149,6 +149,46 @@ def test_distinct_collector_numbers_are_structured_release_identifiers():
         engine.dispose()
 
 
+def test_repeated_collector_number_is_shared_without_merging_releases():
+    engine, session = make_session()
+    try:
+        first = row("AAA11", "Model Alpha", 11)
+        second = row("AAA12", "Model Beta", 12)
+        first["collector_number"] = "047"
+        second["collector_number"] = "047"
+
+        result = import_mainline_snapshot(session, snapshot([first, second]))
+        session.commit()
+
+        assert result["stats"]["releases_created"] == 2
+        assert result["stats"]["catalog_number_identifiers_created"] == 1
+        assert result["stats"]["release_catalog_number_links_created"] == 2
+        assert session.query(Release).count() == 2
+
+        catalog_number_type = session.scalar(
+            select(IdentifierType).where(IdentifierType.code == "catalog_number")
+        )
+        identifier = session.scalar(
+            select(CatalogIdentifier).where(
+                CatalogIdentifier.identifier_type_id == catalog_number_type.id,
+                CatalogIdentifier.normalized_value == "047",
+            )
+        )
+        assert identifier is not None
+
+        links = list(session.scalars(
+            select(ReleaseIdentifier).where(
+                ReleaseIdentifier.identifier_id == identifier.id
+            )
+        ))
+        assert len(links) == 2
+        assert {link.role for link in links} == {"secondary"}
+        assert len({link.release_id for link in links}) == 2
+    finally:
+        session.close()
+        engine.dispose()
+
+
 def test_reimport_of_identical_snapshot_is_idempotent():
     engine, session = make_session()
     try:
