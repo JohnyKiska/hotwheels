@@ -6,11 +6,13 @@
 
 `backend/scripts/import_mainline.py` can fetch a yearly Hot Wheels Wiki Mainline table through the MediaWiki API, parse a saved HTML file, or consume an existing parsed snapshot JSON. It sends the parsed rows to `app.mainline_importer`.
 
-The importer creates candidate Castings, Releases, Series, SKU identifiers, source snapshots, pending Evidence, and catalog-tree placements. It deliberately preserves the source's raw row and annotation fields.
+The importer creates candidate Castings, Releases, Series, SKU and collector-number identifiers, source snapshots, pending Evidence, and catalog-tree placements. It deliberately preserves the source's raw row and annotation fields.
 
 - Candidate records are not automatically confirmed.
 - Evidence starts with `review_status=pending`.
 - SKU is a lookup identifier, not a guarantee of unique release identity.
+- Source `Col. #` is stored as a structured `catalog_number` identifier and linked to the Release as a secondary identifier; the source observation is also retained as pending Evidence.
+- Collector numbers may repeat across releases or years. They are not globally unique and must not be used alone to merge or split Castings or Releases.
 - Color annotations such as `(2nd Color)` produce separate Releases. A shared Casting grouping is only a candidate.
 - Existing catalog fields are never overwritten.
 - Re-running an unchanged source row is idempotent.
@@ -46,7 +48,7 @@ Example:
 
 ```bash
 DATABASE_URL="sqlite:////absolute/path/to/hotwheels_test.db" alembic upgrade head
-DATABASE_URL="sqlite:////absolute/path/to/hotwheels_test.db" HW_IMPORT_ALLOW_WRITE=1 \\
+DATABASE_URL="sqlite:////absolute/path/to/hotwheels_test.db" HW_IMPORT_ALLOW_WRITE=1 \
   python scripts/import_mainline.py --year 2024 --apply --report-output mainline-2024-import.json
 ```
 
