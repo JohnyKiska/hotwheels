@@ -6,10 +6,12 @@ from sqlalchemy.orm import Session
 from app.db import Base
 from app.mainline_importer import import_mainline_snapshot
 from app.models import (
+    CatalogIdentifier,
     CatalogNode,
     Casting,
     Evidence,
     EvidenceRelease,
+    IdentifierType,
     Release,
     ReleaseIdentifier,
     Series,
@@ -99,6 +101,49 @@ def test_color_annotations_keep_distinct_releases_but_share_candidate_casting():
         assert {release.name for release in session.scalars(select(Release))} == {
             "Twin Mill", "Twin Mill (2nd Color)"
         }
+    finally:
+        session.close()
+        engine.dispose()
+
+
+def test_distinct_collector_numbers_are_structured_release_identifiers():
+    engine, session = make_session()
+    try:
+        first = row("HTC65", "Nissan Skyline 2000GT-R LBWK", 191, "Then and Now")
+        first["collector_number"] = "191"
+        second = row("HRY85", "Nissan Skyline 2000GT-R LBWK", 213, "Tooned")
+        second["collector_number"] = "213"
+
+        result = import_mainline_snapshot(session, snapshot([first, second]))
+        session.commit()
+
+        assert result["stats"]["releases_created"] == 2
+        releases = list(session.scalars(select(Release)))
+        assert len(releases) == 2
+        # Matching model names may share a candidate Casting, but not a Release.
+        assert len({release.id for release in releases}) == 2
+
+        catalog_number_type = session.scalar(
+            select(IdentifierType).where(IdentifierType.code == "catalog_number")
+        )
+        assert catalog_number_type is not None
+        identifiers = list(session.scalars(
+            select(CatalogIdentifier).where(
+                CatalogIdentifier.identifier_type_id == catalog_number_type.id
+            )
+        ))
+        assert {identifier.value for identifier in identifiers} == {"191", "213"}
+
+        links = list(session.scalars(
+            select(ReleaseIdentifier)
+            .join(CatalogIdentifier, CatalogIdentifier.id == ReleaseIdentifier.identifier_id)
+            .where(CatalogIdentifier.identifier_type_id == catalog_number_type.id)
+        ))
+        assert len(links) == 2
+        assert {link.role for link in links} == {"secondary"}
+        assert len({link.release_id for link in links}) == 2
+        assert result["stats"]["catalog_number_identifiers_created"] == 2
+        assert result["stats"]["release_catalog_number_links_created"] == 2
     finally:
         session.close()
         engine.dispose()
