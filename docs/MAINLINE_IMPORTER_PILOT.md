@@ -48,7 +48,7 @@ Example:
 
 ```bash
 DATABASE_URL="sqlite:////absolute/path/to/hotwheels_test.db" alembic upgrade head
-DATABASE_URL="sqlite:////absolute/path/to/hotwheels_test.db" HW_IMPORT_ALLOW_WRITE=1 \\\
+DATABASE_URL="sqlite:////absolute/path/to/hotwheels_test.db" HW_IMPORT_ALLOW_WRITE=1 \
   python scripts/import_mainline.py --year 2024 --apply --report-output mainline-2024-import.json
 ```
 
