@@ -52,7 +52,7 @@ PR #60–#68 объединены в main; итоговый main SHA: 68f1ed5a29
 
 ## Этап 3. Mainline Importer — первый специализированный обработчик
 
-**Статус:** первая реализация находится в открытом PR #75 (`feat/mainline-importer-seed`); ещё не объединена и не прошла ручной импорт в отдельную тестовую БД.
+**Статус:** первая реализация находится в открытом PR #75 (`feat/mainline-importer-seed`). Backend CI: 132 теста passed, browser E2E success. GitHub Actions успешно импортировал 441 candidate release из Fandom 2024 в эфемерную тестовую БД; ручной импорт в локальную тестовую БД пользователя ещё не выполнен.
 
 
 - [x] Для пилота зафиксировать Fandom Mainline yearly table / MediaWiki API, saved HTML и parsed snapshot JSON (PR #75).
