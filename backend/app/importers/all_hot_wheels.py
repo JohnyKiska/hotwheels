@@ -270,15 +270,50 @@ def preview_all_hot_wheels_html(text: str, expected_year: int | None = None) -> 
     ]
     series_name = summary_series_name or (max(series_badges, key=len) if series_badges else None)
 
-    series_index, series_total = _fraction(fields.get("Series index", ""))
+    series_index_raw = fields.get("Series index")
+    series_index, series_total = _fraction(series_index_raw or "")
+    if series_index is None and series_index_raw and series_index_raw.isdigit():
+        numeric_index = int(series_index_raw)
+        if numeric_index >= 1:
+            series_index = numeric_index
     if series_index is None and summary_fraction:
         series_index, series_total = _fraction(summary_fraction)
+        if series_index is None and summary_fraction.isdigit():
+            numeric_index = int(summary_fraction)
+            if numeric_index >= 1:
+                series_index = numeric_index
+
     mainline_number_text = fields.get("Mainline #", "")
     mainline_number = int(mainline_number_text) if mainline_number_text.isdigit() else None
+    invalid_series_values = list(dict.fromkeys(
+        value for value in (series_index_raw, summary_fraction)
+        if value and "/" in value and _fraction(value)[0] is None
+    ))
+    issues: list[dict[str, Any]] = [
+        {
+            "row": 1,
+            "severity": "warning",
+            "code": "invalid_series_fraction",
+            "message": (
+                f"Позиция серии {value!r} не прошла проверку; "
+                "исходное значение сохранено для ручной проверки."
+            ),
+            "toy_number": toy_number,
+        }
+        for value in invalid_series_values
+    ]
 
     wheels = _extract_wheels(_section_after_heading(root, "Wheels"))
     colors = _extract_colors(_section_after_heading(root, "Colors"))
     tags = _extract_tags(_section_after_heading(root, "Tags"))
+
+    source_values = dict(fields)
+    series_summary_raw = (
+        f"{category} · {summary_series_name} · #{summary_fraction}"
+        if category_series_line else None
+    )
+    if series_summary_raw:
+        source_values["Category/series summary"] = series_summary_raw
 
     source_fields = {
         "toy_number": "SKU",
@@ -287,8 +322,10 @@ def preview_all_hot_wheels_html(text: str, expected_year: int | None = None) -> 
         "scale": "Scale",
         "base_material": "Base material",
         "series_name": "category/series summary or series badge",
-        "series_index": "Series index",
+        "series_index": "Series index or category/series summary",
+        "series_index_raw": "Series index",
         "mainline_number": "Mainline #",
+        "mainline_number_raw": "Mainline #",
         "special_label": "primary badge",
         "wheels": "Wheels",
         "colors": "Colors",
@@ -307,21 +344,35 @@ def preview_all_hot_wheels_html(text: str, expected_year: int | None = None) -> 
         "series_name": series_name,
         "series_index": series_index,
         "series_total": series_total,
+        "series_index_raw": series_index_raw,
         "mainline_number": mainline_number,
+        "mainline_number_raw": mainline_number_text or None,
+        "mainline_number_source": "Mainline #" if mainline_number is not None else None,
+        "mainline_total": None,
+        "mainline_total_source": None,
         "wheels": wheels,
         "colors": colors,
         "tags": tags,
         "source_url": canonical,
         "source_fields": source_fields,
+        "source_values": source_values,
+        "series_summary_raw": series_summary_raw,
         "raw_title": title or None,
         "review_status": "candidate",
     }
+    error_count = sum(issue["severity"] == "error" for issue in issues)
+    warning_count = sum(issue["severity"] == "warning" for issue in issues)
     return {
         "importer": "all_hot_wheels",
         "mode": "preview_only",
         "writes_to_catalog": False,
         "source_format": "all_hot_wheels_car_html",
         "records": [record],
-        "issues": [],
-        "summary": {"records_found": 1, "errors": 0, "warnings": 0, "ready_for_review": True},
+        "issues": issues,
+        "summary": {
+            "records_found": 1,
+            "errors": error_count,
+            "warnings": warning_count,
+            "ready_for_review": error_count == 0,
+        },
     }

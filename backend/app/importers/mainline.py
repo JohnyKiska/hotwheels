@@ -187,10 +187,13 @@ class _FandomListParser(HTMLParser):
         self.current_cell: list[str] | None = None
         self.title_parts: list[str] = []
         self.page_text_parts: list[str] = []
+        self.canonical_url: str | None = None
         self.in_title = False
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         attributes = dict(attrs)
+        if tag == "link" and "canonical" in (attributes.get("rel") or "").casefold().split():
+            self.canonical_url = attributes.get("href")
         if tag == "title":
             self.in_title = True
         if tag == "table":
@@ -275,6 +278,16 @@ def preview_mainline_fandom_html(text: str, catalog_year: int) -> dict[str, Any]
         re.IGNORECASE,
     )
     mainline_total = int(numbering_statement.group(2)) if numbering_statement else None
+    mainline_numbering_statement = numbering_statement.group(0) if numbering_statement else None
+    source_fields = {
+        "toy_number": "Toy #",
+        "collector_number": "Col.#",
+        "name": "Model Name",
+        "series_name": "Series",
+        "series_index": "Series #",
+        "mainline_number": "Col.# + explicit yearly Mainline numbering statement",
+        "mainline_total": "explicit yearly Mainline numbering statement",
+    }
     records: list[dict[str, Any]] = []
     issues: list[dict[str, Any]] = []
 
@@ -347,6 +360,15 @@ def preview_mainline_fandom_html(text: str, catalog_year: int) -> dict[str, Any]
             and 1 <= int(collector_number) <= mainline_total
             else None
         )
+        source_values = {
+            "Toy #": toy_number,
+            "Col.#": collector_number,
+            "Model Name": name,
+            "Series": series_cell,
+            "Series #": series_fraction,
+        }
+        if mainline_numbering_statement:
+            source_values["Mainline numbering statement"] = mainline_numbering_statement
         records.append({
             "source_row": source_row,
             "toy_number": toy_number,
@@ -355,6 +377,10 @@ def preview_mainline_fandom_html(text: str, catalog_year: int) -> dict[str, Any]
             "mainline_total": mainline_total,
             "mainline_number_source": "Fandom Col.# + yearly Mainline numbering statement" if parsed_mainline_number is not None else None,
             "mainline_total_source": "Fandom yearly page numbering statement" if mainline_total is not None else None,
+            "mainline_numbering_statement": mainline_numbering_statement,
+            "source_url": parser.canonical_url,
+            "source_fields": source_fields,
+            "source_values": source_values,
             "assortment_number": None,
             "name": name,
             "catalog_year": catalog_year,
@@ -404,8 +430,10 @@ def preview_mainline_fandom_html(text: str, catalog_year: int) -> dict[str, Any]
         "writes_to_catalog": False,
         "catalog_year": catalog_year,
         "source_title": title or None,
+        "source_url": parser.canonical_url,
         "mainline_total": mainline_total,
         "mainline_total_source": "Fandom yearly page numbering statement" if mainline_total is not None else None,
+        "mainline_numbering_statement": mainline_numbering_statement,
         "records": records,
         "issues": issues,
         "summary": {

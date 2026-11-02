@@ -85,8 +85,9 @@ def test_fandom_yearly_html_preview_extracts_collector_number_and_treasure_hunt(
     from app.importers.mainline import preview_mainline_fandom_html
 
     text = """<!doctype html>
-    <html><head><title>List of 2025 Hot Wheels | Hot Wheels Wiki</title></head>
-    <body><p>For 2025, the Hot Wheels mainline is numbered 1 through 250 with color variations not receiving a new number.</p>
+    <html><head><title>List of 2025 Hot Wheels | Hot Wheels Wiki</title>
+    <link rel="canonical" href="https://hotwheels.fandom.com/wiki/List_of_2025_Hot_Wheels">
+    </head><body><p>For 2025, the Hot Wheels mainline is numbered 1 through 250 with color variations not receiving a new number.</p>
     <table class="sortable wikitable">
     <tr><th>Toy #</th><th>Col.#</th><th>Model Name</th><th>Series</th><th>Series #</th><th>Photo</th></tr>
     <tr><td>JBC25</td><td>141</td><td>'85 Honda City Turbo II</td>
@@ -100,6 +101,8 @@ def test_fandom_yearly_html_preview_extracts_collector_number_and_treasure_hunt(
     assert result["mode"] == "preview_only"
     assert result["writes_to_catalog"] is False
     assert result["source_format"] == "fandom_yearly_html"
+    assert result["source_url"] == "https://hotwheels.fandom.com/wiki/List_of_2025_Hot_Wheels"
+    assert result["mainline_numbering_statement"] == "mainline is numbered 1 through 250"
     assert result["summary"]["records_found"] == 2
     first, second = result["records"]
     assert first["toy_number"] == "JBC25"
@@ -107,6 +110,10 @@ def test_fandom_yearly_html_preview_extracts_collector_number_and_treasure_hunt(
     assert first["mainline_number"] == 141
     assert first["mainline_total"] == 250
     assert first["mainline_number_source"] == "Fandom Col.# + yearly Mainline numbering statement"
+    assert first["mainline_numbering_statement"] == "mainline is numbered 1 through 250"
+    assert first["source_url"] == "https://hotwheels.fandom.com/wiki/List_of_2025_Hot_Wheels"
+    assert first["source_values"]["Col.#"] == "141"
+    assert first["source_values"]["Mainline numbering statement"] == "mainline is numbered 1 through 250"
     assert first["assortment_number"] is None
     assert first["name"] == "'85 Honda City Turbo II"
     assert first["series_name"] == "HW J-Imports"
@@ -141,6 +148,7 @@ def test_fandom_html_does_not_invent_mainline_total_without_explicit_statement()
     from app.importers.mainline import preview_mainline_fandom_html
 
     text = """<title>List of 2025 Hot Wheels</title>
+    <link rel="canonical" href="https://hotwheels.fandom.com/wiki/List_of_2025_Hot_Wheels">
     <table class="sortable wikitable">
     <tr><th>Toy #</th><th>Col.#</th><th>Model Name</th><th>Series</th><th>Series #</th></tr>
     <tr><td>JBC25</td><td>141</td><td>'85 Honda City Turbo II</td><td>HW J-Imports</td><td>5/5</td></tr>

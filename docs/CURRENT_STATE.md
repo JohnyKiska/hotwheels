@@ -1,6 +1,6 @@
 # Текущее состояние проекта
 
-**Снимок:** 2026-10-30.  
+**Снимок:** 2026-11-02.  
 **Основной репозиторий:** JohnyKiska/hotwheels.  
 **Последний подтверждённый main:** 68f1ed5a298bdb2479858ec93d32a1fca5fb1ebe (merge PR #68).
 
@@ -48,7 +48,7 @@ PR #60–#68 объединены с main. В этой серии реализо
 
 ## 3. Состояние импортеров
 
-**Импортеры Mainline и All Hot Wheels развиваются в Draft PR #74.** Последняя ранее подтверждённая проверка базовой ветки PR: workflow run #128 на commit `e3f0def828a2628472a23408f3d2ed86cf94031b`, jobs `pytest` и `browser-e2e` — success. После этого в ветку добавлен All Hot Wheels parser; CI для нового HEAD ещё нужно проверить.
+**Импортеры Mainline и All Hot Wheels развиваются в Draft PR #74** ([PR](https://github.com/JohnyKiska/hotwheels/pull/74)), ветка `feat/mainline-importer-preview`. На 2026-11-02 PR открыт, draft, не объединён; HEAD `2dd0ed27ec67e0b33f65250c68910cf659384b55`, base `main` на `93da500fb840719fd2f3cce2d1e08a94b8fef14b`. Последний коммит ветки от 2026-10-30: `docs(importer): document component-scoped color data`. Workflow run #148 на HEAD завершился успешно: `pytest` и `browser-e2e` — success. Изменений в ветке после этого коммита на момент проверки не обнаружено.
 
 ### Что уже добавлено в ветке `feat/mainline-importer-preview`
 - `backend/app/importers/mainline.py` — TSV parser для табличного текста старого `converter.html` и read-only parser основной таблицы HTML-страницы Fandom со списком Hot Wheels за год.
@@ -67,6 +67,7 @@ PR #60–#68 объединены с main. В этой серии реализо
 - Исходные метки сохраняются: `chase` не преобразуется в TH/STH; `treasure hunt` не переименовывается в STH.
 - Категория, серия, позиция в серии и special label представлены раздельно. `Mainline #` остаётся независимым от Fandom `Col.#`.
 - Добавлены синтетические parser/API-тесты. Четыре предоставленных реальных карточки (JBC25, GJJ06, CKJ44, JHW68) материализованы и изучены на уровне структуры и состава полей. Полный прогон именно committed parser на четырёх файлах ещё требуется отдельно подтвердить.
+- Добавлено сохранение raw values и provenance для подписанных полей, canonical source URL и отдельной сырой строки позиции серии; самостоятельное положительное число позиции сохраняется без выдуманного знаменателя, а некорректная дробь получает предупреждение.
 - Подробное описание: `docs/ALL_HOT_WHEELS_IMPORTER.md`.
 
 ### Согласованное правило отображения годового номера Mainline
@@ -78,7 +79,8 @@ PR #60–#68 объединены с main. В этой серии реализо
 ### Границы текущего результата
 - Это **preview-only вертикальный срез**, а не завершённый импорт в каталог.
 - Пока нет подтверждения/записи в БД, поиска кандидатов среди существующих Casting/Release, хранения SourceRecord/Evidence и полноценной идентификации выпусков.
-- Workflow run #140 (`41079292033`) на commit `8624ea0966e847b3fc899db724fc32e495806ef5` прошёл: `pytest` — success (145 passed, 8 warnings), `browser-e2e` — success. Это подтверждает синтетические parser/API-тесты и browser-to-HTTP flow на указанном commit, но не заменяет отдельный запуск committed parser на реальных сохранённых HTML.
+- Последний CI на текущем HEAD — workflow run #148 (`41083174015`): `pytest` и `browser-e2e` — success. Эти проверки относятся к synthetic fixtures и browser-to-HTTP flow, а не к исполнению parser на реальных HTML-файлах.
+- В рамках source-level аудита реальных сохранённых All Hot Wheels HTML из ветки `feature/scheduled-market-data` просмотрены страницы BL018, HTF33, HYW28, JBC25, JKF45 и JRP31. Обнаружены значения `Series index=95` (BL018) и `0/5` (JKF45), которые реализация на прежнем HEAD молча теряла. Прямой запуск committed Python parser на полных реальных HTML по-прежнему не подтверждён; эти наблюдения основаны на структурном чтении источников, а не на тесте Python parser.
 - Старый `importer.html` остаётся отдельным редактором `collection.json`; новый endpoint не изменяет его поведение и не мигрирует старую базу.
 
 ### Согласованное направление

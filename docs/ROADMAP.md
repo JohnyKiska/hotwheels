@@ -1,6 +1,6 @@
 # Дорожная карта Hot Wheels Catalog
 
-**Обновлено:** 2026-10-30.
+**Обновлено:** 2026-11-02.
 
 Статусы отражают подтверждённое состояние на дату обновления. «Запланировано» не означает, что функция реализована. Перед выполнением этапа сверять код, PR и CI.
 
@@ -51,7 +51,7 @@ PR #60–#68 объединены в main; итоговый main SHA: 68f1ed5a29
 
 **Первый вертикальный срез реализуется в Draft PR #74:** TSV preview parser (`POST /imports/mainline/preview`) и parser основной таблицы Fandom yearly-list HTML (`POST /imports/mainline/fandom-html-preview`). Оба endpoint только формируют preview и не пишут в БД. Для Fandom различаем `Col.#` как collector number, не assortment number. Добавлены синтетические parser/API-тесты; до подтверждения CI и проверки на приложенном HTML не считать реальный формат окончательно подтверждённым.
 
-**Следующее расширение в той же Draft PR #74:** отдельный All Hot Wheels card HTML parser (`POST /imports/all-hot-wheels/html-preview`) в `backend/app/importers/all_hot_wheels.py`. Он извлекает SKU, название, год, категорию, специальную метку, scale, base material, серию и её позицию, `Mainline #`, колёса, доступные цвета и теги. Parser сохраняет `chase`/`treasure hunt` как исходные метки и не пишет в БД. Синтетические parser/API-тесты добавлены; проверка четырёх реальных HTML-файлов и CI текущего commit ещё ожидаются. Подробности: `docs/ALL_HOT_WHEELS_IMPORTER.md`.
+**Следующее расширение в той же Draft PR #74:** отдельный All Hot Wheels card HTML parser (`POST /imports/all-hot-wheels/html-preview`) в `backend/app/importers/all_hot_wheels.py`. Он извлекает SKU, название, год, категорию, специальную метку, scale, base material, серию и её позицию, `Mainline #`, колёса, цвета и теги. Parser сохраняет `chase`/`treasure hunt` как исходные метки и не пишет в БД. На HEAD `2dd0ed27ec67e0b33f65250c68910cf659384b55` CI run #148 прошёл (`pytest`, `browser-e2e`: success). Source-level аудит реальных HTML выявил и исправляет обработку числовой позиции серии без знаменателя и некорректной дроби. Полный запуск committed parser на исходных реальных HTML всё ещё требуется подтвердить. Подробности: `docs/ALL_HOT_WHEELS_IMPORTER.md`.
 
 Далее нужно проверить реальные страницы, затем построить единый preview-сопоставитель Fandom + All Hot Wheels, показывающий совпадения, source-only поля и расхождения. Не объединять Casting/Release автоматически.
 
@@ -62,6 +62,7 @@ PR #60–#68 объединены в main; итоговый main SHA: 68f1ed5a29
 - [x] Сохранить отдельную семантику `collector_number` (Fandom `Col.#`) и `series_index/series_total` (позиция внутри серии, например `5/5`); не считать их взаимозаменяемыми с годовым номером.
 - [x] Для 2025 года проверено явное утверждение Fandom «mainline is numbered 1 through 250»; парсер извлекает `mainline_total=250` из текста годовой страницы, а `mainline_number` из `Col.#` только при наличии такого утверждения.
 - [ ] Проверить аналогичное явное утверждение для каждого другого года; не переносить 250 как константу и не выводить знаменатель из количества строк Fandom.
+- [x] Сохранять provenance и исходные значения Mainline/Fandom и All Hot Wheels; для All Hot Wheels сохранять standalone `Series index` без выдуманного знаменателя и помечать некорректные дроби.
 - [ ] Сформулировать правила идентификации Casting и Release для Mainline с учётом утверждённых правил Release.
 - [ ] Учесть год официального каталога, артикулы, тип колёс, маркировку днища, UPC и свидетельства.
 - [ ] Определить поведение для неизвестных значений и неполных записей.
