@@ -60,10 +60,10 @@ Read-only аудит показал:
 
 Открыт PR #75: [Add isolated Mainline importer seed pipeline](https://github.com/JohnyKiska/hotwheels/pull/75), ветка `feat/mainline-importer-seed`.
 
-1. Дождаться CI на актуальном head PR #75; исправить найденные проблемы.
-2. После зелёного CI выполнить dry-run для 2024 на изолированной тестовой SQLite БД и сохранить JSON-отчёт.
-3. Проверить количество строк, дубли SKU и предупреждения.
-4. После успешного dry-run выполнить `--apply` только на отдельной тестовой БД.
+1. CI на реализации прошёл: 132 теста passed, browser E2E success. Отдельный GitHub Actions pilot успешно импортировал Fandom Mainline 2024 в эфемерную тестовую SQLite БД.
+2. Pilot обработал 441 строку: 441 candidate Release, 249 candidate Casting, 36 Series, 0 duplicate SKU и 0 warnings. Отчёт artifact: `mainline-2024-import-report` в [workflow run](https://github.com/JohnyKiska/hotwheels/actions/runs/41394385313).
+3. Следующий ручной шаг: выполнить dry-run на локальной изолированной тестовой БД пользователя и просмотреть JSON-отчёт.
+4. После успешного dry-run выполнить `--apply` только на отдельной тестовой БД, не на production.
 5. Проверить созданные Casting/Release/Series, source snapshots, pending evidence и узлы дерева каталога.
 6. Сопоставить с AllHW пять известных SKU: HRY49, HTD01, HTC50, HTF81, HTF65; отдельно сохранить физические наблюдения пользователя по HTD01/HTF65 и гипотезу Target Red Edition для HTF81.
 7. После этого расширить enrichment AllHW и продумать подключение импорта к API.
