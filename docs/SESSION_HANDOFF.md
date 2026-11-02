@@ -19,7 +19,7 @@
 
 Пользователь 2026-10-30 подтвердил семейство специализированных обработчиков: Mainline первым, Premium отдельно, остальные по мере необходимости.
 
-В Draft PR #74 (`feat/mainline-importer-preview`) на текущем HEAD `c8abd1be8498628f23d9de259b5544c85a0192f7` (base `main` SHA `93da500fb840719fd2f3cce2d1e08a94b8fef14b`) добавлены:
+В Draft PR #74 (`feat/mainline-importer-preview`), base `main` SHA `93da500fb840719fd2f3cce2d1e08a94b8fef14b`, добавлены следующие изменения. Последняя реализационная правка: `c8abd1be8498628f23d9de259b5544c85a0192f7`; последующий documentation-only commit: `abe6796977093baeaf835c874900eda751b5ebd3`. Точный текущий HEAD смотреть в PR.
 - `backend/app/importers/mainline.py`: TSV parser под формат старого `converter.html` и parser основной таблицы Fandom yearly-list HTML.
 - `POST /imports/mainline/preview` и `POST /imports/mainline/fandom-html-preview`: API endpoints без доступа к сессии БД и без записи данных.
 - Для Fandom `Col.#` хранится отдельно как `collector_number`; год страницы сверяется с запрошенным годом.
@@ -27,7 +27,7 @@
 - Дубли Toy number сохраняются отдельными строками и помечаются для ручной проверки.
 - В переданном наборе Fandom за 2025 год найдена строка JBC25, '85 Honda City Turbo II, Col.# 141, HW J-Imports Treasure Hunt, 5/5. Другие приложенные карточки: Raphael (2020 Character Cars), Enforcer (2015 Themed Entertainment), Mitsubishi Eclipse (2026 Fast & Furious Premium); это полезные отрицательные примеры, не Mainline.
 
-Это первый рабочий вертикальный срез, не полный импорт. На workflow run #119 обе jobs (`pytest` и `browser-e2e`) завершились success. В том же PR добавлен `backend/app/importers/all_hot_wheels.py` и `POST /imports/all-hot-wheels/html-preview`: read-only parser индивидуальной карточки All Hot Wheels. Он извлекает SKU, название, год, категорию, special label, scale, base material, серию, Series index, `Mainline #`, доступные колёса, цвета и теги. `chase` и `treasure hunt` сохраняются как исходные метки. Синтетические parser/API-тесты добавлены. Четыре реальные страницы JBC25, GJJ06, CKJ44 и JHW68 доступны в приложенных файлах и материализованы в рабочую папку `/mnt/data/hw_import_samples`; они изучены на уровне структуры и полей, но полный запуск committed parser на этих файлах ещё нужно подтвердить. Для Colors согласована и реализуется структура по компонентам (`body`, `interior`, `base`, `window`) с отдельными `color`, `detailed`, `source`, `finish`. Workflow run #149 (`41386938362`) на текущем HEAD завершился успешно: `pytest` — 147 passed, 8 warnings; `browser-e2e` — success.
+Это первый рабочий вертикальный срез, не полный импорт. На workflow run #119 обе jobs (`pytest` и `browser-e2e`) завершились success. В том же PR добавлен `backend/app/importers/all_hot_wheels.py` и `POST /imports/all-hot-wheels/html-preview`: read-only parser индивидуальной карточки All Hot Wheels. Он извлекает SKU, название, год, категорию, special label, scale, base material, серию, Series index, `Mainline #`, доступные колёса, цвета и теги. `chase` и `treasure hunt` сохраняются как исходные метки. Синтетические parser/API-тесты добавлены. Четыре реальные страницы JBC25, GJJ06, CKJ44 и JHW68 доступны в приложенных файлах и материализованы в рабочую папку `/mnt/data/hw_import_samples`; они изучены на уровне структуры и полей, но полный запуск committed parser на этих файлах ещё нужно подтвердить. Для Colors согласована и реализуется структура по компонентам (`body`, `interior`, `base`, `window`) с отдельными `color`, `detailed`, `source`, `finish`. Workflow run #150 (`41387177145`) на документационном follow-up завершился успешно: `pytest` — 147 passed, 8 warnings; `browser-e2e` — success.
 
 Пока нет сопоставления с существующими Casting/Release, записи SourceRecord/Evidence и явного подтверждения импорта.
 
@@ -47,8 +47,8 @@ Read-only аудит показал:
 
 ## Проверка 2026-11-02
 
-- PR #74 остаётся draft/open, не объединён; HEAD `c8abd1be8498628f23d9de259b5544c85a0192f7`.
-- CI run #149 завершился успешно: `pytest` — 147 passed, 8 warnings; `browser-e2e` — success.
+- PR #74 остаётся draft/open, не объединён; последняя реализационная правка — `c8abd1be8498628f23d9de259b5544c85a0192f7`, documentation-only follow-up — `abe6796977093baeaf835c874900eda751b5ebd3`.
+- CI run #150 на документационном follow-up завершился успешно: `pytest` — 147 passed, 8 warnings; `browser-e2e` — success.
 - Реальные All Hot Wheels HTML BL018, HTF33, HYW28, JBC25, JKF45 и JRP31 просмотрены на уровне DOM/подписанных полей; полное исполнение Python parser на них не подтверждено.
 - Обнаруженные края исправлены в parser: BL018 `Series index=95` теперь сохраняется как индекс без знаменателя; JKF45 `Series index=0/5` сохраняется в raw field и создаёт warning. Для Fandom preview добавлены canonical source URL и исходная строка подтверждения годовой нумерации.
 - Визуальный макет preview подготовлен как концептуальный пример, не как скриншот реально работающего интерфейса.

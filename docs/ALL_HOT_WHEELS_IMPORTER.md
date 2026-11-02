@@ -1,6 +1,6 @@
 # All Hot Wheels HTML Importer
 
-**Статус на 2026-11-02:** read-only parser находится в Draft PR #74. CI run #149 на HEAD `c8abd1be8498628f23d9de259b5544c85a0192f7` прошёл: `pytest` — 147 passed, 8 warnings; `browser-e2e` — success. Прямой запуск committed Python parser на полных реальных HTML-файлах ещё не подтверждён.
+**Статус на 2026-11-02:** read-only parser находится в Draft PR #74. Последняя реализационная правка `c8abd1be8498628f23d9de259b5544c85a0192f7` и documentation-only follow-up `abe6796977093baeaf835c874900eda751b5ebd3` прошли CI run #150: `pytest` — 147 passed, 8 warnings; `browser-e2e` — success. Прямой запуск committed Python parser на полных реальных HTML-файлах ещё не подтверждён.
 
 ## Назначение
 
@@ -51,7 +51,7 @@ Endpoint: `POST /imports/all-hot-wheels/html-preview`.
 - Цвета извлекаются из видимых DOM-чипов с сохранением компонента (`body`, `interior`, `base`, `window`). Атрибуты `color`, `detailed` и `source` остаются отдельными; исходный атрибут `premium` сохраняется в поле `finish`. Чипы одной детали объединяются в одну структуру.
 - Если сайт скрывает часть блока для гостя, парсер не пытается восстановить скрытые значения из маркетингового текста или других карточек.
 - Реальные HTML-файлы используются только для локальной проверки и не должны попадать в репозиторий. В CI применяются синтетические fixtures.
-- Synthetic parser/API tests покрывают компоненты цветов, provenance, самостоятельный индекс `95` и предупреждение для `0/5`. GitHub Actions run #149 на HEAD `c8abd1be8498628f23d9de259b5544c85a0192f7` подтвердил: `pytest` — 147 passed, 8 warnings; `browser-e2e` — success.
+- Synthetic parser/API tests покрывают компоненты цветов, provenance, самостоятельный индекс `95` и предупреждение для `0/5`. GitHub Actions run #150 на документационном follow-up подтвердил: `pytest` — 147 passed, 8 warnings; `browser-e2e` — success.
 - В текущем run изучены реальные HTML BL018, HTF33, HYW28, JBC25, JKF45 и JRP31 из ветки `feature/scheduled-market-data` на уровне структуры и подписанных значений. Это source-level аудит, не прямой запуск committed Python parser. Реальные HTML и изображения в PR не добавляются.
 
 ## Следующий шаг
