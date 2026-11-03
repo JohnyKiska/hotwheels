@@ -1,6 +1,23 @@
 # Текущее состояние проекта
 
-**Актуализация:** 2026-11-02.  
+**Актуализация:** 2026-11-03.
+
+**Текущий main:** `9126b49a03d362165764f3b29aefe8e6be3af0aa` (последний проверенный commit от 2026-11-02).
+
+> ВНИМАНИЕ: ниже сохранены прежние снимки состояния для истории. Их старые формулировки о PR #75 как открытом и Mainline Importer как нереализованном устарели. Актуальное состояние описано в блоке ниже и в конце документа.
+
+## Актуальный статус на 2026-11-03
+
+- PR #75 Mainline importer seed pipeline объединён в `main`.
+- Backend CI на последнем проверенном main: **134 passed, 8 warnings**; browser E2E: **success** ([run](https://github.com/JohnyKiska/hotwheels/actions/runs/41409331916)).
+- GitHub Pages deploy: **success** ([run](https://github.com/JohnyKiska/hotwheels/actions/runs/41409331670)).
+- Изолированный Fandom Mainline 2024 pilot: **441 candidate Release**, **249 candidate Casting**, **36 Series**, 0 duplicate SKU, 0 warnings. Это CI-пилот в эфемерной SQLite БД, не локальная ручная проверка.
+- Последний main commit сохраняет collector numbers как Release identifiers.
+- Mainline pipeline создаёт кандидатов и сохраняет provenance/evidence; не считать записи автоматически подтверждёнными. Локальный тестовый dry-run и проверка результата пользователем остаются следующими шагами.
+- Premium Importer не реализован. Полноценный import API/UI workflow не подтверждён.
+- Не изменять production `collection.json`, production DB и `main` напрямую.
+
+  
 **Новая работа:** PR #75 — [Add isolated Mainline importer seed pipeline](https://github.com/JohnyKiska/hotwheels/pull/75), ветка `feat/mainline-importer-seed`. На момент записи PR открыт; CI текущего head ещё выполняется.
 
 ## Mainline Importer: первая реализация в PR #75
