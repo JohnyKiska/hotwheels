@@ -1,3 +1,5 @@
+from contextlib import contextmanager
+
 from sqlalchemy import create_engine, func, select
 from sqlalchemy.orm import Session
 
@@ -15,10 +17,15 @@ from app.models import (
 )
 
 
+@contextmanager
 def make_session():
     engine = create_engine("sqlite:///:memory:")
-    Base.metadata.create_all(engine)
-    return Session(engine)
+    try:
+        Base.metadata.create_all(engine)
+        with Session(engine) as session:
+            yield session
+    finally:
+        engine.dispose()
 
 
 def seed_entity_and_sources(session):

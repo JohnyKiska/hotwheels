@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from contextlib import closing
 import os
 import sqlite3
 import subprocess
@@ -31,7 +32,7 @@ def test_fresh_database_upgrade_creates_complete_core_schema(tmp_path: Path) -> 
         f"stderr:\n{result.stderr}"
     )
 
-    with sqlite3.connect(database_path) as connection:
+    with closing(sqlite3.connect(database_path)) as connection:
         tables = {
             row[0]
             for row in connection.execute(

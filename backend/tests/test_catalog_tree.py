@@ -49,24 +49,42 @@ def test_product_line_is_distinct_from_series_and_can_link_brands(session):
     assert loaded.id != loaded.brand_links[0].brand.id
 
 
+
 def test_catalog_node_typed_foreign_key_round_trips(session):
     line = ProductLine(name="Mainline", line_type="mainline")
     root = CatalogNode(node_type="root", label_override="Catalog")
     session.add_all([line, root])
     session.flush()
+
     line_node = CatalogNode(
         parent=root,
         node_type="product_line",
         product_line=line,
         sort_order=1,
     )
-    year_node = CatalogNode(parent=line_node, node_type="year", catalog_year=2026)
+    session.add(line_node)
+    session.flush()
+
+    year_node = CatalogNode(
+        parent=line_node,
+        node_type="year",
+        catalog_year=2026,
+    )
+    session.add(year_node)
+    session.flush()
+
     casting = Casting(name="Skyline")
     release = Release(casting=casting, catalog_year=2026)
     session.add(release)
     session.flush()
-    release_node = CatalogNode(parent=year_node, node_type="release", release=release)
-    session.add_all([line_node, year_node, release_node])
+
+    release_node = CatalogNode(
+        parent=year_node,
+        node_type="release",
+        release=release,
+    )
+    session.add(release_node)
+
     session.commit()
 
     session.expire_all()
@@ -76,6 +94,7 @@ def test_catalog_node_typed_foreign_key_round_trips(session):
     assert loaded.parent.node_type == "year"
     assert loaded.parent.catalog_year == 2026
     assert loaded.parent.parent.product_line.name == "Mainline"
+
 
 
 @pytest.mark.parametrize(

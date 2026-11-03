@@ -73,27 +73,26 @@ def test_origin_object_can_have_optional_variant_and_scoped_specifications(sessi
     assert loaded.variants[0].specifications[0].value == "AWD"
 
 
+
 def test_origin_specification_must_belong_to_exactly_one_scope(session):
     skyline = OriginObject(make_name="Nissan", model_name="Skyline")
     session.add(skyline)
     session.flush()
 
     invalid_none = OriginSpecification(key="power", value="206 kW")
-    invalid_both = OriginSpecification(
-        origin_object=skyline,
-        key="power",
-        value="206 kW",
-    )
     session.add(invalid_none)
+
     with pytest.raises(IntegrityError):
         session.commit()
     session.rollback()
 
     session.add(skyline)
     session.flush()
+
     variant = OriginVariant(origin_object=skyline, name="GT-R")
     session.add(variant)
     session.flush()
+
     invalid_both = OriginSpecification(
         origin_object_id=skyline.id,
         origin_variant_id=variant.id,
@@ -101,9 +100,11 @@ def test_origin_specification_must_belong_to_exactly_one_scope(session):
         value="206 kW",
     )
     session.add(invalid_both)
+
     with pytest.raises(IntegrityError):
         session.commit()
     session.rollback()
+
 
 
 def test_casting_can_have_multiple_candidates_without_claiming_confirmation(session):

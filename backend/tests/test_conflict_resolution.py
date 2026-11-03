@@ -1,3 +1,5 @@
+from contextlib import contextmanager
+
 from sqlalchemy import create_engine, func, select
 from sqlalchemy.orm import Session
 
@@ -21,11 +23,15 @@ from app.models import (
 )
 
 
+@contextmanager
 def make_session():
     engine = create_engine("sqlite:///:memory:")
-    Base.metadata.create_all(engine)
-    return Session(engine)
-
+    try:
+        Base.metadata.create_all(engine)
+        with Session(engine) as session:
+            yield session
+    finally:
+        engine.dispose()
 
 def seed_conflict(session):
     release = Release(casting_id="casting-id", catalog_year=2026, name="Example")
