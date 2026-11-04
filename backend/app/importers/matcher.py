@@ -217,10 +217,8 @@ def match_import_observation(
         signals = candidate["signals"]
         has_release_identifier = any(s["kind"] == "release_identifier" for s in signals)
         has_exact_name_year = any(s["kind"] == "exact_name_and_catalog_year" for s in signals)
-        has_exact_name = any(s["kind"] == "exact_name" for s in signals)
         strong = has_release_identifier and (
             catalog_year is None or release.catalog_year == catalog_year
-            or has_exact_name
         ) or has_exact_name_year
         enriched.append({
             **candidate,
