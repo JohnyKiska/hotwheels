@@ -133,3 +133,15 @@ GitHub Actions run #183 подтвердил adapter: `118 passed`, 4 warnings. 
 Matcher использует только SELECT-запросы. Он не создаёт SourceRecord/Evidence/Conflict, не регистрирует identifiers, не меняет статусы и не объединяет сущности. Это первый matching slice, не полный preview diff и не importer orchestration.
 
 Следующий шаг: прогнать CI, затем добавить explainable attribute diff между claims и выбранным Release, отдельно покрыв конфликтующие значения. Persistence/apply и UI остаются отдельными этапами.
+
+## 9. Claim preview diff
+
+`build_release_claim_diff(observation, release_snapshot)` — pure in-memory function for comparing one observation with an explicitly selected Release snapshot. It returns per-claim statuses:
+
+- `same` — source value matches a known canonical field; proposed action `no_change`.
+- `new_evidence` — supported canonical field is empty; evidence may be attached only after confirmation.
+- `conflicting_value` — incoming value differs from a populated canonical field; proposed action is manual conflict review, never overwrite.
+- `evidence_only` — no direct canonical field exists yet (for example wheels, colors, scale); preserve the claim as source evidence.
+- `insufficient_evidence` — incoming value is empty or unusable.
+
+Current direct field mapping is deliberately small: model name, catalog year, assortment number and series name. Release year, toy numbers, collector numbers and physical attributes are not silently mapped into unrelated canonical columns. The function has no database dependency and always returns `preview_only` / `writes_to_catalog=False`.
