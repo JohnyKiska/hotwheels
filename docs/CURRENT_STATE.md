@@ -99,3 +99,15 @@
 - Closed stale/superseded PRs #1, #29, #59, #70, #71, #72, #73, #74, #78 and #79 after preserving relevant content. Historical branches and archive refs were not deleted.
 - `main`, GitHub Pages default branch and production data remain untouched.
 - Remaining important work: inspect saved local HTML fixtures; define shared observation/matching/confirmation contracts; separately design safe additive migrations for Package, Manufacturer/Brand, ProductLine/CatalogNode and Origin.
+
+
+## Read-only importer matcher · 2026-11-04
+
+- В feature-ветке `feature/read-only-import-matcher` добавлен `backend/app/importers/matcher.py` с функцией `match_import_observation()`.
+- Matcher работает поверх существующих `Release`, `Casting`, `IdentifierType`, `CatalogIdentifier`, `ReleaseIdentifier`, `CastingIdentifier` и `SourceRecord`; новые таблицы и миграции не добавлялись.
+- Поддержаны объяснимые результаты `exact_source_replay`, `strong_candidate`, `identifier_collision`, `ambiguous`, `no_match`.
+- Exact replay определяется только при явной паре `source_id` + `content_hash`; URL или SKU сами по себе не считаются доказательством replay.
+- Matching выполняет только SELECT. Нет записи SourceRecord/Evidence/Conflict, регистрации identifier, изменения статусов или merge.
+- Добавлены тесты на exact name/year, identifier lookup, collision, неизвестный namespace, exact source replay и read-only поведение.
+- CI для этой ветки ожидает запуска после открытия draft PR. До успешного CI не считать реализацию проверенной.
+- Ограничение: matcher пока ориентирован на Release candidates; explainable attribute diff и полноценный preview action builder ещё не реализованы.
