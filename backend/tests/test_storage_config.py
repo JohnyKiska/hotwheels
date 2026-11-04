@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 
 import pytest
+from sqlalchemy.engine import make_url
 
 from app.storage import (
     DEFAULT_DATABASE_PATH,
@@ -40,7 +41,7 @@ def test_external_storage_selects_catalog_database(tmp_path, monkeypatch):
     url = resolve_database_url()
 
     assert url.startswith("sqlite:///")
-    assert url.endswith("DATABASE/catalog.db")
+    assert Path(make_url(url).database) == root / "DATABASE" / "catalog.db"
 
 
 def test_missing_external_storage_fails_closed_without_creating_directories(
