@@ -117,3 +117,17 @@ Next: design a read-only matcher and explainable preview diff over the shared ob
 Matcher использует существующие Release/Casting/Identifier/SourceRecord модели и только SELECT-запросы. Он не создаёт Evidence, SourceRecord или Conflict, не вызывает `register_identifier()`, не подтверждает и не объединяет сущности. Exact replay возможен только при явном `source_id` и `content_hash`; текущий adapter пока не поставляет эти значения, поэтому обычный observation не классифицируется как replay по одному URL/SKU.
 
 PR #83 merged: https://github.com/JohnyKiska/hotwheels/pull/83, squash commit `c9f01d45dedc3e856486388cb910d8ed11dbacfd`. GitHub Actions run #184: `124 passed`, 4 warnings. `integration/catalog-foundation` проверена как identical merge commit. `main` по-прежнему на `b315431d279c42d94a76766d89dd18187278039c`; GitHub Pages и архивные ветки не затрагивались. Следующий шаг: реализовать explainable attribute preview diff.
+
+
+## Claim preview diff · 2026-11-04
+
+Создана ветка `feature/import-claim-preview-diff` от `integration/catalog-foundation`.
+
+Добавлено:
+- `backend/app/importers/preview_diff.py`: pure `build_release_claim_diff(observation, release_snapshot)`.
+- `backend/tests/test_importer_preview_diff.py`: тесты на same, new evidence, conflicting value, evidence-only, insufficient evidence, series name и обязательный Release ID.
+- В контракт добавлено описание diff статусов и ограниченной карты canonical fields.
+
+Diff не использует БД и не пишет значения. Прямое сравнение пока только для `model_name`, `catalog_year`, `assortment_number`, `series_name`. Wheels/colors/scale и другие поля идут как `evidence_only`, так как текущая canonical schema не содержит для них соответствующих полей. Конфликт никогда не перезаписывает выбранный Release.
+
+Следующий шаг: проверить diff tests в GitHub Actions через PR в `integration/catalog-foundation`. После успешного CI объединить; затем проектировать read-only preview API, который свяжет parser → observation → matcher → diff. `main` и GitHub Pages не менять.
