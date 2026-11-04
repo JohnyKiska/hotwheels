@@ -80,7 +80,7 @@
 - [x] Restore All Hot Wheels saved-card HTML parser as read-only preview.
 - [x] Add preview-only API endpoints and synthetic parser/API tests.
 - [x] Preserve Mainline importer specification, synthetic fixture plan/data, and All Hot Wheels importer documentation.
-- [ ] Run GitHub Actions and resolve any integration/test failures.
+- [x] Run GitHub Actions on importer code: 113 passed, 4 warnings (run #179).
 - [ ] Review source-level parser behavior against representative local HTML files from `ALLHW` without network access.
 - [ ] Design the next shared observation/preview/matching layer before adding DB writes.
 - [ ] Separately assess ProductLine/Package/Brand/Origin model additions and safe additive migrations; do not merge PR #74 wholesale.
