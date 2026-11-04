@@ -82,7 +82,9 @@
 - [x] Preserve Mainline importer specification, synthetic fixture plan/data, and All Hot Wheels importer documentation.
 - [x] Run GitHub Actions on importer code: 113 passed, 4 warnings (run #179).
 - [ ] Review source-level parser behavior against representative local HTML files from `ALLHW` without network access.
-- [ ] Design the next shared observation/preview/matching layer before adding DB writes.
+- [x] Define the shared observation contract and implement pure in-memory adapters for all three preview sources.
+- [x] Validate the adapter with GitHub Actions run #183: 118 passed, 4 warnings.
+- [ ] Design a read-only matcher and explainable preview diff before adding DB writes.
 - [ ] Separately assess ProductLine/Package/Brand/Origin model additions and safe additive migrations; do not merge PR #74 wholesale.
 
 ## PR cleanup · 2026-11-04
