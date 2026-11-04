@@ -103,3 +103,17 @@ Superseded PRs #1, #29, #59, #70, #71, #72, #73, #74, #78 and #79 are closed. Th
 PR #82 added and merged a pure in-memory `preview_to_observations()` adapter. It normalizes all three source-specific previews into a versioned observation envelope, keeps catalog year distinct from release year, preserves source provenance/raw values, and emits only identifier hints. It does not access the database or network. GitHub Actions run #183: `118 passed`, 4 warnings.
 
 Next: design a read-only matcher and explainable preview diff over the shared observation contract. Continue to prohibit direct catalog writes, automatic entity merges, and network fetching until separately designed and explicitly reviewed.
+
+
+## Matcher implementation · 2026-11-04
+
+Создана feature-ветка `feature/read-only-import-matcher` от `integration/catalog-foundation`.
+
+Добавлено:
+- `backend/app/importers/matcher.py`: read-only `match_import_observation(session, observation, source_snapshot=None)`.
+- `backend/tests/test_importer_matcher.py`: проверки exact name/year, exact identifier, collision, неизвестного namespace и exact source replay.
+- Обновлён `docs/importers/IMPORTER_OBSERVATION_CONTRACT.md`.
+
+Matcher использует существующие Release/Casting/Identifier/SourceRecord модели и только SELECT-запросы. Он не создаёт Evidence, SourceRecord или Conflict, не вызывает `register_identifier()`, не подтверждает и не объединяет сущности. Exact replay возможен только при явном `source_id` и `content_hash`; текущий adapter пока не поставляет эти значения, поэтому обычный observation не классифицируется как replay по одному URL/SKU.
+
+Текущий результат до CI: код и тесты закоммичены в feature branch; draft PR ещё не открыт. Следующий шаг: проверить diff, открыть draft PR в `integration/catalog-foundation`, дождаться GitHub Actions и исправить найденные ошибки. Затем реализовать attribute preview diff. `main`, GitHub Pages и архивные ветки не трогать.
