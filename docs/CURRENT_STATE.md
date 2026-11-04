@@ -111,3 +111,12 @@
 - Добавлены тесты на exact name/year, identifier lookup, collision, неизвестный namespace, exact source replay и read-only поведение.
 - PR #83 merged в `integration/catalog-foundation` (squash commit `c9f01d45dedc3e856486388cb910d8ed11dbacfd`). GitHub Actions run #184: `124 passed`, 4 warnings. Integration проверена как identical merge commit; `main` остался на `b315431d279c42d94a76766d89dd18187278039c`.
 - Ограничение: matcher пока ориентирован на Release candidates; explainable attribute diff и полноценный preview action builder ещё не реализованы.
+
+
+## Attribute preview diff · 2026-11-04
+
+- В отдельной feature-ветке добавлен pure in-memory `build_release_claim_diff(observation, release_snapshot)`.
+- Diff выдаёт `same`, `new_evidence`, `conflicting_value`, `evidence_only`, `insufficient_evidence` и предлагает только preview actions.
+- Прямое сравнение ограничено текущими canonical полями: model name, catalog year, assortment number, series name. Остальные атрибуты сохраняются как evidence-only, без ложного отображения их как полей Release.
+- Различия не перезаписываются и не применяются; функция не обращается к БД.
+- Добавлены unit tests; CI ожидается после PR.
