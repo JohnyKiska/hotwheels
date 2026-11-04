@@ -81,7 +81,7 @@ The explicit `DATABASE_URL` override takes precedence over
 On the PC where the HDD or SSD is connected, run this once from `backend/`:
 
 ```bash
-python -m app.init_storage "H:\\HW-CATALOG" --label "Development HDD"
+python -m app.init_storage "H:\HW-CATALOG" --label "Development HDD"
 ```
 
 Use the actual drive letter assigned by Windows. The command creates the storage
