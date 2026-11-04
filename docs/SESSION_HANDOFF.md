@@ -159,3 +159,12 @@ PR #84 merged в `integration/catalog-foundation`: https://github.com/JohnyKiska
 Endpoint read-only: никаких network fetch, SourceRecord/Evidence/Conflict writes, identifier registration, catalog updates или migrations. HTML sources передаются локальным текстом. CI ещё не запущен/не подтверждён на момент handoff.
 
 Следующий шаг: открыть PR в `integration/catalog-foundation`, дождаться GitHub Actions, исправить regressions. После успешной проверки оценить response contract и подготовить UI workflow. `main`, GitHub Pages и архивные ветки не менять.
+
+
+## Pipeline preview API merge · 2026-11-04
+
+PR #85 merged: https://github.com/JohnyKiska/hotwheels/pull/85, squash commit `c787696e9dc25abfc985de485710fd8f2569d0aa`. GitHub Actions run #188: `138 passed`, 4 warnings.
+
+В integration добавлен `POST /imports/preview`: parser → observation → matcher → optional claim diff. Поддерживаются Mainline TSV, локальный Fandom yearly HTML и локальный All Hot Wheels HTML. Multi-record parser result требует явного `record_index`; diff требует явного `selected_release_id`. Endpoint read-only, без network fetch, DB writes, migrations, SourceRecord/Evidence/Conflict creation, identifier registration или auto-select.
+
+Следующий шаг: изучить frontend admin structure и спроектировать read-only importer preview UI, используя существующие компоненты и API patterns. Не добавлять apply/persistence до отдельного решения. `main`, GitHub Pages и archive branches не трогать.
