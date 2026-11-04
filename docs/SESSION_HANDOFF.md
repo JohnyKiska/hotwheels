@@ -168,3 +168,7 @@ PR #85 merged: https://github.com/JohnyKiska/hotwheels/pull/85, squash commit `c
 В integration добавлен `POST /imports/preview`: parser → observation → matcher → optional claim diff. Поддерживаются Mainline TSV, локальный Fandom yearly HTML и локальный All Hot Wheels HTML. Multi-record parser result требует явного `record_index`; diff требует явного `selected_release_id`. Endpoint read-only, без network fetch, DB writes, migrations, SourceRecord/Evidence/Conflict creation, identifier registration или auto-select.
 
 Следующий шаг: изучить frontend admin structure и спроектировать read-only importer preview UI, используя существующие компоненты и API patterns. Не добавлять apply/persistence до отдельного решения. `main`, GitHub Pages и archive branches не трогать.
+
+
+### Current integration blocker
+The preview API is implemented and CI-verified, but there is no backend deployment target or persistent database hosting configuration in the repository. The existing API also contains write-capable conflict-resolution endpoints. Therefore do not wire the public GitHub Pages UI to an arbitrary backend origin or enable broad CORS yet. Next decision required before browser integration: choose backend hosting + persistent DB, and define API authentication/authorization and explicit allowed origins. Local API tests are green; remote end-to-end browser testing is not possible until that infrastructure exists.
