@@ -126,6 +126,8 @@ Apply — отдельная операция после явного решен
 
 ## 8. Текущая реализация и следующий шаг
 
-Сейчас существуют три read-only parser endpoints: Mainline TSV, local Fandom yearly HTML и All Hot Wheels saved-card HTML. Они возвращают source-specific preview payloads. Общего observation adapter, matcher, persisted import run, confirmation UI/API и apply service пока нет.
+Сейчас существуют три read-only parser endpoints: Mainline TSV, local Fandom yearly HTML и All Hot Wheels saved-card HTML. Чистый in-memory adapter `preview_to_observations()` объединяет их результаты в versioned `hw_catalog.import_observation` envelope, сохраняя source fields, raw values, identifier hints и parser issues. Adapter не обращается к БД и сети.
 
-Следующий технический шаг: реализовать общий in-memory adapter и unit tests поверх текущих parser outputs, не добавляя новые ORM-модели и не записывая в БД. После проверки контракта отдельно проектировать preview/matching service и только затем persistence/apply.
+GitHub Actions run #183 подтвердил интеграцию: `118 passed`, 4 warnings. Matcher, persisted import run, confirmation UI/API и apply service пока не реализованы.
+
+Следующий технический шаг: спроектировать read-only matcher и preview diff поверх общего observation contract, не добавляя автоматические записи или merge. Persistence/apply проектировать отдельно после проверки matching rules.
