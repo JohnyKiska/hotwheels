@@ -3,6 +3,7 @@ from pathlib import Path
 from uuid import UUID
 
 import pytest
+from sqlalchemy.engine import make_url
 
 from app.init_storage import STORAGE_DIRECTORIES, initialize_storage
 from app.storage import resolve_database_url
@@ -32,7 +33,7 @@ def test_initialized_storage_is_accepted_by_database_resolver(tmp_path, monkeypa
 
     url = resolve_database_url()
 
-    assert url.endswith("DATABASE/catalog.db")
+    assert Path(make_url(url).database) == root / "DATABASE" / "catalog.db"
 
 
 def test_initialize_storage_refuses_non_empty_directory_without_changes(tmp_path):
