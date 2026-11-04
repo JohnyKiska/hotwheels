@@ -104,6 +104,7 @@
 - [x] Возвращать объяснимые сигналы и состояния exact replay / strong candidate / collision / ambiguous / no match.
 - [x] Добавить тесты на безопасный identifier lookup, exact name+catalog year, collisions, неизвестный namespace и replay по source ID + content hash.
 - [x] Подтвердить GitHub Actions для matcher branch: run #184, 124 passed, 4 warnings.
+- [x] Merge PR #83 в `integration/catalog-foundation`; `main` не изменён.
 - [ ] Реализовать explainable claim-to-Release attribute diff (same / new evidence / conflicting value / insufficient evidence).
 - [ ] Подключить read-only preview API только после стабилизации matcher/diff contracts.
 - [ ] Отдельно спроектировать persistence, confirmation и apply; никаких автоматических merges.
