@@ -163,3 +163,29 @@ def test_exact_source_replay_requires_source_id_and_content_hash():
         assert result["status"] == "exact_source_replay"
         assert result["source_record_id"] == record.id
         assert result["writes_to_catalog"] is False
+
+
+def test_identifier_with_conflicting_catalog_year_stays_ambiguous():
+    with make_session() as session:
+        session.add(IdentifierType(code="sku", label="SKU"))
+        _, release = seed_release(session, year=2025)
+        identifier_type = session.scalar(
+            select(IdentifierType).where(IdentifierType.code == "sku")
+        )
+        identifier = CatalogIdentifier(
+            identifier_type_id=identifier_type.id,
+            value="JHW40-K5N7",
+            normalized_value="JHW40-K5N7",
+        )
+        session.add(identifier)
+        session.flush()
+        session.add(ReleaseIdentifier(release_id=release.id, identifier_id=identifier.id))
+        session.flush()
+
+        result = match_import_observation(session, observation(
+            year=2026,
+            hints=[{"type_code": "sku", "raw_value": "JHW40-K5N7"}],
+        ))
+
+        assert result["status"] == "ambiguous"
+        assert result["matched_entities"][0]["strength"] == "weak"
