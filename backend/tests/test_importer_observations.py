@@ -80,6 +80,7 @@ def test_all_hot_wheels_preview_preserves_chase_and_separates_release_year():
     assert observation["subject_hints"]["release_year"] == 2026
     assert observation["identifier_hints"][0]["type_code"] == "sku"
     assert claims["special_label"]["value"] == "chase"
+    assert claims["series_index"]["raw_value"] == "2/5"
     assert "mainline_number" not in claims
 
 
