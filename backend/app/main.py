@@ -3,6 +3,8 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from .db import get_db
+from .importers.all_hot_wheels import preview_all_hot_wheels_html
+from .importers.mainline import preview_mainline_fandom_html, preview_mainline_tsv
 from .conflict_queue import get_conflict_detail, list_conflicts
 from .conflict_resolution import (
     InvalidConflictResolution,
@@ -22,6 +24,54 @@ app = FastAPI(
 def health_check() -> dict[str, str]:
     """Return a basic health status without accessing catalog data."""
     return {"status": "ok"}
+
+
+class MainlinePreviewRequest(BaseModel):
+    """Clipboard content and catalog year for a read-only preview."""
+
+    text: str = Field(min_length=1, max_length=500_000)
+    catalog_year: int = Field(ge=1968, le=2100)
+
+
+@app.post("/imports/mainline/preview", tags=["imports"])
+def preview_mainline_import(request: MainlinePreviewRequest) -> dict:
+    """Parse Mainline TSV for review only; never writes to the catalog."""
+    try:
+        return preview_mainline_tsv(request.text, request.catalog_year)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+class MainlineHtmlPreviewRequest(BaseModel):
+    """A saved Fandom yearly HTML page for a read-only preview."""
+
+    text: str = Field(min_length=1, max_length=2_000_000)
+    catalog_year: int = Field(ge=1968, le=2100)
+
+
+@app.post("/imports/mainline/fandom-html-preview", tags=["imports"])
+def preview_mainline_fandom_html_import(request: MainlineHtmlPreviewRequest) -> dict:
+    """Parse the primary Fandom yearly list table; never writes to the catalog."""
+    try:
+        return preview_mainline_fandom_html(request.text, request.catalog_year)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+class AllHotWheelsHtmlPreviewRequest(BaseModel):
+    """A saved individual All Hot Wheels page for a read-only preview."""
+
+    text: str = Field(min_length=1, max_length=2_000_000)
+    expected_year: int | None = Field(default=None, ge=1968, le=2100)
+
+
+@app.post("/imports/all-hot-wheels/html-preview", tags=["imports"])
+def preview_all_hot_wheels_html_import(request: AllHotWheelsHtmlPreviewRequest) -> dict:
+    """Parse one saved All Hot Wheels page; never writes to the catalog."""
+    try:
+        return preview_all_hot_wheels_html(request.text, request.expected_year)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
 @app.get("/conflicts", tags=["review"])
