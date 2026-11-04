@@ -76,6 +76,19 @@ closed instead of silently falling back to a new local database.
 The explicit `DATABASE_URL` override takes precedence over
 `HW_CATALOG_DATA_DIR`; do not set both in normal external-storage operation.
 
+## Initialize external storage
+
+On the PC where the HDD or SSD is connected, run this once from `backend/`:
+
+```bash
+python -m app.init_storage "H:\\HW-CATALOG" --label "Development HDD"
+```
+
+Use the actual drive letter assigned by Windows. The command creates the storage
+folders and `DEVICE_INFO.json`, but does not create a database or import catalog
+records. It refuses to modify a non-empty target directory. After initialization,
+set `HW_CATALOG_DATA_DIR` to that directory before starting the backend.
+
 ## Initialize a development database
 
 Only when you explicitly want to create the legacy local development database:
