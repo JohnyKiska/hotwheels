@@ -7,9 +7,9 @@ from app.importers.observations import preview_to_observations
 
 def test_mainline_tsv_preview_maps_to_shared_observation_without_writes():
     preview = preview_mainline_tsv(
-        "Toy #\\tCatalog #\\tName\\tSeries\\n"
-        "ABC12\\tJHW01\\tSynthetic Skyline\\tHW J-Imports\\n"
-        "3/10 Treasure Hunt\\n",
+        "Toy #\tCatalog #\tName\tSeries\n"
+        "ABC12\tJHW01\tSynthetic Skyline\tHW J-Imports\n"
+        "3/10 Treasure Hunt\n",
         2026,
     )
 
@@ -80,7 +80,7 @@ def test_all_hot_wheels_preview_preserves_chase_and_separates_release_year():
     assert observation["subject_hints"]["release_year"] == 2026
     assert observation["identifier_hints"][0]["type_code"] == "sku"
     assert claims["special_label"]["value"] == "chase"
-    assert claims["mainline_number"] not in claims
+    assert "mainline_number" not in claims
 
 
 def test_adapter_rejects_any_result_that_is_not_explicitly_read_only():
