@@ -8,9 +8,17 @@ alembic upgrade head
 alembic current
 ```
 
-The database URL defaults to `sqlite:///hotwheels.db` relative to `backend/`. Set
-`DATABASE_URL` to target a different database (especially for tests and staging).
-Back up a persistent database before applying migrations.
+Alembic uses the same database URL resolver as the application:
+
+1. `DATABASE_URL` is an explicit override (used by tests and controlled deployments).
+2. `HW_CATALOG_DATA_DIR` selects an initialized external storage root and resolves
+   to `DATABASE/catalog.db`.
+3. Otherwise, the configured Alembic URL is used. The checked-in default,
+   `sqlite:///hotwheels.db`, is relative to `backend/`.
+
+For external storage, the root must already contain a valid `DEVICE_INFO.json`
+marker and an existing `DATABASE/` directory. See the backend README for the
+marker format and safety behavior. Back up persistent data before applying migrations.
 
 The initial core schema is currently also supported by `python -m app.init_db`.
 The evidence-layer revision adds source/evidence/media/conflict/history tables only;
