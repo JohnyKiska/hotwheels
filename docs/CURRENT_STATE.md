@@ -109,5 +109,5 @@
 - Exact replay определяется только при явной паре `source_id` + `content_hash`; URL или SKU сами по себе не считаются доказательством replay.
 - Matching выполняет только SELECT. Нет записи SourceRecord/Evidence/Conflict, регистрации identifier, изменения статусов или merge.
 - Добавлены тесты на exact name/year, identifier lookup, collision, неизвестный namespace, exact source replay и read-only поведение.
-- PR #83 открыт в `integration/catalog-foundation` и переведён в ready for review. GitHub Actions run #184: `124 passed`, 4 warnings.
+- PR #83 merged в `integration/catalog-foundation` (squash commit `c9f01d45dedc3e856486388cb910d8ed11dbacfd`). GitHub Actions run #184: `124 passed`, 4 warnings. Integration проверена как identical merge commit; `main` остался на `b315431d279c42d94a76766d89dd18187278039c`.
 - Ограничение: matcher пока ориентирован на Release candidates; explainable attribute diff и полноценный preview action builder ещё не реализованы.
