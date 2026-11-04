@@ -50,3 +50,5 @@ py -m http.server 8000
 ## Backend importer status · 2026-11-04
 
 Backend уже содержит read-only source parsers, общий observation adapter и read-only Release matcher, интегрированный в `integration/catalog-foundation` через PR #83. Matcher только ищет кандидатов и объясняет сигналы; он не пишет в БД и не объединяет записи. См. `docs/importers/IMPORTER_OBSERVATION_CONTRACT.md` и `docs/SESSION_HANDOFF.md`.
+
+The importer pipeline also includes a read-only Release matcher and a pure in-memory claim preview diff. The diff distinguishes unchanged values, new evidence candidates, conflicting values, evidence-only attributes, and insufficient evidence. It does not write to the catalog. See `docs/importers/IMPORTER_OBSERVATION_CONTRACT.md`.
