@@ -1,10 +1,17 @@
+from typing import Literal
+
 from fastapi import FastAPI, Depends, HTTPException, Query
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from .db import get_db
 from .importers.all_hot_wheels import preview_all_hot_wheels_html
 from .importers.mainline import preview_mainline_fandom_html, preview_mainline_tsv
+from .importers.observations import preview_to_observations
+from .importers.matcher import match_import_observation
+from .importers.preview_diff import build_release_claim_diff
+from .models import Casting, Release, ReleaseSeries, Series
 from .conflict_queue import get_conflict_detail, list_conflicts
 from .conflict_resolution import (
     InvalidConflictResolution,
@@ -70,6 +77,103 @@ def preview_all_hot_wheels_html_import(request: AllHotWheelsHtmlPreviewRequest) 
     """Parse one saved All Hot Wheels page; never writes to the catalog."""
     try:
         return preview_all_hot_wheels_html(request.text, request.expected_year)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+
+
+class ImportPipelinePreviewRequest(BaseModel):
+    """One source payload and optional explicit catalog Release selection."""
+
+    source: Literal["mainline_tsv", "fandom_html", "all_hot_wheels_html"]
+    text: str = Field(min_length=1, max_length=2_000_000)
+    catalog_year: int | None = Field(default=None, ge=1968, le=2100)
+    expected_year: int | None = Field(default=None, ge=1968, le=2100)
+    record_index: int = Field(default=0, ge=0)
+    selected_release_id: str | None = None
+
+    @model_validator(mode="after")
+    def validate_source_year(self):
+        if self.source in ("mainline_tsv", "fandom_html") and self.catalog_year is None:
+            raise ValueError("catalog_year is required for Mainline sources.")
+        if self.source == "all_hot_wheels_html" and self.catalog_year is not None:
+            raise ValueError("catalog_year is not accepted for All Hot Wheels pages.")
+        return self
+
+
+def _release_preview_snapshot(session: Session, release: Release) -> dict:
+    casting = session.get(Casting, release.casting_id)
+    series_names = session.scalars(
+        select(Series.name)
+        .join(ReleaseSeries, ReleaseSeries.series_id == Series.id)
+        .where(ReleaseSeries.release_id == release.id)
+    ).all()
+    return {
+        "id": release.id,
+        "name": release.name,
+        "casting_name": casting.name if casting else None,
+        "catalog_year": release.catalog_year,
+        "assortment_number": release.assortment_number,
+        "series_names": list(series_names),
+    }
+
+
+@app.post("/imports/preview", tags=["imports"])
+def preview_import_pipeline(
+    request: ImportPipelinePreviewRequest,
+    session: Session = Depends(get_db),
+) -> dict:
+    """Run parser → observation → matcher → optional claim diff, without writes."""
+    try:
+        if request.source == "mainline_tsv":
+            parsed = preview_mainline_tsv(request.text, request.catalog_year)
+        elif request.source == "fandom_html":
+            parsed = preview_mainline_fandom_html(request.text, request.catalog_year)
+        else:
+            parsed = preview_all_hot_wheels_html(request.text, request.expected_year)
+
+        adapted = preview_to_observations(parsed)
+        observations = adapted["observations"]
+        if request.record_index >= len(observations):
+            raise HTTPException(
+                status_code=422,
+                detail=f"record_index {request.record_index} is out of range; "
+                       f"{len(observations)} observations are available.",
+            )
+
+        observation = observations[request.record_index]
+        matcher_input = {
+            **observation,
+            "mode": "preview_only",
+            "writes_to_catalog": False,
+        }
+        matching = match_import_observation(session, matcher_input)
+
+        selected_release = None
+        claim_diff = None
+        if request.selected_release_id:
+            release = session.get(Release, request.selected_release_id)
+            if release is None:
+                raise HTTPException(status_code=404, detail="Selected Release not found.")
+            selected_release = _release_preview_snapshot(session, release)
+            claim_diff = build_release_claim_diff(matcher_input, selected_release)
+
+        return {
+            "contract": "hw_catalog.import_pipeline_preview",
+            "contract_version": 1,
+            "mode": "preview_only",
+            "writes_to_catalog": False,
+            "source": adapted["source"],
+            "parser_summary": adapted["summary"],
+            "parser_issues": adapted["issues"],
+            "record_index": request.record_index,
+            "records_available": len(observations),
+            "observation": observation,
+            "matching": matching,
+            "selected_release": selected_release,
+            "claim_diff": claim_diff,
+        }
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
