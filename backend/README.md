@@ -55,7 +55,7 @@ Configuration priority:
 For external storage, set an absolute path to the `HW-CATALOG` directory, for example:
 
 ```env
-HW_CATALOG_DATA_DIR=H:\\HW-CATALOG
+HW_CATALOG_DATA_DIR=H:\HW-CATALOG
 ```
 
 The directory must already exist and contain:
