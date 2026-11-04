@@ -1,13 +1,18 @@
+import os
+
 from fastapi import FastAPI, Depends, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from .db import get_db
+from .catalog_tree_api import router as catalog_tree_router
 from .conflict_queue import get_conflict_detail, list_conflicts
 from .conflict_resolution import (
     InvalidConflictResolution,
     UnknownConflict,
     resolve_conflict,
+    revise_conflict_resolution,
 )
 
 app = FastAPI(
@@ -15,6 +20,28 @@ app = FastAPI(
     version="0.1.0",
     description="Backend foundation for the test Hot Wheels catalog.",
 )
+
+
+def _configured_cors_origins() -> list[str]:
+    """Read explicitly allowed browser origins from the environment."""
+    configured = os.getenv(
+        "HW_CORS_ORIGINS",
+        "http://localhost:5500,http://127.0.0.1:5500,"
+        "http://localhost:8000,http://127.0.0.1:8000",
+    )
+    return [origin.strip().rstrip("/") for origin in configured.split(",") if origin.strip()]
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=_configured_cors_origins(),
+    allow_credentials=False,
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Content-Type"],
+)
+
+
+app.include_router(catalog_tree_router)
 
 
 @app.get("/health", tags=["system"])
@@ -77,6 +104,54 @@ def post_conflict_resolution(
     """Record an explicit, auditable manual conflict decision."""
     try:
         conflict = resolve_conflict(
+            session,
+            conflict_id=conflict_id,
+            status=request.status,
+            resolution=request.resolution,
+            reason=request.reason,
+            actor_type=request.actor_type,
+            actor_id=request.actor_id,
+            evidence_ids=request.evidence_ids,
+        )
+        session.commit()
+    except UnknownConflict as exc:
+        session.rollback()
+        raise HTTPException(status_code=404, detail="Conflict not found") from exc
+    except InvalidConflictResolution as exc:
+        session.rollback()
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except Exception:
+        session.rollback()
+        raise
+
+    return {
+        "id": conflict.id,
+        "status": conflict.status,
+        "resolution": conflict.resolution,
+        "resolution_reason": conflict.resolution_reason,
+        "resolved_at": conflict.resolved_at.isoformat() if conflict.resolved_at else None,
+    }
+
+
+
+class ConflictResolutionRevisionRequest(BaseModel):
+    status: str
+    resolution: str = Field(min_length=1)
+    reason: str = Field(min_length=1)
+    actor_type: str = "human"
+    actor_id: str | None = None
+    evidence_ids: list[str] = Field(default_factory=list)
+
+
+@app.post("/conflicts/{conflict_id}/revise-resolution", tags=["review"])
+def post_conflict_resolution_revision(
+    conflict_id: str,
+    request: ConflictResolutionRevisionRequest,
+    session: Session = Depends(get_db),
+) -> dict:
+    """Revise a final decision by appending a new audit event."""
+    try:
+        conflict = revise_conflict_resolution(
             session,
             conflict_id=conflict_id,
             status=request.status,
