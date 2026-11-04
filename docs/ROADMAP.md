@@ -71,3 +71,16 @@
 - [x] Проверить Catalog UI checks: success.
 - [ ] Проверить PR #80 вручную и согласовать merge из draft в `integration/catalog-foundation`.
 - [ ] После этого продолжить выборочное восстановление моделей, миграций и импортёров из PR #74/#75.
+
+## Importer recovery · 2026-11-04
+
+- [x] Create isolated branch `integration/importers-safe-preview` from the updated `integration/catalog-foundation`.
+- [x] Restore Mainline TSV parser as read-only preview.
+- [x] Restore local Fandom yearly HTML parser as read-only preview; no network fetch path.
+- [x] Restore All Hot Wheels saved-card HTML parser as read-only preview.
+- [x] Add preview-only API endpoints and synthetic parser/API tests.
+- [x] Preserve Mainline importer specification, synthetic fixture plan/data, and All Hot Wheels importer documentation.
+- [ ] Run GitHub Actions and resolve any integration/test failures.
+- [ ] Review source-level parser behavior against representative local HTML files from `ALLHW` without network access.
+- [ ] Design the next shared observation/preview/matching layer before adding DB writes.
+- [ ] Separately assess ProductLine/Package/Brand/Origin model additions and safe additive migrations; do not merge PR #74 wholesale.
