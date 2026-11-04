@@ -131,3 +131,15 @@ PR #83 merged: https://github.com/JohnyKiska/hotwheels/pull/83, squash commit `c
 Diff не использует БД и не пишет значения. Прямое сравнение пока только для `model_name`, `catalog_year`, `assortment_number`, `series_name`. Wheels/colors/scale и другие поля идут как `evidence_only`, так как текущая canonical schema не содержит для них соответствующих полей. Конфликт никогда не перезаписывает выбранный Release.
 
 Следующий шаг: проверить diff tests в GitHub Actions через PR в `integration/catalog-foundation`. После успешного CI объединить; затем проектировать read-only preview API, который свяжет parser → observation → matcher → diff. `main` и GitHub Pages не менять.
+
+
+## Claim preview diff merge · 2026-11-04
+
+PR #84 merged в `integration/catalog-foundation`: https://github.com/JohnyKiska/hotwheels/pull/84. Squash commit: `058ac4ffc6da11284dc2f97414203e3299b4459b`. GitHub Actions run #187: `131 passed`, 4 warnings.
+
+В integration теперь есть:
+- read-only source parsers + observation adapter;
+- SELECT-only Release matcher;
+- pure in-memory claim preview diff с безопасным разделением canonical comparisons и evidence-only claims.
+
+Никаких новых миграций, SourceRecord/Evidence/Conflict writes, auto-confirmation или merge logic не добавлено. Следующая задача: спроектировать read-only preview API orchestration parser → observation → matcher → diff. Проверить контракт endpoint и payload tests; только после этого обсуждать UI. `main`, GitHub Pages и архивные ветки не менять.
