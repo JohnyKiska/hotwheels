@@ -96,3 +96,14 @@
 - [ ] Review saved local ALLHW HTML against the committed parsers without network access.
 - [ ] Design the shared observation/matching/confirmation/apply pipeline.
 - [ ] Revisit Package, Manufacturer/Brand, ProductLine/CatalogNode and Origin models with safe additive migrations.
+
+
+## Import matching · 2026-11-04
+
+- [x] Реализовать первый read-only Release matcher поверх существующих моделей и identifier services (без вызова write-сервисов).
+- [x] Возвращать объяснимые сигналы и состояния exact replay / strong candidate / collision / ambiguous / no match.
+- [x] Добавить тесты на безопасный identifier lookup, exact name+catalog year, collisions, неизвестный namespace и replay по source ID + content hash.
+- [ ] Подтвердить GitHub Actions для matcher branch.
+- [ ] Реализовать explainable claim-to-Release attribute diff (same / new evidence / conflicting value / insufficient evidence).
+- [ ] Подключить read-only preview API только после стабилизации matcher/diff contracts.
+- [ ] Отдельно спроектировать persistence, confirmation и apply; никаких автоматических merges.
