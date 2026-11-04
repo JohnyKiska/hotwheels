@@ -161,3 +161,6 @@ Current direct field mapping is deliberately small: model name, catalog year, as
 For multi-row sources, `record_index` (default `0`) selects one parsed observation for matching and review. The response includes parser summary/issues, normalized observation, matcher result, and `writes_to_catalog: false`. An optional `selected_release_id` explicitly selects a Release snapshot and adds the claim diff. The API does not silently select a candidate or apply any suggested action. Unknown selected Releases return 404; invalid indices and source/year combinations return 422.
 
 The endpoint performs parsing in memory and SELECT-only catalog reads. It does not fetch remote pages, create SourceRecord/Evidence/Conflict rows, register identifiers, or modify catalog entities. Fandom and All Hot Wheels HTML must be supplied as saved local content.
+
+
+**Pipeline API implementation checkpoint (2026-11-04):** PR #85 merged into `integration/catalog-foundation`; GitHub Actions run #188 passed (`138 passed`, 4 warnings). `POST /imports/preview` now orchestrates parser → observation → matcher → optional diff for all three supported local source payloads. It remains strictly read-only.
