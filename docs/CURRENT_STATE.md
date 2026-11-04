@@ -91,7 +91,10 @@
 
 - PR #80 merged: `c5909c995eb17b16af80710eb1d10849cafd9b9a`.
 - PR #81 merged: `bde2a1e47443877863fea5e716336640dd37f8d0`. `integration/catalog-foundation` was verified identical to this merge commit before subsequent documentation updates.
-- Backend CI run #179: `113 passed`, 4 warnings. The run covered all importer code and tests; later commits were documentation-only.
+- Backend CI run #179 validated the restored parsers: `113 passed`, 4 warnings.
+- PR #82 added the pure in-memory `preview_to_observations()` adapter and tests; it was merged as `cf2f178a7524711546ce7c88b1ba7b6fe4bda5db`.
+- GitHub Actions run #183 on the adapter code: `118 passed`, 4 warnings.
+- The shared adapter keeps `catalog_year` separate from `release_year`, preserves raw source values and provenance, and emits only source-level identifier hints. It performs no matching or persistence.
 - Preserved architecture references: `docs/architecture/CATALOG_HIERARCHY_DESIGN.md`, `docs/architecture/SCHEMA_ALIGNMENT_2026-10-29.md`, and `docs/architecture/RELEASE_LINEAGE_RULES.md`.
 - Closed stale/superseded PRs #1, #29, #59, #70, #71, #72, #73, #74, #78 and #79 after preserving relevant content. Historical branches and archive refs were not deleted.
 - `main`, GitHub Pages default branch and production data remain untouched.
