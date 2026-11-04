@@ -108,3 +108,13 @@
 - [ ] Реализовать explainable claim-to-Release attribute diff (same / new evidence / conflicting value / insufficient evidence).
 - [ ] Подключить read-only preview API только после стабилизации matcher/diff contracts.
 - [ ] Отдельно спроектировать persistence, confirmation и apply; никаких автоматических merges.
+
+
+## Claim preview diff · 2026-11-04
+
+- [x] Добавить pure in-memory claim diff для явно выбранного Release.
+- [x] Разделить совпадающие значения, новые evidence claims, conflicts, evidence-only и insufficient evidence.
+- [x] Не допускать автоматической перезаписи canonical значений.
+- [ ] Подтвердить GitHub Actions для claim diff branch.
+- [ ] Спроектировать read-only preview API, который связывает parser → observation → matcher → diff.
+- [ ] Только после этого отдельно проектировать persistence/confirmation/apply.
