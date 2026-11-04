@@ -1,6 +1,5 @@
 """Alembic environment for the Hot Wheels catalog backend."""
 from logging.config import fileConfig
-import os
 from pathlib import Path
 import sys
 
@@ -18,12 +17,13 @@ if str(BACKEND_DIR) not in sys.path:
 
 from app import models  # noqa: E402,F401
 from app.db import Base  # noqa: E402
+from app.storage import resolve_database_url  # noqa: E402
 
 target_metadata = Base.metadata
 
 
 def database_url() -> str:
-    return os.environ.get("DATABASE_URL", config.get_main_option("sqlalchemy.url"))
+    return resolve_database_url(config.get_main_option("sqlalchemy.url"))
 
 
 def run_migrations_offline() -> None:
