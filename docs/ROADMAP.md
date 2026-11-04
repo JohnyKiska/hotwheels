@@ -143,3 +143,5 @@
 - [x] GitHub Actions run #188: 138 passed, 4 warnings.
 - [x] Merge PR #85 в `integration/catalog-foundation` (squash `c787696e9dc25abfc985de485710fd8f2569d0aa`).
 - [ ] Изучить существующий frontend admin workflow и подключить read-only preview UI без persistence/apply.
+
+- [ ] Resolve backend hosting + persistent database strategy and API authentication before connecting GitHub Pages UI to the API. Do not expose write-capable conflict endpoints through permissive CORS without authentication.
