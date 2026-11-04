@@ -74,3 +74,15 @@
 - Обновлена страница `catalog/conflicts.html`.
 - GitHub Actions на HEAD `a44c17abed1319162b08ad3a332dd66ebf9d36ff`: backend `92 passed`, 4 warnings; Catalog UI checks success.
 - PR #80 mergeable и остаётся draft до отдельной проверки/согласования. `integration/catalog-foundation` и `main` не изменялись.
+
+## Read-only importers restored · 2026-11-04
+
+- PR #80 has been merged into `integration/catalog-foundation` (merge commit `c5909c995eb17b16af80710eb1d10849cafd9b9a`).
+- A follow-up working branch `integration/importers-safe-preview` was created from that integration head.
+- Selectively restored the non-writing Mainline TSV parser, local Fandom yearly HTML parser, and All Hot Wheels saved-card HTML parser from PR #74.
+- Added three preview-only API endpoints: `/imports/mainline/preview`, `/imports/mainline/fandom-html-preview`, and `/imports/all-hot-wheels/html-preview`.
+- Added synthetic parser and API tests. No database writes, network fetcher, scheduler, matching, candidate persistence, or apply flow were added.
+- Preserved Mainline importer specification, synthetic fixture set/test plan, and All Hot Wheels importer notes.
+- Fandom HTML is accepted only as user-provided/local content. No network request to Fandom is made.
+- Deliberately did not port PR #74's catalog-tree API, extra ORM models, or its migration chain. In particular, the legacy `20261030_core_schema.py` / `create_all()` approach is not imported.
+- Validation is pending GitHub Actions on the new PR. Do not treat parser tests as passed until CI reports results.
