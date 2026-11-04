@@ -136,3 +136,10 @@
 - [ ] Подтвердить GitHub Actions для API branch.
 - [ ] После CI спроектировать UX для просмотра parser issues, candidate signals и claim diff.
 - [ ] Persistence/confirmation/apply остаются отдельной задачей после UI review.
+
+
+## Pipeline preview API validation · 2026-11-04
+
+- [x] GitHub Actions run #188: 138 passed, 4 warnings.
+- [x] Merge PR #85 в `integration/catalog-foundation` (squash `c787696e9dc25abfc985de485710fd8f2569d0aa`).
+- [ ] Изучить существующий frontend admin workflow и подключить read-only preview UI без persistence/apply.
