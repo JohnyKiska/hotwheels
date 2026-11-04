@@ -64,14 +64,14 @@ def _validate_external_storage(data_dir: str | Path) -> Path:
             "Unsupported or missing storage layout_version in DEVICE_INFO.json."
         )
 
-    database_dir = root / "DATABASE"
+    database_dir = root / DATABASE_RELATIVE_PATH.parent
     if not database_dir.is_dir():
         raise StorageConfigurationError(
             f"External catalog database directory is missing: {database_dir}. "
             "The backend will not create it automatically."
         )
 
-    return database_dir / "catalog.db"
+    return root / DATABASE_RELATIVE_PATH
 
 
 def resolve_database_url(default_url: str | None = None) -> str:
