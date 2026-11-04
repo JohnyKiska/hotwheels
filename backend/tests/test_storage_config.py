@@ -28,7 +28,7 @@ def test_default_database_path_preserves_legacy_development_location(monkeypatch
     monkeypatch.delenv("HW_CATALOG_DATA_DIR", raising=False)
 
     assert resolve_database_url() == sqlite_url_for_path(DEFAULT_DATABASE_PATH)
-    assert str(DEFAULT_DATABASE_PATH).endswith("backend/hotwheels.db")
+    assert DEFAULT_DATABASE_PATH.as_posix().endswith("backend/hotwheels.db")
 
 
 def test_external_storage_selects_catalog_database(tmp_path, monkeypatch):
@@ -112,7 +112,7 @@ def test_explicit_database_url_takes_precedence_over_external_storage(
 
 
 def test_sqlite_url_supports_windows_drive_letter_paths():
-    url = sqlite_url_for_path(r"H:\\HW-CATALOG\\DATABASE\\catalog.db")
+    url = sqlite_url_for_path(r"H:\HW-CATALOG\DATABASE\catalog.db")
 
     assert url.startswith("sqlite:///")
     assert "HW-CATALOG" in url
