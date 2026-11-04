@@ -59,7 +59,7 @@
 
 - `integration/catalog-foundation` includes the merged identifier idempotency/conflict traceability work from PR #80 and the read-only import previews from PR #81.
 - Preview endpoints accept user-supplied Mainline TSV, local Fandom yearly HTML, and saved All Hot Wheels card HTML. They do not fetch network pages or write to the catalog.
-- The importer code is covered by GitHub Actions run #179: 113 passed, 4 warnings.
+- The importer parsers and shared in-memory observation adapter are covered by GitHub Actions run #183: 118 passed, 4 warnings. PR #82 is merged into `integration/catalog-foundation`.
 - The current backend model set does not yet include ProductLine/CatalogNode, Package, Manufacturer/Brand, or Origin entities. These remain separate design/model tasks; no old PR #74 migrations were imported.
 - Mainline's complete observation/matching/confirmation/apply pipeline is not implemented. Current endpoints are parser previews only.
 - PRs #1, #29, #59, #70, #71, #72, #73, #74, #78 and #79 were closed after preserving useful importer code, fixtures, specifications, and architecture notes in the active integration branch or archive refs. No historical branches were deleted.
