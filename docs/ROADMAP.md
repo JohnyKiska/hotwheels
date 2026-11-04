@@ -118,3 +118,10 @@
 - [ ] Подтвердить GitHub Actions для claim diff branch.
 - [ ] Спроектировать read-only preview API, который связывает parser → observation → matcher → diff.
 - [ ] Только после этого отдельно проектировать persistence/confirmation/apply.
+
+
+## Claim preview diff validation · 2026-11-04
+
+- [x] GitHub Actions run #187: 131 passed, 4 warnings.
+- [x] Merge PR #84 в `integration/catalog-foundation` (squash `058ac4ffc6da11284dc2f97414203e3299b4459b`).
+- [ ] Спроектировать read-only preview API orchestration parser → observation → matcher → diff.
