@@ -148,3 +148,5 @@
 - `POST /imports/preview` теперь объединяет parser → observation → matcher → optional claim diff для Mainline TSV, локального Fandom HTML и локального All Hot Wheels HTML.
 - `record_index` и `selected_release_id` задаются явно; никакого auto-select и apply.
 - Endpoint проверен тестами на отсутствие записей SourceRecord/Evidence/Conflict и отсутствие catalog mutations.
+
+- Backend API deployment target, persistent database hosting, and API authentication are not configured. The current backend includes write-capable conflict resolution endpoints, so public browser access/CORS must not be enabled until authentication and deployment boundaries are designed.
