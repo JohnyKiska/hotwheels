@@ -60,3 +60,14 @@
 - [x] Сохранить `prototype/catalog-visual-v1` и `integration/catalog-foundation` как рабочие.
 - [ ] Отдельно согласовать удаление исходных refs после проверки архива.
 - [ ] После проверки приложения решить, когда переключать default branch и GitHub Pages с `main`.
+
+## Backend consolidation · 2026-11-04
+
+- [x] Выборочно перенести идемпотентность Evidence из PR #72.
+- [x] Добавить связь `ConflictRelease` и migration поверх текущей integration schema.
+- [x] Перенести traceability конфликтов, историю решений и audited revision endpoint из PR #73.
+- [x] Обновить страницу очереди конфликтов.
+- [x] Проверить Backend tests: 92 passed.
+- [x] Проверить Catalog UI checks: success.
+- [ ] Проверить PR #80 вручную и согласовать merge из draft в `integration/catalog-foundation`.
+- [ ] После этого продолжить выборочное восстановление моделей, миграций и импортёров из PR #74/#75.

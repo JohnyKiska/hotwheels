@@ -63,3 +63,14 @@
 - Это не проверка backend: постоянное хранение и API пока не подключены.
 
 Команда запуска из корня репозитория в PowerShell: `py -m http.server 8000`. Затем открыть `http://localhost:8000/`.
+
+## Backend: выборочный перенос идентификаторов и конфликтов · 2026-11-04
+
+- Подготовлена ветка `integration/import-idempotency-conflict-traceability` от `integration/catalog-foundation`.
+- Открыт draft PR #80: https://github.com/JohnyKiska/hotwheels/pull/80. Он не смержен.
+- Перенесена идемпотентность Evidence из PR #72: одинаковое нормализованное утверждение одного SourceRecord повторно использует Evidence; другой SourceRecord создаёт отдельное наблюдение.
+- Перенесена traceability конфликтов из PR #73: `ConflictRelease`, релевантные ConflictEvidence, Release в очереди и деталях, история решений и endpoint пересмотра.
+- Добавлена миграция `20261104_conflict_releases`, совместимая с текущей цепочкой integration и безопасная при уже созданной ORM таблице.
+- Обновлена страница `catalog/conflicts.html`.
+- GitHub Actions на HEAD `a44c17abed1319162b08ad3a332dd66ebf9d36ff`: backend `92 passed`, 4 warnings; Catalog UI checks success.
+- PR #80 mergeable и остаётся draft до отдельной проверки/согласования. `integration/catalog-foundation` и `main` не изменялись.
