@@ -125,3 +125,14 @@
 - [x] GitHub Actions run #187: 131 passed, 4 warnings.
 - [x] Merge PR #84 в `integration/catalog-foundation` (squash `058ac4ffc6da11284dc2f97414203e3299b4459b`).
 - [ ] Спроектировать read-only preview API orchestration parser → observation → matcher → diff.
+
+
+## Pipeline preview API · 2026-11-04
+
+- [x] Добавить read-only orchestration endpoint parser → observation → matcher → optional diff.
+- [x] Поддержать Mainline TSV, локальный Fandom yearly HTML и локальный All Hot Wheels HTML.
+- [x] Для multi-row inputs потребовать явный record index; для attribute diff — явный Release ID.
+- [x] Проверять, что endpoint не создаёт SourceRecord/Evidence/Conflict и не меняет Release.
+- [ ] Подтвердить GitHub Actions для API branch.
+- [ ] После CI спроектировать UX для просмотра parser issues, candidate signals и claim diff.
+- [ ] Persistence/confirmation/apply остаются отдельной задачей после UI review.

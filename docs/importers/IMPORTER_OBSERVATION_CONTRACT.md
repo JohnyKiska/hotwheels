@@ -148,3 +148,16 @@ Current direct field mapping is deliberately small: model name, catalog year, as
 
 
 **Implementation checkpoint (2026-11-04):** PR #84 merged the pure `build_release_claim_diff()` preview diff into `integration/catalog-foundation`; GitHub Actions run #187 passed (`131 passed`, 4 warnings). The next integration layer is a read-only API orchestration endpoint. No persistence or apply behavior is implied.
+
+
+## 10. Read-only pipeline preview API
+
+`POST /imports/preview` orchestrates the current stages without persistence. Supported `source` values:
+
+- `mainline_tsv` — `text` plus required `catalog_year`.
+- `fandom_html` — locally saved yearly HTML in `text` plus required `catalog_year`.
+- `all_hot_wheels_html` — locally saved individual-car HTML in `text`, optional `expected_year`.
+
+For multi-row sources, `record_index` (default `0`) selects one parsed observation for matching and review. The response includes parser summary/issues, normalized observation, matcher result, and `writes_to_catalog: false`. An optional `selected_release_id` explicitly selects a Release snapshot and adds the claim diff. The API does not silently select a candidate or apply any suggested action. Unknown selected Releases return 404; invalid indices and source/year combinations return 422.
+
+The endpoint performs parsing in memory and SELECT-only catalog reads. It does not fetch remote pages, create SourceRecord/Evidence/Conflict rows, register identifiers, or modify catalog entities. Fandom and All Hot Wheels HTML must be supplied as saved local content.

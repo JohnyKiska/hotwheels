@@ -143,3 +143,19 @@ PR #84 merged в `integration/catalog-foundation`: https://github.com/JohnyKiska
 - pure in-memory claim preview diff с безопасным разделением canonical comparisons и evidence-only claims.
 
 Никаких новых миграций, SourceRecord/Evidence/Conflict writes, auto-confirmation или merge logic не добавлено. Следующая задача: спроектировать read-only preview API orchestration parser → observation → matcher → diff. Проверить контракт endpoint и payload tests; только после этого обсуждать UI. `main`, GitHub Pages и архивные ветки не менять.
+
+
+## Read-only pipeline preview API · 2026-11-04
+
+Создана ветка `feature/read-only-import-preview-api` от `integration/catalog-foundation`.
+
+Добавлено:
+- `POST /imports/preview` в `backend/app/main.py`.
+- Поддержка `mainline_tsv`, `fandom_html`, `all_hot_wheels_html`.
+- Orchestration parser → observation adapter → matcher → optional diff.
+- `record_index` выбирает одну запись из multi-record parser output; `selected_release_id` задаёт явный Release для diff. Никакого auto-select.
+- API tests покрывают три источника, strong candidate, explicit diff, index bounds, missing Release, required catalog year и отсутствие DB writes.
+
+Endpoint read-only: никаких network fetch, SourceRecord/Evidence/Conflict writes, identifier registration, catalog updates или migrations. HTML sources передаются локальным текстом. CI ещё не запущен/не подтверждён на момент handoff.
+
+Следующий шаг: открыть PR в `integration/catalog-foundation`, дождаться GitHub Actions, исправить regressions. После успешной проверки оценить response contract и подготовить UI workflow. `main`, GitHub Pages и архивные ветки не менять.

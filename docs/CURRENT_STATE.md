@@ -129,3 +129,13 @@
 - `build_release_claim_diff()` реализован как pure in-memory diff без DB access и writes.
 - Статусы: `same`, `new_evidence`, `conflicting_value`, `evidence_only`, `insufficient_evidence`; unsupported attributes не маппятся в неподходящие canonical columns.
 - Следующий шаг: read-only preview API orchestration parser → observation → matcher → diff; persistence/apply остаются за отдельным review.
+
+
+## Read-only import preview API · 2026-11-04
+
+- В feature-ветке `feature/read-only-import-preview-api` добавлен `POST /imports/preview`.
+- Endpoint связывает parser → observation adapter → read-only matcher → optional claim diff.
+- Поддержаны `mainline_tsv`, `fandom_html`, `all_hot_wheels_html`; HTML принимается только как локально переданный текст, network fetch отсутствует.
+- Для multi-record parser payload применяется `record_index`; diff строится только при явном `selected_release_id`, автоматического выбора Release нет.
+- Endpoint возвращает `writes_to_catalog=false`; запись SourceRecord/Evidence/Conflict, identifier registration и catalog updates отсутствуют.
+- Добавлены API tests для всех трёх source paths, candidate matching, explicit diff, invalid index, unknown Release, required year и read-only DB invariants. CI ожидает запуска.
