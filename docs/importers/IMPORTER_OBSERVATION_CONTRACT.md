@@ -38,10 +38,10 @@
       "raw_value": "5-Spoke",
       "value": "5-Spoke",
       "source_field": "Wheels",
-      "assessment": "supports"
+      "claim_status": "observed"
     }
   ],
-  "identifiers": [
+  "identifier_hints": [
     {"type_code": "sku", "raw_value": "SYN25", "source_field": "SKU"}
   ],
   "raw": {"source_values": {}, "raw_text": null},
@@ -49,7 +49,7 @@
 }
 ```
 
-Это схема обмена между компонентами, а не готовый Pydantic/SQLAlchemy model. `value` может быть null; неизвестное не восстанавливается догадкой. Неизвестные/неподдерживаемые поля можно сохранять в `raw` без потери исходного материала.
+Это схема обмена между компонентами, а не готовый Pydantic/SQLAlchemy model. `value` может быть null; неизвестное не восстанавливается догадкой. `identifier_hints` — только подсказки источника, не созданные связи с каноническими Identifier. Неизвестные/неподдерживаемые поля можно сохранять в `raw` без потери исходного материала.
 
 ## 3. Правила нормализации
 
