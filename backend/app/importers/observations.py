@@ -52,6 +52,31 @@ def _present(value: Any) -> bool:
     return value is not None and value != "" and value != [] and value != {}
 
 
+def _raw_value(
+    record: dict[str, Any],
+    source_values: dict[str, Any],
+    source_field: str,
+    source_key: str,
+    parsed_value: Any,
+) -> Any:
+    """Prefer the source's literal field over the parser's normalized value."""
+    aliases = {
+        "series_index": ("series_index_raw", "Series index", "Series #"),
+        "mainline_number": ("mainline_number_raw", "Mainline #"),
+        "series_name": ("series_summary_raw", "Category/series summary", "Series"),
+        "rarity": ("Series",),
+        "category": ("category_slug",),
+    }
+    for alias in aliases.get(source_key, ()):
+        value = record.get(alias)
+        if _present(value):
+            return value
+        value = source_values.get(alias)
+        if _present(value):
+            return value
+    return source_values.get(source_field, parsed_value)
+
+
 def preview_to_observations(preview: dict[str, Any]) -> dict[str, Any]:
     """Convert a read-only parser result to a versioned observation envelope.
 
@@ -84,7 +109,7 @@ def preview_to_observations(preview: dict[str, Any]) -> dict[str, Any]:
             if not _present(value):
                 continue
             source_field = source_fields.get(source_key) or source_key
-            raw_value = source_values.get(source_field, value)
+            raw_value = _raw_value(record, source_values, source_field, source_key, value)
             claims.append({
                 "attribute": attribute,
                 "value": value,
