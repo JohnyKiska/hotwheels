@@ -1,0 +1,50 @@
+name: Temporary catalog preview
+
+on:
+  push:
+    branches:
+      - integration/catalog-foundation
+    paths:
+      - "index.html"
+      - "schema-editor.html"
+      - ".github/workflows/catalog-preview.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: catalog-preview-pages
+  cancel-in-progress: true
+
+jobs:
+  deploy-preview:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out integration branch
+        uses: actions/checkout@v4
+        with:
+          ref: integration/catalog-foundation
+
+      - name: Prepare preview site
+        run: |
+          mkdir -p _site
+          cp index.html schema-editor.html _site/
+          touch _site/.nojekyll
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload preview artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Deploy temporary preview
+        id: deployment
+        uses: actions/deploy-pages@v4
