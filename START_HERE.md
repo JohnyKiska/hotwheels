@@ -45,3 +45,8 @@ py -m http.server 8000
 Остановка локального сервера: Ctrl+C в окне PowerShell.
 
 Важно: это запуск фронтенд-прототипа. Backend уже предоставляет read-only preview API для Mainline TSV, локального Fandom HTML и All Hot Wheels HTML, но визуальный каталог пока не подключён к этим endpoint и постоянному хранению данных.
+
+
+## Backend importer status · 2026-11-04
+
+Backend уже содержит read-only source parsers, общий observation adapter и в отдельной feature-ветке первый read-only Release matcher. Matcher только ищет кандидатов и объясняет сигналы; он не пишет в БД и не объединяет записи. См. `docs/importers/IMPORTER_OBSERVATION_CONTRACT.md` и `docs/SESSION_HANDOFF.md`.
