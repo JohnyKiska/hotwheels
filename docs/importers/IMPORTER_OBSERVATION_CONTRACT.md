@@ -1,6 +1,6 @@
 # Importer observation contract
 
-**Статус:** проектный контракт следующего этапа. Не реализован и не меняет схему БД.
+**Статус:** observation adapter и первый read-only Release matcher реализованы; matching остаётся preview-only и не меняет схему БД.
 **Основа:** Mainline/All Hot Wheels preview parsers, Source/SourceRecord/Evidence, identifier registration and conflict traceability.
 
 ## 1. Границы ответственности
