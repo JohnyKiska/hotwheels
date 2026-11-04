@@ -95,7 +95,11 @@ def build_release_claim_diff(
             status = "new_evidence"
             action = "attach_evidence_after_confirmation"
             reason = "The selected Release has no canonical value for this attribute."
-        elif _value_key(existing) == _value_key(incoming):
+        elif (
+            any(_value_key(item) == _value_key(incoming) for item in existing)
+            if canonical_field == "series_names" and isinstance(existing, list) and not isinstance(incoming, list)
+            else _value_key(existing) == _value_key(incoming)
+        ):
             status = "same"
             action = "no_change"
             reason = "The incoming value matches the selected Release snapshot."
