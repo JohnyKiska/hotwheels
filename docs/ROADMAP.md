@@ -69,8 +69,8 @@
 - [x] Обновить страницу очереди конфликтов.
 - [x] Проверить Backend tests: 92 passed.
 - [x] Проверить Catalog UI checks: success.
-- [ ] Проверить PR #80 вручную и согласовать merge из draft в `integration/catalog-foundation`.
-- [ ] После этого продолжить выборочное восстановление моделей, миграций и импортёров из PR #74/#75.
+- [x] Проверить и смержить PR #80 в `integration/catalog-foundation`.
+- [x] Выборочно восстановить read-only импортёры из PR #74 в PR #81; не переносить старые модели и миграции целиком.
 
 ## Importer recovery · 2026-11-04
 
@@ -84,3 +84,13 @@
 - [ ] Review source-level parser behavior against representative local HTML files from `ALLHW` without network access.
 - [ ] Design the next shared observation/preview/matching layer before adding DB writes.
 - [ ] Separately assess ProductLine/Package/Brand/Origin model additions and safe additive migrations; do not merge PR #74 wholesale.
+
+## PR cleanup · 2026-11-04
+
+- [x] Merge PR #81 into `integration/catalog-foundation` after successful backend CI (113 passed, 4 warnings).
+- [x] Preserve the useful hierarchy and release-lineage design notes in `docs/architecture/`.
+- [x] Close superseded PRs #1, #29, #59, #70, #71, #72, #73, #74, #78 and #79.
+- [x] Keep archive branches and historical refs; no branch deletion performed.
+- [ ] Review saved local ALLHW HTML against the committed parsers without network access.
+- [ ] Design the shared observation/matching/confirmation/apply pipeline.
+- [ ] Revisit Package, Manufacturer/Brand, ProductLine/CatalogNode and Origin models with safe additive migrations.
