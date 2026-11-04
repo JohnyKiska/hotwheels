@@ -128,6 +128,8 @@ Apply — отдельная операция после явного решен
 
 Сейчас существуют три read-only parser endpoints: Mainline TSV, local Fandom yearly HTML и All Hot Wheels saved-card HTML. Чистый in-memory adapter `preview_to_observations()` объединяет их результаты в versioned `hw_catalog.import_observation` envelope, сохраняя source fields, raw values, identifier hints и parser issues. Adapter не обращается к БД и сети.
 
-GitHub Actions run #183 подтвердил интеграцию: `118 passed`, 4 warnings. Matcher, persisted import run, confirmation UI/API и apply service пока не реализованы.
+GitHub Actions run #183 подтвердил adapter: `118 passed`, 4 warnings. В отдельной feature-ветке добавлен первый read-only matcher `match_import_observation()` и тесты. Он ищет exact source replay только при наличии source ID + content hash, сопоставляет exact identifier hints и exact name/catalog-year, возвращает объяснимые сигналы и статусы `exact_source_replay`, `strong_candidate`, `identifier_collision`, `ambiguous`, `no_match`. Parser observation пока не содержит persisted SourceRecord ID/content hash, поэтому replay detection через обычный adapter payload намеренно не предполагается.
 
-Следующий технический шаг: спроектировать read-only matcher и preview diff поверх общего observation contract, не добавляя автоматические записи или merge. Persistence/apply проектировать отдельно после проверки matching rules.
+Matcher использует только SELECT-запросы. Он не создаёт SourceRecord/Evidence/Conflict, не регистрирует identifiers, не меняет статусы и не объединяет сущности. Это первый matching slice, не полный preview diff и не importer orchestration.
+
+Следующий шаг: прогнать CI, затем добавить explainable attribute diff между claims и выбранным Release, отдельно покрыв конфликтующие значения. Persistence/apply и UI остаются отдельными этапами.
