@@ -83,3 +83,21 @@ A new isolated branch, `integration/importers-safe-preview`, was created from th
 Safety boundary: these routes only parse user-supplied text/HTML and return candidates. They do not write to the database, fetch pages, or confirm catalog identity. No Fandom network access is enabled. No old PR #74 ORM models, Catalog Tree API, or risky migration chain were copied.
 
 GitHub Actions run #179 completed successfully on the importer code: `113 passed`, 4 warnings. A later documentation-only commit added the historical hierarchy design reference; it did not change backend code. After CI, inspect parser behavior using local saved HTML fixtures if available. Next architecture step is a shared observation/preview/matching contract, not a direct importer-to-canonical-record write path.
+
+## Latest handoff · 2026-11-04
+
+The current working branch is `integration/catalog-foundation`. PR #80 and PR #81 are merged into it. The latest backend code validation is GitHub Actions run #179 (`113 passed`, 4 warnings).
+
+The read-only Mainline TSV, local Fandom yearly HTML, and All Hot Wheels saved-card HTML preview endpoints are available. They do not write to the database or fetch network pages. The visual catalog frontend is not yet connected to these endpoints.
+
+Useful design documents recovered and retained:
+- `docs/importers/MAINLINE_IMPORTER_SPEC.md`
+- `docs/importers/MAINLINE_FIXTURE_TEST_PLAN.md`
+- `docs/ALL_HOT_WHEELS_IMPORTER.md`
+- `docs/architecture/CATALOG_HIERARCHY_DESIGN.md`
+- `docs/architecture/RELEASE_LINEAGE_RULES.md`
+- `docs/architecture/SCHEMA_ALIGNMENT_2026-10-29.md` (historical snapshot; not current schema truth)
+
+Superseded PRs #1, #29, #59, #70, #71, #72, #73, #74, #78 and #79 are closed. Their useful code/docs were retained where relevant, and archive refs were left intact. No historical branches were deleted. `main` and GitHub Pages remain untouched.
+
+Next: run parser checks against locally saved ALLHW HTML; then design the shared observation/matching/preview/confirmation pipeline. Do not add direct catalog writes or network fetching as part of that step.
