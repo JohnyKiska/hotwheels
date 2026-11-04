@@ -139,3 +139,12 @@
 - Для multi-record parser payload применяется `record_index`; diff строится только при явном `selected_release_id`, автоматического выбора Release нет.
 - Endpoint возвращает `writes_to_catalog=false`; запись SourceRecord/Evidence/Conflict, identifier registration и catalog updates отсутствуют.
 - Добавлены API tests для всех трёх source paths, candidate matching, explicit diff, invalid index, unknown Release, required year и read-only DB invariants. CI ожидает запуска.
+
+
+## Pipeline preview API merge · 2026-11-04
+
+- PR #85 merged в `integration/catalog-foundation` (squash commit `c787696e9dc25abfc985de485710fd8f2569d0aa`).
+- GitHub Actions run #188: `138 passed`, 4 warnings.
+- `POST /imports/preview` теперь объединяет parser → observation → matcher → optional claim diff для Mainline TSV, локального Fandom HTML и локального All Hot Wheels HTML.
+- `record_index` и `selected_release_id` задаются явно; никакого auto-select и apply.
+- Endpoint проверен тестами на отсутствие записей SourceRecord/Evidence/Conflict и отсутствие catalog mutations.
