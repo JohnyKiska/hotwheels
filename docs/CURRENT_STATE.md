@@ -120,3 +120,12 @@
 - Прямое сравнение ограничено текущими canonical полями: model name, catalog year, assortment number, series name. Остальные атрибуты сохраняются как evidence-only, без ложного отображения их как полей Release.
 - Различия не перезаписываются и не применяются; функция не обращается к БД.
 - Добавлены unit tests; CI ожидается после PR.
+
+
+## Claim preview diff merge · 2026-11-04
+
+- PR #84 merged в `integration/catalog-foundation` (squash commit `058ac4ffc6da11284dc2f97414203e3299b4459b`).
+- GitHub Actions run #187: `131 passed`, 4 warnings.
+- `build_release_claim_diff()` реализован как pure in-memory diff без DB access и writes.
+- Статусы: `same`, `new_evidence`, `conflicting_value`, `evidence_only`, `insufficient_evidence`; unsupported attributes не маппятся в неподходящие canonical columns.
+- Следующий шаг: read-only preview API orchestration parser → observation → matcher → diff; persistence/apply остаются за отдельным review.
