@@ -23,7 +23,11 @@ target_metadata = Base.metadata
 
 
 def database_url() -> str:
-    return resolve_database_url(config.get_main_option("sqlalchemy.url"))
+    configured_url = config.get_main_option("sqlalchemy.url")
+    # Anchor the checked-in relative default to backend/, not the caller's cwd.
+    if configured_url == "sqlite:///hotwheels.db":
+        configured_url = None
+    return resolve_database_url(configured_url)
 
 
 def run_migrations_offline() -> None:
