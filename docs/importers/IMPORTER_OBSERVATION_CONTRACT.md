@@ -145,3 +145,6 @@ Matcher использует только SELECT-запросы. Он не со�
 - `insufficient_evidence` — incoming value is empty or unusable.
 
 Current direct field mapping is deliberately small: model name, catalog year, assortment number and series name. Release year, toy numbers, collector numbers and physical attributes are not silently mapped into unrelated canonical columns. The function has no database dependency and always returns `preview_only` / `writes_to_catalog=False`.
+
+
+**Implementation checkpoint (2026-11-04):** PR #84 merged the pure `build_release_claim_diff()` preview diff into `integration/catalog-foundation`; GitHub Actions run #187 passed (`131 passed`, 4 warnings). The next integration layer is a read-only API orchestration endpoint. No persistence or apply behavior is implied.
