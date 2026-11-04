@@ -100,4 +100,6 @@ Useful design documents recovered and retained:
 
 Superseded PRs #1, #29, #59, #70, #71, #72, #73, #74, #78 and #79 are closed. Their useful code/docs were retained where relevant, and archive refs were left intact. No historical branches were deleted. `main` and GitHub Pages remain untouched.
 
-Next: run parser checks against locally saved ALLHW HTML; then design the shared observation/matching/preview/confirmation pipeline. Do not add direct catalog writes or network fetching as part of that step.
+PR #82 added and merged a pure in-memory `preview_to_observations()` adapter. It normalizes all three source-specific previews into a versioned observation envelope, keeps catalog year distinct from release year, preserves source provenance/raw values, and emits only identifier hints. It does not access the database or network. GitHub Actions run #183: `118 passed`, 4 warnings.
+
+Next: design a read-only matcher and explainable preview diff over the shared observation contract. Continue to prohibit direct catalog writes, automatic entity merges, and network fetching until separately designed and explicitly reviewed.
