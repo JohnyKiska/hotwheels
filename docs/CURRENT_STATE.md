@@ -86,3 +86,13 @@
 - Fandom HTML is accepted only as user-provided/local content. No network request to Fandom is made.
 - Deliberately did not port PR #74's catalog-tree API, extra ORM models, or its migration chain. In particular, the legacy `20261030_core_schema.py` / `create_all()` approach is not imported.
 - GitHub Actions run #179 completed successfully on the importer code: `113 passed`, 4 warnings. The final documentation-only follow-up did not change backend code.
+
+## Integration cleanup checkpoint · 2026-11-04
+
+- PR #80 merged: `c5909c995eb17b16af80710eb1d10849cafd9b9a`.
+- PR #81 merged: `bde2a1e47443877863fea5e716336640dd37f8d0`. `integration/catalog-foundation` was verified identical to this merge commit before subsequent documentation updates.
+- Backend CI run #179: `113 passed`, 4 warnings. The run covered all importer code and tests; later commits were documentation-only.
+- Preserved architecture references: `docs/architecture/CATALOG_HIERARCHY_DESIGN.md`, `docs/architecture/SCHEMA_ALIGNMENT_2026-10-29.md`, and `docs/architecture/RELEASE_LINEAGE_RULES.md`.
+- Closed stale/superseded PRs #1, #29, #59, #70, #71, #72, #73, #74, #78 and #79 after preserving relevant content. Historical branches and archive refs were not deleted.
+- `main`, GitHub Pages default branch and production data remain untouched.
+- Remaining important work: inspect saved local HTML fixtures; define shared observation/matching/confirmation contracts; separately design safe additive migrations for Package, Manufacturer/Brand, ProductLine/CatalogNode and Origin.
