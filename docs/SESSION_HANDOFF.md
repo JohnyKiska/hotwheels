@@ -67,3 +67,19 @@
 В процессе CI выявили и исправили две интеграционные несовместимости: импорт отсутствующего `catalog_tree_api` из PR #74 в `main.py` и безопасное создание `conflict_releases`, когда ORM уже создал таблицу. Также обновлено ожидание текущей Alembic head в тесте.
 
 Следующее: вручную проверить diff PR #80 и миграционную цепочку, затем согласовать снятие draft/merge. Не переносить PR #74 целиком. После принятия PR #80 продолжить выборочный перенос backend и импортеров #74/#75.
+
+## Follow-up after PR #80 merge · 2026-11-04
+
+PR #80 was merged into `integration/catalog-foundation` with merge commit `c5909c995eb17b16af80710eb1d10849cafd9b9a`. `main` remains untouched.
+
+A new isolated branch, `integration/importers-safe-preview`, was created from that integration head. It selectively restores the following from PR #74:
+
+- `backend/app/importers/mainline.py`: Mainline TSV and local Fandom yearly HTML parsers.
+- `backend/app/importers/all_hot_wheels.py`: parser for saved All Hot Wheels model-card HTML.
+- Preview-only API routes for all three input formats.
+- Synthetic parser and API tests.
+- Mainline importer specification and synthetic fixture/test plan, plus All Hot Wheels importer documentation.
+
+Safety boundary: these routes only parse user-supplied text/HTML and return candidates. They do not write to the database, fetch pages, or confirm catalog identity. No Fandom network access is enabled. No old PR #74 ORM models, Catalog Tree API, or risky migration chain were copied.
+
+Current CI state must be checked on the follow-up PR before considering the importer restore validated. After CI, inspect parser behavior using local saved HTML fixtures if available. Next architecture step is a shared observation/preview/matching contract, not a direct importer-to-canonical-record write path.
