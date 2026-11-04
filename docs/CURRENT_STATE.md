@@ -85,4 +85,4 @@
 - Preserved Mainline importer specification, synthetic fixture set/test plan, and All Hot Wheels importer notes.
 - Fandom HTML is accepted only as user-provided/local content. No network request to Fandom is made.
 - Deliberately did not port PR #74's catalog-tree API, extra ORM models, or its migration chain. In particular, the legacy `20261030_core_schema.py` / `create_all()` approach is not imported.
-- Validation is pending GitHub Actions on the new PR. Do not treat parser tests as passed until CI reports results.
+- GitHub Actions run #179 completed successfully on the importer code: `113 passed`, 4 warnings. The final documentation-only follow-up did not change backend code.
