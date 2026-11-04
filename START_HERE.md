@@ -25,3 +25,23 @@
 - SKU и annual catalog number не являются глобально уникальными идентификаторами.
 
 См. `PROJECT_CONTEXT.md`, `docs/CURRENT_STATE.md` и `docs/ROADMAP.md`.
+
+
+## Локальный запуск визуального прототипа
+
+Страница статическая и не требует сборки или установки npm-зависимостей.
+
+В PowerShell из корня репозитория:
+
+```powershell
+git fetch origin
+git switch integration/catalog-foundation
+git pull --ff-only
+py -m http.server 8000
+```
+
+Открыть в браузере: http://localhost:8000/
+
+Остановка локального сервера: Ctrl+C в окне PowerShell.
+
+Важно: это запуск фронтенд-прототипа. Backend/API и постоянное хранение данных пока не подключены.
