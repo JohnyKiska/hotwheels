@@ -82,4 +82,4 @@ A new isolated branch, `integration/importers-safe-preview`, was created from th
 
 Safety boundary: these routes only parse user-supplied text/HTML and return candidates. They do not write to the database, fetch pages, or confirm catalog identity. No Fandom network access is enabled. No old PR #74 ORM models, Catalog Tree API, or risky migration chain were copied.
 
-Current CI state must be checked on the follow-up PR before considering the importer restore validated. After CI, inspect parser behavior using local saved HTML fixtures if available. Next architecture step is a shared observation/preview/matching contract, not a direct importer-to-canonical-record write path.
+GitHub Actions run #179 completed successfully on the importer code: `113 passed`, 4 warnings. A later documentation-only commit added the historical hierarchy design reference; it did not change backend code. After CI, inspect parser behavior using local saved HTML fixtures if available. Next architecture step is a shared observation/preview/matching contract, not a direct importer-to-canonical-record write path.
