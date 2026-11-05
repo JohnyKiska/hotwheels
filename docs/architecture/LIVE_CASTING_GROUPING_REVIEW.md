@@ -102,6 +102,13 @@ Decision revisions are inserted as new rows and link to the previous decision fo
 
 The migration has not been run against any user, development, or production database. It must first be exercised against a disposable test database and reviewed independently.
 
+
+### Review queue filters and interface languages
+
+The local review queue supports filters for all proposals, pending decisions, accepted, rejected, and items needing more evidence. The interface currently offers Russian and English labels. The selected interface language and queue filter are stored in browser local storage, not in the catalog database.
+
+Proposal action codes and decision dispositions remain stable language-neutral identifiers in API payloads and database rows (for example, `keep_existing_link_candidate` and `needs_more_evidence`). The UI translates these codes at display time. Catalog values such as product names, collector numbers, and reviewer comments are not automatically translated or modified. Additional interface languages can be added by extending the UI translation dictionary without migrating catalog data or changing stored codes.
+
 ## Admin UI review flow
 
 The live admin preview now exposes an explicit **Start review and save snapshot** action. It creates a persistent review session from the selected product-line/year scope, then renders the session's proposal queue.
