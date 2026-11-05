@@ -79,6 +79,27 @@ def test_conflicting_collector_number_claims_require_review():
     assert "conflicting_collector_number_claims" in result["manual_review"][0]["reason_codes"]
 
 
+def test_conflicting_collector_number_claims_across_snapshots_of_one_release_require_review():
+    first = row("snapshot-a", number="191")
+    second = row("snapshot-b", number="213")
+    first["release_id"] = "same-release"
+    second["release_id"] = "same-release"
+
+    result = build_casting_grouping_preview([first, second])
+
+    assert result["groups"] == []
+    assert len(result["manual_review"]) == 2
+    assert all(
+        "conflicting_collector_number_claims_for_release" in item["reason_codes"]
+        for item in result["manual_review"]
+    )
+    assert {
+        claim["value"]
+        for item in result["manual_review"]
+        for claim in item["collector_number_claims"]
+    } == {"191", "213"}
+
+
 def test_one_existing_casting_across_different_proposed_keys_is_flagged_not_merged():
     result = build_casting_grouping_preview([
         row("a", number="191", casting_id="legacy-casting"),
