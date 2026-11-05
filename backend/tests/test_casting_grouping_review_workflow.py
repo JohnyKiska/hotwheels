@@ -7,6 +7,55 @@ from app.db import Base, get_db
 from app.main import app
 from app.casting_grouping_api import _build_reviewed_remediation_plan
 
+from pathlib import Path
+import re
+
+
+def test_admin_review_translations_cover_all_action_and_decision_codes():
+    admin_html = Path(__file__).resolve().parents[2].joinpath("admin-live.html").read_text(
+        encoding="utf-8"
+    )
+
+    locale_match = re.search(
+        r"const text=\\{\\s*ru:\\{(.*?)\\},\\s*en:\\{(.*?)\\}\\s*\\};",
+        admin_html,
+        re.DOTALL,
+    )
+    assert locale_match, "Review UI must define Russian and English dictionaries"
+    locale_keys = []
+    for locale_body in locale_match.groups():
+        keys = set(re.findall(r"(?:^|,)\\s*([a-zA-Z][a-zA-Z0-9]*):", locale_body))
+        assert keys, "Translation dictionary must not be empty"
+        locale_keys.append(keys)
+    assert locale_keys[0] == locale_keys[1], (
+        f"Missing locale keys: ru-only={locale_keys[0] - locale_keys[1]}, "
+        f"en-only={locale_keys[1] - locale_keys[0]}"
+    )
+
+    action_match = re.search(r"const actionLabels=\\{(.*?)\\};", admin_html, re.DOTALL)
+    assert action_match, "Review UI must define action labels"
+    action_entries = re.findall(
+        r"([a-z][a-z0-9_]+):\\{ru:\"([^\"]+)\",en:\"([^\"]+)\"\\}",
+        action_match.group(1),
+    )
+    action_labels = {code: (ru, en) for code, ru, en in action_entries}
+    expected_actions = {
+        "keep_existing_link_candidate",
+        "split_candidate_manual_review",
+        "merge_candidate_manual_review",
+        "new_casting_candidate",
+        "manual_review",
+    }
+    assert set(action_labels) == expected_actions, (
+        f"Action translation coverage mismatch: missing={expected_actions - set(action_labels)}, "
+        f"unexpected={set(action_labels) - expected_actions}"
+    )
+    assert all(ru.strip() and en.strip() for ru, en in action_labels.values())
+
+    assert {"accepted", "rejected", "needs_more_evidence"} <= locale_keys[0]
+    assert {"accepted", "rejected", "needs_more_evidence"} <= locale_keys[1]
+
+
 
 def test_reviewed_plan_classifies_latest_decisions_without_authorizing_apply():
     snapshot = {"remediation_plan": {"items": [
