@@ -1,40 +1,21 @@
-"""Add manufacturer, brand, and their catalog relationships."""
+"""Retain the historical manufacturer/brand revision in the Alembic graph.
 
-from alembic import op
+The current application no longer maps manufacturer and brand tables. Existing
+installations keep their tables and data; fresh databases use current ORM
+metadata and do not recreate retired models.
+"""
 
 revision = "20261029_manufacturer_brand"
 down_revision = "20261029_packages"
 branch_labels = None
 depends_on = None
 
-TABLES = (
-    "manufacturers",
-    "brands",
-    "manufacturer_brands",
-    "casting_brands",
-    "release_brands",
-    "evidence_manufacturers",
-    "evidence_brands",
-)
+
+def upgrade() -> None:
+    # Historical manufacturer/brand ORM models are no longer registered.
+    pass
 
 
-def upgrade():
-    from app import models  # noqa: F401
-    from app.db import Base
-
-    bind = op.get_bind()
-    Base.metadata.create_all(
-        bind=bind,
-        tables=[Base.metadata.tables[name] for name in TABLES],
-    )
-
-
-def downgrade():
-    from app import models  # noqa: F401
-    from app.db import Base
-
-    bind = op.get_bind()
-    Base.metadata.drop_all(
-        bind=bind,
-        tables=[Base.metadata.tables[name] for name in reversed(TABLES)],
-    )
+def downgrade() -> None:
+    # Never drop legacy manufacturer/brand data during a downgrade.
+    pass
