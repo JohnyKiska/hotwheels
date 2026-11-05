@@ -6,7 +6,7 @@ It does not alter catalog entities or evidence.
 from alembic import op
 
 revision = "20261105_casting_grouping_review"
-down_revision = "20261104_conflict_releases"
+down_revision = "20261105_merge_core_conflicts"
 branch_labels = None
 depends_on = None
 
