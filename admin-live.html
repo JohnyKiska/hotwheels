@@ -80,13 +80,14 @@ async function createPersistentReviewSession(target,scope){
  try{
   const response=await fetch("/castings/grouping-review-sessions/from-catalog",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(scope)});
   if(!response.ok)throw new Error("Backend вернул HTTP "+response.status+": "+(await response.text()));
-  renderPersistentReviewSession(target,await response.json());
+  const created=await response.json();localStorage.setItem("hwCatalogCastingReviewSessionId",created.session_id);renderPersistentReviewSession(target,created);
  }catch(e){
   let box=target.querySelector("#persistentReviewSession");if(!box){box=document.createElement("div");box.id="persistentReviewSession";target.appendChild(box);}
   box.innerHTML='<p class="error">'+esc(e.message)+'</p>';
  }finally{button.disabled=false;button.textContent="Начать проверку и сохранить снимок";}
 }
 function renderPersistentReviewSession(target,review){
+ if(review.session_id)localStorage.setItem("hwCatalogCastingReviewSessionId",review.session_id);
  let box=target.querySelector("#persistentReviewSession");
  if(!box){box=document.createElement("section");box.id="persistentReviewSession";box.className="evidence";target.appendChild(box);}
  const items=review.snapshot?.remediation_plan?.items||[];
@@ -111,6 +112,18 @@ function renderPersistentReviewSession(target,review){
   }catch(e){message.textContent=e.message;btn.disabled=false;btn.textContent="Записать решение";}
  }));
 }
+async function restorePersistentReviewSession(){
+ const sessionId=localStorage.getItem("hwCatalogCastingReviewSessionId");
+ if(!sessionId)return;
+ const target=$("groupingResult");
+ target.innerHTML='<div class="loading">Восстанавливаю последнюю сохранённую сессию проверки…</div>';
+ try{
+  const response=await fetch("/castings/grouping-review-sessions/"+encodeURIComponent(sessionId));
+  if(response.status===404){localStorage.removeItem("hwCatalogCastingReviewSessionId");target.innerHTML='<p class="muted">Последняя сохранённая сессия не найдена. Построй preview и создай новую сессию.</p>';return;}
+  if(!response.ok)throw new Error("Backend вернул HTTP "+response.status+": "+(await response.text()));
+  renderPersistentReviewSession(target,await response.json());
+ }catch(e){target.innerHTML='<p class="error">Не удалось восстановить сессию: '+esc(e.message)+'</p>';}
+}
 async function loadSummary(){const r=await fetch("/catalog/admin/summary");if(!r.ok)throw new Error("Backend вернул HTTP "+r.status);const d=await r.json();const t=d.totals||{};$("stats").innerHTML=[["Выпуски Release",t.releases],["Отливки Casting",t.castings],["Серии",t.series],["Свидетельства Evidence",t.evidence]].map(x=>'<div class="stat"><span>'+esc(x[0])+'</span><strong>'+Number(x[1]||0).toLocaleString("ru-RU")+'</strong></div>').join("");years=d.catalog_years||[];$("year").innerHTML='<option value="">Все годы</option>'+years.map(y=>'<option value="'+y+'">'+y+'</option>').join("");}
 async function loadRows(){if(loading)return;loading=true;$("rows").innerHTML='<tr><td colspan="7" class="loading">Загружаю записи…</td></tr>';const params=new URLSearchParams({limit:String(pageSize),offset:String(offset)});if($("search").value.trim())params.set("q",$("search").value.trim());if($("year").value)params.set("catalog_year",$("year").value);if($("status").value)params.set("status",$("status").value);try{const r=await fetch("/catalog/admin/releases?"+params.toString());if(!r.ok)throw new Error("Backend вернул HTTP "+r.status);const d=await r.json();total=d.total||0;const items=d.items||[];$("count").textContent="Найдено: "+total.toLocaleString("ru-RU");$("pageInfo").textContent=total?("Показаны "+(offset+1)+"–"+Math.min(offset+items.length,total)+" из "+total):"Нет записей";$("prev").disabled=offset===0;$("next").disabled=offset+pageSize>=total;if(!items.length){$("rows").innerHTML='<tr><td colspan="7" class="empty">В этой базе пока нет подходящих выпусков.</td></tr>';return;}$("rows").innerHTML=items.map(x=>{const sku=(x.sku||[]).join(", ")||"—";const col=(x.catalog_numbers||[]).join(", ")||"—";const series=(x.series||[]).join(", ")||"—";return '<tr data-id="'+esc(x.id)+'"><td><strong>'+esc(x.name||"Без названия")+'</strong><br><small class="muted">'+esc(x.casting_name||"")+'</small></td><td>'+esc(x.catalog_year||"—")+'</td><td>'+esc(sku)+'</td><td>'+esc(col)+'</td><td>'+esc(series)+'</td><td><span class="pill candidate">'+esc(x.status)+'</span></td><td>'+Number(x.evidence_count||0)+'</td></tr>';}).join("");}catch(e){showError(e.message);}finally{loading=false;}}
 function openDetail(){ $("backdrop").classList.add("open");$("detail").classList.add("open");}
@@ -127,7 +140,7 @@ $("year").addEventListener("change",()=>{offset=0;loadRows();});$("status").addE
 let searchTimer; $("search").addEventListener("input",()=>{clearTimeout(searchTimer);searchTimer=setTimeout(()=>{offset=0;loadRows();},250);});
 $("prev").addEventListener("click",()=>{offset=Math.max(0,offset-pageSize);loadRows();});$("next").addEventListener("click",()=>{if(offset+pageSize<total){offset+=pageSize;loadRows();}});
 $("close").addEventListener("click",closeDetail);$("backdrop").addEventListener("click",closeDetail);document.addEventListener("keydown",e=>{if(e.key==="Escape")closeDetail();});
-(async()=>{try{await loadSummary();await loadRows();}catch(e){showError(e.message);}})();
+(async()=>{try{await loadSummary();await loadRows();await restorePersistentReviewSession();}catch(e){showError(e.message);}})();
 </script>
 </body>
 </html>
