@@ -1,41 +1,20 @@
-"""Add origin objects, optional variants, structured specifications, and evidence links."""
+"""Retain the historical origin-reference revision in the Alembic graph.
 
-from alembic import op
+Origin-reference ORM models are no longer part of the current application
+metadata. Existing databases retain any legacy origin tables and their data.
+"""
 
 revision = "20261029_origin_reference"
 down_revision = "20261029_catalog_tree"
 branch_labels = None
 depends_on = None
 
-TABLES = (
-    "origin_objects",
-    "origin_variants",
-    "origin_specifications",
-    "casting_origins",
-    "evidence_origin_objects",
-    "evidence_origin_variants",
-    "evidence_origin_specifications",
-    "evidence_casting_origins",
-)
+
+def upgrade() -> None:
+    # Historical origin-reference models are no longer registered.
+    pass
 
 
-def upgrade():
-    from app import models  # noqa: F401
-    from app.db import Base
-
-    bind = op.get_bind()
-    Base.metadata.create_all(
-        bind=bind,
-        tables=[Base.metadata.tables[name] for name in TABLES],
-    )
-
-
-def downgrade():
-    from app import models  # noqa: F401
-    from app.db import Base
-
-    bind = op.get_bind()
-    Base.metadata.drop_all(
-        bind=bind,
-        tables=[Base.metadata.tables[name] for name in reversed(TABLES)],
-    )
+def downgrade() -> None:
+    # Preserve any legacy origin-reference data.
+    pass
