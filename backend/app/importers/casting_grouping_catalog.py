@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from ..models import (
@@ -50,6 +50,17 @@ def build_casting_grouping_catalog_records(
         })
         sources_by_release[release_id].add(source_id)
 
+
+    evidence_status_rows = session.execute(
+        select(EvidenceRelease.release_id, Evidence.review_status, func.count())
+        .join(Evidence, Evidence.id == EvidenceRelease.evidence_id)
+        .where(EvidenceRelease.release_id.in_(release_ids))
+        .group_by(EvidenceRelease.release_id, Evidence.review_status)
+    ).all()
+    evidence_status_by_release: dict[str, dict[str, int]] = defaultdict(dict)
+    for release_id, review_status, count in evidence_status_rows:
+        evidence_status_by_release[release_id][review_status or "unset"] = int(count)
+
     sku_rows = session.execute(
         select(ReleaseIdentifier.release_id, CatalogIdentifier.value)
         .join(CatalogIdentifier, CatalogIdentifier.id == ReleaseIdentifier.identifier_id)
@@ -71,4 +82,5 @@ def build_casting_grouping_catalog_records(
         "model_name": release.name or casting_name,
         "existing_casting_id": release.casting_id,
         "source_record_ids": sorted(sources_by_release[release.id]),
+        "evidence_review_status_counts": evidence_status_by_release[release.id],
     } for release, casting_name in releases]
