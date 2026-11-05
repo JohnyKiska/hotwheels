@@ -57,6 +57,7 @@ def build_casting_grouping_catalog_records(
         .where(
             EvidenceRelease.release_id.in_(release_ids),
             Evidence.attribute_name == "collector_number",
+            Evidence.review_status != "rejected",
         )
         .order_by(
             EvidenceRelease.release_id,
