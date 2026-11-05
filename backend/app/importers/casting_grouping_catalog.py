@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 
-from sqlalchemy import func, select
+from sqlalchemy import func, select, text
 from sqlalchemy.orm import Session
 
 from ..models import (
@@ -15,22 +15,62 @@ from ..models import (
 def build_casting_grouping_catalog_records(
     session: Session, *, product_line: str, catalog_year: int | None = None,
 ) -> list[dict]:
-    """Snapshot Releases, SKU identifiers and linked Col.# evidence using SELECTs only.
+    """Snapshot only Releases inside the requested product-line tree branch.
 
-    Product line is caller-supplied because it is not a canonical Release field.
+    Product-line membership is derived from catalog_nodes parent-child links.
+    The caller-supplied name is a selector, never a classification value.
     """
     clean_product_line = " ".join(product_line.split())
     if not clean_product_line:
         raise ValueError("product_line must not be empty")
 
-    query = select(Release, Casting.name).join(Casting, Casting.id == Release.casting_id).order_by(Release.id)
-    if catalog_year is not None:
-        query = query.where(Release.catalog_year == catalog_year)
-    releases = session.execute(query).all()
+    line_rows = session.execute(
+        text(
+            """
+            SELECT cn.id, pl.name
+            FROM catalog_nodes AS cn
+            JOIN product_lines AS pl ON pl.id = cn.product_line_id
+            WHERE cn.node_type = 'product_line'
+              AND lower(trim(pl.name)) = lower(:product_line)
+            ORDER BY cn.id
+            """
+        ),
+        {"product_line": clean_product_line},
+    ).all()
+    if not line_rows:
+        raise ValueError(f"Unknown product line: {clean_product_line}")
+    if len(line_rows) > 1:
+        raise ValueError(f"Ambiguous product line name: {clean_product_line}")
+
+    line_node_id, canonical_product_line = line_rows[0]
+    query = text(
+        """
+        WITH RECURSIVE line_tree(id, node_type, release_id) AS (
+            SELECT id, node_type, release_id
+            FROM catalog_nodes
+            WHERE id = :line_node_id
+            UNION
+            SELECT child.id, child.node_type, child.release_id
+            FROM catalog_nodes AS child
+            JOIN line_tree AS parent ON child.parent_id = parent.id
+        )
+        SELECT DISTINCT r.id, c.name
+        FROM line_tree AS tree
+        JOIN releases AS r
+          ON tree.node_type = 'release' AND tree.release_id = r.id
+        JOIN castings AS c ON c.id = r.casting_id
+        WHERE (:catalog_year IS NULL OR r.catalog_year = :catalog_year)
+        ORDER BY r.id
+        """
+    )
+    releases = session.execute(
+        query,
+        {"line_node_id": line_node_id, "catalog_year": catalog_year},
+    ).all()
     if not releases:
         return []
 
-    release_ids = [release.id for release, _name in releases]
+    release_ids = [release_id for release_id, _name in releases]
     evidence_rows = session.execute(
         select(EvidenceRelease.release_id, Evidence.observed_value,
                Evidence.source_record_id, Evidence.attribute_name)
@@ -49,7 +89,6 @@ def build_casting_grouping_catalog_records(
             "value": value, "source_record_id": source_id, "source_field": attribute,
         })
         sources_by_release[release_id].add(source_id)
-
 
     evidence_status_rows = session.execute(
         select(EvidenceRelease.release_id, Evidence.review_status, func.count())
@@ -73,14 +112,21 @@ def build_casting_grouping_catalog_records(
         skus_by_release[release_id].append(value)
 
     return [{
-        "record_id": release.id,
-        "release_id": release.id,
-        "product_line": clean_product_line,
-        "catalog_year": release.catalog_year,
-        "collector_number_claims": claims_by_release[release.id],
-        "sku": skus_by_release[release.id],
-        "model_name": release.name or casting_name,
-        "existing_casting_id": release.casting_id,
-        "source_record_ids": sorted(sources_by_release[release.id]),
-        "evidence_review_status_counts": evidence_status_by_release[release.id],
-    } for release, casting_name in releases]
+        "record_id": release_id,
+        "release_id": release_id,
+        "product_line": canonical_product_line,
+        "catalog_year": next(
+            (year for rid, year in session.execute(
+                select(Release.id, Release.catalog_year).where(Release.id.in_(release_ids))
+            ).all() if rid == release_id),
+            None,
+        ),
+        "collector_number_claims": claims_by_release[release_id],
+        "sku": skus_by_release[release_id],
+        "model_name": casting_name,
+        "existing_casting_id": session.scalar(
+            select(Release.casting_id).where(Release.id == release_id)
+        ),
+        "source_record_ids": sorted(sources_by_release[release_id]),
+        "evidence_review_status_counts": evidence_status_by_release[release_id],
+    } for release_id, casting_name in releases]
