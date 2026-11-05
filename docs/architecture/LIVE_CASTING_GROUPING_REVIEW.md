@@ -58,7 +58,7 @@ Decision history is append-only. A changed decision is recorded as a new event w
 
 ### API boundary
 
-The planned endpoints are:
+The implemented endpoints are:
 
 - `POST /castings/grouping-review-sessions/from-catalog`: generate and persist a fresh immutable preview session.
 - `GET /castings/grouping-review-sessions/{session_id}`: return the stored snapshot and current decision state.
@@ -71,7 +71,7 @@ Every decision write must verify that the session exists, is not stale, the prop
 
 The current local admin has no authenticated user identity. Until authentication is implemented, the reviewer field is explicitly an unverified operator-supplied label, not proof of identity. The backend must remain bound to localhost; it must not be exposed to a network.
 
-The review tables require an Alembic migration. The migration is code only until separately reviewed and explicitly applied to a selected database. No startup-time `create_all`, automatic migration, production initialization, or catalog data mutation is permitted.
+The review tables are introduced by Alembic revision `20261105_casting_grouping_review`. The migration is code only until separately reviewed and explicitly applied to a selected database. It adds immutable-session and append-only-decision triggers in SQLite. No startup-time `create_all`, automatic migration, production initialization, or catalog data mutation is permitted.
 
 ### Apply remains a separate future capability
 
@@ -86,3 +86,12 @@ A later apply phase must be designed independently and must require all of the f
 
 Until that separate phase is implemented and explicitly authorized, all review-session APIs remain catalog-read-only and no apply endpoint is exposed.
 
+
+
+## Implementation status
+
+The persistent workflow API and SQLAlchemy models are implemented on the feature branch. Session creation stores the complete preview payload and SHA-256 fingerprints for both the canonical snapshot and its catalog inputs. Reads and decision submissions recompute the preview fingerprints; a changed catalog input or changed preview contract makes the session stale, and stale sessions reject new decisions with HTTP 409.
+
+Decision revisions are inserted as new rows and link to the previous decision for the same proposal. SQLite triggers prevent updates and deletes to both session snapshots and decision history. The workflow writes only to the two dedicated review tables and always returns `writes_to_catalog=false`.
+
+The migration has not been run against any user, development, or production database. It must first be exercised against a disposable test database and reviewed independently.
