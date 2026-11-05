@@ -306,6 +306,7 @@ def create_casting_grouping_review_session(
         "catalog_input_fingerprint": review_session.catalog_input_fingerprint,
         "snapshot": review_session.snapshot,
         "decisions": [],
+        "reviewed_plan": _build_reviewed_remediation_plan(review_session.snapshot, {}),
         "stale": False,
     }
 
