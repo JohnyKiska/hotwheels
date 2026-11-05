@@ -195,6 +195,51 @@ def _review_decision_payload(decision: CastingGroupingReviewDecision) -> dict:
     }
 
 
+def _build_reviewed_remediation_plan(snapshot: dict, latest_by_proposal: dict[str, dict]) -> dict:
+    """Overlay latest human decisions on a report-only plan; never authorize catalog writes."""
+    original = snapshot.get("remediation_plan", {})
+    items = []
+    counts = {
+        "pending_review": 0,
+        "accepted_by_reviewer": 0,
+        "rejected_by_reviewer": 0,
+        "needs_more_evidence": 0,
+    }
+    for source_item in original.get("items", []):
+        item = dict(source_item)
+        decision = latest_by_proposal.get(item.get("proposal_id"))
+        disposition = decision.get("disposition") if decision else None
+        if disposition == "accepted":
+            review_status = "accepted_by_reviewer"
+        elif disposition == "rejected":
+            review_status = "rejected_by_reviewer"
+        elif disposition == "needs_more_evidence":
+            review_status = "needs_more_evidence"
+        else:
+            review_status = "pending_review"
+        counts[review_status] += 1
+        item.update({
+            "review_status": review_status,
+            "review_disposition": disposition,
+            "review_reason": decision.get("reason") if decision else None,
+            "reviewer_label": decision.get("reviewer_label") if decision else None,
+            "reviewed_at": decision.get("created_at") if decision else None,
+            "review_decision_id": decision.get("id") if decision else None,
+        })
+        items.append(item)
+    return {
+        "mode": "reviewed_report_only",
+        "writes_to_catalog": False,
+        "catalog_apply_authorized": False,
+        "items": items,
+        "summary": counts | {
+            "total_items": len(items),
+            "decided_items": len(items) - counts["pending_review"],
+            "safe_to_apply_automatically": False,
+        },
+    }
+
+
 class CastingGroupingReviewSessionRequest(BaseModel):
     product_line: str = Field(min_length=1, max_length=120)
     catalog_year: int | None = Field(default=None, ge=1968, le=2100)
@@ -288,9 +333,14 @@ def get_casting_grouping_review_session(
     latest_by_proposal = {}
     for decision in decisions:
         latest_by_proposal[decision.proposal_id] = _review_decision_payload(decision)
+    latest_decisions = list(latest_by_proposal.values())
+    reviewed_plan = _build_reviewed_remediation_plan(
+        review_session.snapshot, latest_by_proposal
+    )
     return {
         "mode": "review_session_read",
         "writes_to_catalog": False,
+        "reviewed_plan": reviewed_plan,
         "session_id": review_session.id,
         "created_at": review_session.created_at.isoformat(),
         "product_line": review_session.product_line,
