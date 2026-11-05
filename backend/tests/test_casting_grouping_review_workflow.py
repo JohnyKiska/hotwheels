@@ -143,6 +143,14 @@ def test_review_session_persists_snapshot_and_append_only_decision_history():
         detail = client.get(f"/castings/grouping-review-sessions/{session_id}")
         assert detail.status_code == 200
         assert detail.json()["decisions"][0]["disposition"] == "accepted"
+        reviewed_plan = detail.json()["reviewed_plan"]
+        assert reviewed_plan["mode"] == "reviewed_report_only"
+        assert reviewed_plan["writes_to_catalog"] is False
+        assert reviewed_plan["catalog_apply_authorized"] is False
+        assert reviewed_plan["summary"]["accepted_by_reviewer"] == 1
+        assert reviewed_plan["summary"]["decided_items"] == 1
+        assert reviewed_plan["items"][0]["review_status"] == "accepted_by_reviewer"
+        assert reviewed_plan["items"][0]["review_reason"] == "Reviewed again."
 
         with Session(engine) as db:
             assert db.scalar(select(func.count()).select_from(CastingGroupingReviewSession)) == 1
