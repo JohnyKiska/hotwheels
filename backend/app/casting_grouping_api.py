@@ -135,3 +135,245 @@ def preview_casting_grouping_from_catalog(
         }
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+# Persistent review workflow. These endpoints write only to dedicated review tables.
+import hashlib as _hashlib
+import json as _json
+from datetime import timezone as _timezone
+from typing import Literal as _Literal
+
+from sqlalchemy import select as _select
+from .models import (
+    CastingGroupingReviewDecision,
+    CastingGroupingReviewSession,
+)
+
+
+def _canonical_sha256(value: object) -> str:
+    encoded = _json.dumps(
+        value, ensure_ascii=False, sort_keys=True, separators=(",", ":"), default=str
+    ).encode("utf-8")
+    return _hashlib.sha256(encoded).hexdigest()
+
+
+def _current_catalog_input_fingerprint(session: Session, product_line: str, catalog_year: int | None) -> str:
+    records = build_casting_grouping_catalog_records(
+        session, product_line=product_line, catalog_year=catalog_year
+    )
+    return _canonical_sha256(records)
+
+
+def _review_decision_payload(decision: CastingGroupingReviewDecision) -> dict:
+    created_at = decision.created_at
+    if created_at.tzinfo is None:
+        created_at = created_at.replace(tzinfo=_timezone.utc)
+    return {
+        "id": decision.id,
+        "session_id": decision.session_id,
+        "proposal_id": decision.proposal_id,
+        "disposition": decision.disposition,
+        "reviewer_label": decision.reviewer_label,
+        "reason": decision.reason,
+        "previous_decision_id": decision.previous_decision_id,
+        "created_at": created_at.isoformat(),
+    }
+
+
+class CastingGroupingReviewSessionRequest(BaseModel):
+    product_line: str = Field(min_length=1, max_length=120)
+    catalog_year: int | None = Field(default=None, ge=1968, le=2100)
+
+
+class CastingGroupingReviewDecisionRequest(BaseModel):
+    proposal_id: str = Field(min_length=1, max_length=160)
+    disposition: _Literal["accepted", "rejected", "needs_more_evidence"]
+    reviewer_label: str = Field(min_length=1, max_length=120)
+    reason: str | None = Field(default=None, max_length=4000)
+
+
+@router.post("/castings/grouping-review-sessions/from-catalog")
+def create_casting_grouping_review_session(
+    request: CastingGroupingReviewSessionRequest,
+    session: Session = Depends(get_db),
+) -> dict:
+    """Persist a fresh immutable preview snapshot; catalog rows remain read-only."""
+    product_line = " ".join(request.product_line.split())
+    if not product_line:
+        raise HTTPException(status_code=422, detail="product_line must not be blank.")
+    try:
+        report = preview_casting_grouping_from_catalog(
+            CastingGroupingCatalogPreviewRequest(
+                product_line=product_line, catalog_year=request.catalog_year
+            ),
+            session,
+        )
+        input_fingerprint = _current_catalog_input_fingerprint(
+            session, product_line, request.catalog_year
+        )
+        snapshot_fingerprint = _canonical_sha256(report)
+        review_session = CastingGroupingReviewSession(
+            product_line=product_line,
+            catalog_year=request.catalog_year,
+            contract=report.get("contract", "hw_catalog.casting_grouping_preview"),
+            contract_version=report.get("contract_version", 1),
+            grouping_key=report.get("grouping_key", []),
+            snapshot=report,
+            snapshot_sha256=snapshot_fingerprint,
+            catalog_input_fingerprint=input_fingerprint,
+        )
+        session.add(review_session)
+        session.commit()
+        session.refresh(review_session)
+    except HTTPException:
+        session.rollback()
+        raise
+    except ValueError as exc:
+        session.rollback()
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except Exception:
+        session.rollback()
+        raise
+
+    return {
+        "mode": "review_session_created",
+        "writes_to_catalog": False,
+        "session_id": review_session.id,
+        "created_at": review_session.created_at.isoformat(),
+        "product_line": review_session.product_line,
+        "catalog_year": review_session.catalog_year,
+        "snapshot_sha256": review_session.snapshot_sha256,
+        "catalog_input_fingerprint": review_session.catalog_input_fingerprint,
+        "snapshot": review_session.snapshot,
+        "decisions": [],
+        "stale": False,
+    }
+
+
+@router.get("/castings/grouping-review-sessions/{session_id}")
+def get_casting_grouping_review_session(
+    session_id: str,
+    session: Session = Depends(get_db),
+) -> dict:
+    review_session = session.get(CastingGroupingReviewSession, session_id)
+    if review_session is None:
+        raise HTTPException(status_code=404, detail="Review session not found.")
+    current_fingerprint = _current_catalog_input_fingerprint(
+        session, review_session.product_line, review_session.catalog_year
+    )
+    stale = current_fingerprint != review_session.catalog_input_fingerprint
+    decisions = session.scalars(
+        _select(CastingGroupingReviewDecision)
+        .where(CastingGroupingReviewDecision.session_id == session_id)
+        .order_by(CastingGroupingReviewDecision.created_at, CastingGroupingReviewDecision.id)
+    ).all()
+    latest_by_proposal = {}
+    for decision in decisions:
+        latest_by_proposal[decision.proposal_id] = _review_decision_payload(decision)
+    return {
+        "mode": "review_session_read",
+        "writes_to_catalog": False,
+        "session_id": review_session.id,
+        "created_at": review_session.created_at.isoformat(),
+        "product_line": review_session.product_line,
+        "catalog_year": review_session.catalog_year,
+        "contract": review_session.contract,
+        "contract_version": review_session.contract_version,
+        "grouping_key": review_session.grouping_key,
+        "snapshot_sha256": review_session.snapshot_sha256,
+        "catalog_input_fingerprint": review_session.catalog_input_fingerprint,
+        "snapshot": review_session.snapshot,
+        "decisions": list(latest_by_proposal.values()),
+        "stale": stale,
+    }
+
+
+@router.get("/castings/grouping-review-sessions/{session_id}/decisions")
+def list_casting_grouping_review_decisions(
+    session_id: str,
+    session: Session = Depends(get_db),
+) -> dict:
+    review_session = session.get(CastingGroupingReviewSession, session_id)
+    if review_session is None:
+        raise HTTPException(status_code=404, detail="Review session not found.")
+    current_fingerprint = _current_catalog_input_fingerprint(
+        session, review_session.product_line, review_session.catalog_year
+    )
+    stale = current_fingerprint != review_session.catalog_input_fingerprint
+    decisions = session.scalars(
+        _select(CastingGroupingReviewDecision)
+        .where(CastingGroupingReviewDecision.session_id == session_id)
+        .order_by(CastingGroupingReviewDecision.created_at, CastingGroupingReviewDecision.id)
+    ).all()
+    return {
+        "mode": "review_decision_history",
+        "writes_to_catalog": False,
+        "session_id": session_id,
+        "stale": stale,
+        "total": len(decisions),
+        "items": [_review_decision_payload(item) for item in decisions],
+    }
+
+
+@router.post("/castings/grouping-review-sessions/{session_id}/decisions")
+def append_casting_grouping_review_decision(
+    session_id: str,
+    request: CastingGroupingReviewDecisionRequest,
+    session: Session = Depends(get_db),
+) -> dict:
+    """Append one reviewer decision. This never authorizes or performs catalog apply."""
+    review_session = session.get(CastingGroupingReviewSession, session_id)
+    if review_session is None:
+        raise HTTPException(status_code=404, detail="Review session not found.")
+
+    current_fingerprint = _current_catalog_input_fingerprint(
+        session, review_session.product_line, review_session.catalog_year
+    )
+    if current_fingerprint != review_session.catalog_input_fingerprint:
+        raise HTTPException(
+            status_code=409,
+            detail="Review session is stale; create a fresh session before recording decisions.",
+        )
+
+    proposal_ids = {
+        item.get("proposal_id")
+        for item in review_session.snapshot.get("remediation_plan", {}).get("items", [])
+    }
+    if request.proposal_id not in proposal_ids:
+        raise HTTPException(status_code=404, detail="Proposal does not belong to this session.")
+
+    previous = session.scalar(
+        _select(CastingGroupingReviewDecision)
+        .where(
+            CastingGroupingReviewDecision.session_id == session_id,
+            CastingGroupingReviewDecision.proposal_id == request.proposal_id,
+        )
+        .order_by(
+            CastingGroupingReviewDecision.created_at.desc(),
+            CastingGroupingReviewDecision.id.desc(),
+        )
+        .limit(1)
+    )
+    reviewer_label = request.reviewer_label.strip()
+    if not reviewer_label:
+        raise HTTPException(status_code=422, detail="reviewer_label must not be blank.")
+    decision = CastingGroupingReviewDecision(
+        session_id=session_id,
+        proposal_id=request.proposal_id,
+        disposition=request.disposition,
+        reviewer_label=reviewer_label,
+        reason=request.reason,
+        previous_decision_id=previous.id if previous else None,
+    )
+    try:
+        session.add(decision)
+        session.commit()
+        session.refresh(decision)
+    except Exception:
+        session.rollback()
+        raise
+    return {
+        "mode": "review_decision_recorded",
+        "writes_to_catalog": False,
+        "decision": _review_decision_payload(decision),
+    }
