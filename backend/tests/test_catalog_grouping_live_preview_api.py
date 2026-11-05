@@ -101,6 +101,7 @@ def test_catalog_grouping_preview_splits_one_legacy_casting_by_collector_number_
     assert plan["mode"] == "report_only"
     assert plan["writes_to_catalog"] is False
     assert plan["summary"]["split_candidates_requiring_review"] == 2
+    assert plan["summary"]["manual_review_items"] == 2
     assert plan["summary"]["approved_evidence"] == 0
     assert plan["summary"]["non_approved_evidence"] == 2
     assert plan["summary"]["safe_to_apply_automatically"] is False
