@@ -55,7 +55,7 @@ def test_admin_review_translations_cover_all_action_and_decision_codes():
     # API disposition codes are mapped to the UI's translated action labels.
     assert {"accept", "decline", "needEvidence"} <= locale_keys[0]
     assert {"accept", "decline", "needEvidence"} <= locale_keys[1]
-    disposition_match = re.search(r"const dispositionLabels=\\{(.*?)\\};", admin_html)
+    disposition_match = re.search(r"const dispositionLabels=\{(.*?)\};", admin_html)
     assert disposition_match, "Review UI must define decision disposition labels"
     assert all(
         f"{code}:t.{label}" in disposition_match.group(1)
