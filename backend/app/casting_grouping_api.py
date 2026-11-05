@@ -164,6 +164,21 @@ def _current_catalog_input_fingerprint(session: Session, product_line: str, cata
     return _canonical_sha256(records)
 
 
+def _current_review_fingerprints(
+    session: Session, product_line: str, catalog_year: int | None
+) -> tuple[str, str]:
+    input_fingerprint = _current_catalog_input_fingerprint(
+        session, product_line, catalog_year
+    )
+    report = preview_casting_grouping_from_catalog(
+        CastingGroupingCatalogPreviewRequest(
+            product_line=product_line, catalog_year=catalog_year
+        ),
+        session,
+    )
+    return input_fingerprint, _canonical_sha256(report)
+
+
 def _review_decision_payload(decision: CastingGroupingReviewDecision) -> dict:
     created_at = decision.created_at
     if created_at.tzinfo is None:
@@ -258,10 +273,13 @@ def get_casting_grouping_review_session(
     review_session = session.get(CastingGroupingReviewSession, session_id)
     if review_session is None:
         raise HTTPException(status_code=404, detail="Review session not found.")
-    current_fingerprint = _current_catalog_input_fingerprint(
+    current_fingerprint, current_snapshot_fingerprint = _current_review_fingerprints(
         session, review_session.product_line, review_session.catalog_year
     )
-    stale = current_fingerprint != review_session.catalog_input_fingerprint
+    stale = (
+        current_fingerprint != review_session.catalog_input_fingerprint
+        or current_snapshot_fingerprint != review_session.snapshot_sha256
+    )
     decisions = session.scalars(
         _select(CastingGroupingReviewDecision)
         .where(CastingGroupingReviewDecision.session_id == session_id)
@@ -296,10 +314,13 @@ def list_casting_grouping_review_decisions(
     review_session = session.get(CastingGroupingReviewSession, session_id)
     if review_session is None:
         raise HTTPException(status_code=404, detail="Review session not found.")
-    current_fingerprint = _current_catalog_input_fingerprint(
+    current_fingerprint, current_snapshot_fingerprint = _current_review_fingerprints(
         session, review_session.product_line, review_session.catalog_year
     )
-    stale = current_fingerprint != review_session.catalog_input_fingerprint
+    stale = (
+        current_fingerprint != review_session.catalog_input_fingerprint
+        or current_snapshot_fingerprint != review_session.snapshot_sha256
+    )
     decisions = session.scalars(
         _select(CastingGroupingReviewDecision)
         .where(CastingGroupingReviewDecision.session_id == session_id)
@@ -326,10 +347,13 @@ def append_casting_grouping_review_decision(
     if review_session is None:
         raise HTTPException(status_code=404, detail="Review session not found.")
 
-    current_fingerprint = _current_catalog_input_fingerprint(
+    current_fingerprint, current_snapshot_fingerprint = _current_review_fingerprints(
         session, review_session.product_line, review_session.catalog_year
     )
-    if current_fingerprint != review_session.catalog_input_fingerprint:
+    if (
+        current_fingerprint != review_session.catalog_input_fingerprint
+        or current_snapshot_fingerprint != review_session.snapshot_sha256
+    ):
         raise HTTPException(
             status_code=409,
             detail="Review session is stale; create a fresh session before recording decisions.",
