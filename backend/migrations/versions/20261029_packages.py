@@ -1,37 +1,22 @@
-"""Add package records, ordered contents, identifiers, and package evidence."""
+"""Retain the historical package-schema revision in the Alembic graph.
 
-from alembic import op
+The current application no longer maps package tables. Existing databases keep
+any package tables and data they already contain; fresh databases are built
+from the current ORM metadata by the core-schema migration.
+"""
 
 revision = "20261029_packages"
 down_revision = "20261027_change_log_append_only"
 branch_labels = None
 depends_on = None
 
-TABLES = (
-    "packages",
-    "package_releases",
-    "package_identifiers",
-    "evidence_packages",
-)
+
+def upgrade() -> None:
+    # Deliberately do not recreate retired package models from historical ORM
+    # metadata that is no longer part of the current application.
+    pass
 
 
-def upgrade():
-    from app import models  # noqa: F401
-    from app.db import Base
-
-    bind = op.get_bind()
-    Base.metadata.create_all(
-        bind=bind,
-        tables=[Base.metadata.tables[name] for name in TABLES],
-    )
-
-
-def downgrade():
-    from app import models  # noqa: F401
-    from app.db import Base
-
-    bind = op.get_bind()
-    Base.metadata.drop_all(
-        bind=bind,
-        tables=[Base.metadata.tables[name] for name in reversed(TABLES)],
-    )
+def downgrade() -> None:
+    # Preserve any package tables and data left by older installations.
+    pass
