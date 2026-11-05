@@ -81,12 +81,12 @@ def preview_casting_grouping_from_catalog(
             members = group["records"]
             casting_ids = sorted({m["existing_casting_id"] for m in members if m.get("existing_casting_id")})
             split_ids = [cid for cid in casting_ids if len(existing_to_proposals[cid]) > 1]
-            if group["requires_manual_review"]:
-                action = "manual_review"
+            if split_ids:
+                action = "split_candidate_manual_review"
             elif len(casting_ids) > 1:
                 action = "merge_candidate_manual_review"
-            elif split_ids:
-                action = "split_candidate_manual_review"
+            elif group["requires_manual_review"]:
+                action = "manual_review"
             elif len(casting_ids) == 1:
                 action = "keep_existing_link_candidate"
             else:
