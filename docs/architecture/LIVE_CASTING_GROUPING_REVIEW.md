@@ -56,6 +56,12 @@ A decision is not an approval to mutate catalog data. In particular, accepting a
 
 Decision history is append-only. A changed decision is recorded as a new event with a reference to the prior decision rather than overwriting history.
 
+### Reviewed remediation plan
+
+The session read endpoint also returns a derived `reviewed_plan` in `reviewed_report_only` mode. It overlays only the latest decision for each proposal and classifies it as `accepted_by_reviewer`, `rejected_by_reviewer`, `needs_more_evidence`, or `pending_review`. Its summary counts these states and reports the number of decided items.
+
+This derived plan does not rewrite the immutable snapshot or the append-only decision log. It always returns `writes_to_catalog=false`, `catalog_apply_authorized=false`, and `safe_to_apply_automatically=false`. An accepted decision means only that the reviewer agrees with the proposed candidate operation; it is not permission to execute that operation.
+
 ### API boundary
 
 The implemented endpoints are:
