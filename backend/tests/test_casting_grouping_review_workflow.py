@@ -103,6 +103,8 @@ def test_review_session_persists_snapshot_and_append_only_decision_history():
         payload = created.json()
         assert payload["writes_to_catalog"] is False
         assert payload["stale"] is False
+        assert payload["reviewed_plan"]["summary"]["pending_review"] == 1
+        assert payload["reviewed_plan"]["catalog_apply_authorized"] is False
         session_id = payload["session_id"]
         proposal_id = payload["snapshot"]["remediation_plan"]["items"][0]["proposal_id"]
 
