@@ -113,10 +113,27 @@ def build_casting_grouping_preview(records: list[dict[str, Any]]) -> dict[str, A
             }) if isinstance(source.get("source_record_ids") or [], list) else [],
         })
 
+    # A Release can have several source snapshots. Conflicting Col.# claims
+    # across those snapshots must be reviewed as one Release-level conflict.
+    release_claim_values: dict[str, set[str]] = defaultdict(set)
+    release_claim_details: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for record in normalized:
+        release_id = record["release_id"]
+        if not release_id:
+            continue
+        for claim in record["collector_number_claims"]:
+            value = _clean_text(claim.get("value"))
+            if value is not None:
+                release_claim_values[release_id].add(value.casefold())
+                release_claim_details[release_id].append(claim)
+
     keyed: dict[tuple[str, int, str], list[dict[str, Any]]] = defaultdict(list)
     manual_review: list[dict[str, Any]] = []
     for record in normalized:
         reasons: list[str] = []
+        release_id = record["release_id"]
+        if release_id and len(release_claim_values[release_id]) > 1:
+            reasons.append("conflicting_collector_number_claims_for_release")
         if record["product_line_key"] is None:
             reasons.append("missing_product_line")
         if record["catalog_year"] is None:
@@ -132,7 +149,11 @@ def build_casting_grouping_preview(records: list[dict[str, Any]]) -> dict[str, A
                 "release_id": record["release_id"],
                 "sku": record["sku"],
                 "model_name": record["model_name"],
-                "collector_number_claims": record["collector_number_claims"],
+                "collector_number_claims": (
+                    release_claim_details[release_id]
+                    if release_id and len(release_claim_values[release_id]) > 1
+                    else record["collector_number_claims"]
+                ),
                 "reason_codes": reasons,
                 "requires_manual_review": True,
                 "reason": "Insufficient or contradictory identity context; no name-based fallback is permitted.",
