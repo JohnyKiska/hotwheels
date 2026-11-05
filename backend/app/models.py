@@ -456,3 +456,10 @@ class CastingVariantIdentifier(Base):
     source_note: Mapped[str | None] = mapped_column(Text)
     casting_variant: Mapped[CastingVariant] = relationship()
     identifier: Mapped[CatalogIdentifier] = relationship()
+
+
+# Persistent grouping review workflow tables (review-only; no catalog mutations).
+from .review_workflow_models import (  # noqa: E402,F401
+    CastingGroupingReviewDecision,
+    CastingGroupingReviewSession,
+)
