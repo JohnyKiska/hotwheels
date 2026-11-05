@@ -17,14 +17,14 @@ def test_admin_review_translations_cover_all_action_and_decision_codes():
     )
 
     locale_match = re.search(
-        r"const text=\\{\\s*ru:\\{(.*?)\\},\\s*en:\\{(.*?)\\}\\s*\\};",
+        r"const text=\{\s*ru:\{(.*?)\},\s*en:\{(.*?)\}\s*\};",
         admin_html,
         re.DOTALL,
     )
     assert locale_match, "Review UI must define Russian and English dictionaries"
     locale_keys = []
     for locale_body in locale_match.groups():
-        keys = set(re.findall(r"(?:^|,)\\s*([a-zA-Z][a-zA-Z0-9]*):", locale_body))
+        keys = set(re.findall(r"(?:^|,)\s*([a-zA-Z][a-zA-Z0-9]*):", locale_body))
         assert keys, "Translation dictionary must not be empty"
         locale_keys.append(keys)
     assert locale_keys[0] == locale_keys[1], (
@@ -32,10 +32,10 @@ def test_admin_review_translations_cover_all_action_and_decision_codes():
         f"en-only={locale_keys[1] - locale_keys[0]}"
     )
 
-    action_match = re.search(r"const actionLabels=\\{(.*?)\\};", admin_html, re.DOTALL)
+    action_match = re.search(r"const actionLabels=\{(.*?)\};", admin_html, re.DOTALL)
     assert action_match, "Review UI must define action labels"
     action_entries = re.findall(
-        r"([a-z][a-z0-9_]+):\\{ru:\"([^\"]+)\",en:\"([^\"]+)\"\\}",
+        r"([a-z][a-z0-9_]+):\{ru:\"([^\"]+)\",en:\"([^\"]+)\"\}",
         action_match.group(1),
     )
     action_labels = {code: (ru, en) for code, ru, en in action_entries}
