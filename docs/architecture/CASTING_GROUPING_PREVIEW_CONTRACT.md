@@ -23,7 +23,7 @@ The proposal key is:
 - Same explicit key, different SKUs or colors: one provisional group.
 - Same name, different collector numbers: separate groups.
 - Different years or product lines: separate groups.
-- Missing product line/year/collector number, or conflicting collector-number claims: manual review.
+- Missing product line/year/collector number, or conflicting collector-number claims within or across source snapshots for one Release: manual review.
 - Multiple existing Casting IDs under one proposed key: conflict; no automatic merge.
 - One existing Casting spanning multiple proposed keys: keep proposals separate and flag a split conflict.
 - Model name is descriptive metadata only and is never a fallback key.
