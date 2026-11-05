@@ -34,8 +34,8 @@ Collector number values are preserved as source strings, including leading zeroe
 
 The contract is \`hw_catalog.casting_grouping_preview\`, version 1. It returns proposed groups, record-level manual-review items, conflicts, reason codes, source provenance, and a summary.
 
-Every response states \`mode=preview_only\` and \`writes_to_catalog=false\`. The module is pure Python: no database session, network calls, SQL writes, migration, merge, split, or apply operation.
+Every response states \`mode=preview_only\` and \`writes_to_catalog=false\`. The core grouping module remains pure Python. A separate catalog adapter exposes `POST /castings/grouping-preview/from-catalog`: it reads Releases, linked SKU identifiers, and Release-linked `collector_number` Evidence using SELECT queries only. The request must supply `product_line` explicitly and may optionally filter by `catalog_year`. The adapter returns the same preview contract plus a `catalog_snapshot` summary. It performs no INSERT, UPDATE, DELETE, commit, migration, merge, split, or apply operation. Evidence outside the exact `collector_number` attribute is not treated as a Col.# claim.
 
 ## Validation cases
 
-Tests cover same-number/different-SKU grouping, the Nissan Skyline HTC65 / Col.#191 versus HRY85 / Col.#213 split, year and product-line boundaries, missing and conflicting claims, existing-casting conflicts, and input immutability.
+Tests cover same-number/different-SKU grouping, the Nissan Skyline HTC65 / Col.#191 versus HRY85 / Col.#213 split, year and product-line boundaries, missing and conflicting claims, existing-casting conflicts, input immutability, catalog-backed SKU/Evidence loading, missing-number review, and unchanged database row counts.
