@@ -1,5 +1,5 @@
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine, func, select
+from sqlalchemy import create_engine, func, select, text
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
@@ -19,6 +19,13 @@ def make_review_engine():
         poolclass=StaticPool,
     )
     Base.metadata.create_all(engine)
+    with engine.begin() as connection:
+        connection.exec_driver_sql(
+            "CREATE TABLE product_lines (id TEXT PRIMARY KEY, name TEXT NOT NULL)"
+        )
+        connection.exec_driver_sql(
+            "CREATE TABLE catalog_nodes (id TEXT PRIMARY KEY, parent_id TEXT, node_type TEXT NOT NULL, product_line_id TEXT, release_id TEXT)"
+        )
     with Session(engine) as db:
         casting = Casting(name="Mazda Autozam", status="candidate")
         db.add(casting)
@@ -57,6 +64,21 @@ def make_review_engine():
         db.add(EvidenceRelease(
             evidence_id=evidence.id, release_id=release.id, role="about"
         ))
+        db.execute(
+            text("INSERT INTO product_lines (id, name) VALUES ('line-mainline', 'Mainline')")
+        )
+        db.execute(
+            text("INSERT INTO catalog_nodes (id, node_type, product_line_id) VALUES ('line-mainline', 'product_line', 'line-mainline')")
+        )
+        db.execute(
+            text("INSERT INTO catalog_nodes (id, parent_id, node_type) VALUES ('year-2024', 'line-mainline', 'year')")
+        )
+        db.execute(
+            text("INSERT INTO catalog_nodes (id, parent_id, node_type) VALUES ('series-1', 'year-2024', 'series')")
+        )
+        db.execute(
+            text("INSERT INTO catalog_nodes (id, parent_id, node_type, release_id) VALUES ('release-node-1', 'series-1', 'release', 'review-release-1')")
+        )
         db.commit()
     return engine
 
