@@ -95,6 +95,27 @@ def test_catalog_grouping_preview_uses_release_sku_and_collector_evidence_withou
                 release_id=release_id,
                 role="about",
             ))
+
+        rejected_record = SourceRecord(
+            source_id=source.id,
+            record_type="catalog_item",
+            raw_data={},
+        )
+        session.add(rejected_record)
+        session.flush()
+        rejected_evidence = Evidence(
+            source_record_id=rejected_record.id,
+            attribute_name="collector_number",
+            observed_value="999",
+            review_status="rejected",
+        )
+        session.add(rejected_evidence)
+        session.flush()
+        session.add(EvidenceRelease(
+            evidence_id=rejected_evidence.id,
+            release_id="release-a",
+            role="about",
+        ))
         session.commit()
 
     override_database(engine)
@@ -129,7 +150,7 @@ def test_catalog_grouping_preview_uses_release_sku_and_collector_evidence_withou
 
     with Session(engine) as session:
         assert session.scalar(select(func.count()).select_from(Release)) == 3
-        assert session.scalar(select(func.count()).select_from(Evidence)) == 2
+        assert session.scalar(select(func.count()).select_from(Evidence)) == 3
         assert session.scalar(select(func.count()).select_from(ReleaseIdentifier)) == 2
 
 
