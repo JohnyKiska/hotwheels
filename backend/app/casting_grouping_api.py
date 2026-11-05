@@ -333,7 +333,6 @@ def get_casting_grouping_review_session(
     latest_by_proposal = {}
     for decision in decisions:
         latest_by_proposal[decision.proposal_id] = _review_decision_payload(decision)
-    latest_decisions = list(latest_by_proposal.values())
     reviewed_plan = _build_reviewed_remediation_plan(
         review_session.snapshot, latest_by_proposal
     )
