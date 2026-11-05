@@ -55,6 +55,7 @@ The read-only `mainline_2024_export.json` was independently analyzed by followin
 | Existing Casting groups | 249 |
 | Distinct non-empty collector numbers | 250 |
 | Existing Casting groups containing multiple collector numbers | 1 |
+| Collector numbers assigned to multiple existing Casting groups | 0 |
 | Releases in the identified cross-number group | 2 |
 
 The sole cross-number group is:
@@ -66,7 +67,7 @@ The sole cross-number group is:
 
 Under the proposed key, these become two provisional Casting groups while retaining the same displayed model name.
 
-For this 2024 Mainline dataset, applying the key yields **250 provisional groups instead of 249 existing name-based groups**. This is a dataset-specific audit result, not proof that collector number alone is universally sufficient across all years or product lines.
+For this 2024 Mainline dataset, applying the key yields **250 provisional groups instead of 249 existing name-based groups**. All 250 collector numbers currently map to exactly one existing Casting group; one existing group incorrectly spans two numbers. This is a dataset-specific audit result, not proof that collector number alone is universally sufficient across all years or product lines.
 
 ## 5. Data model and implementation guardrails
 
