@@ -116,7 +116,7 @@ def preview_casting_grouping_from_catalog(
                 "split_candidates_requiring_review": sum(x["action"] == "split_candidate_manual_review" for x in plan_items),
                 "merge_candidates_requiring_review": sum(x["action"] == "merge_candidate_manual_review" for x in plan_items),
                 "new_casting_candidates": sum(x["action"] == "new_casting_candidate" for x in plan_items),
-                "manual_review_items": sum(x["action"] == "manual_review" for x in plan_items),
+                "manual_review_items": sum(x["requires_manual_review"] for x in plan_items),
                 "evidence_review_status_counts": evidence_totals,
                 "approved_evidence": approved_evidence,
                 "non_approved_evidence": sum(v for k, v in evidence_totals.items() if k != "approved"),
