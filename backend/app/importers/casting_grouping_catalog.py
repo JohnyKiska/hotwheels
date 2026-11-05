@@ -54,7 +54,7 @@ def build_casting_grouping_catalog_records(
             FROM catalog_nodes AS child
             JOIN line_tree AS parent ON child.parent_id = parent.id
         )
-        SELECT DISTINCT r.id, c.name
+        SELECT DISTINCT r.id, c.name, r.catalog_year, r.casting_id
         FROM line_tree AS tree
         JOIN releases AS r
           ON tree.node_type = 'release' AND tree.release_id = r.id
@@ -70,7 +70,7 @@ def build_casting_grouping_catalog_records(
     if not releases:
         return []
 
-    release_ids = [release_id for release_id, _name in releases]
+    release_ids = [release_id for release_id, _name, _year, _casting_id in releases]
     evidence_rows = session.execute(
         select(EvidenceRelease.release_id, Evidence.observed_value,
                Evidence.source_record_id, Evidence.attribute_name)
@@ -115,18 +115,11 @@ def build_casting_grouping_catalog_records(
         "record_id": release_id,
         "release_id": release_id,
         "product_line": canonical_product_line,
-        "catalog_year": next(
-            (year for rid, year in session.execute(
-                select(Release.id, Release.catalog_year).where(Release.id.in_(release_ids))
-            ).all() if rid == release_id),
-            None,
-        ),
+        "catalog_year": release_year,
         "collector_number_claims": claims_by_release[release_id],
         "sku": skus_by_release[release_id],
         "model_name": casting_name,
-        "existing_casting_id": session.scalar(
-            select(Release.casting_id).where(Release.id == release_id)
-        ),
+        "existing_casting_id": casting_id,
         "source_record_ids": sorted(sources_by_release[release_id]),
         "evidence_review_status_counts": evidence_status_by_release[release_id],
-    } for release_id, casting_name in releases]
+    } for release_id, casting_name, release_year, casting_id in releases]
