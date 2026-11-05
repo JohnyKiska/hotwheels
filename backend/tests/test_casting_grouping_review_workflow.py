@@ -5,6 +5,37 @@ from sqlalchemy.pool import StaticPool
 
 from app.db import Base, get_db
 from app.main import app
+from app.casting_grouping_api import _build_reviewed_remediation_plan
+
+
+def test_reviewed_plan_classifies_latest_decisions_without_authorizing_apply():
+    snapshot = {"remediation_plan": {"items": [
+        {"proposal_id": "accepted", "action": "split_candidate_manual_review"},
+        {"proposal_id": "rejected", "action": "merge_candidate_manual_review"},
+        {"proposal_id": "evidence", "action": "manual_review"},
+        {"proposal_id": "pending", "action": "keep_existing_link_candidate"},
+    ]}}
+    decisions = {
+        "accepted": {"disposition": "accepted", "reason": "Confirmed split."},
+        "rejected": {"disposition": "rejected"},
+        "evidence": {"disposition": "needs_more_evidence"},
+    }
+
+    result = _build_reviewed_remediation_plan(snapshot, decisions)
+
+    assert [item["review_status"] for item in result["items"]] == [
+        "accepted_by_reviewer",
+        "rejected_by_reviewer",
+        "needs_more_evidence",
+        "pending_review",
+    ]
+    assert result["summary"]["decided_items"] == 3
+    assert result["summary"]["pending_review"] == 1
+    assert result["writes_to_catalog"] is False
+    assert result["catalog_apply_authorized"] is False
+    assert result["summary"]["safe_to_apply_automatically"] is False
+
+
 from app.models import (
     Casting, CatalogIdentifier, Evidence, EvidenceRelease, IdentifierType,
     Release, ReleaseIdentifier, Source, SourceRecord,
