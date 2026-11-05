@@ -95,3 +95,13 @@ The persistent workflow API and SQLAlchemy models are implemented on the feature
 Decision revisions are inserted as new rows and link to the previous decision for the same proposal. SQLite triggers prevent updates and deletes to both session snapshots and decision history. The workflow writes only to the two dedicated review tables and always returns `writes_to_catalog=false`.
 
 The migration has not been run against any user, development, or production database. It must first be exercised against a disposable test database and reviewed independently.
+
+## Admin UI review flow
+
+The live admin preview now exposes an explicit **Start review and save snapshot** action. It creates a persistent review session from the selected product-line/year scope, then renders the session's proposal queue.
+
+For each proposal, the operator can append one of three decisions (`accepted`, `rejected`, or `needs_more_evidence`) with a reviewer label and optional reason. A subsequent decision is appended as a new history event; it does not overwrite the previous event. Release IDs in the session are links to the existing read-only release detail drawer, where the operator can inspect Evidence and source metadata.
+
+The UI reloads the session after each saved decision so it displays the latest server-side state. If the backend reports a stale session, decision controls are disabled; the operator must create a fresh session. The reviewer label is operator-supplied and is not an authenticated identity.
+
+The **Apply changes** control remains disabled. This UI phase only writes to the dedicated review-session and review-decision tables; it never changes catalog entities, Release links, or Evidence.
