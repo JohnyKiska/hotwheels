@@ -541,7 +541,7 @@ def test_alembic_upgrade_is_safe_on_initialized_existing_database(tmp_path, monk
             assert connection.execute(
                 text("SELECT name FROM castings WHERE id = :id"), {"id": casting_id}
             ).scalar_one() == "Existing record must survive"
-            assert connection.execute(text("SELECT version_num FROM alembic_version")).scalar_one() == "20261104_conflict_releases"
+            assert connection.execute(text("SELECT version_num FROM alembic_version")).scalar_one() == "20261105_casting_grouping_review"
             assert connection.execute(text("SELECT COUNT(*) FROM alembic_version")).scalar_one() == 1
     finally:
         check_engine.dispose()
@@ -856,3 +856,73 @@ def test_change_log_is_append_only_after_migrations(tmp_path, monkeypatch):
             ).scalar_one() == 2
     finally:
         engine.dispose()
+
+def test_alembic_upgrade_from_existing_core_schema_revision_preserves_catalog_data(
+    tmp_path, monkeypatch
+):
+    """A database already stamped at core_schema must reach the merged head safely."""
+    from alembic import command
+    from alembic.config import Config
+    from sqlalchemy import create_engine, inspect, text
+
+    from app import models  # noqa: F401
+    from app.db import Base
+
+    database_path = tmp_path / "existing_core_schema.db"
+    url = f"sqlite:///{database_path}"
+    engine = create_engine(url)
+    Base.metadata.create_all(engine)
+
+    # These legacy catalog-tree tables exist in the user's initialized catalog
+    # but are intentionally not part of the current ORM metadata.
+    with engine.begin() as connection:
+        connection.exec_driver_sql(
+            "CREATE TABLE product_lines (id TEXT PRIMARY KEY, name TEXT NOT NULL)"
+        )
+        connection.exec_driver_sql(
+            "CREATE TABLE catalog_nodes (id TEXT PRIMARY KEY, parent_id TEXT, "
+            "node_type TEXT NOT NULL, product_line_id TEXT, release_id TEXT)"
+        )
+        connection.exec_driver_sql(
+            "INSERT INTO product_lines (id, name) VALUES ('line-mainline', 'Mainline')"
+        )
+        connection.exec_driver_sql(
+            "INSERT INTO catalog_nodes "
+            "(id, node_type, product_line_id) "
+            "VALUES ('line-mainline', 'product_line', 'line-mainline')"
+        )
+        connection.exec_driver_sql(
+            "CREATE TABLE alembic_version (version_num VARCHAR(32) NOT NULL)"
+        )
+        connection.exec_driver_sql(
+            "INSERT INTO alembic_version (version_num) VALUES ('20261030_core_schema')"
+        )
+    engine.dispose()
+
+    config = Config("alembic.ini")
+    config.set_main_option("sqlalchemy.url", url)
+    monkeypatch.setenv("DATABASE_URL", url)
+    command.upgrade(config, "head")
+
+    check_engine = create_engine(url)
+    try:
+        inspector = inspect(check_engine)
+        tables = set(inspector.get_table_names())
+        assert "casting_grouping_review_sessions" in tables
+        assert "casting_grouping_review_decisions" in tables
+        assert "conflict_releases" in tables
+        with check_engine.connect() as connection:
+            assert connection.execute(
+                text("SELECT name FROM product_lines WHERE id = 'line-mainline'")
+            ).scalar_one() == "Mainline"
+            assert connection.execute(
+                text("SELECT node_type FROM catalog_nodes WHERE id = 'line-mainline'")
+            ).scalar_one() == "product_line"
+            assert connection.execute(
+                text("SELECT version_num FROM alembic_version")
+            ).scalar_one() == "20261105_casting_grouping_review"
+            assert connection.execute(
+                text("SELECT COUNT(*) FROM alembic_version")
+            ).scalar_one() == 1
+    finally:
+        check_engine.dispose()
