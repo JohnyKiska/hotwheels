@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from .db import get_db
 from .casting_grouping_api import router as casting_grouping_router
+from .catalog_admin_api import router as catalog_admin_router
 from .importers.all_hot_wheels import preview_all_hot_wheels_html
 from .importers.mainline import preview_mainline_fandom_html, preview_mainline_tsv
 from .importers.observations import preview_to_observations
@@ -27,6 +28,7 @@ app = FastAPI(
     description="Backend foundation for the test Hot Wheels catalog.",
 )
 app.include_router(casting_grouping_router)
+app.include_router(catalog_admin_router)
 
 
 @app.get("/health", tags=["system"])
