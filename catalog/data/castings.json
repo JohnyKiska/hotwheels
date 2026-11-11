@@ -137,8 +137,8 @@
       "canonical_name": "Batmobile",
       "manufacturer": "Mattel",
       "casting_number": null,
-      "identity_status": "provisional",
-      "identity_basis": "Default project rule: entries sharing a Collector # are provisionally grouped as one casting until structural evidence shows a difference. Color, tampo, wheels, finish, hunt status and distribution do not alone create a new casting.",
+      "identity_status": "user_confirmed_same_casting",
+      "identity_basis": "User visual inspection confirmed the JJH83 and JJK97 releases share the same physical casting. Packaging formats (including tall/short blister) are tracked separately from casting identity.",
       "collector_number": "004",
       "year_context": 2026,
       "catalog_family": "Mainline",
@@ -164,9 +164,18 @@
           "repository": "JohnyKiska/hotwheels-fandom-archive",
           "path": "research/reviews/MAINLINE-2026-PROVISIONAL-CASTING-GROUPS.csv",
           "collector_number": "004"
+        },
+        {
+          "type": "user_visual_inspection",
+          "collector_number": "004",
+          "release_ids": [
+            "rel_ml2026_jjh83",
+            "rel_ml2026_jjk97"
+          ],
+          "observation": "User confirmed identical castings. User emphasized retaining reverse/card-back packaging photographs as evidence, including article suffixes, to trace tall- and short-blister packaging variants."
         }
       ],
-      "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import."
+      "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import. User confirmed identical castings. Packaging research should retain front and reverse/card-back views, full article identifiers including suffixes, and separate tall/short blister observations."
     },
     {
       "id": "cst_ml2026_005",
