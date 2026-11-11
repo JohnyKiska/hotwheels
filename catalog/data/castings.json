@@ -101,8 +101,8 @@
       "canonical_name": "Gordon Murray Automotive T.33",
       "manufacturer": "Mattel",
       "casting_number": null,
-      "identity_status": "provisional",
-      "identity_basis": "Default project rule: entries sharing a Collector # are provisionally grouped as one casting until structural evidence shows a difference. Color, tampo, wheels, finish, hunt status and distribution do not alone create a new casting.",
+      "identity_status": "user_confirmed_same_casting",
+      "identity_basis": "User visually inspected the JJJ62 and JJL44 releases and confirmed that the castings are identical.",
       "collector_number": "003",
       "year_context": 2026,
       "catalog_family": "Mainline",
@@ -128,6 +128,15 @@
           "repository": "JohnyKiska/hotwheels-fandom-archive",
           "path": "research/reviews/MAINLINE-2026-PROVISIONAL-CASTING-GROUPS.csv",
           "collector_number": "003"
+        },
+        {
+          "type": "user_visual_inspection",
+          "collector_number": "003",
+          "release_ids": [
+            "rel_ml2026_jjj62",
+            "rel_ml2026_jjl44"
+          ],
+          "observation": "User confirmed identical castings."
         }
       ],
       "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import."
