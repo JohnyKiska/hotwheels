@@ -86,3 +86,7 @@ Recognized `release_tags` currently include:
 Recognized retailer values in `exclusive` currently include `Target`, `Walmart`, `Kroger`, `Dollar General`, and `Dollar Tree/Family Dollar`. A retailer suffix is separated from the base series and any release tags. These values are copied from the source label, not independently proof-checked against packaging or retailer documentation. Unknown suffixes must remain in `series_raw` and must not be silently discarded.
 
 Normalization does not alter `casting_id`, variant identity, model names, source references, Toy numbers, or Collector numbers. It must never be used as evidence that two releases share a physical casting.
+
+## Photo evidence priority
+
+For product documentation and catalog research, prioritize photographs of the **carded/blistered product** over loose-car photographs. Packaging is part of the collectible product and contributes to its presentation and collector value, so blistered photos should be the primary image reference whenever available. Loose-car photos are secondary/supplementary evidence, especially useful for close inspection of casting geometry, base details, wheels, and tampo. Record the view angle and whether the item is carded or loose; do not treat a loose-car image as a substitute for missing packaging evidence.
