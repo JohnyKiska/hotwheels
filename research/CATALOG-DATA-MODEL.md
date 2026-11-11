@@ -90,3 +90,12 @@ Normalization does not alter `casting_id`, variant identity, model names, source
 ## Photo evidence priority
 
 For product documentation and catalog research, prioritize photographs of the **carded/blistered product** over loose-car photographs. Packaging is part of the collectible product and contributes to its presentation and collector value, so blistered photos should be the primary image reference whenever available. Loose-car photos are secondary/supplementary evidence, especially useful for close inspection of casting geometry, base details, wheels, and tampo. Record the view angle and whether the item is carded or loose; do not treat a loose-car image as a substitute for missing packaging evidence.
+
+
+## Packaging variants and source-identifier suffixes
+
+Packaging is tracked independently from casting identity and from the car's decorative/mechanical variant. When the same release/model is documented with different blister or card formats (for example, tall and short blisters), retain both as distinct packaging observations/variants rather than selecting one as canonical or treating the difference as a new casting.
+
+Preserve every source article/SKU identifier exactly as published, including all suffixes. Never strip, overwrite, or normalize away a suffix during import or matching. Store the full raw identifier and, where useful, parse a base identifier and suffix into additional fields without losing the original string. Different suffixes are evidence of distinct catalog/article records, but do not by themselves prove a different casting or even a packaging difference; verify the physical packaging from photographs or reliable documentation.
+
+For photo research, seek and prioritize carded/blistered images for each identifier/packaging variant. Keep the tall/short blister observations and their evidence links separately associated with the relevant release/article identifier. Loose-car photos remain supplementary.
