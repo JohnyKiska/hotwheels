@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HW Catalog · Mainline 2026 review</title>
+<style>
+:root{--ink:#182338;--muted:#718096;--line:#e3e8ef;--paper:#f5f7fa;--panel:#fff;--orange:#ff5a1f;--orange-soft:#fff0e9;--green:#16845b;--green-soft:#e8f7ef;--blue:#2d6cdf;--blue-soft:#eaf1ff;--amber:#a76500;--amber-soft:#fff4d9;--red:#bd3c35;--shadow:0 5px 20px rgba(25,42,70,.055)}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:14px/1.5 Inter,"Segoe UI",Arial,sans-serif}a{color:#245fc2}.top{background:#172238;color:#fff;padding:22px clamp(16px,4vw,48px);border-bottom:3px solid var(--orange)}.top-inner,main{max-width:1500px;margin:auto}.brand{font-size:12px;color:#aeb9cb;letter-spacing:.08em;text-transform:uppercase}.top h1{margin:7px 0 4px;font-size:clamp(25px,3vw,34px)}.top p{margin:0;color:#c5cfdd}.top a{color:#ffd0bd}.toplinks{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;font-size:13px}main{padding:24px clamp(14px,3vw,36px) 50px}.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:18px}.stat{background:#fff;border:1px solid var(--line);border-radius:12px;padding:15px 17px;box-shadow:var(--shadow)}.stat small{color:var(--muted)}.stat strong{display:block;font-size:26px;margin-top:5px}.panel{background:#fff;border:1px solid var(--line);border-radius:13px;box-shadow:var(--shadow);padding:16px;margin-bottom:16px}.panel h2{font-size:16px;margin:0 0 10px}.note{background:#fff8e8;border:1px solid #f0dfb9;border-radius:10px;padding:12px 14px;color:#73521a;margin-bottom:16px}.toolbar{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:13px}.toolbar input,.toolbar select{height:40px;border:1px solid #dce2ea;background:#fff;border-radius:8px;padding:0 11px;color:#354156}.toolbar input{flex:1;min-width:220px}.toolbar select{min-width:150px}.count{color:var(--muted);font-size:12px;margin-left:auto;align-self:center}.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:10px}table{width:100%;border-collapse:collapse;min-width:900px;background:#fff}th{background:#f7f9fc;color:#68758a;font-size:11px;text-transform:uppercase;letter-spacing:.05em;text-align:left;padding:11px 12px;position:sticky;top:0}td{padding:10px 12px;border-top:1px solid #edf0f4;vertical-align:top}tbody tr:hover{background:#fbfcfe}.mono{font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:650}.model{font-weight:650}.sub{display:block;color:var(--muted);font-size:11px;margin-top:2px}.pill{display:inline-block;border-radius:20px;padding:3px 8px;font-size:11px;font-weight:750;white-space:nowrap}.p1{background:#fff0ef;color:#ae302a}.p2{background:#fff4d9;color:#8a5a00}.p3{background:#edf2f7;color:#536174}.pending{background:#edf2f7;color:#536174}.observed{background:#eaf1ff;color:#2856a8}.confirmed{background:#e8f7ef;color:#146c4b}details summary{cursor:pointer;color:#53647c;font-size:12px}details p{max-width:600px;color:#56647a;font-size:12px;white-space:pre-wrap;margin:7px 0 0}footer{color:var(--muted);font-size:12px;margin-top:16px}.loading,.error{padding:24px;text-align:center;color:var(--muted)}@media(max-width:760px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.top{padding-top:18px}.panel{padding:12px}}
+</style>
+</head>
+<body>
+<header class="top"><div class="top-inner"><div class="brand">HW Catalog · review workspace</div><h1>Mainline 2026</h1><p>Визуальная очередь проверки базовой линейки. Исходные названия и номера сохранены.</p><nav class="toplinks"><a href="./">← Основной каталог</a><a href="https://github.com/JohnyKiska/hotwheels-fandom-archive/blob/main/research/reviews/MAINLINE-2026-INITIAL-AUDIT.md" target="_blank" rel="noopener">Отчёт аудита</a><a href="https://github.com/JohnyKiska/hotwheels-fandom-archive/blob/main/research/reviews/MAINLINE-2026-VISUAL-REVIEW-QUEUE.csv" target="_blank" rel="noopener">Исходная очередь CSV</a></nav></div></header>
+<main>
+<section class="stats">
+<div class="stat"><small>Строк в очереди</small><strong id="total">…</strong></div>
+<div class="stat"><small>Приоритет P1</small><strong id="p1">…</strong></div>
+<div class="stat"><small>Приоритет P2</small><strong id="p2">…</strong></div>
+<div class="stat"><small>Приоритет P3</small><strong id="p3">…</strong></div>
+</section>
+<div class="note" id="guardrail">Данные загружаются из архива. Приоритет показывает порядок работы, а не достоверность. Записи очереди не являются подтверждёнными релизами.</div>
+<section class="panel">
+<h2>Очередь визуальной проверки</h2>
+<div class="toolbar">
+<input id="q" type="search" placeholder="Поиск по модели, Toy #, Collector # или серии…" aria-label="Поиск">
+<select id="priority" aria-label="Приоритет"><option value="">Все приоритеты</option><option>P1</option><option>P2</option><option>P3</option></select>
+<select id="status" aria-label="Статус"><option value="">Все статусы</option></select>
+<select id="class" aria-label="Класс записи"><option value="">Все классы</option></select>
+<span class="count" id="count">Загрузка…</span>
+</div>
+<div class="tablewrap"><table><thead><tr><th>Collector #</th><th>Toy #</th><th>Модель из источника</th><th>Серия</th><th>Приоритет</th><th>Статус</th><th>Примечание</th></tr></thead><tbody id="rows"><tr><td colspan="7" class="loading">Загружаю очередь…</td></tr></tbody></table></div>
+</section>
+<section class="panel">
+<h2>Как читать эту витрину</h2>
+<ul>
+<li><b>P1</b>: Treasure Hunt / Super Treasure Hunt, эксклюзивы и конфликты названий в группах Collector #.</li>
+<li><b>P2</b>: заявленные цветовые версии и модели, помеченные источником как новые для 2026 года.</li>
+<li><b>P3</b>: остальные стандартные записи.</li>
+<li>Пустое поле Photo в исходной таблице не означает отсутствие фотографий в интернете. Оно означает, что фото не было приложено к исходной строке.</li>
+<li>Подтверждение одинаковой отливки не означает автоматически один и тот же Variant, Release или Package.</li>
+</ul>
+<footer id="source">Источник: MAINLINE-2026-VISUAL-REVIEW-QUEUE.csv · данные загружаются напрямую из репозитория архива.</footer>
+</section>
+</main>
+<script>
+const DATA_URL="https://raw.githubusercontent.com/JohnyKiska/hotwheels-fandom-archive/main/research/reviews/MAINLINE-2026-VISUAL-REVIEW-QUEUE.csv";
+function parseCSV(s){const a=[];let row=[],v="",q=false;for(let i=0;i<s.length;i++){const c=s[i];if(c==='"'&&q&&s[i+1]==='"'){v+='"';i++;}else if(c==='"')q=!q;else if(c===","&&!q){row.push(v);v="";}else if((c==="\n"||c==="\r")&&!q){if(c==="\r"&&s[i+1]==="\n")i++;row.push(v);if(row.some(x=>x!==""))a.push(row);row=[];v="";}else v+=c;}row.push(v);if(row.some(x=>x!==""))a.push(row);return a;}
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fields=["Source Row ID","Toy #","Collector #","Model Name","Series","Series #","Photo","Review Class","Visual Review Priority","Visual Review Status","Collector Group Size","Collector Group Warning","Review Reason"];
+let data=[];
+const labels={pending:"Ожидает проверки",user_visual_observation_received:"Есть наблюдение владельца",user_confirmed_same_casting:"Отливка подтверждена одинаковой"};
+const classes={standard_release_candidate:"Стандартная запись",second_color_candidate:"Заявленный 2-й цвет",third_color_candidate:"Заявленный 3-й цвет",new_for_2026_candidate:"Новинка 2026",retailer_exclusive_candidate:"Эксклюзив магазина",treasure_hunt:"Treasure Hunt",super_treasure_hunt:"Super Treasure Hunt"};
+function render(){const q=document.getElementById("q").value.trim().toLowerCase(),p=document.getElementById("priority").value,s=document.getElementById("status").value,c=document.getElementById("class").value;const list=data.filter(r=>(!p||r["Visual Review Priority"]===p)&&(!s||r["Visual Review Status"]===s)&&(!c||r["Review Class"]===c)&&(!q||[r["Toy #"],r["Collector #"],r["Model Name"],r.Series,r["Series #"],r["Review Reason"]].join(" ").toLowerCase().includes(q)));document.getElementById("count").textContent=list.length+" из "+data.length+" записей";document.getElementById("rows").innerHTML=list.map(r=>{const st=r["Visual Review Status"],pr=r["Visual Review Priority"];return '<tr><td class="mono">'+esc(r["Collector #"])+'</td><td class="mono">'+esc(r["Toy #"])+'</td><td><span class="model">'+esc(r["Model Name"])+'</span><span class="sub">'+esc(r["Series #"])+'</span></td><td>'+esc(r.Series)+'</td><td><span class="pill '+pr.toLowerCase()+'">'+pr+'</span></td><td><span class="pill '+(st==="user_confirmed_same_casting"?"confirmed":st==="user_visual_observation_received"?"observed":"pending")+'">'+esc(labels[st]||st)+'</span></td><td><details><summary>Подробности</summary><p>'+esc(r["Review Reason"])+(r["Collector Group Warning"]?"\n\nПредупреждение: "+esc(r["Collector Group Warning"]):"")+'</p></details></td></tr>';}).join("")||'<tr><td colspan="7" class="loading">По этому фильтру записей нет.</td></tr>';}
+async function init(){try{const res=await fetch(DATA_URL,{cache:"no-store"});if(!res.ok)throw new Error("HTTP "+res.status);const matrix=parseCSV(await res.text());const head=matrix.shift();data=matrix.map(row=>Object.fromEntries(head.map((k,i)=>[k,row[i]??""])));const count=k=>data.filter(r=>r["Visual Review Priority"]===k).length;document.getElementById("total").textContent=data.length;document.getElementById("p1").textContent=count("P1");document.getElementById("p2").textContent=count("P2");document.getElementById("p3").textContent=count("P3");const statusSel=document.getElementById("status");[...new Set(data.map(r=>r["Visual Review Status"]))].forEach(v=>statusSel.add(new Option(labels[v]||v,v)));const classSel=document.getElementById("class");[...new Set(data.map(r=>r["Review Class"]))].forEach(v=>classSel.add(new Option(classes[v]||v,v)));const noted=data.filter(r=>r["Visual Review Status"]!=="pending").length;document.getElementById("guardrail").textContent="Загружено "+data.length+" исходных строк; "+noted+" записей содержат пользовательские наблюдения или подтверждение сравнения. Ни одна запись очереди автоматически не становится каноническим выпуском. Приоритет — порядок проверки, не оценка достоверности.";document.getElementById("source").textContent="Источник: MAINLINE-2026-VISUAL-REVIEW-QUEUE.csv · обновлено автоматически при изменении файла в архиве.";render();}catch(e){document.getElementById("rows").innerHTML='<tr><td colspan="7" class="error">Не удалось загрузить очередь: '+esc(e.message)+'. Открой исходный CSV по ссылке выше.</td></tr>';document.getElementById("count").textContent="Ошибка загрузки";}}
+["q","priority","status","class"].forEach(id=>document.getElementById(id).addEventListener(id==="q"?"input":"change",render));init();
+</script>
+</body>
+</html>
