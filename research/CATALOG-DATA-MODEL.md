@@ -24,7 +24,7 @@ A catalog appearance of a casting in a defined year and product line/series/asso
 Suggested fields:
 - `id`, `casting_id`
 - `year`, `catalog_family` (Mainline, Premium, etc.)
-- `series_name`, `series_raw`, `release_tags[]`, `exclusive`
+- `series_name` (normalized series label), `series_raw` (unaltered source label), `series_normalization_status`, `release_tags[]`, `exclusive` (retailer or distribution channel when known)
 - `toy_number`, `collector_number`, `assortment`, `country_of_origin`
 - `source_refs[]`
 
@@ -69,4 +69,20 @@ Every imported fact should retain provenance where possible: source URL, source 
 5. Update the explorer to read canonical data while retaining the generated index as a fallback during migration.
 
 ## Current status
-The entity collections are initialized but empty. Existing `catalog-image-manifest.json` remains a research/reference manifest of externally hosted images; it is not the owned image asset registry.
+Canonical entity collections are populated for Mainline 2026: 250 casting candidates, 440 releases, and 440 variants. Casting identity retains its evidence-based review status. Release series labels and recognized release tags have been normalized from the preserved raw source labels. Existing `catalog-image-manifest.json` remains a research/reference manifest of externally hosted images; it is not the owned image asset registry.
+
+
+## Series and release-label normalization
+
+For imported Mainline 2026 releases, `series_raw` is preserved exactly as received. `series_name` contains the base series after deterministic removal of recognized suffixes. `series_normalization_status: "normalized_from_source_label"` means the label was parsed from the source string; it is not an independently verified official taxonomy.
+
+Recognized `release_tags` currently include:
+- `new_for_2026`
+- `new_in_mainline`
+- `treasure_hunt`
+- `super_treasure_hunt`
+- event tags prefixed with `event_` (for example, `event_world_braille_day` and `event_easterseals`)
+
+Recognized retailer values in `exclusive` currently include `Target`, `Walmart`, `Kroger`, `Dollar General`, and `Dollar Tree/Family Dollar`. A retailer suffix is separated from the base series and any release tags. These values are copied from the source label, not independently proof-checked against packaging or retailer documentation. Unknown suffixes must remain in `series_raw` and must not be silently discarded.
+
+Normalization does not alter `casting_id`, variant identity, model names, source references, Toy numbers, or Collector numbers. It must never be used as evidence that two releases share a physical casting.
