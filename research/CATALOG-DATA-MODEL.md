@@ -12,7 +12,7 @@ Suggested fields:
 - `id`: permanent internal ID (opaque, never derived from a mutable model name)
 - `canonical_name`
 - `manufacturer`, `casting_number` (when known)
-- `identity_status`: `provisional`, `user_confirmed_same_casting`, `documented_distinct`
+- `identity_status`: `provisional`, `user_confirmed_same_casting`, `documented_distinct`, `unreviewed_single_entry`
 - `evidence_refs[]`: references to observations and sources
 - `notes`
 
