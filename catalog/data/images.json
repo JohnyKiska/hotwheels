@@ -1,0 +1,6 @@
+{
+  "schema_version": 1,
+  "entity": "image_asset",
+  "description": "First-party and licensed image asset registry. External research references remain separate and must not be treated as locally hosted assets.",
+  "records": []
+}
