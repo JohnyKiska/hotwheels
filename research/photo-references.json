@@ -302,6 +302,21 @@
       "packaging_format": "us_card_unspecified",
       "evidence_status": "listing_variant_verified",
       "notes": "В карточке товара есть выбор RD-06 1/5 6/250 JJK66 и формат US Card. Конкретные фотографии JJK66 в выдаче не подтверждены, поэтому прямой image URL не указан."
+    },
+    {
+      "id": "photo_ref_ml2026_006_jjh84_user_reverse_n7c5",
+      "release_id": "rel_ml2026_jjh84",
+      "toy_number": "JJH84",
+      "article_identifier_raw": "JJH84-N7C5",
+      "source_page_url": "https://github.com/JohnyKiska/hotwheels-fandom-archive/blob/main/research/photos/2026/collector-006/2026_C006_JJH84_JJH84-N7C5_revers.webp",
+      "image_url": "https://raw.githubusercontent.com/JohnyKiska/hotwheels-fandom-archive/main/research/photos/2026/collector-006/2026_C006_JJH84_JJH84-N7C5_revers.webp",
+      "source_name": "User-provided photo (GitHub archive)",
+      "retrieved_at": "2026-11-11",
+      "packaging_state": "carded",
+      "view_angle": "reverse",
+      "packaging_format": "unknown",
+      "evidence_status": "user_image_visually_inspected",
+      "notes": "Пользовательское фото физической карточки. На обороте визуально читается JJH84-N7C5; модель RD-06, серия X-Racers 1/5, штрихкод 027084120134. Не смешивать с отдельной карточкой из eBay gallery с кодом JJH84-N9C0B."
     }
   ]
 }
