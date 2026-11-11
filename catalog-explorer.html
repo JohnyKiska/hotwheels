@@ -28,6 +28,7 @@ button{border:1px solid var(--line);background:white;border-radius:8px;padding:8
 button:disabled{opacity:.4;cursor:default}
 .pagination{display:flex;justify-content:center;align-items:center;gap:12px;margin:18px 0}
 #status{color:var(--muted);font-size:13px}.empty{padding:40px;text-align:center;color:var(--muted)}
+.photo-thumb{display:block;width:72px;height:52px;object-fit:contain;background:#fff;border:1px solid var(--line);border-radius:6px}.photo-status{display:block;font-size:10px;color:var(--muted);margin-top:3px}.photo-empty{color:#aab3c0}
 @media(max-width:800px){.stats{grid-template-columns:repeat(2,1fr)}.filters{grid-template-columns:1fr 1fr}.filters input{grid-column:1/-1}table{font-size:12px}th,td{padding:8px}.hide-mobile{display:none}}
 </style>
 </head>
@@ -55,8 +56,8 @@ button:disabled{opacity:.4;cursor:default}
 <div class="results-head"><span id="result-count">Подготовка…</span><span id="status">Читаю данные…</span></div>
 <div style="overflow:auto;max-height:68vh">
 <table>
-<thead><tr><th>Модель</th><th>Toy #</th><th>Год</th><th>Серия / семейство</th><th class="hide-mobile">Цвет / колёса</th><th>Источник</th></tr></thead>
-<tbody id="rows"><tr><td colspan="6" class="empty">Загружаю каталог…</td></tr></tbody>
+<thead><tr><th>Фото</th><th>Модель</th><th>Toy #</th><th>Год</th><th>Серия / семейство</th><th class="hide-mobile">Цвет / колёса</th><th>Источник</th></tr></thead>
+<tbody id="rows"><tr><td colspan="7" class="empty">Загружаю каталог…</td></tr></tbody>
 </table>
 </div>
 <div class="pagination"><button id="prev">Назад</button><span id="page">1</span><button id="next">Дальше</button></div>
@@ -65,7 +66,8 @@ button:disabled{opacity:.4;cursor:default}
 </main>
 <script>
 const DATA_URL="https://raw.githubusercontent.com/JohnyKiska/hotwheels-fandom-archive/main/catalog/generated/catalog-index.json";
-const PAGE_SIZE=100;let records=[],filtered=[],page=0;
+const PHOTO_MANIFEST_URL="./catalog/data/catalog-image-manifest.json";
+const PAGE_SIZE=100;let records=[],filtered=[],page=0,photos={};
 const el=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 function initFilters(data){
@@ -90,28 +92,31 @@ function render(){
  el("result-count").textContent=filtered.length.toLocaleString("ru-RU")+" записей";
  el("page").textContent=(page+1)+" / "+Math.max(1,Math.ceil(filtered.length/PAGE_SIZE));
  el("prev").disabled=page===0;el("next").disabled=start+PAGE_SIZE>=filtered.length;
- if(!items.length){el("rows").innerHTML='<tr><td colspan="6" class="empty">Ничего не найдено. Попробуй изменить запрос или фильтры.</td></tr>';return;}
+ if(!items.length){el("rows").innerHTML='<tr><td colspan="7" class="empty">Ничего не найдено. Попробуй изменить запрос или фильтры.</td></tr>';return;}
  el("rows").innerHTML=items.map(r=>{
   const cat=r.catalog==="Mainline"?"main":"prem";
   const toy=r.toy_number?'<strong>'+esc(r.toy_number)+'</strong>':'<small>не указан</small>';
   const source='https://github.com/JohnyKiska/hotwheels-fandom-archive/blob/main/'+r.source_file;
   const attrs=[r.color,r.wheel_type].filter(Boolean).join(" · ");
+  const photo=photos[`${r.year}:${r.toy_number}`];
+  const photoCell=photo?`<a target="_blank" rel="noopener" href="${esc(photo.asset_url)}" title="${esc(photo.notes||"Фото из архива")}"><img class="photo-thumb" loading="lazy" src="${esc(photo.image_url)}" alt="${esc(r.model_name||r.toy_number)}"></a><small class="photo-status">${photo.visual_review_status==="confirmed"?"проверено":"нужна проверка"}</small>`:'<span class="photo-empty">—</span>';
   const labels=[...(r.release_tags||[]),...(r.exclusive||[])];
   const seriesCell=esc(r.series||r.family)+(labels.length?' <small>'+labels.map(x=>'<span class="tag">'+esc(x)+'</span>').join(" ")+'</small>':"");
-  return '<tr><td><strong>'+esc(r.model_name||"Без названия")+'</strong><small><span class="tag '+cat+'">'+esc(r.catalog)+'</span> '+esc(r.collector_number?"Collector #"+r.collector_number:"")+'</small></td><td>'+toy+'</td><td>'+esc(r.year)+'</td><td>'+seriesCell+'</td><td class="hide-mobile">'+esc(attrs||"—")+'</td><td><a class="row-link" target="_blank" rel="noopener" href="'+source+'">CSV ↗</a></td></tr>';
+  return '<tr><td>'+photoCell+'</td><td><strong>'+esc(r.model_name||"Без названия")+'</strong><small><span class="tag '+cat+'">'+esc(r.catalog)+'</span> '+esc(r.collector_number?"Collector #"+r.collector_number:"")+'</small></td><td>'+toy+'</td><td>'+esc(r.year)+'</td><td>'+seriesCell+'</td><td class="hide-mobile">'+esc(attrs||"—")+'</td><td><a class="row-link" target="_blank" rel="noopener" href="'+source+'">CSV ↗</a></td></tr>';
  }).join("");
 }
 async function boot(){
  try{
-  const response=await fetch(DATA_URL);if(!response.ok)throw new Error("HTTP "+response.status);
+  const [response,photoResponse]=await Promise.all([fetch(DATA_URL),fetch(PHOTO_MANIFEST_URL).catch(()=>null)]);if(!response.ok)throw new Error("HTTP "+response.status);
   const data=await response.json();records=data.records||[];
+  if(photoResponse&&photoResponse.ok){const manifest=await photoResponse.json();photos=Object.fromEntries((manifest.photos||[]).map(p=>[`${p.year}:${p.toy_number}`,p]));}
   el("count-records").textContent=records.length.toLocaleString("ru-RU");
   el("count-mainline").textContent=(data.stats.mainline_records||0).toLocaleString("ru-RU");
   el("count-premium").textContent=(data.stats.premium_records||0).toLocaleString("ru-RU");
   el("count-groups").textContent=(data.stats.multi_record_groups||0).toLocaleString("ru-RU");
-  initFilters(records);el("status").textContent="Индекс обновлён автоматически";
+  initFilters(records);el("status").textContent="Индекс обновлён автоматически · фото: "+Object.keys(photos).length;
   apply();
- }catch(error){el("status").textContent="Не удалось загрузить данные";el("rows").innerHTML='<tr><td colspan="6" class="empty">Ошибка загрузки каталога: '+esc(error.message)+'</td></tr>';}
+ }catch(error){el("status").textContent="Не удалось загрузить данные";el("rows").innerHTML='<tr><td colspan="7" class="empty">Ошибка загрузки каталога: '+esc(error.message)+'</td></tr>';}
 }
 ["q","catalog","year","family"].forEach(id=>el(id).addEventListener(id==="q"?"input":"change",apply));
 el("prev").addEventListener("click",()=>{if(page>0){page--;render();}});
