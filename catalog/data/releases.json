@@ -1,0 +1,6 @@
+{
+  "schema_version": 1,
+  "entity": "release",
+  "description": "A catalogued release of a casting in a specific year, line, series or assortment. Preserve source identifiers and raw source values.",
+  "records": []
+}
