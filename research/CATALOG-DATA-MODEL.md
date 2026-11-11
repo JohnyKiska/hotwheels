@@ -99,3 +99,10 @@ Packaging is tracked independently from casting identity and from the car's deco
 Preserve every source article/SKU identifier exactly as published, including all suffixes. Never strip, overwrite, or normalize away a suffix during import or matching. Store the full raw identifier and, where useful, parse a base identifier and suffix into additional fields without losing the original string. Different suffixes are evidence of distinct catalog/article records, but do not by themselves prove a different casting or even a packaging difference; verify the physical packaging from photographs or reliable documentation.
 
 For photo research, seek and prioritize carded/blistered images for each identifier/packaging variant. Keep the tall/short blister observations and their evidence links separately associated with the relevant release/article identifier. Loose-car photos remain supplementary.
+
+
+## Packaging reverse-side evidence and article suffix history
+
+For blister/card packaging research, retain reverse-side (card-back) photographs as first-class evidence alongside front-facing blister photographs. The reverse can carry article/SKU identifiers and suffixes, distribution or packaging codes, and other clues needed to reconstruct packaging changes over time.
+
+Preserve the complete identifier exactly as printed or published, and associate it with the specific packaging observation (for example, tall blister versus short blister). Do not collapse records that differ by suffix. Use front and reverse views together where available to trace the chronology and logic of packaging formats. A suffix is a traceable clue, not proof on its own: correlate it with visible packaging dimensions/features and reliable source documentation.
