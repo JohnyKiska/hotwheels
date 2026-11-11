@@ -116,7 +116,7 @@ main{padding:24px clamp(16px,2vw,30px) 44px;max-width:none;background:#f9fbfd}
   <div class="catalog-table-wrap" id="catalogTableWrap" hidden><table class="catalog-table" aria-label="Таблица каталога без фотографий"><thead><tr><th>Статус</th><th>Тип</th><th>Название</th><th>Год</th><th>Бренд</th><th>Серия</th><th>Номер / артикул</th><th>Колёса</th></tr></thead><tbody id="catalogTableBody"></tbody></table></div>
   
   <div class="empty" id="empty" hidden><strong>Ничего не найдено</strong>Измените поисковый запрос или сбросьте фильтры.</div>
-  <div class="note"><span>ⓘ</span><div><b>Статус пилота.</b> Визуал подключён к экспортированным данным SQLite. Здесь показаны 41 исходная строка и 55 осмотренных изображений. Полностью подтверждённых канонических выпусков пока 0. Кандидаты и групповые связи не выдаются за подтверждённые модели.</div></div>
+  <div class="note"><span>ⓘ</span><div id="databaseStatusNote">Загрузка статуса базы…</div></div>
 </main>
 </div>
 <div class="overlay" id="overlay"></div>\n<div class="image-lightbox" id="imageLightbox" style="position:fixed;inset:0;z-index:99999;background:rgba(12,18,30,.94);display:none;align-items:center;justify-content:center;padding:24px" role="dialog" aria-modal="true" aria-label="Просмотр фотографии" tabindex="-1"><button type="button" id="closeLightbox" aria-label="Закрыть фото">×</button><img id="lightboxImage" alt="Увеличенная фотография"></div>
@@ -242,6 +242,8 @@ async function loadCatalogExport(){
     if(!response.ok)throw new Error("HTTP "+response.status);
     const data=await response.json();
     window.catalogExport=data;
+    const state=data.databaseState;
+    document.getElementById("databaseStatusNote").textContent="Статус пилота: "+state.sourceProductRows+" исходных строк, "+state.galleryImagesVisuallyInspected+" осмотренных изображений, "+state.fullyVerifiedCanonicalProductRecords+" полностью подтверждённых канонических выпусков. Кандидаты и групповые связи не выдаются за подтверждённые модели.";
     data.sourceRecords.forEach(r=>cars.push({
       id:r.sourceRowNumber,name:r.name,type:"Source row",year:r.year||"Не указан",number:"ROW "+String(r.sourceRowNumber).padStart(3,"0"),
       series:"Vehicles · Pro Racing 1:43",group:"source",status:"review",color:"silver",tag:"SOURCE ROW",
@@ -265,7 +267,7 @@ async function loadCatalogExport(){
     }));
     document.getElementById("pageTitle").textContent="Pro Racing 1:43 · база доказательств";
     document.getElementById("crumbCurrent").textContent="Pro Racing 1:43";
-    document.getElementById("pageSubtitle").textContent="41 исходная строка · 55 осмотренных изображений · 0 подтверждённых канонических выпусков.";
+    document.getElementById("pageSubtitle").textContent=state.sourceProductRows+" исходных строк · "+state.galleryImagesVisuallyInspected+" осмотренных изображений · "+state.fullyVerifiedCanonicalProductRecords+" подтверждённых канонических выпусков.";
     document.getElementById("resultCount").textContent="Загружено "+cars.length+" материалов из SQLite pilot export";
     buildCatalogTree();render();
   }catch(error){
