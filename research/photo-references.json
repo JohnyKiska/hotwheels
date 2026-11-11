@@ -239,9 +239,9 @@
       "retrieved_at": "2026-11-11",
       "packaging_state": "carded",
       "view_angle": "front",
-      "packaging_format": "tall_blister",
+      "packaging_format": "unknown",
       "evidence_status": "image_visually_inspected",
-      "notes": "Открытое фото показывает лицевую сторону JJH84 в блистере, номер 6/250."
+      "notes": "Открытое фото показывает лицевую сторону JJH84 в блистере, номер 6/250. Размер карточки не классифицирую без надёжного масштаба/полного изображения."
     },
     {
       "id": "photo_ref_ml2026_006_jjh84_ebay_reverse_code",
@@ -254,9 +254,9 @@
       "retrieved_at": "2026-11-11",
       "packaging_state": "carded",
       "view_angle": "reverse",
-      "packaging_format": "tall_blister",
+      "packaging_format": "unknown",
       "evidence_status": "image_visually_inspected",
-      "notes": "Открытое фото оборота карточки; читается артикул JJH84-N9C0B. Тип блистера отнесён к tall по виду лицевой карточки из той же галереи."
+      "notes": "Открытое фото оборота карточки; читается артикул JJH84-N9C0B. Тип блистера отнесён к tall по виду лицевой карточки из той же галереи. Размер карточки не классифицирую без надёжного масштаба/полного изображения."
     },
     {
       "id": "photo_ref_ml2026_006_jjh84_hwc",
