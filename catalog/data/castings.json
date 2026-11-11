@@ -182,8 +182,8 @@
       "canonical_name": "Pass 'n Go",
       "manufacturer": "Mattel",
       "casting_number": null,
-      "identity_status": "provisional",
-      "identity_basis": "Default project rule: entries sharing a Collector # are provisionally grouped as one casting until structural evidence shows a difference. Color, tampo, wheels, finish, hunt status and distribution do not alone create a new casting.",
+      "identity_status": "user_confirmed_same_casting",
+      "identity_basis": "User visual inspection confirmed the JJH30 and JJK98 releases share the same physical casting. Any wheel or packaging differences are tracked as release/variant or packaging observations, not as a distinct casting.",
       "collector_number": "005",
       "year_context": 2026,
       "catalog_family": "Mainline",
@@ -209,9 +209,18 @@
           "repository": "JohnyKiska/hotwheels-fandom-archive",
           "path": "research/reviews/MAINLINE-2026-PROVISIONAL-CASTING-GROUPS.csv",
           "collector_number": "005"
+        },
+        {
+          "type": "user_visual_inspection",
+          "collector_number": "005",
+          "release_ids": [
+            "rel_ml2026_jjh30",
+            "rel_ml2026_jjk98"
+          ],
+          "observation": "User confirmed identical castings."
         }
       ],
-      "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import."
+      "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import. User confirmed identical castings for JJH30 and JJK98."
     },
     {
       "id": "cst_ml2026_006",
