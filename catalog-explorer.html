@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HW Catalog | Mainline & Premium</title>
+<style>
+:root{color-scheme:light;--ink:#19263a;--muted:#68778d;--line:#dfe5ed;--paper:#f4f6f9;--panel:#fff;--orange:#f15a24;--blue:#405fbd}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:14px/1.45 Inter,"Segoe UI",Arial,sans-serif}
+header{background:#172238;color:white;padding:22px max(18px,calc((100vw - 1440px)/2));border-bottom:4px solid var(--orange)}
+header a{color:#ffd2c0;text-decoration:none;font-size:12px}h1{font-size:28px;margin:8px 0 4px}header p{margin:0;color:#b9c4d4}
+main{max-width:1440px;margin:auto;padding:22px 18px 60px}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:18px}
+.stat,.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:15px;box-shadow:0 3px 12px #1c2a4010}
+.stat small{color:var(--muted)}.stat strong{display:block;font-size:25px;margin-top:4px}
+.filters{display:grid;grid-template-columns:minmax(220px,2fr) repeat(3,minmax(130px,1fr));gap:10px;margin-bottom:12px}
+input,select{width:100%;height:42px;border:1px solid var(--line);border-radius:8px;background:white;padding:0 11px;color:var(--ink);font:inherit}
+.notice{background:#fff8e8;border:1px solid #f0d9a6;color:#76541a;padding:11px 13px;border-radius:9px;margin:12px 0 17px}
+.results-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:14px 0;color:var(--muted)}
+table{width:100%;border-collapse:collapse;background:white;border-radius:12px;overflow:hidden}
+th,td{text-align:left;padding:11px 12px;border-bottom:1px solid #edf0f4;vertical-align:top}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#68778d;background:#f9fafc;position:sticky;top:0}
+td strong{display:block;font-size:14px;color:var(--ink)}td small{display:block;color:var(--muted);margin-top:3px}
+.tag{display:inline-block;padding:3px 7px;border-radius:5px;background:#edf1f7;color:#4d5b70;font-size:11px;white-space:nowrap}
+.tag.main{background:#fff0e8;color:#b64b1e}.tag.prem{background:#edf0ff;color:#455eae}
+.row-link{color:#365db6;text-decoration:none}.row-link:hover{text-decoration:underline}
+button{border:1px solid var(--line);background:white;border-radius:8px;padding:8px 12px;color:var(--ink);cursor:pointer}
+button:disabled{opacity:.4;cursor:default}
+.pagination{display:flex;justify-content:center;align-items:center;gap:12px;margin:18px 0}
+#status{color:var(--muted);font-size:13px}.empty{padding:40px;text-align:center;color:var(--muted)}
+@media(max-width:800px){.stats{grid-template-columns:repeat(2,1fr)}.filters{grid-template-columns:1fr 1fr}.filters input{grid-column:1/-1}table{font-size:12px}th,td{padding:8px}.hide-mobile{display:none}}
+</style>
+</head>
+<body>
+<header>
+<a href="./">← HW Catalog</a>
+<h1>Mainline & Premium</h1>
+<p>Единый поиск по извлечённым каталогам Hot Wheels. 1968–2026 и современные Premium-серии.</p>
+</header>
+<main>
+<section class="stats" id="stats">
+<div class="stat"><small>Загрузка каталога</small><strong id="count-records">…</strong></div>
+<div class="stat"><small>Mainline</small><strong id="count-mainline">…</strong></div>
+<div class="stat"><small>Premium</small><strong id="count-premium">…</strong></div>
+<div class="stat"><small>Группы с вариантами</small><strong id="count-groups">…</strong></div>
+</section>
+<div class="notice"><strong>Важно:</strong> группы вариантов пока предварительные. Совпадение модели, Collector # или названия серии не доказывает идентичность физической отливки. Цвет, тампо, колёса и покрытие хранятся отдельно. Конструктивные отличия будем выделять по мере обнаружения.</div>
+<section class="panel">
+<div class="filters">
+<input id="q" type="search" placeholder="Поиск: модель, Toy #, серия, цвет, база…">
+<select id="catalog"><option value="">Все направления</option><option value="Mainline">Mainline</option><option value="Premium">Premium</option></select>
+<select id="year"><option value="">Все годы</option></select>
+<select id="family"><option value="">Все серии / семейства</option></select>
+</div>
+<div class="results-head"><span id="result-count">Подготовка…</span><span id="status">Читаю данные…</span></div>
+<div style="overflow:auto;max-height:68vh">
+<table>
+<thead><tr><th>Модель</th><th>Toy #</th><th>Год</th><th>Серия / семейство</th><th class="hide-mobile">Цвет / колёса</th><th>Источник</th></tr></thead>
+<tbody id="rows"><tr><td colspan="6" class="empty">Загружаю каталог…</td></tr></tbody>
+</table>
+</div>
+<div class="pagination"><button id="prev">Назад</button><span id="page">1</span><button id="next">Дальше</button></div>
+</section>
+<p style="margin:14px 2px;color:var(--muted);font-size:12px">Данные формируются автоматически из исходных CSV архива. <a class="row-link" href="https://github.com/JohnyKiska/hotwheels-fandom-archive/tree/main/research/extractions">Открыть исходные извлечения</a> · <a class="row-link" href="https://github.com/JohnyKiska/hotwheels-fandom-archive/blob/main/catalog/generated/catalog-index-stats.json">Статистика индекса</a></p>
+</main>
+<script>
+const DATA_URL="https://raw.githubusercontent.com/JohnyKiska/hotwheels-fandom-archive/main/catalog/generated/catalog-index.json";
+const PAGE_SIZE=100;let records=[],filtered=[],page=0;
+const el=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function initFilters(data){
+ const years=[...new Set(data.map(x=>x.year).filter(Boolean))].sort((a,b)=>Number(b)-Number(a));
+ years.forEach(y=>el("year").insertAdjacentHTML("beforeend",'<option value="'+esc(y)+'">'+esc(y)+'</option>'));
+ const families=[...new Set(data.map(x=>x.family).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+ families.forEach(x=>el("family").insertAdjacentHTML("beforeend",'<option value="'+esc(x)+'">'+esc(x)+'</option>'));
+}
+function apply(){
+ const q=el("q").value.trim().toLocaleLowerCase();
+ const cat=el("catalog").value,year=el("year").value,family=el("family").value;
+ filtered=records.filter(r=>{
+  if(cat&&r.catalog!==cat)return false;if(year&&r.year!==year)return false;if(family&&r.family!==family)return false;
+  if(!q)return true;
+  const hay=[r.model_name,r.toy_number,r.collector_number,r.series,r.family,r.color,r.tampo,r.base,r.wheel_type,r.notes,(r.base_codes||[]).join(" ")].join(" ").toLocaleLowerCase();
+  return hay.includes(q);
+ });
+ page=0;render();
+}
+function render(){
+ const start=page*PAGE_SIZE,items=filtered.slice(start,start+PAGE_SIZE);
+ el("result-count").textContent=filtered.length.toLocaleString("ru-RU")+" записей";
+ el("page").textContent=(page+1)+" / "+Math.max(1,Math.ceil(filtered.length/PAGE_SIZE));
+ el("prev").disabled=page===0;el("next").disabled=start+PAGE_SIZE>=filtered.length;
+ if(!items.length){el("rows").innerHTML='<tr><td colspan="6" class="empty">Ничего не найдено. Попробуй изменить запрос или фильтры.</td></tr>';return;}
+ el("rows").innerHTML=items.map(r=>{
+  const cat=r.catalog==="Mainline"?"main":"prem";
+  const toy=r.toy_number?'<strong>'+esc(r.toy_number)+'</strong>':'<small>не указан</small>';
+  const source='https://github.com/JohnyKiska/hotwheels-fandom-archive/blob/main/'+r.source_file;
+  const attrs=[r.color,r.wheel_type].filter(Boolean).join(" · ");
+  return '<tr><td><strong>'+esc(r.model_name||"Без названия")+'</strong><small><span class="tag '+cat+'">'+esc(r.catalog)+'</span> '+esc(r.collector_number?"Collector #"+r.collector_number:"")+'</small></td><td>'+toy+'</td><td>'+esc(r.year)+'</td><td>'+esc(r.series||r.family)+'</td><td class="hide-mobile">'+esc(attrs||"—")+'</td><td><a class="row-link" target="_blank" rel="noopener" href="'+source+'">CSV ↗</a></td></tr>';
+ }).join("");
+}
+async function boot(){
+ try{
+  const response=await fetch(DATA_URL);if(!response.ok)throw new Error("HTTP "+response.status);
+  const data=await response.json();records=data.records||[];
+  el("count-records").textContent=records.length.toLocaleString("ru-RU");
+  el("count-mainline").textContent=(data.stats.mainline_records||0).toLocaleString("ru-RU");
+  el("count-premium").textContent=(data.stats.premium_records||0).toLocaleString("ru-RU");
+  el("count-groups").textContent=(data.stats.multi_record_groups||0).toLocaleString("ru-RU");
+  initFilters(records);el("status").textContent="Индекс обновлён автоматически";
+  apply();
+ }catch(error){el("status").textContent="Не удалось загрузить данные";el("rows").innerHTML='<tr><td colspan="6" class="empty">Ошибка загрузки каталога: '+esc(error.message)+'</td></tr>';}
+}
+["q","catalog","year","family"].forEach(id=>el(id).addEventListener(id==="q"?"input":"change",apply));
+el("prev").addEventListener("click",()=>{if(page>0){page--;render();}});
+el("next").addEventListener("click",()=>{if((page+1)*PAGE_SIZE<filtered.length){page++;render();}});
+boot();
+</script>
+</body></html>
