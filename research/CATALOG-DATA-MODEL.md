@@ -106,3 +106,19 @@ For photo research, seek and prioritize carded/blistered images for each identif
 For blister/card packaging research, retain reverse-side (card-back) photographs as first-class evidence alongside front-facing blister photographs. The reverse can carry article/SKU identifiers and suffixes, distribution or packaging codes, and other clues needed to reconstruct packaging changes over time.
 
 Preserve the complete identifier exactly as printed or published, and associate it with the specific packaging observation (for example, tall blister versus short blister). Do not collapse records that differ by suffix. Use front and reverse views together where available to trace the chronology and logic of packaging formats. A suffix is a traceable clue, not proof on its own: correlate it with visible packaging dimensions/features and reliable source documentation.
+
+
+## External photo research references
+
+External photographs and product pages used as research evidence must be recorded separately from owned/licensed image assets. The empty or sparse `catalog/data/images.json` registry is intentional: it contains only files the project is authorized to store and serve, not every image found online.
+
+Maintain a separate photo-reference record for each external source/photo set, linked to the relevant release and, where known, variant. Preserve:
+- source page URL and direct image URL (when available);
+- source/site name and retrieval or verification date;
+- release/article identifier exactly as shown, including suffixes;
+- packaging state (`carded`, `loose`, or `unknown`);
+- view angle (`front`, `reverse`, `side`, `base`, or `unknown`);
+- packaging format (`tall_blister`, `short_blister`, or `unknown`);
+- evidence status and notes.
+
+Do not mark a page as containing a particular view unless that view was actually inspected. Keep external URLs as research references; do not copy them into the owned image asset registry or download third-party images without permission. Research references should remain useful even when the source later disappears.
