@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "description": "Verified-by-key photo references for catalog releases. A filename match is not treated as visual confirmation.",
+  "photos": [
+    {
+      "year": "2026",
+      "toy_number": "JJJ40",
+      "model_name": "'76 Chevy Chevette",
+      "image_url": "https://raw.githubusercontent.com/JohnyKiska/hotwheels/main/cars-img/JJJ40.webp",
+      "asset_url": "https://github.com/JohnyKiska/hotwheels/blob/main/cars-img/JJJ40.webp",
+      "source_url": null,
+      "mapping_status": "toy_number_filename_match",
+      "visual_review_status": "pending",
+      "notes": "Existing project asset. Filename matches Toy # in MAINLINE-2026.csv; image content and original photographic source have not yet been independently reviewed."
+    },
+    {
+      "year": "2026",
+      "toy_number": "JJL45",
+      "model_name": "'76 Chevy Chevette (2nd Color)",
+      "image_url": "https://raw.githubusercontent.com/JohnyKiska/hotwheels/main/cars-img/JJL45.webp",
+      "asset_url": "https://github.com/JohnyKiska/hotwheels/blob/main/cars-img/JJL45.webp",
+      "source_url": null,
+      "mapping_status": "toy_number_filename_match",
+      "visual_review_status": "pending",
+      "notes": "Existing project asset. Filename matches Toy # in MAINLINE-2026.csv; image content and original photographic source have not yet been independently reviewed."
+    }
+  ]
+}
