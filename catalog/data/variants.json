@@ -1,0 +1,6 @@
+{
+  "schema_version": 1,
+  "entity": "variant",
+  "description": "A specific decoration/configuration of a release, such as color, tampo, wheels, base or window. Variant differences do not automatically imply a different casting.",
+  "records": []
+}
