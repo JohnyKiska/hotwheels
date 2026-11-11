@@ -44,8 +44,8 @@
       "canonical_name": "'16 Lamborghini Centenario Roadster",
       "manufacturer": "Mattel",
       "casting_number": null,
-      "identity_status": "provisional",
-      "identity_basis": "Default project rule: entries sharing a Collector # are provisionally grouped as one casting until structural evidence shows a difference. Color, tampo, wheels, finish, hunt status and distribution do not alone create a new casting.",
+      "identity_status": "user_confirmed_same_casting",
+      "identity_basis": "User visual inspection confirmed the three 2026 Mainline releases share the same physical casting. Wheel differences are recorded as release/variant configuration differences, not as a distinct casting.",
       "collector_number": "002",
       "year_context": 2026,
       "catalog_family": "Mainline",
@@ -77,9 +77,24 @@
           "repository": "JohnyKiska/hotwheels-fandom-archive",
           "path": "research/reviews/MAINLINE-2026-PROVISIONAL-CASTING-GROUPS.csv",
           "collector_number": "002"
+        },
+        {
+          "type": "user_visual_inspection",
+          "collector_number": "002",
+          "release_ids": [
+            "rel_ml2026_jjh80",
+            "rel_ml2026_jjk74",
+            "rel_ml2026_jjm49"
+          ],
+          "observation": "User confirmed identical castings; wheels differ.",
+          "source_pages": [
+            "https://www.hwcgarage.com/en/vehicle/16-lamborghini-centenario-roadster-2026-jaune-jjh80",
+            "https://www.hwcgarage.com/en/vehicle/16-lamborghini-centenario-roadster-2026-vert-jjk74",
+            "https://www.hwcgarage.com/en/vehicle/16-lamborghini-centenario-roadster-2026-bleu-jjm49"
+          ]
         }
       ],
-      "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import."
+      "notes": "Visually confirmed by the user: all three listed releases share the same casting. Wheel types differ between releases. Packaging/photo research note: blistered product photos are preferred as primary catalog evidence; loose-car photos are supplementary, especially for tooling details."
     },
     {
       "id": "cst_ml2026_003",
