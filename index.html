@@ -254,7 +254,7 @@ async function loadCatalogExport(){
       variantDisposition:r.variantDisposition,releaseDisposition:r.releaseDisposition,recordKind:"source_row"
     }));
     data.galleryEvidence.forEach(g=>cars.push({
-      id:1000+g.galleryItemIndex,name:g.sourceCaption||g.fileName,type:"Gallery image",year:"Gallery #"+g.galleryItemIndex,
+      id:1000+g.galleryItemIndex,name:g.sourceCaptionText||g.sourceCaption||g.fileName,type:"Gallery image",year:"Gallery #"+g.galleryItemIndex,
       number:g.reviewGroupId,series:g.groupLabel,group:"evidence",status:"ok",color:"blue",tag:"PHOTO REVIEWED",
       note:g.reviewNotes,casting:g.candidateEntity,brand:"",wheel:g.visualInspectionStatus,base:g.textConfidence,
       photo:g.imageUrl,source:"GALLERY-EXTRACTION-08.csv · "+g.fileName,
