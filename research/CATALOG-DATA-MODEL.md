@@ -112,13 +112,13 @@ Preserve the complete identifier exactly as printed or published, and associate 
 
 External photographs and product pages used as research evidence must be recorded separately from owned/licensed image assets. The empty or sparse `catalog/data/images.json` registry is intentional: it contains only files the project is authorized to store and serve, not every image found online.
 
-Maintain a separate photo-reference record for each external source/photo set, linked to the relevant release and, where known, variant. Preserve:
+Maintain the registry at `research/photo-references.json`. Keep one record per relevant external photo/source view, linked to the exact release and, where known, variant. Preserve:
 - source page URL and direct image URL (when available);
 - source/site name and retrieval or verification date;
 - release/article identifier exactly as shown, including suffixes;
 - packaging state (`carded`, `loose`, or `unknown`);
-- view angle (`front`, `reverse`, `side`, `base`, or `unknown`);
-- packaging format (`tall_blister`, `short_blister`, or `unknown`);
+- view angle (for example `front`, `reverse`, `blister_front`, `side`, `base`, or `unknown`);
+- packaging format (for example `tall_blister`, `short_blister`, `blister_card_unspecified`, or `unknown`);
 - evidence status and notes.
 
 Do not mark a page as containing a particular view unless that view was actually inspected. Keep external URLs as research references; do not copy them into the owned image asset registry or download third-party images without permission. Research references should remain useful even when the source later disappears.
