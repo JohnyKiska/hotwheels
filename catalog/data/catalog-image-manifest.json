@@ -4,6 +4,166 @@
   "photos": [
     {
       "year": "2026",
+      "toy_number": "JJH43",
+      "collector_number": "075",
+      "model_name": "X-cceleron",
+      "image_url": "https://static.wikia.nocookie.net/hotwheels/images/e/ec/Mainline_2026_X-cceleron_White_Malaysia_JJH43.jpg/revision/latest/scale-to-width-down/119?cb=20260213005105",
+      "source_url": "https://hotwheels.fandom.com/wiki/File:Mainline_2026_X-cceleron_White_Malaysia_JJH43.jpg",
+      "asset_url": null,
+      "mapping_status": "exact_toy_number_in_gallery_filename_or_caption",
+      "visual_review_status": "pending",
+      "source_type": "Hot Wheels Wiki gallery extraction",
+      "source_page": "https://hotwheels.fandom.com/wiki/X-cceleron",
+      "fandom_revision_id": "814789",
+      "source_blob_sha": "6a6a8a70fdb72e294a2bd798dfe53e9f2c024af8",
+      "gallery_images": [
+        {
+          "file_name": "Mainline 2026 X-cceleron White Malaysia JJH43.jpg",
+          "image_url": "https://static.wikia.nocookie.net/hotwheels/images/e/ec/Mainline_2026_X-cceleron_White_Malaysia_JJH43.jpg/revision/latest/scale-to-width-down/119?cb=20260213005105",
+          "source_url": "https://hotwheels.fandom.com/wiki/File:Mainline_2026_X-cceleron_White_Malaysia_JJH43.jpg",
+          "source_page": "https://hotwheels.fandom.com/wiki/X-cceleron",
+          "fandom_revision_id": "814789",
+          "source_blob_sha": "6a6a8a70fdb72e294a2bd798dfe53e9f2c024af8",
+          "image_alt": "Mainline New Model 2026",
+          "caption_html": "Mainline New Model 2026",
+          "image_title": "Mainline 2026 X-cceleron White Malaysia JJH43.jpg (531 KB)"
+        }
+      ],
+      "notes": "Exact Toy # JJH43 found in archived Gallery filename/alt/caption and matched to MAINLINE-2026.csv. Image identity awaits visual review."
+    },
+    {
+      "year": "2026",
+      "toy_number": "JJH47",
+      "collector_number": "103",
+      "model_name": "Eggshelleracer",
+      "image_url": "https://static.wikia.nocookie.net/hotwheels/images/3/39/Mainline_2026_Eggshellracer_ZAMAC_Malaysia_JJH47.jpg/revision/latest/scale-to-width-down/120?cb=20260313231430",
+      "source_url": "https://hotwheels.fandom.com/wiki/File:Mainline_2026_Eggshellracer_ZAMAC_Malaysia_JJH47.jpg",
+      "asset_url": null,
+      "mapping_status": "exact_toy_number_in_gallery_filename_or_caption",
+      "visual_review_status": "pending",
+      "source_type": "Hot Wheels Wiki gallery extraction",
+      "source_page": "https://hotwheels.fandom.com/wiki/Eggshelleracer",
+      "fandom_revision_id": "800491",
+      "source_blob_sha": "002c2ad1a179a3b4a4f6208d16ef065cc11a4dc3",
+      "gallery_images": [
+        {
+          "file_name": "Mainline 2026 Eggshellracer ZAMAC Malaysia JJH47.jpg",
+          "image_url": "https://static.wikia.nocookie.net/hotwheels/images/3/39/Mainline_2026_Eggshellracer_ZAMAC_Malaysia_JJH47.jpg/revision/latest/scale-to-width-down/120?cb=20260313231430",
+          "source_url": "https://hotwheels.fandom.com/wiki/File:Mainline_2026_Eggshellracer_ZAMAC_Malaysia_JJH47.jpg",
+          "source_page": "https://hotwheels.fandom.com/wiki/Eggshelleracer",
+          "fandom_revision_id": "800491",
+          "source_blob_sha": "002c2ad1a179a3b4a4f6208d16ef065cc11a4dc3",
+          "image_alt": "Mainline New Model 2026",
+          "caption_html": "Mainline New Model 2026",
+          "image_title": "Mainline 2026 Eggshellracer ZAMAC Malaysia JJH47.jpg (529 KB)"
+        },
+        {
+          "file_name": "2026-103 JJH47 Eggshelleracer r1.jpg",
+          "image_url": "https://static.wikia.nocookie.net/hotwheels/images/d/df/2026-103_JJH47_Eggshelleracer_r1.jpg/revision/latest/scale-to-width-down/124?cb=20260224182930",
+          "source_url": "https://hotwheels.fandom.com/wiki/File:2026-103_JJH47_Eggshelleracer_r1.jpg",
+          "source_page": "https://hotwheels.fandom.com/wiki/Eggshelleracer",
+          "fandom_revision_id": "800491",
+          "source_blob_sha": "002c2ad1a179a3b4a4f6208d16ef065cc11a4dc3",
+          "image_alt": "2026-103 New Casting 1st Colour JJH47",
+          "caption_html": "2026-103 New Casting 1st Colour JJH47",
+          "image_title": "2026-103 JJH47 Eggshelleracer r1.jpg (820 KB)"
+        },
+        {
+          "file_name": "2026-103 JJH47 Eggshelleracer r2.jpg",
+          "image_url": "https://static.wikia.nocookie.net/hotwheels/images/b/b9/2026-103_JJH47_Eggshelleracer_r2.jpg/revision/latest/scale-to-width-down/122?cb=20260224183109",
+          "source_url": "https://hotwheels.fandom.com/wiki/File:2026-103_JJH47_Eggshelleracer_r2.jpg",
+          "source_page": "https://hotwheels.fandom.com/wiki/Eggshelleracer",
+          "fandom_revision_id": "800491",
+          "source_blob_sha": "002c2ad1a179a3b4a4f6208d16ef065cc11a4dc3",
+          "image_alt": "",
+          "caption_html": "",
+          "image_title": "2026-103 JJH47 Eggshelleracer r2.jpg (1.6 MB)"
+        },
+        {
+          "file_name": "2026-103 JJH47 Eggshelleracer r1T.jpg",
+          "image_url": "https://static.wikia.nocookie.net/hotwheels/images/a/a5/2026-103_JJH47_Eggshelleracer_r1T.jpg/revision/latest/scale-to-width-down/159?cb=20260224183022",
+          "source_url": "https://hotwheels.fandom.com/wiki/File:2026-103_JJH47_Eggshelleracer_r1T.jpg",
+          "source_page": "https://hotwheels.fandom.com/wiki/Eggshelleracer",
+          "fandom_revision_id": "800491",
+          "source_blob_sha": "002c2ad1a179a3b4a4f6208d16ef065cc11a4dc3",
+          "image_alt": "",
+          "caption_html": "",
+          "image_title": "2026-103 JJH47 Eggshelleracer r1T.jpg (754 KB)"
+        }
+      ],
+      "notes": "Exact Toy # JJH47 found in archived Gallery filename/alt/caption and matched to MAINLINE-2026.csv. Image identity awaits visual review."
+    },
+    {
+      "year": "2026",
+      "toy_number": "JJH93",
+      "collector_number": "018",
+      "model_name": "Deora II",
+      "image_url": "https://static.wikia.nocookie.net/hotwheels/images/d/da/Mainline_2026_Deora_II_Cyan_Malaysia_JJH93.jpg/revision/latest/scale-to-width-down/120?cb=20251030113914",
+      "source_url": "https://hotwheels.fandom.com/wiki/File:Mainline_2026_Deora_II_Cyan_Malaysia_JJH93.jpg",
+      "asset_url": null,
+      "mapping_status": "exact_toy_number_in_gallery_filename_or_caption",
+      "visual_review_status": "pending",
+      "source_type": "Hot Wheels Wiki gallery extraction",
+      "source_page": "https://hotwheels.fandom.com/wiki/Deora_II",
+      "fandom_revision_id": "817028",
+      "source_blob_sha": "fb1d9200675f564445d1daa944a3548aea720482",
+      "gallery_images": [
+        {
+          "file_name": "Mainline 2026 Deora II Cyan Malaysia JJH93.jpg",
+          "image_url": "https://static.wikia.nocookie.net/hotwheels/images/d/da/Mainline_2026_Deora_II_Cyan_Malaysia_JJH93.jpg/revision/latest/scale-to-width-down/120?cb=20251030113914",
+          "source_url": "https://hotwheels.fandom.com/wiki/File:Mainline_2026_Deora_II_Cyan_Malaysia_JJH93.jpg",
+          "source_page": "https://hotwheels.fandom.com/wiki/Deora_II",
+          "fandom_revision_id": "817028",
+          "source_blob_sha": "fb1d9200675f564445d1daa944a3548aea720482",
+          "image_alt": "Mainline 2026",
+          "caption_html": "Mainline 2026",
+          "image_title": "Mainline 2026 Deora II Cyan Malaysia JJH93.jpg (704 KB)"
+        }
+      ],
+      "notes": "Exact Toy # JJH93 found in archived Gallery filename/alt/caption and matched to MAINLINE-2026.csv. Image identity awaits visual review."
+    },
+    {
+      "year": "2026",
+      "toy_number": "JJJ09",
+      "collector_number": "038",
+      "model_name": "24/Seven",
+      "image_url": "https://static.wikia.nocookie.net/hotwheels/images/d/de/JJJ09.jpg/revision/latest/scale-to-width-down/185?cb=20260202095553",
+      "source_url": "https://hotwheels.fandom.com/wiki/File:JJJ09.jpg",
+      "asset_url": null,
+      "mapping_status": "exact_toy_number_in_gallery_filename_or_caption",
+      "visual_review_status": "pending",
+      "source_type": "Hot Wheels Wiki gallery extraction",
+      "source_page": "https://hotwheels.fandom.com/wiki/24_Seven",
+      "fandom_revision_id": "809009",
+      "source_blob_sha": "19240f0749786c39806ee43656baa529a1dd88d6",
+      "gallery_images": [
+        {
+          "file_name": "JJJ09.jpg",
+          "image_url": "https://static.wikia.nocookie.net/hotwheels/images/d/de/JJJ09.jpg/revision/latest/scale-to-width-down/185?cb=20260202095553",
+          "source_url": "https://hotwheels.fandom.com/wiki/File:JJJ09.jpg",
+          "source_page": "https://hotwheels.fandom.com/wiki/24_Seven",
+          "fandom_revision_id": "809009",
+          "source_blob_sha": "19240f0749786c39806ee43656baa529a1dd88d6",
+          "image_alt": "JJJ09",
+          "caption_html": "JJJ09",
+          "image_title": "JJJ09.jpg (973 KB)"
+        },
+        {
+          "file_name": "JJJ09-back.jpg",
+          "image_url": "https://static.wikia.nocookie.net/hotwheels/images/4/45/JJJ09-back.jpg/revision/latest/scale-to-width-down/185?cb=20260202095607",
+          "source_url": "https://hotwheels.fandom.com/wiki/File:JJJ09-back.jpg",
+          "source_page": "https://hotwheels.fandom.com/wiki/24_Seven",
+          "fandom_revision_id": "809009",
+          "source_blob_sha": "19240f0749786c39806ee43656baa529a1dd88d6",
+          "image_alt": "JJJ09",
+          "caption_html": "JJJ09",
+          "image_title": "JJJ09-back.jpg (947 KB)"
+        }
+      ],
+      "notes": "Exact Toy # JJJ09 found in archived Gallery filename/alt/caption and matched to MAINLINE-2026.csv. Image identity awaits visual review."
+    },
+    {
+      "year": "2026",
       "toy_number": "JJJ40",
       "model_name": "'76 Chevy Chevette",
       "image_url": "https://raw.githubusercontent.com/JohnyKiska/hotwheels/main/cars-img/JJJ40.webp",
@@ -12,6 +172,93 @@
       "mapping_status": "toy_number_filename_match",
       "visual_review_status": "pending",
       "notes": "Existing project asset. Filename matches Toy # in MAINLINE-2026.csv; image content and original photographic source have not yet been independently reviewed."
+    },
+    {
+      "year": "2026",
+      "toy_number": "JJK70",
+      "collector_number": "018",
+      "model_name": "Deora II (2nd Color)",
+      "image_url": "https://static.wikia.nocookie.net/hotwheels/images/a/ab/Mainline_2026_Deora_II_MF_Pink_Malaysia_JJK70.jpg/revision/latest/scale-to-width-down/120?cb=20260324125657",
+      "source_url": "https://hotwheels.fandom.com/wiki/File:Mainline_2026_Deora_II_MF_Pink_Malaysia_JJK70.jpg",
+      "asset_url": null,
+      "mapping_status": "exact_toy_number_in_gallery_filename_or_caption",
+      "visual_review_status": "pending",
+      "source_type": "Hot Wheels Wiki gallery extraction",
+      "source_page": "https://hotwheels.fandom.com/wiki/Deora_II",
+      "fandom_revision_id": "817028",
+      "source_blob_sha": "fb1d9200675f564445d1daa944a3548aea720482",
+      "gallery_images": [
+        {
+          "file_name": "Mainline 2026 Deora II MF Pink Malaysia JJK70.jpg",
+          "image_url": "https://static.wikia.nocookie.net/hotwheels/images/a/ab/Mainline_2026_Deora_II_MF_Pink_Malaysia_JJK70.jpg/revision/latest/scale-to-width-down/120?cb=20260324125657",
+          "source_url": "https://hotwheels.fandom.com/wiki/File:Mainline_2026_Deora_II_MF_Pink_Malaysia_JJK70.jpg",
+          "source_page": "https://hotwheels.fandom.com/wiki/Deora_II",
+          "fandom_revision_id": "817028",
+          "source_blob_sha": "fb1d9200675f564445d1daa944a3548aea720482",
+          "image_alt": "Mainline 2026",
+          "caption_html": "Mainline 2026",
+          "image_title": "Mainline 2026 Deora II MF Pink Malaysia JJK70.jpg (518 KB)"
+        }
+      ],
+      "notes": "Exact Toy # JJK70 found in archived Gallery filename/alt/caption and matched to MAINLINE-2026.csv. Image identity awaits visual review."
+    },
+    {
+      "year": "2026",
+      "toy_number": "JJL23",
+      "collector_number": "075",
+      "model_name": "X-cceleron (2nd Color)",
+      "image_url": "https://static.wikia.nocookie.net/hotwheels/images/5/5f/Mainline_2026_X-cceleron_MF_Gray_Malaysia_JJL23.jpg/revision/latest/scale-to-width-down/119?cb=20260831091533",
+      "source_url": "https://hotwheels.fandom.com/wiki/File:Mainline_2026_X-cceleron_MF_Gray_Malaysia_JJL23.jpg",
+      "asset_url": null,
+      "mapping_status": "exact_toy_number_in_gallery_filename_or_caption",
+      "visual_review_status": "pending",
+      "source_type": "Hot Wheels Wiki gallery extraction",
+      "source_page": "https://hotwheels.fandom.com/wiki/X-cceleron",
+      "fandom_revision_id": "814789",
+      "source_blob_sha": "6a6a8a70fdb72e294a2bd798dfe53e9f2c024af8",
+      "gallery_images": [
+        {
+          "file_name": "Mainline 2026 X-cceleron MF Gray Malaysia JJL23.jpg",
+          "image_url": "https://static.wikia.nocookie.net/hotwheels/images/5/5f/Mainline_2026_X-cceleron_MF_Gray_Malaysia_JJL23.jpg/revision/latest/scale-to-width-down/119?cb=20260831091533",
+          "source_url": "https://hotwheels.fandom.com/wiki/File:Mainline_2026_X-cceleron_MF_Gray_Malaysia_JJL23.jpg",
+          "source_page": "https://hotwheels.fandom.com/wiki/X-cceleron",
+          "fandom_revision_id": "814789",
+          "source_blob_sha": "6a6a8a70fdb72e294a2bd798dfe53e9f2c024af8",
+          "image_alt": "Mainline New Model 2026",
+          "caption_html": "Mainline New Model 2026",
+          "image_title": "Mainline 2026 X-cceleron MF Gray Malaysia JJL23.jpg (473 KB)"
+        }
+      ],
+      "notes": "Exact Toy # JJL23 found in archived Gallery filename/alt/caption and matched to MAINLINE-2026.csv. Image identity awaits visual review."
+    },
+    {
+      "year": "2026",
+      "toy_number": "JJL25",
+      "collector_number": "103",
+      "model_name": "Eggshelleracer (2nd Color)",
+      "image_url": "https://static.wikia.nocookie.net/hotwheels/images/6/60/Mainline_2026_Eggshellracer_ZAMAC_with_White_Egg_Malaysia_JJL25.jpg/revision/latest/scale-to-width-down/120?cb=20260831234537",
+      "source_url": "https://hotwheels.fandom.com/wiki/File:Mainline_2026_Eggshellracer_ZAMAC_with_White_Egg_Malaysia_JJL25.jpg",
+      "asset_url": null,
+      "mapping_status": "exact_toy_number_in_gallery_filename_or_caption",
+      "visual_review_status": "pending",
+      "source_type": "Hot Wheels Wiki gallery extraction",
+      "source_page": "https://hotwheels.fandom.com/wiki/Eggshelleracer",
+      "fandom_revision_id": "800491",
+      "source_blob_sha": "002c2ad1a179a3b4a4f6208d16ef065cc11a4dc3",
+      "gallery_images": [
+        {
+          "file_name": "Mainline 2026 Eggshellracer ZAMAC with White Egg Malaysia JJL25.jpg",
+          "image_url": "https://static.wikia.nocookie.net/hotwheels/images/6/60/Mainline_2026_Eggshellracer_ZAMAC_with_White_Egg_Malaysia_JJL25.jpg/revision/latest/scale-to-width-down/120?cb=20260831234537",
+          "source_url": "https://hotwheels.fandom.com/wiki/File:Mainline_2026_Eggshellracer_ZAMAC_with_White_Egg_Malaysia_JJL25.jpg",
+          "source_page": "https://hotwheels.fandom.com/wiki/Eggshelleracer",
+          "fandom_revision_id": "800491",
+          "source_blob_sha": "002c2ad1a179a3b4a4f6208d16ef065cc11a4dc3",
+          "image_alt": "Mainline New Model 2026",
+          "caption_html": "Mainline New Model 2026",
+          "image_title": "Mainline 2026 Eggshellracer ZAMAC with White Egg Malaysia JJL25.jpg (493 KB)"
+        }
+      ],
+      "notes": "Exact Toy # JJL25 found in archived Gallery filename/alt/caption and matched to MAINLINE-2026.csv. Image identity awaits visual review."
     },
     {
       "year": "2026",
