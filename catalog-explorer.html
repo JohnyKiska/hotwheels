@@ -80,7 +80,7 @@ function apply(){
  filtered=records.filter(r=>{
   if(cat&&r.catalog!==cat)return false;if(year&&r.year!==year)return false;if(family&&r.family!==family)return false;
   if(!q)return true;
-  const hay=[r.model_name,r.toy_number,r.collector_number,r.series,r.family,r.color,r.tampo,r.base,r.wheel_type,r.notes,(r.base_codes||[]).join(" ")].join(" ").toLocaleLowerCase();
+  const hay=[r.model_name,r.toy_number,r.collector_number,r.series,r.series_raw,r.family,r.color,r.tampo,r.base,r.wheel_type,r.notes,r.release_type,(r.release_tags||[]).join(" "),(r.exclusive||[]).join(" "),(r.base_codes||[]).join(" ")].join(" ").toLocaleLowerCase();
   return hay.includes(q);
  });
  page=0;render();
@@ -96,7 +96,9 @@ function render(){
   const toy=r.toy_number?'<strong>'+esc(r.toy_number)+'</strong>':'<small>не указан</small>';
   const source='https://github.com/JohnyKiska/hotwheels-fandom-archive/blob/main/'+r.source_file;
   const attrs=[r.color,r.wheel_type].filter(Boolean).join(" · ");
-  return '<tr><td><strong>'+esc(r.model_name||"Без названия")+'</strong><small><span class="tag '+cat+'">'+esc(r.catalog)+'</span> '+esc(r.collector_number?"Collector #"+r.collector_number:"")+'</small></td><td>'+toy+'</td><td>'+esc(r.year)+'</td><td>'+esc(r.series||r.family)+'</td><td class="hide-mobile">'+esc(attrs||"—")+'</td><td><a class="row-link" target="_blank" rel="noopener" href="'+source+'">CSV ↗</a></td></tr>';
+  const labels=[...(r.release_tags||[]),...(r.exclusive||[])];
+  const seriesCell=esc(r.series||r.family)+(labels.length?' <small>'+labels.map(x=>'<span class="tag">'+esc(x)+'</span>').join(" ")+'</small>':"");
+  return '<tr><td><strong>'+esc(r.model_name||"Без названия")+'</strong><small><span class="tag '+cat+'">'+esc(r.catalog)+'</span> '+esc(r.collector_number?"Collector #"+r.collector_number:"")+'</small></td><td>'+toy+'</td><td>'+esc(r.year)+'</td><td>'+seriesCell+'</td><td class="hide-mobile">'+esc(attrs||"—")+'</td><td><a class="row-link" target="_blank" rel="noopener" href="'+source+'">CSV ↗</a></td></tr>';
  }).join("");
 }
 async function boot(){
