@@ -99,7 +99,9 @@ function render(){
   const source='https://github.com/JohnyKiska/hotwheels-fandom-archive/blob/main/'+r.source_file;
   const attrs=[r.color,r.wheel_type].filter(Boolean).join(" · ");
   const photo=photos[`${r.year}:${r.toy_number}`];
-  const photoCell=photo?`<a target="_blank" rel="noopener" href="${esc(photo.asset_url)}" title="${esc(photo.notes||"Фото из архива")}"><img class="photo-thumb" loading="lazy" src="${esc(photo.image_url)}" alt="${esc(r.model_name||r.toy_number)}"></a><small class="photo-status">${photo.visual_review_status==="confirmed"?"проверено":"нужна проверка"}</small>`:'<span class="photo-empty">—</span>';
+  const photoHref=photo?(photo.source_url||photo.asset_url||photo.image_url):"";
+  const photoCount=photo&&photo.gallery_images&&photo.gallery_images.length>1?" · "+photo.gallery_images.length+" фото":"";
+  const photoCell=photo?`<a target="_blank" rel="noopener" href="${esc(photoHref)}" title="${esc(photo.notes||"Фото из архива")}"><img class="photo-thumb" loading="lazy" src="${esc(photo.image_url)}" alt="${esc(r.model_name||r.toy_number)}"></a><small class="photo-status">${photo.visual_review_status==="confirmed"?"проверено":"нужна проверка"}${photoCount}</small>`:'<span class="photo-empty">—</span>';
   const labels=[...(r.release_tags||[]),...(r.exclusive||[])];
   const seriesCell=esc(r.series||r.family)+(labels.length?' <small>'+labels.map(x=>'<span class="tag">'+esc(x)+'</span>').join(" ")+'</small>':"");
   return '<tr><td>'+photoCell+'</td><td><strong>'+esc(r.model_name||"Без названия")+'</strong><small><span class="tag '+cat+'">'+esc(r.catalog)+'</span> '+esc(r.collector_number?"Collector #"+r.collector_number:"")+'</small></td><td>'+toy+'</td><td>'+esc(r.year)+'</td><td>'+seriesCell+'</td><td class="hide-mobile">'+esc(attrs||"—")+'</td><td><a class="row-link" target="_blank" rel="noopener" href="'+source+'">CSV ↗</a></td></tr>';
