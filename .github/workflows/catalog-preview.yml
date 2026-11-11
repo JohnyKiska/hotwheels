@@ -7,6 +7,7 @@ on:
     paths:
       - "index.html"
       - "schema-editor.html"
+      - "catalog-explorer.html"
       - ".github/workflows/catalog-preview.yml"
   workflow_dispatch:
 
