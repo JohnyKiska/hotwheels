@@ -1,4 +1,4 @@
-# Visual catalog prototype
+# Visual catalog · Pro Racing 1:43 pilot
 
 ## Filter reset behavior
 
@@ -16,4 +16,4 @@ The reset action is available whenever the visible catalog is narrowed by a tree
 - With the full catalog selected and no active search/type/status filters, the active-filter row remains hidden.
 - Confirm that the **«Весь каталог»** tree item still performs navigation independently.
 
-This is a visual prototype; changes to demo records are not persisted to a backend.
+The deployed page reads the read-only export generated from the Pro Racing 1:43 SQLite pilot in `JohnyKiska/hotwheels-fandom-archive`. Synthetic demo cards have been removed. The page currently shows 41 source rows and 55 visually inspected Gallery images. It intentionally shows 0 fully verified canonical product releases; inspected images and probable group matches are not product identities. Editing and write-back are not enabled.
