@@ -1,0 +1,6 @@
+{
+  "schema_version": 1,
+  "entity": "casting",
+  "description": "Canonical physical tooling identity. Create a record only when identity is supported; uncertain relationships belong in review data, not merged casting records.",
+  "records": []
+}
