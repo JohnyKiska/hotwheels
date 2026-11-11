@@ -8,6 +8,7 @@ on:
       - "index.html"
       - "schema-editor.html"
       - "catalog-explorer.html"
+      - "catalog/data/catalog-image-manifest.json"
       - ".github/workflows/catalog-preview.yml"
   workflow_dispatch:
 
@@ -36,6 +37,8 @@ jobs:
         run: |
           mkdir -p _site
           cp index.html schema-editor.html catalog-explorer.html _site/
+          mkdir -p _site/catalog/data
+          cp catalog/data/catalog-image-manifest.json _site/catalog/data/
           touch _site/.nojekyll
 
       - name: Configure GitHub Pages
