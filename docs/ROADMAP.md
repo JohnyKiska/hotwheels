@@ -271,4 +271,7 @@
 - [ ] Выбрать SMTP/API-провайдера и реализовать адаптер без изменения outbox/domain API.
 - [ ] Добавить шаблоны invitation/email verification и постановку писем в outbox в той же транзакции, что и выпуск токенов.
 - [ ] Добавить защищённый worker/scheduler и мониторинг очереди.
-- [ ] Добавить account API endpoints, cookie sessions, CSRF/origin checks и RBAC dependencies.
+- [x] Добавить account API endpoints для /me, logout, invitations, invitation acceptance и email verification.
+- [x] Установить HttpOnly session cookie + отдельный CSRF cookie; проверять Origin и CSRF header для cookie-auth mutations.
+- [x] Добавить RBAC permission dependencies для users.manage и roles.assign.
+- [ ] Добавить rate limiting для публичных token endpoints и административной отправки приглашений.
