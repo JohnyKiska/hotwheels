@@ -6,7 +6,7 @@ These functions share the caller's transaction with account token creation.
 from __future__ import annotations
 
 from html import escape
-from urllib.parse import quote
+from urllib.parse import quote, urlsplit
 
 from sqlalchemy.orm import Session
 
@@ -20,8 +20,12 @@ from .models import EmailAddress, Invitation
 
 def _base_url(value: str) -> str:
     base = value.strip().rstrip("/")
-    if not (base.startswith("https://") or base.startswith("http://localhost")):
+    parsed = urlsplit(base)
+    local_http = parsed.scheme == "http" and parsed.hostname in {"localhost", "127.0.0.1"}
+    if parsed.scheme != "https" and not local_http:
         raise ValueError("public_base_url_must_use_https")
+    if not parsed.netloc or parsed.username or parsed.password:
+        raise ValueError("invalid_public_base_url")
     return base
 
 
