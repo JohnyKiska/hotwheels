@@ -317,6 +317,66 @@
       "packaging_format": "unknown",
       "evidence_status": "user_image_visually_inspected",
       "notes": "Пользовательское фото физической карточки. На обороте визуально читается JJH84-N7C5; модель RD-06, серия X-Racers 1/5, штрихкод 027084120134. Не смешивать с отдельной карточкой из eBay gallery с кодом JJH84-N9C0B."
+    },
+    {
+      "id": "photo_ref_ml2026_007_jjh85_ebay_front",
+      "release_id": "rel_ml2026_jjh85",
+      "toy_number": "JJH85",
+      "article_identifier_raw": "JJH85-N521",
+      "source_page_url": "https://www.ebay.co.uk/itm/398093090527",
+      "image_url": "https://i.ebayimg.com/images/g/8GEAAeSwnu5pEJbd/s-l1600.webp",
+      "source_name": "eBay",
+      "retrieved_at": "2026-11-12",
+      "packaging_state": "carded",
+      "view_angle": "front",
+      "packaging_format": "short_blister",
+      "evidence_status": "image_visually_inspected",
+      "notes": "Фронт блистера Solar Reflex #7/250; визуально подтверждена короткая картонка и синяя версия JJH85. На карточке видны 7/250 и HW EV 1/10."
+    },
+    {
+      "id": "photo_ref_ml2026_007_jjh85_ebay_reverse",
+      "release_id": "rel_ml2026_jjh85",
+      "toy_number": "JJH85",
+      "article_identifier_raw": "JJH85-N521",
+      "source_page_url": "https://www.ebay.co.uk/itm/398093090527",
+      "image_url": "https://i.ebayimg.com/images/g/C5wAAeSw9QBpEJbz/s-l1600.webp",
+      "source_name": "eBay",
+      "retrieved_at": "2026-11-12",
+      "packaging_state": "carded",
+      "view_angle": "reverse",
+      "packaging_format": "short_blister",
+      "evidence_status": "image_visually_inspected",
+      "notes": "Оборот той же карточки; отчётливо читается JJH85-N521, код PP-T 21A и штрихкод 074299057854."
+    },
+    {
+      "id": "photo_ref_ml2026_007_jjk67_etsy_front",
+      "release_id": "rel_ml2026_jjk67",
+      "toy_number": "JJK67",
+      "article_identifier_raw": "JJK67-N521",
+      "source_page_url": "https://www.etsy.com/uk/listing/4528494496/m-2026-mattel-hotwheels-blue-solar",
+      "image_url": "https://i.etsystatic.com/33638763/r/il/04706f/8182249834/il_794xN.8182249834_eu08.jpg",
+      "source_name": "Etsy",
+      "retrieved_at": "2026-11-12",
+      "packaging_state": "carded",
+      "view_angle": "blister_front_detail",
+      "packaging_format": "short_blister",
+      "evidence_status": "image_visually_inspected",
+      "notes": "Фото передней части блистера с чёрной версией Solar Reflex; сопоставлено с оборотом карточки из той же галереи, где читается JJK67-N521. Полный фронт карточки в галерее также доступен."
+    },
+    {
+      "id": "photo_ref_ml2026_007_jjk67_etsy_reverse",
+      "release_id": "rel_ml2026_jjk67",
+      "toy_number": "JJK67",
+      "article_identifier_raw": "JJK67-N521",
+      "source_page_url": "https://www.etsy.com/uk/listing/4528494496/m-2026-mattel-blue-solar",
+      "image_url": "https://i.etsystatic.com/33638763/r/il/cad568/8182250086/il_300x300.8182250086_aau8.jpg",
+      "source_name": "Etsy",
+      "retrieved_at": "2026-11-12",
+      "packaging_state": "carded",
+      "view_angle": "reverse",
+      "packaging_format": "short_blister",
+      "evidence_status": "image_visually_inspected",
+      "notes": "Оборот карточки; читается JJK67-N521, код 21A и штрихкод. Ссылка на галерею Etsy, в которой также присутствует лицевая сторона блистера."
     }
   ]
 }
