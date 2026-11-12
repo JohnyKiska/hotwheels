@@ -182,3 +182,17 @@
 
 Архитектурные правила Premium зафиксированы в `docs/architecture/FOUNDATION-ADR-001.md`, раздел «Коммерческий доступ: планы, подписки и Premium».
 
+## Схема аккаунтов, RBAC и Premium · 2026-11-12
+
+- [x] Изучить текущие SQLAlchemy-модели, Alembic bootstrap и соглашения миграций.
+- [x] Подготовить проект схемы User/ExternalIdentity/Session/Invitation.
+- [x] Разделить RBAC (Role/Permission/UserRole) и коммерческие entitlements.
+- [x] Предусмотреть тарифы с версиями цены, подписки, платежи, webhook idempotency и ручные Premium grants.
+- [x] Зафиксировать правила аудита, индексов, FK, временных зон и PostgreSQL portability.
+- [ ] Согласовать открытые продуктовые решения и утвердить контракт схемы.
+- [ ] Реализовать модели и миграции небольшими этапами, начиная с аккаунтов и RBAC.
+- [ ] Проверить миграции и полный backend suite на SQLite и PostgreSQL 16.
+- [ ] После проверки реализовать GitHub OAuth, сессии и серверные permission checks.
+
+Проект схемы: `docs/architecture/ACCOUNT-ACCESS-SCHEMA.md`. Это проектирование, не реализация: новые таблицы и миграции пока не добавлялись.
+
