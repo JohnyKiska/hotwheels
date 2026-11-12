@@ -6,6 +6,7 @@ These functions share the caller's transaction with account token creation.
 from __future__ import annotations
 
 from html import escape
+import os
 from urllib.parse import quote, urlsplit
 
 from sqlalchemy.orm import Session
@@ -16,6 +17,10 @@ from .account_services import (
 )
 from .email_delivery import queue_email
 from .models import EmailAddress, Invitation
+
+
+def _frontend_base_url(fallback: str) -> str:
+    return _base_url(os.environ.get("HW_FRONTEND_URL", "").strip() or fallback)
 
 
 def _base_url(value: str) -> str:
@@ -45,7 +50,7 @@ def create_invitation_and_queue_email(
         role_id=role_id,
     )
     link = (
-        f"{_base_url(public_base_url)}/account/accept-invitation"
+        f"{_base_url(public_base_url)}/login.html?invite="
         f"?token={quote(raw_token, safe='')}"
     )
     greeting = f"Здравствуйте, {recipient_name}!" if recipient_name else "Здравствуйте!"
@@ -89,7 +94,7 @@ def create_email_verification_and_queue_email(
         email_address_id=email_address_id,
     )
     link = (
-        f"{_base_url(public_base_url)}/account/verify-email"
+        f"{_base_url(public_base_url)}/login.html?verify="
         f"?token={quote(raw_token, safe='')}"
     )
     subject = "Подтвердите адрес электронной почты HW Catalog"
