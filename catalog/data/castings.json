@@ -558,8 +558,8 @@
       "canonical_name": "Carbonator",
       "manufacturer": "Mattel",
       "casting_number": null,
-      "identity_status": "user_confirmed_same_casting",
-      "identity_basis": "User visual inspection confirmed that all 1 listed 2026 Mainline release(s) in Collector #012 share the same physical casting. Differences in color, tampo, wheels, finish, hunt status, distribution or packaging are not treated as a distinct casting unless structural tooling evidence shows otherwise.",
+      "identity_status": "provisional",
+      "identity_basis": "Default project rule: entries sharing a Collector # are provisionally grouped as one casting until structural evidence shows a difference. Color, tampo, wheels, finish, hunt status and distribution do not alone create a new casting.",
       "collector_number": "012",
       "year_context": 2026,
       "catalog_family": "Mainline",
@@ -582,14 +582,6 @@
           "repository": "JohnyKiska/hotwheels-fandom-archive",
           "path": "research/reviews/MAINLINE-2026-PROVISIONAL-CASTING-GROUPS.csv",
           "collector_number": "012"
-        },
-        {
-          "type": "user_visual_inspection",
-          "collector_number": "012",
-          "release_ids": [
-            "rel_ml2026_jjh89"
-          ],
-          "observation": "User reviewed the 2026 Mainline releases for Collector #012 and marked them identical in the completed casting review spreadsheet."
         }
       ],
       "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import."
@@ -1006,8 +998,8 @@
       "canonical_name": "McLaren Formula 1 Team",
       "manufacturer": "Mattel",
       "casting_number": null,
-      "identity_status": "user_confirmed_same_casting",
-      "identity_basis": "User visual inspection confirmed that all 1 listed 2026 Mainline release(s) in Collector #020 share the same physical casting. Differences in color, tampo, wheels, finish, hunt status, distribution or packaging are not treated as a distinct casting unless structural tooling evidence shows otherwise.",
+      "identity_status": "provisional",
+      "identity_basis": "Default project rule: entries sharing a Collector # are provisionally grouped as one casting until structural evidence shows a difference. Color, tampo, wheels, finish, hunt status and distribution do not alone create a new casting.",
       "collector_number": "020",
       "year_context": 2026,
       "catalog_family": "Mainline",
@@ -1030,14 +1022,6 @@
           "repository": "JohnyKiska/hotwheels-fandom-archive",
           "path": "research/reviews/MAINLINE-2026-PROVISIONAL-CASTING-GROUPS.csv",
           "collector_number": "020"
-        },
-        {
-          "type": "user_visual_inspection",
-          "collector_number": "020",
-          "release_ids": [
-            "rel_ml2026_jjh95"
-          ],
-          "observation": "User reviewed the 2026 Mainline releases for Collector #020 and marked them identical in the completed casting review spreadsheet."
         }
       ],
       "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import."
@@ -1349,8 +1333,8 @@
       "canonical_name": "Optimus Prime",
       "manufacturer": "Mattel",
       "casting_number": null,
-      "identity_status": "user_confirmed_same_casting",
-      "identity_basis": "User visual inspection confirmed that all 1 listed 2026 Mainline release(s) in Collector #027 share the same physical casting. Differences in color, tampo, wheels, finish, hunt status, distribution or packaging are not treated as a distinct casting unless structural tooling evidence shows otherwise.",
+      "identity_status": "provisional",
+      "identity_basis": "Default project rule: entries sharing a Collector # are provisionally grouped as one casting until structural evidence shows a difference. Color, tampo, wheels, finish, hunt status and distribution do not alone create a new casting.",
       "collector_number": "027",
       "year_context": 2026,
       "catalog_family": "Mainline",
@@ -1373,14 +1357,6 @@
           "repository": "JohnyKiska/hotwheels-fandom-archive",
           "path": "research/reviews/MAINLINE-2026-PROVISIONAL-CASTING-GROUPS.csv",
           "collector_number": "027"
-        },
-        {
-          "type": "user_visual_inspection",
-          "collector_number": "027",
-          "release_ids": [
-            "rel_ml2026_jjj00"
-          ],
-          "observation": "User reviewed the 2026 Mainline releases for Collector #027 and marked them identical in the completed casting review spreadsheet."
         }
       ],
       "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import."
@@ -1390,8 +1366,8 @@
       "canonical_name": "HW K.I.T.T. Concept",
       "manufacturer": "Mattel",
       "casting_number": null,
-      "identity_status": "user_confirmed_same_casting",
-      "identity_basis": "User visual inspection confirmed that all 1 listed 2026 Mainline release(s) in Collector #028 share the same physical casting. Differences in color, tampo, wheels, finish, hunt status, distribution or packaging are not treated as a distinct casting unless structural tooling evidence shows otherwise.",
+      "identity_status": "provisional",
+      "identity_basis": "Default project rule: entries sharing a Collector # are provisionally grouped as one casting until structural evidence shows a difference. Color, tampo, wheels, finish, hunt status and distribution do not alone create a new casting.",
       "collector_number": "028",
       "year_context": 2026,
       "catalog_family": "Mainline",
@@ -1414,14 +1390,6 @@
           "repository": "JohnyKiska/hotwheels-fandom-archive",
           "path": "research/reviews/MAINLINE-2026-PROVISIONAL-CASTING-GROUPS.csv",
           "collector_number": "028"
-        },
-        {
-          "type": "user_visual_inspection",
-          "collector_number": "028",
-          "release_ids": [
-            "rel_ml2026_jjh98"
-          ],
-          "observation": "User reviewed the 2026 Mainline releases for Collector #028 and marked them identical in the completed casting review spreadsheet."
         }
       ],
       "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import."
@@ -1431,8 +1399,8 @@
       "canonical_name": "'92 Dodge Viper RT/10",
       "manufacturer": "Mattel",
       "casting_number": null,
-      "identity_status": "user_confirmed_same_casting",
-      "identity_basis": "User visual inspection confirmed that all 1 listed 2026 Mainline release(s) in Collector #029 share the same physical casting. Differences in color, tampo, wheels, finish, hunt status, distribution or packaging are not treated as a distinct casting unless structural tooling evidence shows otherwise.",
+      "identity_status": "provisional",
+      "identity_basis": "Default project rule: entries sharing a Collector # are provisionally grouped as one casting until structural evidence shows a difference. Color, tampo, wheels, finish, hunt status and distribution do not alone create a new casting.",
       "collector_number": "029",
       "year_context": 2026,
       "catalog_family": "Mainline",
@@ -1456,14 +1424,6 @@
           "repository": "JohnyKiska/hotwheels-fandom-archive",
           "path": "research/reviews/MAINLINE-2026-PROVISIONAL-CASTING-GROUPS.csv",
           "collector_number": "029"
-        },
-        {
-          "type": "user_visual_inspection",
-          "collector_number": "029",
-          "release_ids": [
-            "rel_ml2026_jjm01"
-          ],
-          "observation": "User reviewed the 2026 Mainline releases for Collector #029 and marked them identical in the completed casting review spreadsheet."
         }
       ],
       "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import."
@@ -1930,8 +1890,8 @@
       "canonical_name": "Braille Racer - Twin Mill",
       "manufacturer": "Mattel",
       "casting_number": null,
-      "identity_status": "user_confirmed_same_casting",
-      "identity_basis": "User visual inspection confirmed that all 1 listed 2026 Mainline release(s) in Collector #040 share the same physical casting. Differences in color, tampo, wheels, finish, hunt status, distribution or packaging are not treated as a distinct casting unless structural tooling evidence shows otherwise.",
+      "identity_status": "provisional",
+      "identity_basis": "Default project rule: entries sharing a Collector # are provisionally grouped as one casting until structural evidence shows a difference. Color, tampo, wheels, finish, hunt status and distribution do not alone create a new casting.",
       "collector_number": "040",
       "year_context": 2026,
       "catalog_family": "Mainline",
@@ -1954,14 +1914,6 @@
           "repository": "JohnyKiska/hotwheels-fandom-archive",
           "path": "research/reviews/MAINLINE-2026-PROVISIONAL-CASTING-GROUPS.csv",
           "collector_number": "040"
-        },
-        {
-          "type": "user_visual_inspection",
-          "collector_number": "040",
-          "release_ids": [
-            "rel_ml2026_jjj11"
-          ],
-          "observation": "User reviewed the 2026 Mainline releases for Collector #040 and marked them identical in the completed casting review spreadsheet."
         }
       ],
       "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import."
@@ -2758,8 +2710,8 @@
       "canonical_name": "Electro Silhouette",
       "manufacturer": "Mattel",
       "casting_number": null,
-      "identity_status": "user_confirmed_same_casting",
-      "identity_basis": "User visual inspection confirmed that all 1 listed 2026 Mainline release(s) in Collector #058 share the same physical casting. Differences in color, tampo, wheels, finish, hunt status, distribution or packaging are not treated as a distinct casting unless structural tooling evidence shows otherwise.",
+      "identity_status": "provisional",
+      "identity_basis": "Default project rule: entries sharing a Collector # are provisionally grouped as one casting until structural evidence shows a difference. Color, tampo, wheels, finish, hunt status and distribution do not alone create a new casting.",
       "collector_number": "058",
       "year_context": 2026,
       "catalog_family": "Mainline",
@@ -2784,14 +2736,6 @@
           "repository": "JohnyKiska/hotwheels-fandom-archive",
           "path": "research/reviews/MAINLINE-2026-PROVISIONAL-CASTING-GROUPS.csv",
           "collector_number": "058"
-        },
-        {
-          "type": "user_visual_inspection",
-          "collector_number": "058",
-          "release_ids": [
-            "rel_ml2026_jjm02"
-          ],
-          "observation": "User reviewed the 2026 Mainline releases for Collector #058 and marked them identical in the completed casting review spreadsheet."
         }
       ],
       "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import."
@@ -3035,8 +2979,8 @@
       "canonical_name": "Mercedes-Benz Unimog 1300L",
       "manufacturer": "Mattel",
       "casting_number": null,
-      "identity_status": "user_confirmed_same_casting",
-      "identity_basis": "User visual inspection confirmed that all 1 listed 2026 Mainline release(s) in Collector #064 share the same physical casting. Differences in color, tampo, wheels, finish, hunt status, distribution or packaging are not treated as a distinct casting unless structural tooling evidence shows otherwise.",
+      "identity_status": "provisional",
+      "identity_basis": "Default project rule: entries sharing a Collector # are provisionally grouped as one casting until structural evidence shows a difference. Color, tampo, wheels, finish, hunt status and distribution do not alone create a new casting.",
       "collector_number": "064",
       "year_context": 2026,
       "catalog_family": "Mainline",
@@ -3059,14 +3003,6 @@
           "repository": "JohnyKiska/hotwheels-fandom-archive",
           "path": "research/reviews/MAINLINE-2026-PROVISIONAL-CASTING-GROUPS.csv",
           "collector_number": "064"
-        },
-        {
-          "type": "user_visual_inspection",
-          "collector_number": "064",
-          "release_ids": [
-            "rel_ml2026_jjj32"
-          ],
-          "observation": "User reviewed the 2026 Mainline releases for Collector #064 and marked them identical in the completed casting review spreadsheet."
         }
       ],
       "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import."
@@ -3218,8 +3154,8 @@
       "canonical_name": "Visa Cash App Racing Bulls Formula One Team",
       "manufacturer": "Mattel",
       "casting_number": null,
-      "identity_status": "user_confirmed_same_casting",
-      "identity_basis": "User visual inspection confirmed that all 1 listed 2026 Mainline release(s) in Collector #068 share the same physical casting. Differences in color, tampo, wheels, finish, hunt status, distribution or packaging are not treated as a distinct casting unless structural tooling evidence shows otherwise.",
+      "identity_status": "provisional",
+      "identity_basis": "Default project rule: entries sharing a Collector # are provisionally grouped as one casting until structural evidence shows a difference. Color, tampo, wheels, finish, hunt status and distribution do not alone create a new casting.",
       "collector_number": "068",
       "year_context": 2026,
       "catalog_family": "Mainline",
@@ -3242,14 +3178,6 @@
           "repository": "JohnyKiska/hotwheels-fandom-archive",
           "path": "research/reviews/MAINLINE-2026-PROVISIONAL-CASTING-GROUPS.csv",
           "collector_number": "068"
-        },
-        {
-          "type": "user_visual_inspection",
-          "collector_number": "068",
-          "release_ids": [
-            "rel_ml2026_jjj35"
-          ],
-          "observation": "User reviewed the 2026 Mainline releases for Collector #068 and marked them identical in the completed casting review spreadsheet."
         }
       ],
       "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import."
@@ -3811,8 +3739,8 @@
       "canonical_name": "Hot Wheengs",
       "manufacturer": "Mattel",
       "casting_number": null,
-      "identity_status": "user_confirmed_same_casting",
-      "identity_basis": "User visual inspection confirmed that all 1 listed 2026 Mainline release(s) in Collector #081 share the same physical casting. Differences in color, tampo, wheels, finish, hunt status, distribution or packaging are not treated as a distinct casting unless structural tooling evidence shows otherwise.",
+      "identity_status": "provisional",
+      "identity_basis": "Default project rule: entries sharing a Collector # are provisionally grouped as one casting until structural evidence shows a difference. Color, tampo, wheels, finish, hunt status and distribution do not alone create a new casting.",
       "collector_number": "081",
       "year_context": 2026,
       "catalog_family": "Mainline",
@@ -3837,14 +3765,6 @@
           "repository": "JohnyKiska/hotwheels-fandom-archive",
           "path": "research/reviews/MAINLINE-2026-PROVISIONAL-CASTING-GROUPS.csv",
           "collector_number": "081"
-        },
-        {
-          "type": "user_visual_inspection",
-          "collector_number": "081",
-          "release_ids": [
-            "rel_ml2026_jjm03"
-          ],
-          "observation": "User reviewed the 2026 Mainline releases for Collector #081 and marked them identical in the completed casting review spreadsheet."
         }
       ],
       "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import."
@@ -4266,8 +4186,8 @@
       "canonical_name": "LB-WORKS Lamborghini Huracán Coupé",
       "manufacturer": "Mattel",
       "casting_number": null,
-      "identity_status": "user_confirmed_same_casting",
-      "identity_basis": "User visual inspection confirmed that all 1 listed 2026 Mainline release(s) in Collector #091 share the same physical casting. Differences in color, tampo, wheels, finish, hunt status, distribution or packaging are not treated as a distinct casting unless structural tooling evidence shows otherwise.",
+      "identity_status": "provisional",
+      "identity_basis": "Default project rule: entries sharing a Collector # are provisionally grouped as one casting until structural evidence shows a difference. Color, tampo, wheels, finish, hunt status and distribution do not alone create a new casting.",
       "collector_number": "091",
       "year_context": 2026,
       "catalog_family": "Mainline",
@@ -4290,14 +4210,6 @@
           "repository": "JohnyKiska/hotwheels-fandom-archive",
           "path": "research/reviews/MAINLINE-2026-PROVISIONAL-CASTING-GROUPS.csv",
           "collector_number": "091"
-        },
-        {
-          "type": "user_visual_inspection",
-          "collector_number": "091",
-          "release_ids": [
-            "rel_ml2026_jjj53"
-          ],
-          "observation": "User reviewed the 2026 Mainline releases for Collector #091 and marked them identical in the completed casting review spreadsheet."
         }
       ],
       "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import."
@@ -4535,8 +4447,8 @@
       "canonical_name": "Corvette Grand Sport",
       "manufacturer": "Mattel",
       "casting_number": null,
-      "identity_status": "user_confirmed_same_casting",
-      "identity_basis": "User visual inspection confirmed that all 1 listed 2026 Mainline release(s) in Collector #097 share the same physical casting. Differences in color, tampo, wheels, finish, hunt status, distribution or packaging are not treated as a distinct casting unless structural tooling evidence shows otherwise.",
+      "identity_status": "provisional",
+      "identity_basis": "Default project rule: entries sharing a Collector # are provisionally grouped as one casting until structural evidence shows a difference. Color, tampo, wheels, finish, hunt status and distribution do not alone create a new casting.",
       "collector_number": "097",
       "year_context": 2026,
       "catalog_family": "Mainline",
@@ -4559,14 +4471,6 @@
           "repository": "JohnyKiska/hotwheels-fandom-archive",
           "path": "research/reviews/MAINLINE-2026-PROVISIONAL-CASTING-GROUPS.csv",
           "collector_number": "097"
-        },
-        {
-          "type": "user_visual_inspection",
-          "collector_number": "097",
-          "release_ids": [
-            "rel_ml2026_jjj58"
-          ],
-          "observation": "User reviewed the 2026 Mainline releases for Collector #097 and marked them identical in the completed casting review spreadsheet."
         }
       ],
       "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import."
@@ -4712,8 +4616,8 @@
       "canonical_name": "'17 Pagani Huayra Roadster",
       "manufacturer": "Mattel",
       "casting_number": null,
-      "identity_status": "user_confirmed_same_casting",
-      "identity_basis": "User visual inspection confirmed that all 1 listed 2026 Mainline release(s) in Collector #101 share the same physical casting. Differences in color, tampo, wheels, finish, hunt status, distribution or packaging are not treated as a distinct casting unless structural tooling evidence shows otherwise.",
+      "identity_status": "provisional",
+      "identity_basis": "Default project rule: entries sharing a Collector # are provisionally grouped as one casting until structural evidence shows a difference. Color, tampo, wheels, finish, hunt status and distribution do not alone create a new casting.",
       "collector_number": "101",
       "year_context": 2026,
       "catalog_family": "Mainline",
@@ -4736,14 +4640,6 @@
           "repository": "JohnyKiska/hotwheels-fandom-archive",
           "path": "research/reviews/MAINLINE-2026-PROVISIONAL-CASTING-GROUPS.csv",
           "collector_number": "101"
-        },
-        {
-          "type": "user_visual_inspection",
-          "collector_number": "101",
-          "release_ids": [
-            "rel_ml2026_jjh99"
-          ],
-          "observation": "User reviewed the 2026 Mainline releases for Collector #101 and marked them identical in the completed casting review spreadsheet."
         }
       ],
       "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import."
@@ -5038,8 +4934,8 @@
       "canonical_name": "The Simpsons Family Car",
       "manufacturer": "Mattel",
       "casting_number": null,
-      "identity_status": "user_confirmed_same_casting",
-      "identity_basis": "User visual inspection confirmed that all 1 listed 2026 Mainline release(s) in Collector #108 share the same physical casting. Differences in color, tampo, wheels, finish, hunt status, distribution or packaging are not treated as a distinct casting unless structural tooling evidence shows otherwise.",
+      "identity_status": "provisional",
+      "identity_basis": "Default project rule: entries sharing a Collector # are provisionally grouped as one casting until structural evidence shows a difference. Color, tampo, wheels, finish, hunt status and distribution do not alone create a new casting.",
       "collector_number": "108",
       "year_context": 2026,
       "catalog_family": "Mainline",
@@ -5062,14 +4958,6 @@
           "repository": "JohnyKiska/hotwheels-fandom-archive",
           "path": "research/reviews/MAINLINE-2026-PROVISIONAL-CASTING-GROUPS.csv",
           "collector_number": "108"
-        },
-        {
-          "type": "user_visual_inspection",
-          "collector_number": "108",
-          "release_ids": [
-            "rel_ml2026_jjj68"
-          ],
-          "observation": "User reviewed the 2026 Mainline releases for Collector #108 and marked them identical in the completed casting review spreadsheet."
         }
       ],
       "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import."
@@ -5125,8 +5013,8 @@
       "canonical_name": "'70 Chevelle SS Wagon",
       "manufacturer": "Mattel",
       "casting_number": null,
-      "identity_status": "user_confirmed_same_casting",
-      "identity_basis": "User visual inspection confirmed that all 1 listed 2026 Mainline release(s) in Collector #110 share the same physical casting. Differences in color, tampo, wheels, finish, hunt status, distribution or packaging are not treated as a distinct casting unless structural tooling evidence shows otherwise.",
+      "identity_status": "provisional",
+      "identity_basis": "Default project rule: entries sharing a Collector # are provisionally grouped as one casting until structural evidence shows a difference. Color, tampo, wheels, finish, hunt status and distribution do not alone create a new casting.",
       "collector_number": "110",
       "year_context": 2026,
       "catalog_family": "Mainline",
@@ -5149,14 +5037,6 @@
           "repository": "JohnyKiska/hotwheels-fandom-archive",
           "path": "research/reviews/MAINLINE-2026-PROVISIONAL-CASTING-GROUPS.csv",
           "collector_number": "110"
-        },
-        {
-          "type": "user_visual_inspection",
-          "collector_number": "110",
-          "release_ids": [
-            "rel_ml2026_jjj70"
-          ],
-          "observation": "User reviewed the 2026 Mainline releases for Collector #110 and marked them identical in the completed casting review spreadsheet."
         }
       ],
       "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import."
@@ -5588,8 +5468,8 @@
       "canonical_name": "Scuderia Ferrari HP",
       "manufacturer": "Mattel",
       "casting_number": null,
-      "identity_status": "user_confirmed_same_casting",
-      "identity_basis": "User visual inspection confirmed that all 1 listed 2026 Mainline release(s) in Collector #120 share the same physical casting. Differences in color, tampo, wheels, finish, hunt status, distribution or packaging are not treated as a distinct casting unless structural tooling evidence shows otherwise.",
+      "identity_status": "provisional",
+      "identity_basis": "Default project rule: entries sharing a Collector # are provisionally grouped as one casting until structural evidence shows a difference. Color, tampo, wheels, finish, hunt status and distribution do not alone create a new casting.",
       "collector_number": "120",
       "year_context": 2026,
       "catalog_family": "Mainline",
@@ -5612,14 +5492,6 @@
           "repository": "JohnyKiska/hotwheels-fandom-archive",
           "path": "research/reviews/MAINLINE-2026-PROVISIONAL-CASTING-GROUPS.csv",
           "collector_number": "120"
-        },
-        {
-          "type": "user_visual_inspection",
-          "collector_number": "120",
-          "release_ids": [
-            "rel_ml2026_jjj78"
-          ],
-          "observation": "User reviewed the 2026 Mainline releases for Collector #120 and marked them identical in the completed casting review spreadsheet."
         }
       ],
       "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import."
@@ -5676,8 +5548,8 @@
       "canonical_name": "Cone Shaker",
       "manufacturer": "Mattel",
       "casting_number": null,
-      "identity_status": "user_confirmed_same_casting",
-      "identity_basis": "User visual inspection confirmed that all 1 listed 2026 Mainline release(s) in Collector #122 share the same physical casting. Differences in color, tampo, wheels, finish, hunt status, distribution or packaging are not treated as a distinct casting unless structural tooling evidence shows otherwise.",
+      "identity_status": "provisional",
+      "identity_basis": "Default project rule: entries sharing a Collector # are provisionally grouped as one casting until structural evidence shows a difference. Color, tampo, wheels, finish, hunt status and distribution do not alone create a new casting.",
       "collector_number": "122",
       "year_context": 2026,
       "catalog_family": "Mainline",
@@ -5702,14 +5574,6 @@
           "repository": "JohnyKiska/hotwheels-fandom-archive",
           "path": "research/reviews/MAINLINE-2026-PROVISIONAL-CASTING-GROUPS.csv",
           "collector_number": "122"
-        },
-        {
-          "type": "user_visual_inspection",
-          "collector_number": "122",
-          "release_ids": [
-            "rel_ml2026_jjm04"
-          ],
-          "observation": "User reviewed the 2026 Mainline releases for Collector #122 and marked them identical in the completed casting review spreadsheet."
         }
       ],
       "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import."
@@ -5772,8 +5636,8 @@
       "canonical_name": "2016 Ford GT Race",
       "manufacturer": "Mattel",
       "casting_number": null,
-      "identity_status": "user_confirmed_same_casting",
-      "identity_basis": "User visual inspection confirmed that all 1 listed 2026 Mainline release(s) in Collector #124 share the same physical casting. Differences in color, tampo, wheels, finish, hunt status, distribution or packaging are not treated as a distinct casting unless structural tooling evidence shows otherwise.",
+      "identity_status": "provisional",
+      "identity_basis": "Default project rule: entries sharing a Collector # are provisionally grouped as one casting until structural evidence shows a difference. Color, tampo, wheels, finish, hunt status and distribution do not alone create a new casting.",
       "collector_number": "124",
       "year_context": 2026,
       "catalog_family": "Mainline",
@@ -5797,14 +5661,6 @@
           "repository": "JohnyKiska/hotwheels-fandom-archive",
           "path": "research/reviews/MAINLINE-2026-PROVISIONAL-CASTING-GROUPS.csv",
           "collector_number": "124"
-        },
-        {
-          "type": "user_visual_inspection",
-          "collector_number": "124",
-          "release_ids": [
-            "rel_ml2026_jjm05"
-          ],
-          "observation": "User reviewed the 2026 Mainline releases for Collector #124 and marked them identical in the completed casting review spreadsheet."
         }
       ],
       "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import."
@@ -5996,8 +5852,8 @@
       "canonical_name": "Standard Kart",
       "manufacturer": "Mattel",
       "casting_number": null,
-      "identity_status": "user_confirmed_same_casting",
-      "identity_basis": "User visual inspection confirmed that all 1 listed 2026 Mainline release(s) in Collector #129 share the same physical casting. Differences in color, tampo, wheels, finish, hunt status, distribution or packaging are not treated as a distinct casting unless structural tooling evidence shows otherwise.",
+      "identity_status": "provisional",
+      "identity_basis": "Default project rule: entries sharing a Collector # are provisionally grouped as one casting until structural evidence shows a difference. Color, tampo, wheels, finish, hunt status and distribution do not alone create a new casting.",
       "collector_number": "129",
       "year_context": 2026,
       "catalog_family": "Mainline",
@@ -6020,14 +5876,6 @@
           "repository": "JohnyKiska/hotwheels-fandom-archive",
           "path": "research/reviews/MAINLINE-2026-PROVISIONAL-CASTING-GROUPS.csv",
           "collector_number": "129"
-        },
-        {
-          "type": "user_visual_inspection",
-          "collector_number": "129",
-          "release_ids": [
-            "rel_ml2026_jjj83"
-          ],
-          "observation": "User reviewed the 2026 Mainline releases for Collector #129 and marked them identical in the completed casting review spreadsheet."
         }
       ],
       "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import."
@@ -6179,8 +6027,8 @@
       "canonical_name": "8 Crate",
       "manufacturer": "Mattel",
       "casting_number": null,
-      "identity_status": "user_confirmed_same_casting",
-      "identity_basis": "User visual inspection confirmed that all 1 listed 2026 Mainline release(s) in Collector #133 share the same physical casting. Differences in color, tampo, wheels, finish, hunt status, distribution or packaging are not treated as a distinct casting unless structural tooling evidence shows otherwise.",
+      "identity_status": "provisional",
+      "identity_basis": "Default project rule: entries sharing a Collector # are provisionally grouped as one casting until structural evidence shows a difference. Color, tampo, wheels, finish, hunt status and distribution do not alone create a new casting.",
       "collector_number": "133",
       "year_context": 2026,
       "catalog_family": "Mainline",
@@ -6203,14 +6051,6 @@
           "repository": "JohnyKiska/hotwheels-fandom-archive",
           "path": "research/reviews/MAINLINE-2026-PROVISIONAL-CASTING-GROUPS.csv",
           "collector_number": "133"
-        },
-        {
-          "type": "user_visual_inspection",
-          "collector_number": "133",
-          "release_ids": [
-            "rel_ml2026_jjj86"
-          ],
-          "observation": "User reviewed the 2026 Mainline releases for Collector #133 and marked them identical in the completed casting review spreadsheet."
         }
       ],
       "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import."
@@ -6265,8 +6105,8 @@
       "canonical_name": "Flippin Fast",
       "manufacturer": "Mattel",
       "casting_number": null,
-      "identity_status": "user_confirmed_same_casting",
-      "identity_basis": "User visual inspection confirmed that all 1 listed 2026 Mainline release(s) in Collector #135 share the same physical casting. Differences in color, tampo, wheels, finish, hunt status, distribution or packaging are not treated as a distinct casting unless structural tooling evidence shows otherwise.",
+      "identity_status": "provisional",
+      "identity_basis": "Default project rule: entries sharing a Collector # are provisionally grouped as one casting until structural evidence shows a difference. Color, tampo, wheels, finish, hunt status and distribution do not alone create a new casting.",
       "collector_number": "135",
       "year_context": 2026,
       "catalog_family": "Mainline",
@@ -6289,14 +6129,6 @@
           "repository": "JohnyKiska/hotwheels-fandom-archive",
           "path": "research/reviews/MAINLINE-2026-PROVISIONAL-CASTING-GROUPS.csv",
           "collector_number": "135"
-        },
-        {
-          "type": "user_visual_inspection",
-          "collector_number": "135",
-          "release_ids": [
-            "rel_ml2026_jjj88"
-          ],
-          "observation": "User reviewed the 2026 Mainline releases for Collector #135 and marked them identical in the completed casting review spreadsheet."
         }
       ],
       "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import."
@@ -6351,8 +6183,8 @@
       "canonical_name": "La Troca",
       "manufacturer": "Mattel",
       "casting_number": null,
-      "identity_status": "user_confirmed_same_casting",
-      "identity_basis": "User visual inspection confirmed that all 1 listed 2026 Mainline release(s) in Collector #137 share the same physical casting. Differences in color, tampo, wheels, finish, hunt status, distribution or packaging are not treated as a distinct casting unless structural tooling evidence shows otherwise.",
+      "identity_status": "provisional",
+      "identity_basis": "Default project rule: entries sharing a Collector # are provisionally grouped as one casting until structural evidence shows a difference. Color, tampo, wheels, finish, hunt status and distribution do not alone create a new casting.",
       "collector_number": "137",
       "year_context": 2026,
       "catalog_family": "Mainline",
@@ -6375,14 +6207,6 @@
           "repository": "JohnyKiska/hotwheels-fandom-archive",
           "path": "research/reviews/MAINLINE-2026-PROVISIONAL-CASTING-GROUPS.csv",
           "collector_number": "137"
-        },
-        {
-          "type": "user_visual_inspection",
-          "collector_number": "137",
-          "release_ids": [
-            "rel_ml2026_jjj90"
-          ],
-          "observation": "User reviewed the 2026 Mainline releases for Collector #137 and marked them identical in the completed casting review spreadsheet."
         }
       ],
       "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import."
@@ -6566,8 +6390,8 @@
       "canonical_name": "Mazda RX-3",
       "manufacturer": "Mattel",
       "casting_number": null,
-      "identity_status": "user_confirmed_same_casting",
-      "identity_basis": "User visual inspection confirmed that all 1 listed 2026 Mainline release(s) in Collector #142 share the same physical casting. Differences in color, tampo, wheels, finish, hunt status, distribution or packaging are not treated as a distinct casting unless structural tooling evidence shows otherwise.",
+      "identity_status": "provisional",
+      "identity_basis": "Default project rule: entries sharing a Collector # are provisionally grouped as one casting until structural evidence shows a difference. Color, tampo, wheels, finish, hunt status and distribution do not alone create a new casting.",
       "collector_number": "142",
       "year_context": 2026,
       "catalog_family": "Mainline",
@@ -6590,14 +6414,6 @@
           "repository": "JohnyKiska/hotwheels-fandom-archive",
           "path": "research/reviews/MAINLINE-2026-PROVISIONAL-CASTING-GROUPS.csv",
           "collector_number": "142"
-        },
-        {
-          "type": "user_visual_inspection",
-          "collector_number": "142",
-          "release_ids": [
-            "rel_ml2026_jjj95"
-          ],
-          "observation": "User reviewed the 2026 Mainline releases for Collector #142 and marked them identical in the completed casting review spreadsheet."
         }
       ],
       "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import."
@@ -6650,8 +6466,8 @@
       "canonical_name": "Classic TV Series Batmobile",
       "manufacturer": "Mattel",
       "casting_number": null,
-      "identity_status": "user_confirmed_same_casting",
-      "identity_basis": "User visual inspection confirmed that all 1 listed 2026 Mainline release(s) in Collector #144 share the same physical casting. Differences in color, tampo, wheels, finish, hunt status, distribution or packaging are not treated as a distinct casting unless structural tooling evidence shows otherwise.",
+      "identity_status": "provisional",
+      "identity_basis": "Default project rule: entries sharing a Collector # are provisionally grouped as one casting until structural evidence shows a difference. Color, tampo, wheels, finish, hunt status and distribution do not alone create a new casting.",
       "collector_number": "144",
       "year_context": 2026,
       "catalog_family": "Mainline",
@@ -6674,14 +6490,6 @@
           "repository": "JohnyKiska/hotwheels-fandom-archive",
           "path": "research/reviews/MAINLINE-2026-PROVISIONAL-CASTING-GROUPS.csv",
           "collector_number": "144"
-        },
-        {
-          "type": "user_visual_inspection",
-          "collector_number": "144",
-          "release_ids": [
-            "rel_ml2026_jjj96"
-          ],
-          "observation": "User reviewed the 2026 Mainline releases for Collector #144 and marked them identical in the completed casting review spreadsheet."
         }
       ],
       "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import."
@@ -6734,8 +6542,8 @@
       "canonical_name": "Mazda Autozam",
       "manufacturer": "Mattel",
       "casting_number": null,
-      "identity_status": "user_confirmed_same_casting",
-      "identity_basis": "User visual inspection confirmed that all 1 listed 2026 Mainline release(s) in Collector #146 share the same physical casting. Differences in color, tampo, wheels, finish, hunt status, distribution or packaging are not treated as a distinct casting unless structural tooling evidence shows otherwise.",
+      "identity_status": "provisional",
+      "identity_basis": "Default project rule: entries sharing a Collector # are provisionally grouped as one casting until structural evidence shows a difference. Color, tampo, wheels, finish, hunt status and distribution do not alone create a new casting.",
       "collector_number": "146",
       "year_context": 2026,
       "catalog_family": "Mainline",
@@ -6758,14 +6566,6 @@
           "repository": "JohnyKiska/hotwheels-fandom-archive",
           "path": "research/reviews/MAINLINE-2026-PROVISIONAL-CASTING-GROUPS.csv",
           "collector_number": "146"
-        },
-        {
-          "type": "user_visual_inspection",
-          "collector_number": "146",
-          "release_ids": [
-            "rel_ml2026_jjj98"
-          ],
-          "observation": "User reviewed the 2026 Mainline releases for Collector #146 and marked them identical in the completed casting review spreadsheet."
         }
       ],
       "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import."
@@ -6775,8 +6575,8 @@
       "canonical_name": "2 Jet Z",
       "manufacturer": "Mattel",
       "casting_number": null,
-      "identity_status": "user_confirmed_same_casting",
-      "identity_basis": "User visual inspection confirmed that all 1 listed 2026 Mainline release(s) in Collector #147 share the same physical casting. Differences in color, tampo, wheels, finish, hunt status, distribution or packaging are not treated as a distinct casting unless structural tooling evidence shows otherwise.",
+      "identity_status": "provisional",
+      "identity_basis": "Default project rule: entries sharing a Collector # are provisionally grouped as one casting until structural evidence shows a difference. Color, tampo, wheels, finish, hunt status and distribution do not alone create a new casting.",
       "collector_number": "147",
       "year_context": 2026,
       "catalog_family": "Mainline",
@@ -6801,14 +6601,6 @@
           "repository": "JohnyKiska/hotwheels-fandom-archive",
           "path": "research/reviews/MAINLINE-2026-PROVISIONAL-CASTING-GROUPS.csv",
           "collector_number": "147"
-        },
-        {
-          "type": "user_visual_inspection",
-          "collector_number": "147",
-          "release_ids": [
-            "rel_ml2026_jjm06"
-          ],
-          "observation": "User reviewed the 2026 Mainline releases for Collector #147 and marked them identical in the completed casting review spreadsheet."
         }
       ],
       "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import."
@@ -6995,8 +6787,8 @@
       "canonical_name": "BMW 635 CSi",
       "manufacturer": "Mattel",
       "casting_number": null,
-      "identity_status": "user_confirmed_same_casting",
-      "identity_basis": "User visual inspection confirmed that all 1 listed 2026 Mainline release(s) in Collector #152 share the same physical casting. Differences in color, tampo, wheels, finish, hunt status, distribution or packaging are not treated as a distinct casting unless structural tooling evidence shows otherwise.",
+      "identity_status": "provisional",
+      "identity_basis": "Default project rule: entries sharing a Collector # are provisionally grouped as one casting until structural evidence shows a difference. Color, tampo, wheels, finish, hunt status and distribution do not alone create a new casting.",
       "collector_number": "152",
       "year_context": 2026,
       "catalog_family": "Mainline",
@@ -7019,14 +6811,6 @@
           "repository": "JohnyKiska/hotwheels-fandom-archive",
           "path": "research/reviews/MAINLINE-2026-PROVISIONAL-CASTING-GROUPS.csv",
           "collector_number": "152"
-        },
-        {
-          "type": "user_visual_inspection",
-          "collector_number": "152",
-          "release_ids": [
-            "rel_ml2026_jjk00"
-          ],
-          "observation": "User reviewed the 2026 Mainline releases for Collector #152 and marked them identical in the completed casting review spreadsheet."
         }
       ],
       "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import."
@@ -7036,8 +6820,8 @@
       "canonical_name": "'41 Willys",
       "manufacturer": "Mattel",
       "casting_number": null,
-      "identity_status": "user_confirmed_same_casting",
-      "identity_basis": "User visual inspection confirmed that all 1 listed 2026 Mainline release(s) in Collector #153 share the same physical casting. Differences in color, tampo, wheels, finish, hunt status, distribution or packaging are not treated as a distinct casting unless structural tooling evidence shows otherwise.",
+      "identity_status": "provisional",
+      "identity_basis": "Default project rule: entries sharing a Collector # are provisionally grouped as one casting until structural evidence shows a difference. Color, tampo, wheels, finish, hunt status and distribution do not alone create a new casting.",
       "collector_number": "153",
       "year_context": 2026,
       "catalog_family": "Mainline",
@@ -7060,14 +6844,6 @@
           "repository": "JohnyKiska/hotwheels-fandom-archive",
           "path": "research/reviews/MAINLINE-2026-PROVISIONAL-CASTING-GROUPS.csv",
           "collector_number": "153"
-        },
-        {
-          "type": "user_visual_inspection",
-          "collector_number": "153",
-          "release_ids": [
-            "rel_ml2026_jjk01"
-          ],
-          "observation": "User reviewed the 2026 Mainline releases for Collector #153 and marked them identical in the completed casting review spreadsheet."
         }
       ],
       "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import."
@@ -7077,8 +6853,8 @@
       "canonical_name": "Kick Sauber F1 Team",
       "manufacturer": "Mattel",
       "casting_number": null,
-      "identity_status": "user_confirmed_same_casting",
-      "identity_basis": "User visual inspection confirmed that all 1 listed 2026 Mainline release(s) in Collector #154 share the same physical casting. Differences in color, tampo, wheels, finish, hunt status, distribution or packaging are not treated as a distinct casting unless structural tooling evidence shows otherwise.",
+      "identity_status": "provisional",
+      "identity_basis": "Default project rule: entries sharing a Collector # are provisionally grouped as one casting until structural evidence shows a difference. Color, tampo, wheels, finish, hunt status and distribution do not alone create a new casting.",
       "collector_number": "154",
       "year_context": 2026,
       "catalog_family": "Mainline",
@@ -7101,14 +6877,6 @@
           "repository": "JohnyKiska/hotwheels-fandom-archive",
           "path": "research/reviews/MAINLINE-2026-PROVISIONAL-CASTING-GROUPS.csv",
           "collector_number": "154"
-        },
-        {
-          "type": "user_visual_inspection",
-          "collector_number": "154",
-          "release_ids": [
-            "rel_ml2026_jjk02"
-          ],
-          "observation": "User reviewed the 2026 Mainline releases for Collector #154 and marked them identical in the completed casting review spreadsheet."
         }
       ],
       "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import."
@@ -7449,8 +7217,8 @@
       "canonical_name": "Total Disposal",
       "manufacturer": "Mattel",
       "casting_number": null,
-      "identity_status": "user_confirmed_same_casting",
-      "identity_basis": "User visual inspection confirmed that all 1 listed 2026 Mainline release(s) in Collector #162 share the same physical casting. Differences in color, tampo, wheels, finish, hunt status, distribution or packaging are not treated as a distinct casting unless structural tooling evidence shows otherwise.",
+      "identity_status": "provisional",
+      "identity_basis": "Default project rule: entries sharing a Collector # are provisionally grouped as one casting until structural evidence shows a difference. Color, tampo, wheels, finish, hunt status and distribution do not alone create a new casting.",
       "collector_number": "162",
       "year_context": 2026,
       "catalog_family": "Mainline",
@@ -7475,14 +7243,6 @@
           "repository": "JohnyKiska/hotwheels-fandom-archive",
           "path": "research/reviews/MAINLINE-2026-PROVISIONAL-CASTING-GROUPS.csv",
           "collector_number": "162"
-        },
-        {
-          "type": "user_visual_inspection",
-          "collector_number": "162",
-          "release_ids": [
-            "rel_ml2026_jjm07"
-          ],
-          "observation": "User reviewed the 2026 Mainline releases for Collector #162 and marked them identical in the completed casting review spreadsheet."
         }
       ],
       "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import."
@@ -7674,8 +7434,8 @@
       "canonical_name": "Head Gasket",
       "manufacturer": "Mattel",
       "casting_number": null,
-      "identity_status": "user_confirmed_same_casting",
-      "identity_basis": "User visual inspection confirmed that all 1 listed 2026 Mainline release(s) in Collector #167 share the same physical casting. Differences in color, tampo, wheels, finish, hunt status, distribution or packaging are not treated as a distinct casting unless structural tooling evidence shows otherwise.",
+      "identity_status": "provisional",
+      "identity_basis": "Default project rule: entries sharing a Collector # are provisionally grouped as one casting until structural evidence shows a difference. Color, tampo, wheels, finish, hunt status and distribution do not alone create a new casting.",
       "collector_number": "167",
       "year_context": 2026,
       "catalog_family": "Mainline",
@@ -7698,14 +7458,6 @@
           "repository": "JohnyKiska/hotwheels-fandom-archive",
           "path": "research/reviews/MAINLINE-2026-PROVISIONAL-CASTING-GROUPS.csv",
           "collector_number": "167"
-        },
-        {
-          "type": "user_visual_inspection",
-          "collector_number": "167",
-          "release_ids": [
-            "rel_ml2026_jjk11"
-          ],
-          "observation": "User reviewed the 2026 Mainline releases for Collector #167 and marked them identical in the completed casting review spreadsheet."
         }
       ],
       "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import."
@@ -7760,8 +7512,8 @@
       "canonical_name": "Super Twin Mill",
       "manufacturer": "Mattel",
       "casting_number": null,
-      "identity_status": "user_confirmed_same_casting",
-      "identity_basis": "User visual inspection confirmed that all 1 listed 2026 Mainline release(s) in Collector #169 share the same physical casting. Differences in color, tampo, wheels, finish, hunt status, distribution or packaging are not treated as a distinct casting unless structural tooling evidence shows otherwise.",
+      "identity_status": "provisional",
+      "identity_basis": "Default project rule: entries sharing a Collector # are provisionally grouped as one casting until structural evidence shows a difference. Color, tampo, wheels, finish, hunt status and distribution do not alone create a new casting.",
       "collector_number": "169",
       "year_context": 2026,
       "catalog_family": "Mainline",
@@ -7784,14 +7536,6 @@
           "repository": "JohnyKiska/hotwheels-fandom-archive",
           "path": "research/reviews/MAINLINE-2026-PROVISIONAL-CASTING-GROUPS.csv",
           "collector_number": "169"
-        },
-        {
-          "type": "user_visual_inspection",
-          "collector_number": "169",
-          "release_ids": [
-            "rel_ml2026_jjk13"
-          ],
-          "observation": "User reviewed the 2026 Mainline releases for Collector #169 and marked them identical in the completed casting review spreadsheet."
         }
       ],
       "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import."
@@ -7801,8 +7545,8 @@
       "canonical_name": "'64 Lincoln Continental",
       "manufacturer": "Mattel",
       "casting_number": null,
-      "identity_status": "user_confirmed_same_casting",
-      "identity_basis": "User visual inspection confirmed that all 1 listed 2026 Mainline release(s) in Collector #170 share the same physical casting. Differences in color, tampo, wheels, finish, hunt status, distribution or packaging are not treated as a distinct casting unless structural tooling evidence shows otherwise.",
+      "identity_status": "provisional",
+      "identity_basis": "Default project rule: entries sharing a Collector # are provisionally grouped as one casting until structural evidence shows a difference. Color, tampo, wheels, finish, hunt status and distribution do not alone create a new casting.",
       "collector_number": "170",
       "year_context": 2026,
       "catalog_family": "Mainline",
@@ -7825,14 +7569,6 @@
           "repository": "JohnyKiska/hotwheels-fandom-archive",
           "path": "research/reviews/MAINLINE-2026-PROVISIONAL-CASTING-GROUPS.csv",
           "collector_number": "170"
-        },
-        {
-          "type": "user_visual_inspection",
-          "collector_number": "170",
-          "release_ids": [
-            "rel_ml2026_jjk14"
-          ],
-          "observation": "User reviewed the 2026 Mainline releases for Collector #170 and marked them identical in the completed casting review spreadsheet."
         }
       ],
       "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import."
@@ -7842,8 +7578,8 @@
       "canonical_name": "1983 Porsche 928S",
       "manufacturer": "Mattel",
       "casting_number": null,
-      "identity_status": "user_confirmed_same_casting",
-      "identity_basis": "User visual inspection confirmed that all 1 listed 2026 Mainline release(s) in Collector #171 share the same physical casting. Differences in color, tampo, wheels, finish, hunt status, distribution or packaging are not treated as a distinct casting unless structural tooling evidence shows otherwise.",
+      "identity_status": "provisional",
+      "identity_basis": "Default project rule: entries sharing a Collector # are provisionally grouped as one casting until structural evidence shows a difference. Color, tampo, wheels, finish, hunt status and distribution do not alone create a new casting.",
       "collector_number": "171",
       "year_context": 2026,
       "catalog_family": "Mainline",
@@ -7866,14 +7602,6 @@
           "repository": "JohnyKiska/hotwheels-fandom-archive",
           "path": "research/reviews/MAINLINE-2026-PROVISIONAL-CASTING-GROUPS.csv",
           "collector_number": "171"
-        },
-        {
-          "type": "user_visual_inspection",
-          "collector_number": "171",
-          "release_ids": [
-            "rel_ml2026_jjk15"
-          ],
-          "observation": "User reviewed the 2026 Mainline releases for Collector #171 and marked them identical in the completed casting review spreadsheet."
         }
       ],
       "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import."
@@ -7935,8 +7663,8 @@
       "canonical_name": "Ferrari F2004",
       "manufacturer": "Mattel",
       "casting_number": null,
-      "identity_status": "user_confirmed_same_casting",
-      "identity_basis": "User visual inspection confirmed that all 1 listed 2026 Mainline release(s) in Collector #173 share the same physical casting. Differences in color, tampo, wheels, finish, hunt status, distribution or packaging are not treated as a distinct casting unless structural tooling evidence shows otherwise.",
+      "identity_status": "provisional",
+      "identity_basis": "Default project rule: entries sharing a Collector # are provisionally grouped as one casting until structural evidence shows a difference. Color, tampo, wheels, finish, hunt status and distribution do not alone create a new casting.",
       "collector_number": "173",
       "year_context": 2026,
       "catalog_family": "Mainline",
@@ -7959,14 +7687,6 @@
           "repository": "JohnyKiska/hotwheels-fandom-archive",
           "path": "research/reviews/MAINLINE-2026-PROVISIONAL-CASTING-GROUPS.csv",
           "collector_number": "173"
-        },
-        {
-          "type": "user_visual_inspection",
-          "collector_number": "173",
-          "release_ids": [
-            "rel_ml2026_jjh51"
-          ],
-          "observation": "User reviewed the 2026 Mainline releases for Collector #173 and marked them identical in the completed casting review spreadsheet."
         }
       ],
       "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import."
@@ -8217,8 +7937,8 @@
       "canonical_name": "Mountain Mauler",
       "manufacturer": "Mattel",
       "casting_number": null,
-      "identity_status": "user_confirmed_same_casting",
-      "identity_basis": "User visual inspection confirmed that all 1 listed 2026 Mainline release(s) in Collector #179 share the same physical casting. Differences in color, tampo, wheels, finish, hunt status, distribution or packaging are not treated as a distinct casting unless structural tooling evidence shows otherwise.",
+      "identity_status": "provisional",
+      "identity_basis": "Default project rule: entries sharing a Collector # are provisionally grouped as one casting until structural evidence shows a difference. Color, tampo, wheels, finish, hunt status and distribution do not alone create a new casting.",
       "collector_number": "179",
       "year_context": 2026,
       "catalog_family": "Mainline",
@@ -8241,14 +7961,6 @@
           "repository": "JohnyKiska/hotwheels-fandom-archive",
           "path": "research/reviews/MAINLINE-2026-PROVISIONAL-CASTING-GROUPS.csv",
           "collector_number": "179"
-        },
-        {
-          "type": "user_visual_inspection",
-          "collector_number": "179",
-          "release_ids": [
-            "rel_ml2026_jjk20"
-          ],
-          "observation": "User reviewed the 2026 Mainline releases for Collector #179 and marked them identical in the completed casting review spreadsheet."
         }
       ],
       "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import."
@@ -8258,8 +7970,8 @@
       "canonical_name": "'55 Chevy",
       "manufacturer": "Mattel",
       "casting_number": null,
-      "identity_status": "user_confirmed_same_casting",
-      "identity_basis": "User visual inspection confirmed that all 1 listed 2026 Mainline release(s) in Collector #180 share the same physical casting. Differences in color, tampo, wheels, finish, hunt status, distribution or packaging are not treated as a distinct casting unless structural tooling evidence shows otherwise.",
+      "identity_status": "provisional",
+      "identity_basis": "Default project rule: entries sharing a Collector # are provisionally grouped as one casting until structural evidence shows a difference. Color, tampo, wheels, finish, hunt status and distribution do not alone create a new casting.",
       "collector_number": "180",
       "year_context": 2026,
       "catalog_family": "Mainline",
@@ -8282,14 +7994,6 @@
           "repository": "JohnyKiska/hotwheels-fandom-archive",
           "path": "research/reviews/MAINLINE-2026-PROVISIONAL-CASTING-GROUPS.csv",
           "collector_number": "180"
-        },
-        {
-          "type": "user_visual_inspection",
-          "collector_number": "180",
-          "release_ids": [
-            "rel_ml2026_jjk21"
-          ],
-          "observation": "User reviewed the 2026 Mainline releases for Collector #180 and marked them identical in the completed casting review spreadsheet."
         }
       ],
       "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import."
@@ -8436,8 +8140,8 @@
       "canonical_name": "'68 Shelby GT500",
       "manufacturer": "Mattel",
       "casting_number": null,
-      "identity_status": "user_confirmed_same_casting",
-      "identity_basis": "User visual inspection confirmed that all 1 listed 2026 Mainline release(s) in Collector #184 share the same physical casting. Differences in color, tampo, wheels, finish, hunt status, distribution or packaging are not treated as a distinct casting unless structural tooling evidence shows otherwise.",
+      "identity_status": "provisional",
+      "identity_basis": "Default project rule: entries sharing a Collector # are provisionally grouped as one casting until structural evidence shows a difference. Color, tampo, wheels, finish, hunt status and distribution do not alone create a new casting.",
       "collector_number": "184",
       "year_context": 2026,
       "catalog_family": "Mainline",
@@ -8460,14 +8164,6 @@
           "repository": "JohnyKiska/hotwheels-fandom-archive",
           "path": "research/reviews/MAINLINE-2026-PROVISIONAL-CASTING-GROUPS.csv",
           "collector_number": "184"
-        },
-        {
-          "type": "user_visual_inspection",
-          "collector_number": "184",
-          "release_ids": [
-            "rel_ml2026_jjk24"
-          ],
-          "observation": "User reviewed the 2026 Mainline releases for Collector #184 and marked them identical in the completed casting review spreadsheet."
         }
       ],
       "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import."
@@ -8477,8 +8173,8 @@
       "canonical_name": "Aston Martin Aramco Formula One Team",
       "manufacturer": "Mattel",
       "casting_number": null,
-      "identity_status": "user_confirmed_same_casting",
-      "identity_basis": "User visual inspection confirmed that all 1 listed 2026 Mainline release(s) in Collector #185 share the same physical casting. Differences in color, tampo, wheels, finish, hunt status, distribution or packaging are not treated as a distinct casting unless structural tooling evidence shows otherwise.",
+      "identity_status": "provisional",
+      "identity_basis": "Default project rule: entries sharing a Collector # are provisionally grouped as one casting until structural evidence shows a difference. Color, tampo, wheels, finish, hunt status and distribution do not alone create a new casting.",
       "collector_number": "185",
       "year_context": 2026,
       "catalog_family": "Mainline",
@@ -8501,14 +8197,6 @@
           "repository": "JohnyKiska/hotwheels-fandom-archive",
           "path": "research/reviews/MAINLINE-2026-PROVISIONAL-CASTING-GROUPS.csv",
           "collector_number": "185"
-        },
-        {
-          "type": "user_visual_inspection",
-          "collector_number": "185",
-          "release_ids": [
-            "rel_ml2026_jjk25"
-          ],
-          "observation": "User reviewed the 2026 Mainline releases for Collector #185 and marked them identical in the completed casting review spreadsheet."
         }
       ],
       "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import."
@@ -8518,8 +8206,8 @@
       "canonical_name": "Amaru GTC",
       "manufacturer": "Mattel",
       "casting_number": null,
-      "identity_status": "user_confirmed_same_casting",
-      "identity_basis": "User visual inspection confirmed that all 1 listed 2026 Mainline release(s) in Collector #186 share the same physical casting. Differences in color, tampo, wheels, finish, hunt status, distribution or packaging are not treated as a distinct casting unless structural tooling evidence shows otherwise.",
+      "identity_status": "provisional",
+      "identity_basis": "Default project rule: entries sharing a Collector # are provisionally grouped as one casting until structural evidence shows a difference. Color, tampo, wheels, finish, hunt status and distribution do not alone create a new casting.",
       "collector_number": "186",
       "year_context": 2026,
       "catalog_family": "Mainline",
@@ -8544,14 +8232,6 @@
           "repository": "JohnyKiska/hotwheels-fandom-archive",
           "path": "research/reviews/MAINLINE-2026-PROVISIONAL-CASTING-GROUPS.csv",
           "collector_number": "186"
-        },
-        {
-          "type": "user_visual_inspection",
-          "collector_number": "186",
-          "release_ids": [
-            "rel_ml2026_jjm08"
-          ],
-          "observation": "User reviewed the 2026 Mainline releases for Collector #186 and marked them identical in the completed casting review spreadsheet."
         }
       ],
       "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import."
@@ -8561,8 +8241,8 @@
       "canonical_name": "PT Fast",
       "manufacturer": "Mattel",
       "casting_number": null,
-      "identity_status": "user_confirmed_same_casting",
-      "identity_basis": "User visual inspection confirmed that all 1 listed 2026 Mainline release(s) in Collector #187 share the same physical casting. Differences in color, tampo, wheels, finish, hunt status, distribution or packaging are not treated as a distinct casting unless structural tooling evidence shows otherwise.",
+      "identity_status": "provisional",
+      "identity_basis": "Default project rule: entries sharing a Collector # are provisionally grouped as one casting until structural evidence shows a difference. Color, tampo, wheels, finish, hunt status and distribution do not alone create a new casting.",
       "collector_number": "187",
       "year_context": 2026,
       "catalog_family": "Mainline",
@@ -8585,14 +8265,6 @@
           "repository": "JohnyKiska/hotwheels-fandom-archive",
           "path": "research/reviews/MAINLINE-2026-PROVISIONAL-CASTING-GROUPS.csv",
           "collector_number": "187"
-        },
-        {
-          "type": "user_visual_inspection",
-          "collector_number": "187",
-          "release_ids": [
-            "rel_ml2026_jjh59"
-          ],
-          "observation": "User reviewed the 2026 Mainline releases for Collector #187 and marked them identical in the completed casting review spreadsheet."
         }
       ],
       "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import."
@@ -8602,8 +8274,8 @@
       "canonical_name": "'70 Dodge Charger",
       "manufacturer": "Mattel",
       "casting_number": null,
-      "identity_status": "user_confirmed_same_casting",
-      "identity_basis": "User visual inspection confirmed that all 1 listed 2026 Mainline release(s) in Collector #188 share the same physical casting. Differences in color, tampo, wheels, finish, hunt status, distribution or packaging are not treated as a distinct casting unless structural tooling evidence shows otherwise.",
+      "identity_status": "provisional",
+      "identity_basis": "Default project rule: entries sharing a Collector # are provisionally grouped as one casting until structural evidence shows a difference. Color, tampo, wheels, finish, hunt status and distribution do not alone create a new casting.",
       "collector_number": "188",
       "year_context": 2026,
       "catalog_family": "Mainline",
@@ -8626,14 +8298,6 @@
           "repository": "JohnyKiska/hotwheels-fandom-archive",
           "path": "research/reviews/MAINLINE-2026-PROVISIONAL-CASTING-GROUPS.csv",
           "collector_number": "188"
-        },
-        {
-          "type": "user_visual_inspection",
-          "collector_number": "188",
-          "release_ids": [
-            "rel_ml2026_jjk26"
-          ],
-          "observation": "User reviewed the 2026 Mainline releases for Collector #188 and marked them identical in the completed casting review spreadsheet."
         }
       ],
       "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import."
@@ -8643,8 +8307,8 @@
       "canonical_name": "'11 Corvette Grand Sport",
       "manufacturer": "Mattel",
       "casting_number": null,
-      "identity_status": "user_confirmed_same_casting",
-      "identity_basis": "User visual inspection confirmed that all 1 listed 2026 Mainline release(s) in Collector #189 share the same physical casting. Differences in color, tampo, wheels, finish, hunt status, distribution or packaging are not treated as a distinct casting unless structural tooling evidence shows otherwise.",
+      "identity_status": "provisional",
+      "identity_basis": "Default project rule: entries sharing a Collector # are provisionally grouped as one casting until structural evidence shows a difference. Color, tampo, wheels, finish, hunt status and distribution do not alone create a new casting.",
       "collector_number": "189",
       "year_context": 2026,
       "catalog_family": "Mainline",
@@ -8667,14 +8331,6 @@
           "repository": "JohnyKiska/hotwheels-fandom-archive",
           "path": "research/reviews/MAINLINE-2026-PROVISIONAL-CASTING-GROUPS.csv",
           "collector_number": "189"
-        },
-        {
-          "type": "user_visual_inspection",
-          "collector_number": "189",
-          "release_ids": [
-            "rel_ml2026_jjk27"
-          ],
-          "observation": "User reviewed the 2026 Mainline releases for Collector #189 and marked them identical in the completed casting review spreadsheet."
         }
       ],
       "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import."
@@ -8684,8 +8340,8 @@
       "canonical_name": "'82 Toyota Supra",
       "manufacturer": "Mattel",
       "casting_number": null,
-      "identity_status": "user_confirmed_same_casting",
-      "identity_basis": "User visual inspection confirmed that all 1 listed 2026 Mainline release(s) in Collector #190 share the same physical casting. Differences in color, tampo, wheels, finish, hunt status, distribution or packaging are not treated as a distinct casting unless structural tooling evidence shows otherwise.",
+      "identity_status": "provisional",
+      "identity_basis": "Default project rule: entries sharing a Collector # are provisionally grouped as one casting until structural evidence shows a difference. Color, tampo, wheels, finish, hunt status and distribution do not alone create a new casting.",
       "collector_number": "190",
       "year_context": 2026,
       "catalog_family": "Mainline",
@@ -8708,14 +8364,6 @@
           "repository": "JohnyKiska/hotwheels-fandom-archive",
           "path": "research/reviews/MAINLINE-2026-PROVISIONAL-CASTING-GROUPS.csv",
           "collector_number": "190"
-        },
-        {
-          "type": "user_visual_inspection",
-          "collector_number": "190",
-          "release_ids": [
-            "rel_ml2026_jjk28"
-          ],
-          "observation": "User reviewed the 2026 Mainline releases for Collector #190 and marked them identical in the completed casting review spreadsheet."
         }
       ],
       "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import."
@@ -8777,8 +8425,8 @@
       "canonical_name": "Fiat 500C",
       "manufacturer": "Mattel",
       "casting_number": null,
-      "identity_status": "user_confirmed_same_casting",
-      "identity_basis": "User visual inspection confirmed that all 1 listed 2026 Mainline release(s) in Collector #192 share the same physical casting. Differences in color, tampo, wheels, finish, hunt status, distribution or packaging are not treated as a distinct casting unless structural tooling evidence shows otherwise.",
+      "identity_status": "provisional",
+      "identity_basis": "Default project rule: entries sharing a Collector # are provisionally grouped as one casting until structural evidence shows a difference. Color, tampo, wheels, finish, hunt status and distribution do not alone create a new casting.",
       "collector_number": "192",
       "year_context": 2026,
       "catalog_family": "Mainline",
@@ -8801,14 +8449,6 @@
           "repository": "JohnyKiska/hotwheels-fandom-archive",
           "path": "research/reviews/MAINLINE-2026-PROVISIONAL-CASTING-GROUPS.csv",
           "collector_number": "192"
-        },
-        {
-          "type": "user_visual_inspection",
-          "collector_number": "192",
-          "release_ids": [
-            "rel_ml2026_jjk29"
-          ],
-          "observation": "User reviewed the 2026 Mainline releases for Collector #192 and marked them identical in the completed casting review spreadsheet."
         }
       ],
       "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import."
@@ -8818,8 +8458,8 @@
       "canonical_name": "'63 Chevy II",
       "manufacturer": "Mattel",
       "casting_number": null,
-      "identity_status": "user_confirmed_same_casting",
-      "identity_basis": "User visual inspection confirmed that all 1 listed 2026 Mainline release(s) in Collector #193 share the same physical casting. Differences in color, tampo, wheels, finish, hunt status, distribution or packaging are not treated as a distinct casting unless structural tooling evidence shows otherwise.",
+      "identity_status": "provisional",
+      "identity_basis": "Default project rule: entries sharing a Collector # are provisionally grouped as one casting until structural evidence shows a difference. Color, tampo, wheels, finish, hunt status and distribution do not alone create a new casting.",
       "collector_number": "193",
       "year_context": 2026,
       "catalog_family": "Mainline",
@@ -8842,14 +8482,6 @@
           "repository": "JohnyKiska/hotwheels-fandom-archive",
           "path": "research/reviews/MAINLINE-2026-PROVISIONAL-CASTING-GROUPS.csv",
           "collector_number": "193"
-        },
-        {
-          "type": "user_visual_inspection",
-          "collector_number": "193",
-          "release_ids": [
-            "rel_ml2026_jjk31"
-          ],
-          "observation": "User reviewed the 2026 Mainline releases for Collector #193 and marked them identical in the completed casting review spreadsheet."
         }
       ],
       "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import."
@@ -8859,8 +8491,8 @@
       "canonical_name": "Lil' Roar",
       "manufacturer": "Mattel",
       "casting_number": null,
-      "identity_status": "user_confirmed_same_casting",
-      "identity_basis": "User visual inspection confirmed that all 1 listed 2026 Mainline release(s) in Collector #194 share the same physical casting. Differences in color, tampo, wheels, finish, hunt status, distribution or packaging are not treated as a distinct casting unless structural tooling evidence shows otherwise.",
+      "identity_status": "provisional",
+      "identity_basis": "Default project rule: entries sharing a Collector # are provisionally grouped as one casting until structural evidence shows a difference. Color, tampo, wheels, finish, hunt status and distribution do not alone create a new casting.",
       "collector_number": "194",
       "year_context": 2026,
       "catalog_family": "Mainline",
@@ -8883,14 +8515,6 @@
           "repository": "JohnyKiska/hotwheels-fandom-archive",
           "path": "research/reviews/MAINLINE-2026-PROVISIONAL-CASTING-GROUPS.csv",
           "collector_number": "194"
-        },
-        {
-          "type": "user_visual_inspection",
-          "collector_number": "194",
-          "release_ids": [
-            "rel_ml2026_jjk32"
-          ],
-          "observation": "User reviewed the 2026 Mainline releases for Collector #194 and marked them identical in the completed casting review spreadsheet."
         }
       ],
       "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import."
@@ -8900,8 +8524,8 @@
       "canonical_name": "Spider-Mobile",
       "manufacturer": "Mattel",
       "casting_number": null,
-      "identity_status": "user_confirmed_same_casting",
-      "identity_basis": "User visual inspection confirmed that all 1 listed 2026 Mainline release(s) in Collector #195 share the same physical casting. Differences in color, tampo, wheels, finish, hunt status, distribution or packaging are not treated as a distinct casting unless structural tooling evidence shows otherwise.",
+      "identity_status": "provisional",
+      "identity_basis": "Default project rule: entries sharing a Collector # are provisionally grouped as one casting until structural evidence shows a difference. Color, tampo, wheels, finish, hunt status and distribution do not alone create a new casting.",
       "collector_number": "195",
       "year_context": 2026,
       "catalog_family": "Mainline",
@@ -8924,14 +8548,6 @@
           "repository": "JohnyKiska/hotwheels-fandom-archive",
           "path": "research/reviews/MAINLINE-2026-PROVISIONAL-CASTING-GROUPS.csv",
           "collector_number": "195"
-        },
-        {
-          "type": "user_visual_inspection",
-          "collector_number": "195",
-          "release_ids": [
-            "rel_ml2026_jjk33"
-          ],
-          "observation": "User reviewed the 2026 Mainline releases for Collector #195 and marked them identical in the completed casting review spreadsheet."
         }
       ],
       "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import."
@@ -8941,8 +8557,8 @@
       "canonical_name": "Sweet Driver",
       "manufacturer": "Mattel",
       "casting_number": null,
-      "identity_status": "user_confirmed_same_casting",
-      "identity_basis": "User visual inspection confirmed that all 1 listed 2026 Mainline release(s) in Collector #196 share the same physical casting. Differences in color, tampo, wheels, finish, hunt status, distribution or packaging are not treated as a distinct casting unless structural tooling evidence shows otherwise.",
+      "identity_status": "provisional",
+      "identity_basis": "Default project rule: entries sharing a Collector # are provisionally grouped as one casting until structural evidence shows a difference. Color, tampo, wheels, finish, hunt status and distribution do not alone create a new casting.",
       "collector_number": "196",
       "year_context": 2026,
       "catalog_family": "Mainline",
@@ -8967,14 +8583,6 @@
           "repository": "JohnyKiska/hotwheels-fandom-archive",
           "path": "research/reviews/MAINLINE-2026-PROVISIONAL-CASTING-GROUPS.csv",
           "collector_number": "196"
-        },
-        {
-          "type": "user_visual_inspection",
-          "collector_number": "196",
-          "release_ids": [
-            "rel_ml2026_jjm09"
-          ],
-          "observation": "User reviewed the 2026 Mainline releases for Collector #196 and marked them identical in the completed casting review spreadsheet."
         }
       ],
       "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import."
@@ -9219,8 +8827,8 @@
       "canonical_name": "Street Shaker",
       "manufacturer": "Mattel",
       "casting_number": null,
-      "identity_status": "user_confirmed_same_casting",
-      "identity_basis": "User visual inspection confirmed that all 1 listed 2026 Mainline release(s) in Collector #202 share the same physical casting. Differences in color, tampo, wheels, finish, hunt status, distribution or packaging are not treated as a distinct casting unless structural tooling evidence shows otherwise.",
+      "identity_status": "provisional",
+      "identity_basis": "Default project rule: entries sharing a Collector # are provisionally grouped as one casting until structural evidence shows a difference. Color, tampo, wheels, finish, hunt status and distribution do not alone create a new casting.",
       "collector_number": "202",
       "year_context": 2026,
       "catalog_family": "Mainline",
@@ -9243,14 +8851,6 @@
           "repository": "JohnyKiska/hotwheels-fandom-archive",
           "path": "research/reviews/MAINLINE-2026-PROVISIONAL-CASTING-GROUPS.csv",
           "collector_number": "202"
-        },
-        {
-          "type": "user_visual_inspection",
-          "collector_number": "202",
-          "release_ids": [
-            "rel_ml2026_jjk38"
-          ],
-          "observation": "User reviewed the 2026 Mainline releases for Collector #202 and marked them identical in the completed casting review spreadsheet."
         }
       ],
       "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import."
@@ -9260,8 +8860,8 @@
       "canonical_name": "Street Shrieker",
       "manufacturer": "Mattel",
       "casting_number": null,
-      "identity_status": "user_confirmed_same_casting",
-      "identity_basis": "User visual inspection confirmed that all 1 listed 2026 Mainline release(s) in Collector #203 share the same physical casting. Differences in color, tampo, wheels, finish, hunt status, distribution or packaging are not treated as a distinct casting unless structural tooling evidence shows otherwise.",
+      "identity_status": "provisional",
+      "identity_basis": "Default project rule: entries sharing a Collector # are provisionally grouped as one casting until structural evidence shows a difference. Color, tampo, wheels, finish, hunt status and distribution do not alone create a new casting.",
       "collector_number": "203",
       "year_context": 2026,
       "catalog_family": "Mainline",
@@ -9284,14 +8884,6 @@
           "repository": "JohnyKiska/hotwheels-fandom-archive",
           "path": "research/reviews/MAINLINE-2026-PROVISIONAL-CASTING-GROUPS.csv",
           "collector_number": "203"
-        },
-        {
-          "type": "user_visual_inspection",
-          "collector_number": "203",
-          "release_ids": [
-            "rel_ml2026_jjk39"
-          ],
-          "observation": "User reviewed the 2026 Mainline releases for Collector #203 and marked them identical in the completed casting review spreadsheet."
         }
       ],
       "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import."
