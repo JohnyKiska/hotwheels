@@ -57,7 +57,7 @@ def test_smtp_provider_builds_multipart_message(monkeypatch):
     assert mime["To"] == "person@example.com"
     assert mime["Subject"] == "Welcome"
     assert mime["X-HW-Idempotency-Key"] == "invite:123"
-    assert mime.get_content().strip() == "Hello"
+    assert mime.get_payload()[0].get_content().strip() == "Hello"
     assert mime.get_payload()[1].get_content_type() == "text/html"
 
 
