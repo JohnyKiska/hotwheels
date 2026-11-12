@@ -183,3 +183,30 @@ def test_dispatch_fails_closed_when_encryption_key_changes(db_factory, encryptio
         row = db.get(OutboundEmail, row_id)
         assert row.status == "failed"
         assert row.last_error == "payload_decryption_failed"
+
+
+
+def test_dispatch_does_not_claim_messages_when_encryption_key_is_missing(
+    db_factory, encryption_key, monkeypatch
+):
+    with db_factory() as db:
+        row = queue_email(
+            db,
+            recipient="person@example.com",
+            subject="Verify",
+            text_body="Sensitive link",
+            idempotency_key="verify:user-4",
+        )
+        row_id = row.id
+        db.commit()
+
+    monkeypatch.delenv("HW_EMAIL_ENCRYPTION_KEY", raising=False)
+    provider = FakeProvider()
+    with pytest.raises(EmailOutboxError, match="email_encryption_key_not_configured"):
+        dispatch_outbox_batch(db_factory, provider)
+
+    with db_factory() as db:
+        row = db.get(OutboundEmail, row_id)
+        assert row.status == "pending"
+        assert row.attempt_count == 0
+    assert provider.messages == []
