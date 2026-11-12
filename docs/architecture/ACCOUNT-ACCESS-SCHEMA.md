@@ -356,3 +356,39 @@ Subscription представляет платную recurring-подписку 
 - Ограничить время жизни state десятью минутами; cleanup старых consumed/expired transactions выполняется фоновым обслуживанием.
 - OAuth client secret, PKCE encryption key и session signing/secret material хранятся только в hosting secret manager. Реальные secrets никогда не добавляются в GitHub repository или frontend build.
 - Перед production запуском настроить точные callback URLs, HTTPS, allowed origins, rate limits, alerts и проверить обе интеграции тестовыми provider apps.
+
+## 15. Реализация email/password authentication · 2026-11-12
+
+### Password lifecycle
+
+- Пароль задаётся после принятия invitation и создания активной HW Catalog session. До подтверждения primary email вход по паролю запрещён.
+- Хэширование выполняется Argon2id. Исходный пароль и повтор пароля не сохраняются; пароль не нормализуется и ограничен 12–128 символами.
+- Первичная установка пароля доступна через authenticated + CSRF-protected endpoint. Повторная установка через тот же endpoint запрещена; смена пароля с проверкой текущего пароля остаётся отдельной задачей.
+- Login выдаёт обычную opaque server-side session cookie. В ответе не возвращаются credential/hash/token.
+
+### Password reset
+
+- Reset token содержит криптографически случайное значение, в БД сохраняется только SHA-256 hash.
+- Token одноразовый, действует 30 минут; URL попадает только в Fernet-encrypted transactional outbox.
+- Запрос сброса всегда отвечает одинаковым HTTP 202 независимо от наличия аккаунта, статуса пользователя, подтверждения email или наличия password credential.
+- Успешный reset атомарно меняет Argon2id hash, помечает использованными все reset tokens пользователя и отзывает все активные сессии.
+- Reset token нельзя повторно использовать. Повреждённые, просроченные и использованные токены дают общий ответ.
+
+### Brute-force protection and privacy
+
+- Login/reset используют persistent rate-limit buckets, атомарно обновляемые SQLite/PostgreSQL upsert.
+- В bucket key сохраняется HMAC-SHA256 от типа и значения идентификатора. Исходные email/IP в таблице rate limits не хранятся.
+- HMAC key задаётся секретом `HW_AUTH_RATE_LIMIT_KEY` (не менее 32 случайных символов); при отсутствии конфигурации auth endpoints fail closed.
+- Login: пять неудач на email bucket и двенадцать на IP bucket за 15 минут; блокировка на 15 минут.
+- Не доверять X-Forwarded-For без отдельно настроенного trusted-proxy middleware.
+- Неизвестный email проверяется через dummy Argon2id hash, чтобы снизить различия по времени ответа.
+- В audit metadata не записывать пароль, raw reset token, полный email или IP.
+
+### Implemented API
+
+- `POST /api/v1/account/password/login`
+- `POST /api/v1/account/password/set`
+- `POST /api/v1/account/password/reset/request`
+- `POST /api/v1/account/password/reset/confirm`
+
+Первичная регистрация остаётся invite-only. Password sign-in не создаёт User и не связывает аккаунты автоматически.
