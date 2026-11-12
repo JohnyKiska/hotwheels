@@ -641,8 +641,8 @@
       "canonical_name": "Porsche 911 Carrera T",
       "manufacturer": "Mattel",
       "casting_number": null,
-      "identity_status": "provisional",
-      "identity_basis": "Default project rule: entries sharing a Collector # are provisionally grouped as one casting until structural evidence shows a difference. Color, tampo, wheels, finish, hunt status and distribution do not alone create a new casting.",
+      "identity_status": "user_confirmed_same_casting",
+      "identity_basis": "User visual inspection confirmed that all three 2026 Mainline releases are the same physical casting.",
       "collector_number": "015",
       "year_context": 2026,
       "catalog_family": "Mainline",
@@ -676,7 +676,18 @@
           "collector_number": "015"
         }
       ],
-      "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import."
+      "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import. User confirmed identical castings across JJH33, JJM31 and JJK80 (Porsche 911 Carrera T; Collector #015).",
+      "evidence": [
+        {
+          "type": "user_visual_inspection",
+          "release_ids": [
+            "rel_ml2026_jjh33",
+            "rel_ml2026_jjm31",
+            "rel_ml2026_jjk80"
+          ],
+          "observation": "User confirmed that all three Porsche 911 Carrera T castings are identical."
+        }
+      ]
     },
     {
       "id": "cst_ml2026_016",
