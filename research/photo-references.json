@@ -384,14 +384,29 @@
       "toy_number": "JJH85",
       "article_identifier_raw": "JJH85-N7C5",
       "source_page_url": "https://www.ebay.co.uk/itm/940077087462",
-      "image_url": null,
+      "image_url": "https://i.ebayimg.com/images/g/ekEAAeSw21hq8So1/s-l1600.webp",
       "source_name": "User-provided eBay photo reference",
       "retrieved_at": "2026-11-12",
       "packaging_state": "unknown",
       "view_angle": "unknown",
       "packaging_format": "unknown",
-      "evidence_status": "user_provided_reference_not_yet_visually_inspected",
-      "notes": "Пользователь предоставил полную ссылку на объявление eBay и сообщил код JJH85-N7C5. Страница объявления доступна как источник, но галерея не загрузилась для визуальной проверки; прямой URL изображения, ракурс и тип упаковки пока не подтверждены. Хранить отдельно от JJH85-N521."
+      "evidence_status": "direct_image_url_provided_not_yet_visually_inspected",
+      "notes": "Пользователь предоставил прямую ссылку на изображение из объявления eBay и сообщил код JJH85-N7C5. Изображение пока не удалось загрузить для визуальной проверки; ракурс и тип упаковки не подтверждены. Хранить отдельно от JJH85-N521."
+    },
+    {
+      "id": "photo_ref_ml2026_007_jjh85_user_n7c5_image2",
+      "release_id": "rel_ml2026_jjh85",
+      "toy_number": "JJH85",
+      "article_identifier_raw": "JJH85-N7C5",
+      "source_page_url": "https://www.ebay.co.uk/itm/940077087462",
+      "image_url": "https://i.ebayimg.com/images/g/tXwAAeSw~jxq8So1/s-l1600.webp",
+      "source_name": "User-provided eBay photo reference",
+      "retrieved_at": "2026-11-12",
+      "packaging_state": "unknown",
+      "view_angle": "unknown",
+      "packaging_format": "unknown",
+      "evidence_status": "direct_image_url_provided_not_yet_visually_inspected",
+      "notes": "Второе прямое изображение из того же объявления eBay, предоставлено пользователем для JJH85-N7C5. Не удалось загрузить для визуальной проверки; ракурс и тип упаковки пока не подтверждены. Хранить отдельно от JJH85-N521."
     }
   ]
 }
