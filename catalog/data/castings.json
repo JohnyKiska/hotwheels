@@ -694,8 +694,8 @@
       "canonical_name": "Maserati Shamal",
       "manufacturer": "Mattel",
       "casting_number": null,
-      "identity_status": "provisional",
-      "identity_basis": "Default project rule: entries sharing a Collector # are provisionally grouped as one casting until structural evidence shows a difference. Color, tampo, wheels, finish, hunt status and distribution do not alone create a new casting.",
+      "identity_status": "user_confirmed_same_casting",
+      "identity_basis": "User visually inspected the 2026 Mainline releases JJH92, JJL08 and JJM57 and confirmed that all three Maserati Shamal castings are identical.",
       "collector_number": "016",
       "year_context": 2026,
       "catalog_family": "Mainline",
@@ -728,9 +728,18 @@
           "repository": "JohnyKiska/hotwheels-fandom-archive",
           "path": "research/reviews/MAINLINE-2026-PROVISIONAL-CASTING-GROUPS.csv",
           "collector_number": "016"
+        },
+        {
+          "type": "user_visual_inspection",
+          "release_ids": [
+            "rel_ml2026_jjh92",
+            "rel_ml2026_jjl08",
+            "rel_ml2026_jjm57"
+          ],
+          "observation": "User confirmed that all three Maserati Shamal castings are identical."
         }
       ],
-      "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import."
+      "notes": "User-confirmed identical casting across the First Listed release, 3rd Color and 2nd Color Target Exclusive. Color, tampo, wheels and distribution remain release/variant attributes unless separately documented."
     },
     {
       "id": "cst_ml2026_017",
