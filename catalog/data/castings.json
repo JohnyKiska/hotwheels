@@ -281,8 +281,8 @@
       "canonical_name": "Solar Reflex",
       "manufacturer": "Mattel",
       "casting_number": null,
-      "identity_status": "provisional",
-      "identity_basis": "Default project rule: entries sharing a Collector # are provisionally grouped as one casting until structural evidence shows a difference. Color, tampo, wheels, finish, hunt status and distribution do not alone create a new casting.",
+      "identity_status": "user_confirmed_same_casting",
+      "identity_basis": "User visually inspected the 2026 Mainline Solar Reflex releases JJH85 and JJK67 and confirmed that the castings are identical. Differences, if any, belong at release/variant level.",
       "collector_number": "007",
       "year_context": 2026,
       "catalog_family": "Mainline",
@@ -308,9 +308,17 @@
           "repository": "JohnyKiska/hotwheels-fandom-archive",
           "path": "research/reviews/MAINLINE-2026-PROVISIONAL-CASTING-GROUPS.csv",
           "collector_number": "007"
+        },
+        {
+          "type": "user_visual_inspection",
+          "release_ids": [
+            "rel_ml2026_jjh85",
+            "rel_ml2026_jjk67"
+          ],
+          "observation": "User confirmed that the Solar Reflex castings are identical."
         }
       ],
-      "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import."
+      "notes": "Casting identity confirmed by user visual inspection; preserve release-level differences such as color, tampo, wheels or packaging as variants/evidence rather than separate castings."
     },
     {
       "id": "cst_ml2026_008",
