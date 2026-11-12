@@ -27,6 +27,8 @@ from .db import get_db
 from .email_delivery import EmailOutboxError
 from .models import (
     EmailAddress,
+    ExternalIdentity,
+    PasswordCredential,
     Permission,
     RolePermission,
     User,
@@ -181,12 +183,33 @@ def get_account_me(
             or_(UserRole.expires_at.is_(None), UserRole.expires_at > utc_now()),
         )
     ).all()
+    emails = db.scalars(
+        select(EmailAddress).where(
+            EmailAddress.user_id == user.id,
+            EmailAddress.disabled_at.is_(None),
+        ).order_by(EmailAddress.is_primary.desc(), EmailAddress.created_at.asc())
+    ).all()
+    identities = db.scalars(
+        select(ExternalIdentity).where(
+            ExternalIdentity.user_id == user.id,
+            ExternalIdentity.disabled_at.is_(None),
+        ).order_by(ExternalIdentity.provider.asc())
+    ).all()
+    password_configured = db.scalar(
+        select(PasswordCredential.id).where(
+            PasswordCredential.user_id == user.id,
+            PasswordCredential.disabled_at.is_(None),
+        )
+    ) is not None
     db.commit()
     return {
         "id": user.id,
         "status": user.status,
         "display_name": user.display_name,
         "role_ids": list(roles),
+        "emails": [{"email": item.email_display, "verified": item.verified_at is not None, "primary": item.is_primary} for item in emails],
+        "identities": [{"provider": item.provider, "username": item.provider_username, "email": item.provider_email, "last_authenticated_at": item.last_authenticated_at.isoformat() if item.last_authenticated_at else None} for item in identities],
+        "password_configured": password_configured,
     }
 
 
