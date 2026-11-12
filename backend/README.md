@@ -211,3 +211,24 @@ random characters. It is used to HMAC privacy-preserving rate-limit bucket
 identifiers. Also configure `HW_EMAIL_ENCRYPTION_KEY`,
 `HW_PUBLIC_BASE_URL`, and the SMTP settings documented above. Never expose
 these values to the frontend or commit them to Git.
+
+
+## Account frontend
+
+The static account interface is `../login.html` at the repository root and is
+linked from the catalog header. It supports email/password login, Google/GitHub
+OAuth login, invitation acceptance and first-password setup, password reset,
+password change, account profile, and linking an external identity.
+
+The frontend uses same-origin `/api/v1` by default. For production, serve the
+static site and FastAPI behind the same HTTPS origin, reverse-proxying
+`/api/*` to FastAPI. If a separate API origin is unavoidable, set the
+`hw-api-base` meta tag in `login.html` to the API origin and configure a
+credentialed CORS allowlist, cookie SameSite/domain policy, and CSRF protections
+before exposing it publicly. Do not put OAuth client secrets or other server
+secrets in the HTML.
+
+Set `HW_FRONTEND_URL` to the public static-site origin. OAuth callback results,
+invitation links, email-verification links and password-reset links return to
+`/login.html` with short-lived status/token query parameters. Token-bearing
+emails remain encrypted in the transactional outbox.
