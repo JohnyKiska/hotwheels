@@ -3,6 +3,9 @@
 Identifier values may be assigned to multiple entities; this is intentional so
 ambiguous SKU/UPC observations can be reviewed rather than discarded.
 """
+from datetime import datetime, timezone
+
+import sqlalchemy as sa
 from alembic import op
 
 revision = "20261027_catalog_identifiers"
@@ -18,30 +21,69 @@ TABLES = (
     "identifier_types",
 )
 
+IDENTIFIER_TYPES = (
+    ("idtype-catalog-number", "catalog_number", "Catalog number"),
+    ("idtype-mattel-product-number", "mattel_product_number", "Mattel product number"),
+    ("idtype-sku", "sku", "SKU"),
+    ("idtype-upc", "upc", "UPC"),
+    ("idtype-ean", "ean", "EAN"),
+    ("idtype-assortment-number", "assortment_number", "Assortment number"),
+    ("idtype-series-number", "series_number", "Series number"),
+    ("idtype-external-id", "external_id", "External source ID"),
+    ("idtype-other", "other", "Other identifier"),
+)
+
 
 def upgrade():
     from app import models  # noqa: F401
     from app.db import Base
+
     bind = op.get_bind()
-    Base.metadata.create_all(bind=bind, tables=[Base.metadata.tables[name] for name in TABLES])
-    # Seed the extensible identifier namespaces; none is globally unique by default.
-    op.execute("""
-        INSERT INTO identifier_types (id, code, label, is_globally_unique, created_at, updated_at)
-        VALUES
-        ('idtype-catalog-number', 'catalog_number', 'Catalog number', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-        ('idtype-mattel-product-number', 'mattel_product_number', 'Mattel product number', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-        ('idtype-sku', 'sku', 'SKU', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-        ('idtype-upc', 'upc', 'UPC', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-        ('idtype-ean', 'ean', 'EAN', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-        ('idtype-assortment-number', 'assortment_number', 'Assortment number', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-        ('idtype-series-number', 'series_number', 'Series number', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-        ('idtype-external-id', 'external_id', 'External source ID', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-        ('idtype-other', 'other', 'Other identifier', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-    """)
+    Base.metadata.create_all(
+        bind=bind,
+        tables=[Base.metadata.tables[name] for name in TABLES],
+    )
+
+    identifier_types = sa.table(
+        "identifier_types",
+        sa.column("id", sa.String(length=36)),
+        sa.column("code", sa.String(length=60)),
+        sa.column("label", sa.String(length=120)),
+        sa.column("is_globally_unique", sa.Boolean()),
+        sa.column("created_at", sa.DateTime(timezone=True)),
+        sa.column("updated_at", sa.DateTime(timezone=True)),
+    )
+    existing_codes = set(
+        bind.execute(sa.select(identifier_types.c.code)).scalars().all()
+    )
+    now = datetime.now(timezone.utc)
+    missing_rows = [
+        {
+            "id": identifier_id,
+            "code": code,
+            "label": label,
+            "is_globally_unique": False,
+            "created_at": now,
+            "updated_at": now,
+        }
+        for identifier_id, code, label in IDENTIFIER_TYPES
+        if code not in existing_codes
+    ]
+    if missing_rows:
+        op.bulk_insert(identifier_types, missing_rows)
 
 
 def downgrade():
     from app.db import Base
+
     bind = op.get_bind()
-    op.execute("DELETE FROM identifier_types WHERE code IN ('catalog_number','mattel_product_number','sku','upc','ean','assortment_number','series_number','external_id','other')")
-    Base.metadata.drop_all(bind=bind, tables=[Base.metadata.tables[name] for name in TABLES[:-1]] + [Base.metadata.tables[TABLES[-1]]])
+    codes = tuple(code for _identifier_id, code, _label in IDENTIFIER_TYPES)
+    bind.execute(
+        sa.delete(Base.metadata.tables["identifier_types"]).where(
+            Base.metadata.tables["identifier_types"].c.code.in_(codes)
+        )
+    )
+    Base.metadata.drop_all(
+        bind=bind,
+        tables=[Base.metadata.tables[name] for name in TABLES],
+    )
