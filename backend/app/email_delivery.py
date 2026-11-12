@@ -131,6 +131,7 @@ def dispatch_outbox_batch(
         raise EmailOutboxError("invalid_dispatch_limits")
     now = now or utc_now()
     claimed: list[tuple[str, EmailMessage]] = []
+    decode_failed = 0
 
     with session_factory() as db:
         eligible = or_(
@@ -156,11 +157,12 @@ def dispatch_outbox_batch(
                 row.status = "failed"
                 row.locked_at = None
                 row.last_error = "payload_decryption_failed"
+                decode_failed += 1
                 continue
             claimed.append((row.id, message))
         db.commit()
 
-    result = {"sent": 0, "retrying": 0, "failed": 0}
+    result = {"sent": 0, "retrying": 0, "failed": decode_failed}
     for message_id, message in claimed:
         try:
             provider.send_email(message)
