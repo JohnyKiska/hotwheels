@@ -108,8 +108,10 @@ jobs:
           PY
 
       - name: Validate staging Compose configuration
+        working-directory: .
         run: |
           cp .env.example .env
           docker compose config --quiet
       - name: Build staging backend image
+        working-directory: .
         run: docker build --file backend/Dockerfile backend
