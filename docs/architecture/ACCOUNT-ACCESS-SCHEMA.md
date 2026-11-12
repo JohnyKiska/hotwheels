@@ -330,3 +330,29 @@ Subscription представляет платную recurring-подписку 
 - Предупреждения: предлагаем 90 / 30 / 7 дней.
 - Восстановление: вход или явное подтверждение до дедлайна отменяет удаление.
 - Удаление данных: только после отдельной retention policy и проверки обязательств хранения.
+
+## 14. Реализация GitHub OAuth и Google OIDC
+
+### Транзакция авторизации
+
+- OAuth authorization request хранится в отдельной таблице с provider, hash случайного state, hash nonce для Google, redirect URI, intent, user_id для linking, hash инициировавшей сессии, expiry и consumed_at.
+- PKCE verifier нужен при обмене authorization code, поэтому хранится только в зашифрованном виде отдельным Fernet-ключом `HW_OAUTH_ENCRYPTION_KEY`. Этот ключ не совпадает с ключом email outbox и хранится только в secret manager.
+- State одноразовый: callback блокирует запись, проверяет provider и срок действия, помечает consumed и коммитит это до сетевого обращения к OAuth provider. Повторный callback не должен повторно обменивать code.
+- Для linking state дополнительно связан с hash текущей HW Catalog session. Если сессия изменилась или отсутствует, identity не привязывается.
+- Использовать authorization-code flow + PKCE S256 для обоих провайдеров. Redirect URI должен точно совпадать с зарегистрированным callback URI.
+
+### Provider identity validation
+
+- GitHub subject — неизменяемый numeric account ID из authenticated `GET /user`; login/username используется только как отображаемая метаинформация. Email не является ключом identity.
+- Google identity принимается только после проверки ID token: подпись RS256 по Google JWKS, issuer, audience/client ID, exp, iat и одноразовый nonce. Subject — OIDC `sub`.
+- `ExternalIdentity` идентифицируется составным ключом issuer + subject. Provider email сохраняется только как метаданные; совпадение email с EmailAddress другого User никогда не приводит к автоматическому linking.
+- Вход возможен только для уже связанной identity и активного User. Неизвестная identity не создаёт новый аккаунт: первая регистрация invite-only, затем пользователь привязывает провайдера из подтверждённой HW Catalog session.
+- Linking требует активной сессии и CSRF/Origin проверки. Последующая отвязка identity должна быть запрещена, если это последний рабочий способ входа/восстановления аккаунта.
+
+### Операционная безопасность
+
+- Callback не должен возвращать provider access token, authorization code, raw state, nonce или PKCE verifier frontend.
+- Логи и AuditEvent не содержат raw токены, code, email без необходимости или provider secrets.
+- Ограничить время жизни state десятью минутами; cleanup старых consumed/expired transactions выполняется фоновым обслуживанием.
+- OAuth client secret, PKCE encryption key и session signing/secret material хранятся только в hosting secret manager. Реальные secrets никогда не добавляются в GitHub repository или frontend build.
+- Перед production запуском настроить точные callback URLs, HTTPS, allowed origins, rate limits, alerts и проверить обе интеграции тестовыми provider apps.
