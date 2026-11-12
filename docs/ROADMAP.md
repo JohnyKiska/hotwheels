@@ -261,6 +261,21 @@
 - [ ] Реализовать password hashing/login/reset и OAuth callbacks отдельным этапом.
 
 
+
+### SMTP adapter и email worker · 2026-11-12
+
+- [x] Добавить SMTP provider с STARTTLS, SMTP-over-TLS и явным опциональным режимом без TLS.
+- [x] Проверять SMTP-конфигурацию, адрес отправителя и заголовки; поддержать текстовые и HTML-письма.
+- [x] Добавить отдельный CLI worker с однократным и непрерывным режимом, настраиваемыми batch size и polling interval.
+- [x] Описать конфигурацию секретов и запуск отдельного supervised worker-процесса.
+- [x] Добавить unit tests SMTP-адаптера для TLS-режимов, multipart, credentials и ошибочной конфигурации.
+- [ ] Проверить backend CI на ветке integration и устранить ошибки.
+- [ ] После CI выбрать реальный SMTP-провайдер, добавить секреты только в hosting environment и выполнить тестовую доставку.
+- [ ] Добавить метрики/алерты по возрасту pending-сообщений, failed и retrying; не логировать адреса и содержимое писем.
+
+SMTP не гарантирует exactly-once delivery при разрыве соединения после принятия письма сервером. В таком случае retry может привести к повторной доставке; это ограничение зафиксировано в README.
+
+
 ### Email delivery foundation · 2026-11-12
 
 - [x] Добавить transactional outbox с идемпотентным ключом и состояниями pending/sending/sent/failed.
