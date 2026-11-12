@@ -2,6 +2,7 @@ from cryptography.fernet import Fernet
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, event, select
+from sqlalchemy.pool import StaticPool
 from sqlalchemy.orm import Session, sessionmaker
 
 from app.db import Base, get_db
@@ -20,7 +21,11 @@ from app.models import (
 
 @pytest.fixture
 def api_factory(monkeypatch):
-    engine = create_engine("sqlite:///:memory:")
+    engine = create_engine(
+        "sqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
 
     @event.listens_for(engine, "connect")
     def enable_foreign_keys(connection, _record):
