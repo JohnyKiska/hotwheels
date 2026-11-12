@@ -7,3 +7,4 @@ pillow
 pytest
 httpx
 psycopg[binary]>=3.2,<4
+cryptography>=44,<47
