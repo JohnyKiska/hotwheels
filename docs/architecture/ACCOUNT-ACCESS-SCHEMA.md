@@ -44,7 +44,7 @@ HW Catalog должен поддерживать несколько незави
 - Google OAuth / OpenID Connect;
 - email + пароль.
 
-Модель `ExternalIdentity` должна хранить OAuth/OIDC identity по паре (`provider`, `provider_subject`). Для email/password использовать отдельную сущность `PasswordCredential`, связанную с User, а не притворяться внешним OAuth-провайдером.
+Модель `ExternalIdentity` должна хранить OAuth/OIDC identity по паре (`issuer`, `provider_subject`). Для email/password использовать отдельную сущность `PasswordCredential`, связанную с User, а не притворяться внешним OAuth-провайдером.
 
 ### PasswordCredential
 - `id`, `user_id` FK RESTRICT (уникальная активная credential на пользователя).
@@ -56,7 +56,7 @@ HW Catalog должен поддерживать несколько незави
 ### EmailAddress и подтверждение
 Email следует моделировать отдельно от OAuth identity, поскольку у пользователя могут быть несколько адресов и один primary:
 - `EmailAddress`: `id`, `user_id`, `email_normalized`, `email_display`, `is_primary`, `verified_at`, `created_at`, `disabled_at`.
-- уникальный индекс по нормализованному адресу для активных записей (с учётом возможностей целевой БД);
+- глобальная уникальность `email_normalized` среди всех записей, включая отключённые. Адрес не удалять физически и не переиспользовать после отключения.
 - `EmailVerificationToken`: hash токена, срок действия, использован/отозван, дата отправки.
 
 Email от OAuth-провайдера считается подтверждённым только если провайдер достоверно сообщает verified status. Не полагаться на username или непроверенный email. Правила нормализации должны быть консервативными: не удалять точки/плюсы и не применять провайдер-специфичные догадки.
@@ -75,18 +75,18 @@ Email от OAuth-провайдера считается подтверждён�
 - `id`: UUID/opaque string, primary key.
 - `status`: `pending`, `active`, `suspended`, `closed`.
 - `display_name`: nullable.
-- `primary_email`: nullable; подтверждение и уникальность учитывать только после проверки email.
-- `created_at`, `updated_at`, `last_login_at`.
+- `created_at`, `updated_at`, `last_login_at`, `closed_at` nullable.
 
-Не хранить `is_admin` или `is_premium`: доступ определяется связями ролей и entitlements. Закрытие аккаунта не должно каскадно удалять историю аудита, платежей и каталожных пользовательских данных.
+Email не дублировать в User: единственный источник истины — `EmailAddress`; primary email определяется записью с `is_primary=true` и `verified_at IS NOT NULL`. Не хранить `is_admin` или `is_premium`: доступ определяется ролями и entitlements. При закрытии аккаунта сохранять стабильный User ID для ссылочной целостности и аудита, а профиль анонимизировать согласно политике хранения.
 
 ### ExternalIdentity
 - `id`, `user_id` FK RESTRICT.
-- `provider` (например, `github`), `provider_subject` (стабильный numeric ID провайдера).
+- `issuer` (точный доверенный issuer/идентификатор провайдера), `provider_subject` (стабильный subject; для GitHub — numeric ID).
+- `provider` как нормализованный код (`github`, `google`).
 - `provider_username`, `provider_email` как снимки профиля, не ключ идентичности.
-- `created_at`, `last_authenticated_at`.
+- `created_at`, `last_authenticated_at`, `disabled_at` nullable.
 
-Уникальность: (`provider`, `provider_subject`). Один User может иметь несколько identity. GitHub username изменяем, поэтому не использовать его как primary key. OAuth access tokens по умолчанию не сохранять, если отдельная функция приложения не требует этого.
+Уникальность: (`issuer`, `provider_subject`). Для OIDC subject уникален в контексте issuer, а не только названия провайдера. GitHub username изменяем, поэтому не использовать его как primary key. OAuth access tokens по умолчанию не сохранять.
 
 ### Session
 - `id` (случайный opaque token ID), `user_id` FK RESTRICT.
@@ -97,11 +97,11 @@ Email от OAuth-провайдера считается подтверждён�
 Индекс по `user_id`, уникальность `token_hash`, индекс по `expires_at`. Сессии отзываются сервером; cookies HttpOnly/Secure/SameSite. Если будет введено обновление сессий, refresh token rotation и reuse detection проектируются отдельным дополнением, а не добавляются автоматически.
 
 ### Invitation
-- `id`, `email` nullable, `token_hash`, `created_by_user_id`, `accepted_by_user_id` nullable.
+- `id`, `email_normalized` nullable, `token_hash` unique, `created_by_user_id`, `accepted_by_user_id` nullable.
 - `status`: `pending`, `accepted`, `revoked`, `expired`.
 - `expires_at`, `accepted_at`, `created_at`.
 
-Приглашение не назначает привилегированную роль само по себе. Роль/permissions выдаются отдельной операцией с аудитом. Хранить только hash токена.
+Если приглашение ограничено email, пользователь обязан подтвердить владение именно этим адресом. Приглашение не назначает привилегированную роль. Начальный режим регистрации — invite-only; OAuth callback сам по себе не создаёт User без действительного приглашения или разрешения.
 
 ## 4. RBAC
 
@@ -119,10 +119,11 @@ Email от OAuth-провайдера считается подтверждён�
 - составной PK (`role_id`, `permission_id`), оба FK RESTRICT.
 
 ### UserRole
-- составной PK (`user_id`, `role_id`), `assigned_by_user_id` nullable, `assigned_at`, `expires_at` nullable.
-- При отзыве роли предпочтительно сохранять событие в AuditEvent; действующее назначение можно удалить или закрыть через `revoked_at`, решение закрепить до реализации.
+- `id` primary key, `user_id`, `role_id`, `assigned_by_user_id` nullable, `assigned_at`, `expires_at` nullable, `revoked_at` nullable, `revoked_by_user_id` nullable.
+- Каждое назначение — историческая запись. При отзыве выставлять `revoked_at`; повторная выдача создаёт новую строку.
+- Не допускать двух одновременно действующих назначений одной роли одному пользователю; проверять транзакционно.
 
-Ограничения super admin должны быть серверными: нельзя снять последнего активного super admin; нельзя назначить super admin без отдельного permission/подтверждения. Первый super admin создаётся bootstrap-процедурой по GitHub numeric ID из серверной конфигурации, а не публичным signup.
+Ограничения super admin серверные: нельзя снять, заблокировать или закрыть последнего активного super admin; назначение требует отдельного permission и подтверждения. Первый super admin создаётся одноразовой bootstrap-процедурой, сопоставляющей заранее заданный GitHub numeric ID с проверенной GitHub identity; после успешного выполнения bootstrap отключается.
 
 ## 5. Тарифы и entitlements
 
@@ -144,32 +145,34 @@ Email от OAuth-провайдера считается подтверждён�
 - Отсутствующая запись означает, что план не предоставляет entitlement.
 
 ### Subscription
-- `id`, `user_id`, `plan_id`, `status`, `source` (`provider`, `admin`, `promotion`).
-- `provider_code` и `provider_subscription_id` nullable; уникальность внешнего ID в пределах провайдера.
-- `current_period_start`, `current_period_end`, `cancel_at_period_end`, `canceled_at`, `ended_at`, `grace_until`.
-- snapshot цены/валюты/интервала, действовавших при оформлении.
-- Время хранить timezone-aware в UTC; правила отображения локального времени оставить frontend.
+- `id`, `user_id`, `plan_id`, `status`.
+- `provider_code` и `provider_subscription_id`; до создания у провайдера допустимы только в состоянии `pending`. Уникальность внешнего ID в пределах провайдера.
+- `plan_price_id` и snapshot цены/валюты/интервала.
+- `current_period_start`, `current_period_end`, `cancel_at_period_end`, `canceled_at`, `ended_at`, `grace_until`, timestamps.
 
-Статусы как минимум: `pending`, `active`, `past_due`, `canceled`, `expired`. Grace period лучше моделировать отдельным `grace_until`, а не отдельным статусом, чтобы не смешивать состояние оплаты и временное право доступа. Допустимые переходы определить в сервисе и тестах.
+Subscription представляет платную recurring-подписку через провайдера. Ручная бесплатная выдача и промо-доступ моделируются через EntitlementGrant.
+
+Статусы: `pending`, `active`, `past_due`, `canceled`, `expired`. При `cancel_at_period_end=true` доступ сохраняется до конца оплаченного `current_period_end`. При немедленной отмене доступ заканчивается в подтверждённый провайдером момент `ended_at`. Grace действует только до `grace_until`.
 
 ### EntitlementGrant
-- `id`, `user_id`, `entitlement_id` (или ссылка на набор/план, если будет утверждён такой сценарий).
+- `id`, `grant_batch_id`, `user_id`, `entitlement_id`.
 - `value_json`, `starts_at`, `ends_at` nullable.
-- `granted_by_user_id`, `reason`, `revoked_at`, `revoked_by_user_id`.
+- `granted_by_user_id`, `reason`, `source` (`admin` или `promotion`), `source_reference` nullable, `revoked_at`, `revoked_by_user_id`.
 
-Это отдельная аудируемая выдача, а не фиктивная платная подписка. Поддерживает временный, бессрочный и отозванный grant. Если потребуется «подарить Premium целиком», администратор выдаёт согласованный набор entitlements либо специальный grant на пакет, но не присваивает роль.
+Для «Premium целиком» одна операция создаёт несколько строк с общим `grant_batch_id`. Начальная модель additive-only: entitlements складываются из активных подписок и grants; deny/override пока не вводятся.
 
 ### SubscriptionEvent
 - `id`, `subscription_id`, `event_type`, `occurred_at`, `actor_type`, `actor_user_id` nullable, `provider_event_id` nullable, `payload_summary` JSON.
 - append-only: исправление — новая запись, не UPDATE/DELETE истории.
 
 ### Payment
-- `id`, `user_id`, `subscription_id` nullable, `provider_code`, `provider_payment_id`, `amount_minor`, `currency`, `status`, `created_at`, `paid_at` nullable, `refunded_at` nullable.
-- Уникальность внешнего payment ID в пределах провайдера. Сохранять только безопасные метаданные; не хранить PAN/CVV/полные карточные реквизиты.
+- `id`, `user_id`, `subscription_id` nullable, `provider_code`, `provider_payment_id`, `amount_minor`, `currency`, `status`, `created_at`, `paid_at` nullable.
+- Возвраты и частичные возвраты хранить отдельными связанными финансовыми событиями/записями с суммой, валютой, provider refund ID и временем.
+- Уникальность внешнего payment ID в пределах провайдера. Не хранить PAN/CVV/полные карточные реквизиты.
 
 ### ProviderWebhookEvent
-- `id`, `provider_code`, `provider_event_id`, `event_type`, `received_at`, `processed_at` nullable, `processing_status`, `failure_code` nullable.
-- Уникальность (`provider_code`, `provider_event_id`) для идемпотентности. Проверка подписи выполняется до обработки; повтор события не должен повторно проводить бизнес-переход.
+- `id`, `provider_code`, `provider_event_id`, `event_type`, `received_at`, `processed_at` nullable, `processing_status`, `failure_code` nullable, `attempt_count`, `payload_hash`.
+- Уникальность (`provider_code`, `provider_event_id`). Проверять подпись до обработки; повтор события не должен повторно проводить бизнес-переход. Хранить hash и минимальную диагностическую сводку, не необработанный payload. Бизнес-изменение и отметка processed должны быть атомарны; ошибки допускают контролируемый retry.
 
 ## 6. Аудит
 
@@ -181,18 +184,19 @@ Email от OAuth-провайдера считается подтверждён�
 
 ## 7. Правила вычисления доступа
 
-1. Сначала проверить, что User активен и сессия действительна.
-2. RBAC permissions вычисляются из действующих UserRole → RolePermission.
-3. Entitlements вычисляются отдельно из подписок в действующем периоде (включая grace до `grace_until`) и действующих EntitlementGrant.
-4. При конфликте grants/плана нужно определить явный приоритет revoke/deny до появления таких override-сценариев. Не трактовать отсутствие записи как deny override.
-5. API проверяет права на сервере; скрытие кнопки во frontend не является контролем доступа.
-6. Отмена/истечение Premium не удаляет аккаунт, коллекцию или данные пользователя.
+1. Проверить, что User активен и сессия действительна.
+2. RBAC вычислять из UserRole с `revoked_at IS NULL` и неистёкшим `expires_at`, затем через RolePermission.
+3. Entitlements вычислять из действующих подписок и grants.
+4. Начальная модель additive-only: отзыв одного grant не отменяет entitlement из другого активного источника.
+5. При cancel-at-period-end доступ сохраняется до оплаченного конца; при немедленной отмене до `ended_at`; grace действует только до `grace_until`.
+6. API проверяет права на сервере; скрытие кнопки во frontend не является контролем доступа.
+7. Отмена/истечение Premium не удаляет аккаунт, коллекцию или данные пользователя.
 
 ## 8. Индексы и целостность
 
 Минимум:
-- unique: ExternalIdentity(provider, provider_subject), Role.code, Permission.code, SubscriptionPlan.code, PlanPrice(plan_id, version), Entitlement.code, ProviderWebhookEvent(provider_code, provider_event_id), внешние payment/subscription IDs с учётом nullable;
-- индексы FK и полей выборки: Session(user_id, expires_at), UserRole(user_id), Subscription(user_id, status), Subscription(current_period_end), EntitlementGrant(user_id, starts_at, ends_at), AuditEvent(occurred_at, actor_user_id), Payment(user_id, created_at);
+- unique: ExternalIdentity(issuer, provider_subject), Role.code, Permission.code, SubscriptionPlan.code, PlanPrice(plan_id, version), Entitlement.code, ProviderWebhookEvent(provider_code, provider_event_id), внешние payment/subscription IDs с учётом nullable;
+- индексы FK и полей выборки: Session(user_id, expires_at), UserRole(user_id, role_id, revoked_at), Subscription(user_id, status), Subscription(current_period_end), EntitlementGrant(user_id, starts_at, ends_at), AuditEvent(occurred_at, actor_user_id), Payment(user_id, created_at);
 - FK для финансовой и аудиторской истории преимущественно RESTRICT; CASCADE применять только для чисто технических связей вроде RolePermission;
 - все даты timezone-aware, хранить UTC; PostgreSQL проверять отдельно, поскольку SQLite не обеспечивает одинаковую семантику timezone-aware DateTime.
 
@@ -211,6 +215,20 @@ Email от OAuth-провайдера считается подтверждён�
 - цены, валюта, длительность и доступные планы;
 - платёжный провайдер и доступные способы оплаты;
 - точная политика grace period, возвратов и read-only доступа после истечения;
-- нужны ли email/password или другие OAuth providers помимо GitHub.
+- UX регистрации/приглашений, восстановления доступа и управления identity;
+- сроки хранения финансовых и security-аудитных данных.
 
 До принятия этих решений не создавать жёстко зашитые тарифы и entitlement codes, кроме технических тестовых данных.
+
+
+## 11. Зафиксированные проектные решения после schema review
+
+- `EmailAddress` — единственный источник primary email; поле `User.primary_email` не создаётся.
+- Нормализованный email уникален глобально; отключённые адреса сохраняются и не переиспользуются.
+- OIDC identity уникальна по паре `issuer + subject`.
+- Назначения ролей исторические: отзыв через `revoked_at`, повторная выдача — новая строка.
+- Subscription описывает платный recurring-договор; ручные/промо Premium выдаются через пакет EntitlementGrant.
+- В первой версии entitlements additive-only, без deny overrides.
+- Отмена подписки не отбирает уже оплаченный период.
+- Регистрация на старте invite-only; публичный signup остаётся конфигурируемой политикой.
+- Bootstrap Super Admin привязывается к заранее известному GitHub numeric ID и выполняется однократно.
