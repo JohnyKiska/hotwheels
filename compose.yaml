@@ -1,0 +1,95 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      HW_PUBLIC_BASE_URL: ${HW_PUBLIC_BASE_URL}
+      HW_FRONTEND_URL: ${HW_FRONTEND_URL}
+      HW_ALLOWED_ORIGINS: ${HW_ALLOWED_ORIGINS}
+      HW_COOKIE_SECURE: "true"
+      HW_EMAIL_ENCRYPTION_KEY: ${HW_EMAIL_ENCRYPTION_KEY}
+      HW_OAUTH_ENCRYPTION_KEY: ${HW_OAUTH_ENCRYPTION_KEY}
+      HW_AUTH_RATE_LIMIT_KEY: ${HW_AUTH_RATE_LIMIT_KEY}
+      HW_GITHUB_CLIENT_ID: ${HW_GITHUB_CLIENT_ID:-}
+      HW_GITHUB_CLIENT_SECRET: ${HW_GITHUB_CLIENT_SECRET:-}
+      HW_GITHUB_REDIRECT_URI: ${HW_GITHUB_REDIRECT_URI:-}
+      HW_GOOGLE_CLIENT_ID: ${HW_GOOGLE_CLIENT_ID:-}
+      HW_GOOGLE_CLIENT_SECRET: ${HW_GOOGLE_CLIENT_SECRET:-}
+      HW_GOOGLE_REDIRECT_URI: ${HW_GOOGLE_REDIRECT_URI:-}
+    depends_on:
+      db:
+        condition: service_healthy
+    command: sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  web:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    environment:
+      HW_PUBLIC_HOST: ${HW_PUBLIC_HOST}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./:/srv:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      api:
+        condition: service_healthy
+
+  email-worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    profiles: ["email"]
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      HW_EMAIL_ENCRYPTION_KEY: ${HW_EMAIL_ENCRYPTION_KEY}
+      HW_SMTP_HOST: ${HW_SMTP_HOST}
+      HW_SMTP_PORT: ${HW_SMTP_PORT:-587}
+      HW_SMTP_SECURITY: ${HW_SMTP_SECURITY:-starttls}
+      HW_SMTP_FROM_EMAIL: ${HW_SMTP_FROM_EMAIL}
+      HW_SMTP_FROM_NAME: ${HW_SMTP_FROM_NAME:-HW Catalog}
+      HW_SMTP_USERNAME: ${HW_SMTP_USERNAME:-}
+      HW_SMTP_PASSWORD: ${HW_SMTP_PASSWORD:-}
+      HW_SMTP_TIMEOUT: ${HW_SMTP_TIMEOUT:-20}
+      HW_EMAIL_WORKER_POLL_SECONDS: ${HW_EMAIL_WORKER_POLL_SECONDS:-5}
+      HW_EMAIL_WORKER_BATCH_SIZE: ${HW_EMAIL_WORKER_BATCH_SIZE:-20}
+    command: ["python", "-m", "app.email_worker"]
+    depends_on:
+      db:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  caddy_data:
+  caddy_config:
