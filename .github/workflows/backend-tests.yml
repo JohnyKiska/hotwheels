@@ -54,3 +54,44 @@ jobs:
         run: |
           alembic upgrade head
           alembic upgrade head
+
+      - name: Verify PostgreSQL append-only enforcement
+        env:
+          DATABASE_URL: postgresql+psycopg://postgres:postgres@localhost:5432/hw_catalog_test
+        run: |
+          python - <<'PY'
+          import os
+
+          from sqlalchemy import create_engine, text
+
+          engine = create_engine(os.environ["DATABASE_URL"])
+          try:
+              with engine.begin() as connection:
+                  connection.execute(text("""
+                      INSERT INTO change_log
+                          (id, entity_type, entity_id, action, reason, actor_type, created_at)
+                      VALUES
+                          ('pg-audit-test', 'release', 'pg-release-test', 'created',
+                           'Original event', 'ci', CURRENT_TIMESTAMP)
+                  """))
+
+              for statement in (
+                  "UPDATE change_log SET reason = 'rewritten' WHERE id = 'pg-audit-test'",
+                  "DELETE FROM change_log WHERE id = 'pg-audit-test'",
+              ):
+                  try:
+                      with engine.begin() as connection:
+                          connection.execute(text(statement))
+                  except Exception as exc:
+                      assert "append-only" in str(exc), str(exc)
+                  else:
+                      raise AssertionError("PostgreSQL allowed a change_log mutation")
+
+              with engine.connect() as connection:
+                  reason = connection.execute(
+                      text("SELECT reason FROM change_log WHERE id = 'pg-audit-test'")
+                  ).scalar_one()
+                  assert reason == "Original event"
+          finally:
+              engine.dispose()
+          PY
