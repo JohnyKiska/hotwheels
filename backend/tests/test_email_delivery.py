@@ -147,7 +147,7 @@ def test_dispatch_retries_with_backoff_then_marks_failed(db_factory, encryption_
         row = db.get(OutboundEmail, row_id)
         assert row.status == "pending"
         assert row.attempt_count == 1
-        assert row.available_at > now
+        assert row.available_at.replace(tzinfo=timezone.utc) > now
         assert "provider unavailable" not in (row.last_error or "")
 
     second = dispatch_outbox_batch(
@@ -177,7 +177,7 @@ def test_dispatch_fails_closed_when_encryption_key_changes(db_factory, encryptio
     provider = FakeProvider()
     result = dispatch_outbox_batch(db_factory, provider)
 
-    assert result == {"sent": 0, "retrying": 0, "failed": 0}
+    assert result == {"sent": 0, "retrying": 0, "failed": 1}
     assert provider.messages == []
     with db_factory() as db:
         row = db.get(OutboundEmail, row_id)
