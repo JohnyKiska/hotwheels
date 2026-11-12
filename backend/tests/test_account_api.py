@@ -84,6 +84,9 @@ def test_account_me_requires_valid_session_and_returns_role_ids(api_factory):
     assert response.json()["id"] == user_id
     assert response.json()["status"] == "active"
     assert len(response.json()["role_ids"]) == 1
+    assert response.json()["emails"] == []
+    assert response.json()["identities"] == []
+    assert response.json()["password_configured"] is False
 
 
 def test_invitation_api_requires_csrf_and_queues_encrypted_email(api_factory):
