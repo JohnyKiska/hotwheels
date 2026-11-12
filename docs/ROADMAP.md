@@ -245,3 +245,17 @@
 
 
 **Final technical safeguards review · 2026-11-12:** В схему добавлены требования к транзакционной защите от гонок при назначении ролей и bootstrap Super Admin, одноразовым токенам и сессиям, неизменяемым snapshot цен, правилам объединения entitlements, атомарной/idempotent обработке webhook и возвратов, закрытию аккаунта и retention policy. Уточнено, что migration smoke test PostgreSQL не заменяет полный backend suite на PostgreSQL. Модели и миграции по-прежнему не создавались.
+
+
+### Account services · 2026-11-12
+
+- [x] Добавить транзакционные сервисы создания User и привязки GitHub/Google identity без автоматического объединения по email.
+- [x] Добавить идемпотентное назначение и исторический отзыв RBAC-ролей; обычный сервис не может назначить Super Admin.
+- [x] Реализовать выпуск сессии, проверку, touch с ограничением частоты и отзыв; хранить только SHA-256 hash bearer-токена.
+- [x] Реализовать создание приглашения и его однократное принятие с подтверждением владения приглашённым email.
+- [x] Реализовать выпуск и однократное потребление email verification token.
+- [x] Добавить аудит основных операций без записи raw-токенов и секретов.
+- [x] Добавить unit tests для session, invitation, role lifecycle и email verification.
+- [ ] Проверить полный backend CI и устранить ошибки.
+- [ ] Подключить безопасный email delivery/outbox и API endpoints после определения конфигурации почтового провайдера.
+- [ ] Реализовать password hashing/login/reset и OAuth callbacks отдельным этапом.
