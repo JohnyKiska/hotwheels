@@ -72,7 +72,7 @@ var params=new URLSearchParams(location.search);
 var message=$("message");
 var currentUser=null;
 function cookie(name){var prefix=name+"=";return document.cookie.split(";").map(function(x){return x.trim();}).filter(function(x){return x.indexOf(prefix)===0;}).map(function(x){return decodeURIComponent(x.slice(prefix.length));})[0]||"";}
-function csrfHeaders(){return {"X-CSRF-Token":cookie("hw_csrf"),"Origin":location.origin};}
+function csrfHeaders(){return {"X-CSRF-Token":cookie("hw_csrf")};}
 function showMessage(text,type){message.textContent=text;message.className="notice "+(type||"");}
 function clearMessage(){message.textContent="";message.className="notice hidden";}
 function showView(name){["login","forgot","invite","reset","account"].forEach(function(v){$(""+v+"-view").classList.toggle("hidden",v!==name);});}
