@@ -318,7 +318,7 @@ SMTP не гарантирует exactly-once delivery при разрыве с�
 - [x] Добавить API tests для Argon2id, входа, generic errors, throttle, reset replay, session revocation и unverified email.
 - [x] Проверить полный CI и migration chain на SQLite и PostgreSQL 16; исправить найденные проблемы.
 - [ ] Подключить UI форм входа/установки/сброса пароля и проверить реальные email links.
-- [ ] Добавить смену пароля для вошедшего пользователя с подтверждением текущего пароля.
+- [x] Добавить смену пароля для вошедшего пользователя с подтверждением текущего пароля, CSRF и throttling; сохранить текущую сессию, отозвать остальные сессии и reset tokens.
 - [ ] Добавить мониторинг rate-limit блокировок, reset queue и security events; определить retention/cleanup buckets.
 - [ ] Провести ручной E2E тест после настройки SMTP и HTTPS staging.
 
@@ -326,3 +326,6 @@ SMTP не гарантирует exactly-once delivery при разрыве с�
 
 
 **Email/password CI · 2026-11-12:** GitHub Actions run #314: 227 passed, 7 warnings. Полный backend suite прошёл; clean Alembic upgrade и повторный upgrade на SQLite и PostgreSQL 16 прошли; PostgreSQL append-only enforcement прошёл. Run: https://github.com/JohnyKiska/hotwheels/actions/runs/43166707308.
+
+
+**Password change · 2026-11-12:** Добавлен `POST /api/v1/account/password/change`: проверка текущего пароля, CSRF, persistent throttling, Argon2id, отзыв остальных сессий и reset tokens; текущая сессия сохраняется. Добавлены API tests.
