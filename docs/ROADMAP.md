@@ -329,3 +329,16 @@ SMTP не гарантирует exactly-once delivery при разрыве с�
 
 
 **Password change · 2026-11-12:** Добавлен `POST /api/v1/account/password/change`: проверка текущего пароля, CSRF, persistent throttling, Argon2id, отзыв остальных сессий и reset tokens; текущая сессия сохраняется. Добавлены API tests.
+
+
+## Account frontend · 2026-11-12
+
+- [x] Добавить адаптивную статическую страницу `login.html` и ссылку из каталога.
+- [x] Подключить email/password login, OAuth login Google/GitHub и отображение результата callback.
+- [x] Подключить принятие приглашения, первоначальную установку пароля, reset password и смену пароля.
+- [x] Добавить профиль аккаунта, список email/привязанных OAuth identities и привязку провайдера.
+- [x] Перевести OAuth callback, invitation, email verification и reset links на `login.html`.
+- [ ] Проверить UI в реальном браузере на desktop/mobile и выполнить ручной E2E после настройки HTTPS, OAuth credentials и SMTP.
+- [ ] Добавить визуальные состояния подписки Premium и настройки профиля после появления соответствующих API.
+
+Production deployment: предпочтительно same-origin HTTPS для статики и API через reverse proxy. `HW_FRONTEND_URL` должен указывать на публичный origin сайта; OAuth redirect URIs остаются адресами API callback.
