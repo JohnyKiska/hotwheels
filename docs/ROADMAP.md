@@ -345,4 +345,4 @@ SMTP не гарантирует exactly-once delivery при разрыве с�
 Production deployment: предпочтительно same-origin HTTPS для статики и API через reverse proxy. `HW_FRONTEND_URL` должен указывать на публичный origin сайта; OAuth redirect URIs остаются адресами API callback.
 
 
-**Account frontend CI · 2026-11-12:** GitHub Actions run #? завершился успешно: 232 passed, 7 warnings; clean SQLite/PostgreSQL migration checks and PostgreSQL append-only enforcement passed. [CI run](https://github.com/JohnyKiska/hotwheels/actions/runs/43171622250). Manual browser/E2E remains pending until HTTPS staging, OAuth credentials and SMTP are configured.
+**Account frontend CI · 2026-11-12:** GitHub Actions run #336 завершился успешно: 232 passed, 7 warnings; clean SQLite/PostgreSQL migration checks and PostgreSQL append-only enforcement passed. [CI run](https://github.com/JohnyKiska/hotwheels/actions/runs/43171622250). Manual browser/E2E remains pending until HTTPS staging, OAuth credentials and SMTP are configured.
