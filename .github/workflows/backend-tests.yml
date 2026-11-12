@@ -5,6 +5,10 @@ on:
     branches: [main, integration/catalog-foundation]
     paths:
       - "backend/**"
+      - "compose.yaml"
+      - "Caddyfile"
+      - ".env.example"
+      - "docs/deployment/**"
       - ".github/workflows/backend-tests.yml"
   pull_request:
     paths:
@@ -102,3 +106,10 @@ jobs:
           finally:
               engine.dispose()
           PY
+
+      - name: Validate staging Compose configuration
+        run: |
+          cp .env.example .env
+          docker compose config --quiet
+      - name: Build staging backend image
+        run: docker build --file backend/Dockerfile backend
