@@ -140,3 +140,38 @@ SMTP cannot guarantee exactly-once delivery if a connection drops after the
 server accepted a message; the worker therefore provides at-least-once delivery
 in that edge case. The idempotency key is included as a diagnostic header, but
 SMTP servers are not required to deduplicate it.
+
+## OAuth sign-in and identity linking
+
+GitHub OAuth and Google OpenID Connect use authorization-code flow with PKCE.
+The API stores only a hash of OAuth state, a hash of the Google nonce, and an
+encrypted PKCE verifier in a short-lived, single-use database transaction.
+
+Required server-side secrets/configuration:
+
+- `HW_OAUTH_ENCRYPTION_KEY`: independent Fernet key for encrypting PKCE verifiers.
+  Generate with `python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"`.
+- `HW_GITHUB_CLIENT_ID` and `HW_GITHUB_CLIENT_SECRET`.
+- `HW_GITHUB_REDIRECT_URI`: exact callback URL
+  `/api/v1/account/oauth/github/callback`.
+- `HW_GOOGLE_CLIENT_ID` and `HW_GOOGLE_CLIENT_SECRET`.
+- `HW_GOOGLE_REDIRECT_URI`: exact callback URL
+  `/api/v1/account/oauth/google/callback`.
+- `HW_FRONTEND_URL`: frontend origin used for the final redirect. If omitted,
+  `HW_PUBLIC_BASE_URL` is used.
+
+Login starts at `GET /api/v1/account/oauth/{github|google}/start`.
+An already authenticated user links a provider through
+`POST /api/v1/account/oauth/{github|google}/link`, with the normal Origin and
+CSRF headers. The callback is
+`GET /api/v1/account/oauth/{github|google}/callback`.
+
+A login succeeds only when the provider subject is already linked to an active
+HW Catalog user. Provider email equality never merges or links accounts.
+New users remain invite-only: accept an invitation first, then link a provider.
+The link callback is bound to the initiating HW Catalog session.
+
+Google ID tokens are verified against Google's published signing keys, issuer,
+audience, expiry and nonce. GitHub identity uses the immutable numeric account
+ID returned by the authenticated API, not the mutable username. OAuth client
+secrets and encryption keys belong only in the hosting secret store.
