@@ -148,7 +148,12 @@
 
 - [x] Зафиксировать целевую архитектуру: существующий FastAPI как единственный backend, GitHub OAuth для идентификации, собственный RBAC, GitHub Repository adapter для временного хранения каталога.
 - [x] Зафиксировать принцип переноса: API и доменная логика не зависят от провайдера размещения; будущая SQL-БД — PostgreSQL.
-- [ ] Аудировать текущие SQLAlchemy-модели и Alembic migrations на совместимость с PostgreSQL.
+- [x] Выполнить статический аудит SQLAlchemy-моделей и Alembic migrations на совместимость с PostgreSQL.
+- [ ] Исправить SQLite-only connect_args/PRAGMA в engine и сделать их dialect-aware.
+- [ ] Восстановить полный Alembic bootstrap для core catalog schema на чистой БД.
+- [ ] Сделать append-only triggers и boolean seed совместимыми с SQLite и PostgreSQL.
+- [ ] Добавить migration tests на пустой и существующей БД; подключить PostgreSQL CI.
+- [ ] Только после portability gate добавлять auth/RBAC schema.
 - [ ] Спроектировать и добавить User, ExternalIdentity, Role, Permission, UserRole, Session и AuditEvent.
 - [ ] Реализовать закрытый GitHub OAuth flow и одноразовое назначение первого Super Admin.
 - [ ] Закрыть все изменяющие API endpoints RBAC-проверками и тестами.
@@ -157,6 +162,6 @@
 - [ ] Выбрать временный backend host и managed PostgreSQL, настроить staging и backup/restore.
 - [ ] Подключать frontend к API только после проверки авторизации, CORS и доступа.
 
-Архитектурное решение: `docs/architecture/FOUNDATION-ADR-001.md`.
+Архитектурное решение: `docs/architecture/FOUNDATION-ADR-001.md`.\n\nРезультат статического DB portability audit: `docs/architecture/BACKEND-DB-PORTABILITY-AUDIT.md`.
 
 Важно: Cloudflare Workers не добавляем как второй backend. Используем существующий FastAPI и переносим его между хостингами без изменения API.
