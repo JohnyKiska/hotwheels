@@ -60,6 +60,7 @@ def test_invitation_and_email_are_created_in_same_transaction(monkeypatch):
         assert result["sent"] == 1
         assert len(provider.messages) == 1
         assert "Принять приглашение" in provider.messages[0].html_body
+        assert "login.html?invite=" in provider.messages[0].text_body
         assert "token=" in provider.messages[0].text_body
     finally:
         engine.dispose()
@@ -97,6 +98,7 @@ def test_email_verification_and_outbox_are_created_together(monkeypatch):
         result = dispatch_outbox_batch(factory, provider)
         assert result["sent"] == 1
         assert "Подтвердить email" in provider.messages[0].html_body
+        assert "login.html?verify=" in provider.messages[0].text_body
         assert "token=" in provider.messages[0].text_body
     finally:
         engine.dispose()
