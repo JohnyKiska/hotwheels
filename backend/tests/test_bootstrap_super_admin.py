@@ -55,7 +55,7 @@ def test_bootstrap_refuses_second_super_admin(session):
     bootstrap_super_admin(session, github_id="12345678")
     session.commit()
 
-    with pytest.raises(BootstrapError, match="already assigned"):
+    with pytest.raises(BootstrapError, match="assignment already exists"):
         bootstrap_super_admin(session, github_id="87654321")
 
 
