@@ -50,8 +50,7 @@ def create_invitation_and_queue_email(
         role_id=role_id,
     )
     link = (
-        f"{_base_url(public_base_url)}/login.html?invite="
-        f"?token={quote(raw_token, safe='')}"
+        f"{_frontend_base_url(public_base_url)}/login.html?invite={quote(raw_token, safe='')}"
     )
     greeting = f"Здравствуйте, {recipient_name}!" if recipient_name else "Здравствуйте!"
     subject = "Приглашение в HW Catalog"
@@ -94,8 +93,7 @@ def create_email_verification_and_queue_email(
         email_address_id=email_address_id,
     )
     link = (
-        f"{_base_url(public_base_url)}/login.html?verify="
-        f"?token={quote(raw_token, safe='')}"
+        f"{_frontend_base_url(public_base_url)}/login.html?verify={quote(raw_token, safe='')}"
     )
     subject = "Подтвердите адрес электронной почты HW Catalog"
     text_body = (
