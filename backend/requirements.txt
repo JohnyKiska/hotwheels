@@ -9,3 +9,4 @@ httpx
 psycopg[binary]>=3.2,<4
 cryptography>=44,<47
 PyJWT[crypto]>=2.10,<3
+argon2-cffi>=23.1,<26
