@@ -338,7 +338,11 @@ SMTP не гарантирует exactly-once delivery при разрыве с�
 - [x] Подключить принятие приглашения, первоначальную установку пароля, reset password и смену пароля.
 - [x] Добавить профиль аккаунта, список email/привязанных OAuth identities и привязку провайдера.
 - [x] Перевести OAuth callback, invitation, email verification и reset links на `login.html`.
+- [x] Добавить frontend smoke tests для DOM-контрактов, маршрутов и синтаксиса inline JavaScript.
 - [ ] Проверить UI в реальном браузере на desktop/mobile и выполнить ручной E2E после настройки HTTPS, OAuth credentials и SMTP.
 - [ ] Добавить визуальные состояния подписки Premium и настройки профиля после появления соответствующих API.
 
 Production deployment: предпочтительно same-origin HTTPS для статики и API через reverse proxy. `HW_FRONTEND_URL` должен указывать на публичный origin сайта; OAuth redirect URIs остаются адресами API callback.
+
+
+**Account frontend CI · 2026-11-12:** GitHub Actions run #? завершился успешно: 232 passed, 7 warnings; clean SQLite/PostgreSQL migration checks and PostgreSQL append-only enforcement passed. [CI run](https://github.com/JohnyKiska/hotwheels/actions/runs/43171622250). Manual browser/E2E remains pending until HTTPS staging, OAuth credentials and SMTP are configured.
