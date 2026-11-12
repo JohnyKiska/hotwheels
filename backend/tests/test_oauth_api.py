@@ -206,6 +206,21 @@ def test_oauth_link_requires_csrf_and_binds_to_current_session(
     )
     assert denied.status_code == 403
 
+    json_started = client.post(
+        "/api/v1/account/oauth/github/link",
+        params={"response_mode": "json"},
+        headers={
+            "Origin": "https://catalog.example.com",
+            "X-CSRF-Token": "csrf-value",
+        },
+        follow_redirects=False,
+    )
+    assert json_started.status_code == 200
+    assert json_started.json()["authorization_url"].startswith(
+        "https://github.com/login/oauth/authorize?"
+    )
+    assert "hw_oauth_state_" in json_started.headers.get("set-cookie", "")
+
     started = client.post(
         "/api/v1/account/oauth/github/link",
         headers={
