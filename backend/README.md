@@ -175,3 +175,36 @@ Google ID tokens are verified against Google's published signing keys, issuer,
 audience, expiry and nonce. GitHub identity uses the immutable numeric account
 ID returned by the authenticated API, not the mutable username. OAuth client
 secrets and encryption keys belong only in the hosting secret store.
+
+## Email/password sign-in and recovery
+
+Email/password sign-in is available for an existing account after its primary
+email is verified and a password has been configured. Registration remains
+invite-only: accept an invitation, then while signed in call
+`POST /api/v1/account/password/set` with the normal Origin and CSRF headers.
+Password setup is one-time; an existing password cannot be overwritten through
+this endpoint.
+
+Endpoints:
+
+- `POST /api/v1/account/password/login`: email/password login; returns a
+  generic error for unknown, unverified, disabled, suspended or invalid accounts.
+- `POST /api/v1/account/password/set`: configure the first password for the
+  authenticated user with a verified primary email.
+- `POST /api/v1/account/password/reset/request`: enumeration-safe reset request;
+  always returns HTTP 202 with the same response.
+- `POST /api/v1/account/password/reset/confirm`: consume a single-use reset
+  token and set a new password. Successful reset revokes all existing sessions.
+
+Passwords are hashed with Argon2id. Reset tokens are random, single-use,
+30-minute tokens stored only as SHA-256 hashes. Reset URLs are placed only in
+the encrypted transactional email outbox. Rate-limit buckets are persistent
+and store keyed HMAC digests rather than raw email addresses or IP addresses.
+The login threshold is five failures per email bucket and twelve per IP bucket
+within a 15-minute window; a blocked bucket remains blocked for 15 minutes.
+
+Configure the server-side secret `HW_AUTH_RATE_LIMIT_KEY` with at least 32
+random characters. It is used to HMAC privacy-preserving rate-limit bucket
+identifiers. Also configure `HW_EMAIL_ENCRYPTION_KEY`,
+`HW_PUBLIC_BASE_URL`, and the SMTP settings documented above. Never expose
+these values to the frontend or commit them to Git.
