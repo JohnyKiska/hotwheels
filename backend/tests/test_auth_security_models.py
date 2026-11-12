@@ -35,9 +35,11 @@ def db():
 
 def test_session_stores_hash_and_can_be_revoked(db):
     user = User(status="active")
+    db.add(user)
+    db.flush()
     now = datetime.now(timezone.utc)
     session = UserSession(
-        user=user,
+        user_id=user.id,
         token_hash="a" * 64,
         created_at=now,
         expires_at=now + timedelta(days=7),
@@ -55,8 +57,11 @@ def test_session_stores_hash_and_can_be_revoked(db):
 
 def test_session_rejects_expiry_before_creation(db):
     now = datetime.now(timezone.utc)
+    user = User(status="active")
+    db.add(user)
+    db.flush()
     db.add(UserSession(
-        user=User(status="active"),
+        user_id=user.id,
         token_hash="b" * 64,
         created_at=now,
         expires_at=now - timedelta(seconds=1),
@@ -69,10 +74,12 @@ def test_session_rejects_expiry_before_creation(db):
 def test_session_token_hash_must_be_unique(db):
     now = datetime.now(timezone.utc)
     user = User(status="active")
+    db.add(user)
+    db.flush()
     db.add_all([
-        UserSession(user=user, token_hash="c" * 64, created_at=now,
+        UserSession(user_id=user.id, token_hash="c" * 64, created_at=now,
                     expires_at=now + timedelta(days=1)),
-        UserSession(user=user, token_hash="c" * 64, created_at=now,
+        UserSession(user_id=user.id, token_hash="c" * 64, created_at=now,
                     expires_at=now + timedelta(days=2)),
     ])
     with pytest.raises(IntegrityError):
@@ -139,8 +146,10 @@ def test_invitation_email_must_be_normalized(db):
 
 def test_email_verification_token_is_one_time_and_hash_only(db):
     user = User(status="pending")
+    db.add(user)
+    db.flush()
     email = EmailAddress(
-        user=user,
+        user_id=user.id,
         email_normalized="new@example.com",
         email_display="New@example.com",
     )
@@ -166,8 +175,10 @@ def test_email_verification_token_is_one_time_and_hash_only(db):
 
 def test_email_verification_rejects_expiry_before_creation(db):
     user = User(status="pending")
+    db.add(user)
+    db.flush()
     email = EmailAddress(
-        user=user,
+        user_id=user.id,
         email_normalized="expired@example.com",
         email_display="expired@example.com",
     )
