@@ -698,3 +698,31 @@ class AuditEvent(Base):
         CheckConstraint("result IN ('success', 'failure', 'denied')",
                         name="ck_audit_events_result"),
     )
+
+
+class OutboundEmail(TimestampMixin, Base):
+    """Transactional email outbox; message body is encrypted at rest."""
+    __tablename__ = "outbound_emails"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    recipient_email: Mapped[str] = mapped_column(String(320), nullable=False, index=True)
+    encrypted_payload: Mapped[str] = mapped_column(Text, nullable=False)
+    status: Mapped[str] = mapped_column(String(24), default="pending", nullable=False, index=True)
+    idempotency_key: Mapped[str] = mapped_column(String(180), nullable=False, unique=True)
+    attempt_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    available_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False, index=True)
+    locked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    sent_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    last_error: Mapped[str | None] = mapped_column(String(500))
+
+    __table_args__ = (
+        CheckConstraint(
+            "status IN ('pending', 'sending', 'sent', 'failed')",
+            name="ck_outbound_emails_status",
+        ),
+        CheckConstraint("attempt_count >= 0", name="ck_outbound_emails_attempt_count"),
+        CheckConstraint(
+            "(status != 'sent') OR sent_at IS NOT NULL",
+            name="ck_outbound_emails_sent_at",
+        ),
+    )
