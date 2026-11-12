@@ -209,3 +209,6 @@
 
 
 **Schema consistency review · 2026-11-12:** `docs/architecture/ACCOUNT-ACCESS-SCHEMA.md` уточнён: EmailAddress — единственный источник primary email; ExternalIdentity использует issuer+subject; UserRole хранит историю отзывов; Subscription отделена от ручных Premium grants; доступ после отмены привязан к оплаченному периоду; стартовая регистрация invite-only. Миграции и модели пока не создавались.
+
+
+**Final technical safeguards review · 2026-11-12:** В схему добавлены требования к транзакционной защите от гонок при назначении ролей и bootstrap Super Admin, одноразовым токенам и сессиям, неизменяемым snapshot цен, правилам объединения entitlements, атомарной/idempotent обработке webhook и возвратов, закрытию аккаунта и retention policy. Уточнено, что migration smoke test PostgreSQL не заменяет полный backend suite на PostgreSQL. Модели и миграции по-прежнему не создавались.
