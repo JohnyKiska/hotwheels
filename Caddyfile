@@ -8,8 +8,9 @@
 
     handle {
         root * /srv
-        hide /backend /docs /research /.github /.git /.env /.env.* /README* /Dockerfile /compose.yaml /Caddyfile /*.md /*.yml /*.yaml
         try_files {path} {path}/ /index.html
-        file_server
+        file_server {
+            hide /backend /docs /research /.github /.git /.env /.env.* /README* /Dockerfile /compose.yaml /Caddyfile /*.md /*.yml /*.yaml
+        }
     }
 }
