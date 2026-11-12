@@ -9,7 +9,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision = "20261112_account_rbac"
-down_revision = "20261027_change_log_append_only"
+down_revision = "20261104_conflict_releases"
 branch_labels = None
 depends_on = None
 
