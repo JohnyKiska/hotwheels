@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#172238">
+<meta name="hw-api-base" content="">
+<title>Аккаунт · HW Catalog</title>
+<style>
+:root{color-scheme:light;--ink:#19263a;--muted:#718096;--line:#e2e7ef;--paper:#f4f6fa;--panel:#fff;--orange:#f15a24;--navy:#172238;--green:#16845b;--red:#b83d35;--shadow:0 18px 55px #17223812}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 15% 0%,#ffe9df 0,transparent 34%),var(--paper);color:var(--ink);font:15px/1.5 Inter,"Segoe UI",Arial,sans-serif}button,input{font:inherit}button,a{ -webkit-tap-highlight-color:transparent}a{color:inherit}.top{height:72px;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 max(22px,calc((100vw - 1120px)/2));border-bottom:3px solid var(--orange)}.brand{display:flex;align-items:center;gap:12px;text-decoration:none}.mark{width:38px;height:38px;border-radius:11px;background:var(--orange);display:grid;place-items:center;font-weight:900;font-size:21px;transform:skew(-7deg)}.brand strong{display:block;letter-spacing:.2px}.brand small{color:#aeb9ca;font-size:11px}.top a.back{color:#ffd2c0;text-decoration:none;font-size:13px}.shell{width:min(100% - 32px,1040px);margin:46px auto 70px;display:grid;grid-template-columns:minmax(0,1fr) minmax(310px,.86fr);gap:22px;align-items:start}.intro{padding:30px 12px 20px 4px}.eyebrow{color:var(--orange);font-size:11px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase}.intro h1{font-size:clamp(30px,4vw,44px);line-height:1.08;letter-spacing:-1.4px;margin:13px 0}.intro p{color:var(--muted);max-width:440px;margin:0}.perks{display:grid;gap:12px;margin-top:32px;color:#536176;font-size:13px}.perks span{display:flex;gap:10px;align-items:center}.perks b{width:25px;height:25px;border-radius:8px;background:#fff0e8;color:#c34b1c;display:grid;place-items:center}.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:26px;box-shadow:var(--shadow)}.card h2{font-size:21px;margin:0 0 5px;letter-spacing:-.4px}.muted{color:var(--muted);font-size:13px;margin:0 0 20px}.field{margin:14px 0}.field label{display:block;font-size:12px;font-weight:750;color:#536176;margin-bottom:6px}.field input{width:100%;height:45px;border:1px solid #dce2eb;border-radius:9px;padding:0 12px;background:#fff;color:var(--ink)}.field input:focus{outline:3px solid #f15a2420;border-color:var(--orange)}.btn{width:100%;min-height:44px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink);font-weight:700;padding:10px 13px;cursor:pointer}.btn:hover{border-color:#b7c3d2}.primary{background:var(--orange);border-color:var(--orange);color:#fff}.primary:hover{background:#df4c18}.oauth{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:16px 0}.oauth a{display:flex;justify-content:center;align-items:center;gap:8px;min-height:44px;border:1px solid var(--line);border-radius:9px;text-decoration:none;font-weight:700;font-size:13px}.oauth a:hover{background:#f8f9fb}.divider{display:flex;align-items:center;gap:12px;color:#98a2b1;font-size:11px;margin:19px 0}.divider:before,.divider:after{content:"";height:1px;background:var(--line);flex:1}.text-btn{border:0;background:none;color:#bd4a1d;padding:8px 0;font-size:13px;font-weight:700;cursor:pointer}.row{display:flex;align-items:center;justify-content:space-between;gap:12px}.notice{padding:11px 13px;border-radius:9px;background:#f4f6fa;color:#59677c;font-size:13px;margin:12px 0}.notice.error{background:#fff0ef;color:#a5332e}.notice.success{background:#eaf7f0;color:#176747}.hidden{display:none!important}.account-head{display:flex;align-items:center;gap:13px;margin-bottom:20px}.avatar{width:48px;height:48px;border-radius:14px;background:#ffeadf;color:#a64016;display:grid;place-items:center;font-size:19px;font-weight:850}.account-head small{display:block;color:var(--muted)}.provider{display:flex;align-items:center;justify-content:space-between;border:1px solid var(--line);border-radius:10px;padding:11px 12px;margin:8px 0;font-size:13px}.provider strong{display:block}.provider small{color:var(--muted)}.provider button{width:auto;min-height:34px;padding:6px 10px;font-size:12px}.section-title{font-size:12px;font-weight:800;letter-spacing:.5px;color:#718096;text-transform:uppercase;margin:22px 0 8px}.footer{text-align:center;color:#929dad;font-size:11px;margin-top:22px}.footer a{color:#65748a}.spinner{display:inline-block;width:15px;height:15px;border:2px solid #ffffff70;border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:7px}@keyframes spin{to{transform:rotate(360deg)}}@media(max-width:760px){.shell{grid-template-columns:1fr;margin-top:22px;gap:14px}.intro{padding:12px 5px}.intro h1{font-size:32px}.perks{display:none}.card{padding:21px}.top{height:64px}.top .back{font-size:12px}}@media(max-width:380px){.oauth{grid-template-columns:1fr}.card{padding:17px}}
+</style>
+</head>
+<body>
+<header class="top">
+<a class="brand" href="./"><span class="mark">HW</span><span><strong>HW Catalog</strong><small>Коллекция начинается здесь</small></span></a>
+<a class="back" href="./">← Вернуться в каталог</a>
+</header>
+<main class="shell">
+<section class="intro">
+<div class="eyebrow">Личный кабинет коллекционера</div>
+<h1>Ваша коллекция.<br>Ваши правила.</h1>
+<p>Войдите, чтобы сохранять свою коллекцию, управлять аккаунтом и постепенно открывать новые возможности HW Catalog.</p>
+<div class="perks"><span><b>✓</b> Единый аккаунт для каталога и коллекции</span><span><b>✓</b> Несколько способов безопасного входа</span><span><b>✓</b> История и настройки аккаунта</span></div>
+</section>
+<section class="card" aria-live="polite">
+<div id="message" class="notice hidden" role="status"></div>
+<section id="login-view">
+<h2>Войти в аккаунт</h2><p class="muted">Используйте привязанный способ входа.</p>
+<div class="oauth">
+<a id="google-login" href="#">◎ Google</a><a id="github-login" href="#">◈ GitHub</a>
+</div>
+<div class="divider">или через email</div>
+<form id="login-form">
+<div class="field"><label for="login-email">Электронная почта</label><input id="login-email" name="email" type="email" autocomplete="username" required maxlength="320" placeholder="you@example.com"></div>
+<div class="field"><label for="login-password">Пароль</label><input id="login-password" name="password" type="password" autocomplete="current-password" required maxlength="128"></div>
+<button class="btn primary" type="submit">Войти</button>
+</form>
+<div class="row"><button class="text-btn" id="show-forgot" type="button">Забыли пароль?</button><span style="font-size:11px;color:#98a2b1">Регистрация по приглашению</span></div>
+</section>
+<section id="forgot-view" class="hidden">
+<h2>Восстановление пароля</h2><p class="muted">Если аккаунт существует и подходит для восстановления, мы отправим письмо со ссылкой.</p>
+<form id="forgot-form"><div class="field"><label for="forgot-email">Электронная почта</label><input id="forgot-email" type="email" required maxlength="320"></div><button class="btn primary" type="submit">Отправить ссылку</button></form>
+<button class="text-btn" id="back-login" type="button">← Назад ко входу</button>
+</section>
+<section id="invite-view" class="hidden">
+<h2>Приглашение принято</h2><p class="muted" id="invite-email">Теперь задайте пароль для входа по email.</p>
+<form id="set-password-form"><div class="field"><label for="new-password">Новый пароль</label><input id="new-password" type="password" autocomplete="new-password" minlength="12" maxlength="128" required></div><div class="field"><label for="repeat-password">Повторите пароль</label><input id="repeat-password" type="password" autocomplete="new-password" minlength="12" maxlength="128" required></div><button class="btn primary" type="submit">Сохранить пароль</button></form>
+</section>
+<section id="reset-view" class="hidden">
+<h2>Новый пароль</h2><p class="muted">Придумайте новый пароль длиной не менее 12 символов.</p>
+<form id="reset-form"><div class="field"><label for="reset-password">Новый пароль</label><input id="reset-password" type="password" autocomplete="new-password" minlength="12" maxlength="128" required></div><div class="field"><label for="reset-repeat">Повторите пароль</label><input id="reset-repeat" type="password" autocomplete="new-password" minlength="12" maxlength="128" required></div><button class="btn primary" type="submit">Сохранить новый пароль</button></form>
+</section>
+<section id="account-view" class="hidden">
+<div class="account-head"><div class="avatar" id="avatar">HW</div><div><h2 id="account-name">Ваш аккаунт</h2><small id="account-status"></small></div></div>
+<div class="section-title">Способы входа</div><div id="identities"></div>
+<div class="section-title">Безопасность</div>
+<form id="change-form"><div class="field"><label for="current-password">Текущий пароль</label><input id="current-password" type="password" autocomplete="current-password" required maxlength="128"></div><div class="field"><label for="change-password">Новый пароль</label><input id="change-password" type="password" autocomplete="new-password" minlength="12" maxlength="128" required></div><button class="btn" type="submit">Изменить пароль</button></form>
+<button class="btn" id="logout" type="button" style="margin-top:12px">Выйти из аккаунта</button>
+</section>
+<div class="footer">HW Catalog · Безопасность аккаунта важнее удобства любой ценой.</div>
+</section>
+</main>
+<script>
+(function(){
+"use strict";
+var meta=document.querySelector('meta[name="hw-api-base"]');
+var API=(meta&&meta.content?meta.content:"").replace(/\/$/,"");
+var $=function(id){return document.getElementById(id);};
+var params=new URLSearchParams(location.search);
+var message=$("message");
+var currentUser=null;
+function cookie(name){var prefix=name+"=";return document.cookie.split(";").map(function(x){return x.trim();}).filter(function(x){return x.indexOf(prefix)===0;}).map(function(x){return decodeURIComponent(x.slice(prefix.length));})[0]||"";}
+function csrfHeaders(){return {"X-CSRF-Token":cookie("hw_csrf"),"Origin":location.origin};}
+function showMessage(text,type){message.textContent=text;message.className="notice "+(type||"");}
+function clearMessage(){message.textContent="";message.className="notice hidden";}
+function showView(name){["login","forgot","invite","reset","account"].forEach(function(v){$(""+v+"-view").classList.toggle("hidden",v!==name);});}
+function setBusy(button,busy,label){if(busy){button.disabled=true;button.dataset.old=button.textContent;button.innerHTML='<span class="spinner"></span>'+label;}else{button.disabled=false;button.textContent=button.dataset.old||label;}}
+async function api(path,options){options=options||{};options.credentials="include";options.headers=Object.assign({"Content-Type":"application/json"},options.headers||{});var response=await fetch(API+"/api/v1"+path,options);var data=null;try{data=await response.json();}catch(_e){}if(!response.ok){var detail=data&&data.detail;throw new Error(typeof detail==="string"?detail:"Request failed ("+response.status+")");}return data;}
+function friendly(error){var map={"Invalid email or password.":"Неверная почта или пароль.","Too many attempts. Try again later.":"Слишком много попыток. Попробуйте позже.","Current password is incorrect.":"Текущий пароль указан неверно.","Invalid or expired reset link.":"Ссылка недействительна или срок её действия истёк.","CSRF validation failed.":"Проверка безопасности не пройдена. Обновите страницу.","Authentication required.":"Сессия завершена. Войдите снова."};return map[error.message]||error.message||"Не удалось выполнить запрос.";}
+function setOAuthLinks(){$("google-login").href=API+"/api/v1/account/oauth/google/start";$("github-login").href=API+"/api/v1/account/oauth/github/start";}
+function safeText(value){return String(value||"").replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+function renderAccount(user){currentUser=user;showView("account");$("account-name").textContent=user.display_name||"Коллекционер HW";$("avatar").textContent=(user.display_name||"HW").trim().slice(0,2).toUpperCase();$("account-status").textContent=(user.emails||[]).map(function(x){return x.email+(x.verified?"":" · не подтверждён");}).join(" · ")||"Аккаунт активен";var connected=(user.identities||[]).map(function(x){return x.provider;});var html=(user.identities||[]).map(function(x){var title=x.provider==="google"?"Google":"GitHub";var detail=x.username?"@"+x.username:(x.email||"Подключено");return '<div class="provider"><div><strong>'+title+'</strong><small>'+safeText(detail)+'</small></div><span>Подключено ✓</span></div>';}).join("");["google","github"].forEach(function(p){if(connected.indexOf(p)<0){var title=p==="google"?"Google":"GitHub";html+='<form class="provider link-provider" data-provider="'+p+'"><div><strong>'+title+'</strong><small>Привязать к этому аккаунту</small></div><button type="submit">Привязать</button><input type="hidden" name="csrf"></form>';}});$("identities").innerHTML=html||'<p class="muted">Пока нет привязанных внешних аккаунтов.</p>';document.querySelectorAll(".link-provider").forEach(function(form){form.addEventListener("submit",function(e){e.preventDefault();var p=form.dataset.provider;var f=document.createElement("form");f.method="post";f.action=API+"/api/v1/account/oauth/"+p+"/link";var input=document.createElement("input");input.type="hidden";input.name="";input.value="";f.appendChild(input);var csrf=document.createElement("input");csrf.type="hidden";csrf.name="csrf";csrf.value=cookie("hw_csrf");f.appendChild(csrf);document.body.appendChild(f);f.submit();});});}
+async function loadMe(){try{var user=await api("/account/me",{method:"GET",headers:{}});renderAccount(user);return true;}catch(_e){return false;}}
+$("login-form").addEventListener("submit",async function(e){e.preventDefault();clearMessage();var button=this.querySelector("button[type=submit]");setBusy(button,true,"Входим…");try{await api("/account/password/login",{method:"POST",body:JSON.stringify({email:$("login-email").value,password:$("login-password").value})});await loadMe();showMessage("Вы вошли в HW Catalog.","success");}catch(err){showMessage(friendly(err),"error");}finally{setBusy(button,false,"Войти");}});
+$("show-forgot").addEventListener("click",function(){clearMessage();showView("forgot");});
+$("back-login").addEventListener("click",function(){clearMessage();showView("login");});
+$("forgot-form").addEventListener("submit",async function(e){e.preventDefault();var button=this.querySelector("button");setBusy(button,true,"Отправляем…");try{await api("/account/password/reset/request",{method:"POST",body:JSON.stringify({email:$("forgot-email").value})});showMessage("Если адрес подходит для восстановления, письмо скоро придёт.","success");}catch(err){showMessage(friendly(err),"error");}finally{setBusy(button,false,"Отправить ссылку");}});
+$("set-password-form").addEventListener("submit",async function(e){e.preventDefault();var a=$("new-password").value,b=$("repeat-password").value;if(a!==b){showMessage("Пароли не совпадают.","error");return;}var button=this.querySelector("button");setBusy(button,true,"Сохраняем…");try{await api("/account/password/set",{method:"POST",headers:csrfHeaders(),body:JSON.stringify({password:a})});await loadMe();showMessage("Пароль настроен. Добро пожаловать!","success");history.replaceState({},"",location.pathname);}catch(err){showMessage(friendly(err),"error");}finally{setBusy(button,false,"Сохранить пароль");}});
+$("reset-form").addEventListener("submit",async function(e){e.preventDefault();var a=$("reset-password").value,b=$("reset-repeat").value;if(a!==b){showMessage("Пароли не совпадают.","error");return;}var button=this.querySelector("button");setBusy(button,true,"Обновляем…");try{await api("/account/password/reset/confirm",{method:"POST",body:JSON.stringify({token:params.get("reset"),password:a})});params.delete("reset");history.replaceState({},"",location.pathname);showView("login");showMessage("Пароль изменён. Теперь можно войти.","success");}catch(err){showMessage(friendly(err),"error");}finally{setBusy(button,false,"Сохранить новый пароль");}});
+$("change-form").addEventListener("submit",async function(e){e.preventDefault();var button=this.querySelector("button");setBusy(button,true,"Меняем…");try{await api("/account/password/change",{method:"POST",headers:csrfHeaders(),body:JSON.stringify({current_password:$("current-password").value,new_password:$("change-password").value})});this.reset();showMessage("Пароль изменён. Другие активные сессии завершены.","success");}catch(err){showMessage(friendly(err),"error");}finally{setBusy(button,false,"Изменить пароль");}});
+$("logout").addEventListener("click",async function(){try{await api("/account/logout",{method:"POST",headers:csrfHeaders()});currentUser=null;showView("login");showMessage("Вы вышли из аккаунта.","success");}catch(err){showMessage(friendly(err),"error");}});
+async function acceptInvite(token){showView("invite");try{var result=await api("/account/invitations/accept",{method:"POST",body:JSON.stringify({token:token})});$("invite-email").textContent="Приглашение для "+result.email+" принято. Задайте пароль для входа по email.";showMessage("Аккаунт создан. Остался последний шаг.","success");}catch(err){showView("login");showMessage("Не удалось принять приглашение: "+friendly(err),"error");}}
+async function verifyEmail(token){try{await api("/account/email-verification/confirm",{method:"POST",body:JSON.stringify({token:token})});params.delete("verify");history.replaceState({},"",location.pathname);showMessage("Электронная почта подтверждена.","success");await loadMe();}catch(err){showMessage("Не удалось подтвердить почту: "+friendly(err),"error");}}
+setOAuthLinks();
+var oauth=params.get("oauth");if(oauth){var statuses={success:"Вход выполнен успешно.",account_not_linked:"Этот способ входа ещё не привязан. Примите приглашение и привяжите аккаунт из кабинета.",invalid_state:"Проверка входа не пройдена. Попробуйте ещё раз.",cancelled:"Вход отменён.",provider_error:"Провайдер не подтвердил вход. Попробуйте позже.",account_unavailable:"Аккаунт временно недоступен.",session_changed:"Сессия изменилась. Войдите и повторите привязку."};showMessage(statuses[oauth]||"Не удалось завершить вход.","error");params.delete("oauth");history.replaceState({},"",location.pathname);}
+(async function init(){if(params.get("invite")){await acceptInvite(params.get("invite"));return;}if(params.get("reset")){showView("reset");return;}if(params.get("verify")){await verifyEmail(params.get("verify"));}if(await loadMe())return;showView("login");})();
+})();
+</script>
+</body>
+</html>
