@@ -42,8 +42,8 @@ def test_account_page_uses_versioned_api_and_does_not_embed_provider_secrets():
     source = page.read_text(encoding="utf-8")
 
     assert 'meta name="hw-api-base"' in source
-    assert "/api/v1/account/password/login" in source
-    assert "/api/v1/account/password/reset/confirm" in source
-    assert "/api/v1/account/oauth/" in source
+    assert "/account/password/login" in source
+    assert "/account/password/reset/confirm" in source
+    assert "/account/oauth/" in source
     assert "CLIENT_SECRET" not in source
     assert "HW_OAUTH_ENCRYPTION_KEY" not in source
