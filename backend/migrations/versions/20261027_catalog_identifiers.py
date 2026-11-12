@@ -78,9 +78,10 @@ def downgrade():
 
     bind = op.get_bind()
     codes = tuple(code for _identifier_id, code, _label in IDENTIFIER_TYPES)
+    seeded_ids = tuple(identifier_id for identifier_id, _code, _label in IDENTIFIER_TYPES)
     bind.execute(
         sa.delete(Base.metadata.tables["identifier_types"]).where(
-            Base.metadata.tables["identifier_types"].c.code.in_(codes)
+            Base.metadata.tables["identifier_types"].c.id.in_(seeded_ids)
         )
     )
     Base.metadata.drop_all(
