@@ -1,5 +1,10 @@
 from html.parser import HTMLParser
 from pathlib import Path
+import shutil
+import subprocess
+import tempfile
+
+import pytest
 
 
 class AccountPageParser(HTMLParser):
@@ -47,3 +52,18 @@ def test_account_page_uses_versioned_api_and_does_not_embed_provider_secrets():
     assert "/account/oauth/" in source
     assert "CLIENT_SECRET" not in source
     assert "HW_OAUTH_ENCRYPTION_KEY" not in source
+
+
+
+def test_account_page_inline_javascript_parses_when_node_is_available():
+    node = shutil.which("node")
+    if node is None:
+        pytest.skip("Node.js is not installed in this test environment")
+
+    page = Path(__file__).resolve().parents[2] / "login.html"
+    source = page.read_text(encoding="utf-8")
+    script = source.split("<script>", 1)[1].split("</script>", 1)[0]
+    with tempfile.NamedTemporaryFile("w", suffix=".js", encoding="utf-8") as handle:
+        handle.write(script)
+        handle.flush()
+        subprocess.run([node, "--check", handle.name], check=True, capture_output=True, text=True)
