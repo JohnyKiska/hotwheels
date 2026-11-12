@@ -346,3 +346,18 @@ Production deployment: предпочтительно same-origin HTTPS для �
 
 
 **Account frontend CI · 2026-11-12:** GitHub Actions run #336 завершился успешно: 232 passed, 7 warnings; clean SQLite/PostgreSQL migration checks and PostgreSQL append-only enforcement passed. [CI run](https://github.com/JohnyKiska/hotwheels/actions/runs/43171622250). Manual browser/E2E remains pending until HTTPS staging, OAuth credentials and SMTP are configured.
+
+
+## Staging deployment foundation · 2026-11-12
+
+- [x] Добавить backend Docker image на Python 3.12 с непривилегированным пользователем.
+- [x] Добавить Compose stack: Caddy HTTPS, FastAPI, PostgreSQL 16 и постоянные volumes.
+- [x] Сохранить same-origin HTTPS для frontend/API; не включать неподготовленный cross-origin CORS.
+- [x] Добавить шаблон переменных окружения без секретов и исключить локальный `.env` из Git.
+- [x] Вынести transactional email worker в отдельный opt-in Compose profile.
+- [x] Добавить one-time CLI bootstrap первого Super Admin по заранее проверенному числовому GitHub ID; без auto-admin при старте API.
+- [x] Документировать запуск, DNS/TLS, OAuth, SMTP, резервное копирование и ручной E2E checklist.
+- [ ] Проверить Docker build и Compose config в CI.
+- [ ] Развернуть на отдельном staging-сервере с доменом и реальными секретами.
+- [ ] Выполнить ручной end-to-end тест регистрации, входа, приглашений, почты, OAuth, RBAC и перезапуска.
+- [ ] Не переключать default branch и не менять `main` до отдельного согласования.
