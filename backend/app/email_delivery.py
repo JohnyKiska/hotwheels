@@ -95,9 +95,9 @@ def queue_email(
     return message
 
 
-def _decode_message(row: OutboundEmail) -> EmailMessage:
+def _decode_message(row: OutboundEmail, cipher: Fernet | None = None) -> EmailMessage:
     try:
-        payload = json.loads(_fernet().decrypt(
+        payload = json.loads((cipher or _fernet()).decrypt(
             row.encrypted_payload.encode("ascii")
         ).decode("utf-8"))
     except (InvalidToken, ValueError, UnicodeDecodeError) as exc:
@@ -130,6 +130,7 @@ def dispatch_outbox_batch(
     if limit < 1 or limit > 100 or max_attempts < 1:
         raise EmailOutboxError("invalid_dispatch_limits")
     now = now or utc_now()
+    cipher = _fernet()  # fail before claiming rows if the encryption key is absent
     claimed: list[tuple[str, EmailMessage]] = []
     decode_failed = 0
 
@@ -152,7 +153,7 @@ def dispatch_outbox_batch(
             row.locked_at = now
             row.attempt_count += 1
             try:
-                message = _decode_message(row)
+                message = _decode_message(row, cipher)
             except EmailOutboxError:
                 row.status = "failed"
                 row.locked_at = None
