@@ -199,3 +199,81 @@ def test_unverified_email_cannot_use_password_login(password_api):
     )
     assert response.status_code == 401
     assert response.json()["detail"] == "Invalid email or password."
+
+
+
+def test_change_password_verifies_current_password_and_keeps_only_current_session(password_api):
+    factory, user_id = password_api
+    client, current_raw = _set_password_session(factory, user_id)
+    assert client.post(
+        "/api/v1/account/password/set",
+        json={"password": "initial password phrase"},
+        headers={"Origin": "https://catalog.example.com", "X-CSRF-Token": "csrf-token"},
+    ).status_code == 200
+
+    with factory() as db:
+        other_session, other_raw = create_session(db, user_id=user_id)
+        db.commit()
+
+    wrong = client.post(
+        "/api/v1/account/password/change",
+        json={
+            "current_password": "not the current password",
+            "new_password": "a different secure password",
+        },
+        headers={"Origin": "https://catalog.example.com", "X-CSRF-Token": "csrf-token"},
+    )
+    assert wrong.status_code == 400
+    assert wrong.json()["detail"] == "Current password is incorrect."
+
+    changed = client.post(
+        "/api/v1/account/password/change",
+        json={
+            "current_password": "initial password phrase",
+            "new_password": "a different secure password",
+        },
+        headers={"Origin": "https://catalog.example.com", "X-CSRF-Token": "csrf-token"},
+    )
+    assert changed.status_code == 200
+    assert changed.json()["status"] == "password_changed"
+
+    with factory() as db:
+        current_hash = __import__("hashlib").sha256(current_raw.encode()).hexdigest()
+        other_hash = __import__("hashlib").sha256(other_raw.encode()).hexdigest()
+        current_row = db.scalar(select(UserSession).where(UserSession.token_hash == current_hash))
+        other_row = db.scalar(select(UserSession).where(UserSession.token_hash == other_hash))
+        assert current_row.revoked_at is None
+        assert other_row.revoked_at is not None
+        credential = db.scalar(select(PasswordCredential).where(PasswordCredential.user_id == user_id))
+        assert credential.password_hash.startswith("$argon2id$")
+
+    # The current browser session remains valid, but the old password no longer works.
+    assert client.get("/api/v1/account/me").status_code == 200
+    old_login = _client().post(
+        "/api/v1/account/password/login",
+        json={"email": "collector@example.com", "password": "initial password phrase"},
+    )
+    assert old_login.status_code == 401
+    new_login = _client().post(
+        "/api/v1/account/password/login",
+        json={"email": "collector@example.com", "password": "a different secure password"},
+    )
+    assert new_login.status_code == 200
+
+
+def test_change_password_requires_csrf(password_api):
+    factory, user_id = password_api
+    client, _raw = _set_password_session(factory, user_id)
+    assert client.post(
+        "/api/v1/account/password/set",
+        json={"password": "initial password phrase"},
+        headers={"Origin": "https://catalog.example.com", "X-CSRF-Token": "csrf-token"},
+    ).status_code == 200
+    response = client.post(
+        "/api/v1/account/password/change",
+        json={
+            "current_password": "initial password phrase",
+            "new_password": "a different secure password",
+        },
+    )
+    assert response.status_code == 403
