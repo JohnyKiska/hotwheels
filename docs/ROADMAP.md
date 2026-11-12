@@ -258,7 +258,7 @@
 - [x] Добавить unit tests для session, invitation, role lifecycle и email verification.
 - [ ] Проверить полный backend CI и устранить ошибки.
 - [ ] Подключить безопасный email delivery/outbox и API endpoints после определения конфигурации почтового провайдера.
-- [ ] Реализовать password hashing/login/reset и OAuth callbacks отдельным этапом.
+- [x] Реализовать GitHub OAuth и Google OIDC callbacks; email/password login/reset остаётся отдельным этапом.
 
 
 
@@ -270,7 +270,7 @@
 - [x] Реализовать Google OIDC с проверкой подписи RS256, JWKS, issuer, audience, exp и nonce.
 - [x] Разделить вход по уже связанной identity и привязку identity из активной сессии; не объединять аккаунты по email.
 - [x] Добавить OAuth API tests для PKCE/state replay, session binding и запрета auto-link по email.
-- [ ] Проверить CI, Alembic upgrade на чистой SQLite и PostgreSQL 16, полный backend suite на обеих СУБД.
+- [x] Проверить CI: 223 passed; Alembic clean upgrade и повторный upgrade на SQLite и PostgreSQL 16 прошли.
 - [ ] Добавить UI кнопки входа/привязки, управление связанными identity и понятные ошибки.
 - [ ] Добавить rate limiting, security monitoring и отдельную процедуру ротации OAuth encryption key.
 - [ ] Выполнить ручную проверку с тестовыми GitHub OAuth App и Google OAuth Client; реальные secrets не хранить в репозитории.
@@ -299,9 +299,9 @@ SMTP не гарантирует exactly-once delivery при разрыве с�
 - [x] Добавить provider-neutral интерфейс отправки и dispatcher с lease для зависших задач, backoff и ограничением попыток.
 - [x] Добавить тесты шифрования, идемпотентности, отправки, повторов и отказа при недоступном ключе.
 - [x] Добавить композицию invitation/email verification писем и атомарную постановку в outbox вместе с выпуском токена.
-- [ ] Выбрать SMTP/API-провайдера и реализовать адаптер без изменения outbox/domain API.
+- [x] Добавить сменный SMTP adapter без изменения outbox/domain API.
 - [ ] Добавить шаблоны invitation/email verification и постановку писем в outbox в той же транзакции, что и выпуск токенов.
-- [ ] Добавить защищённый worker/scheduler и мониторинг очереди.
+- [x] Добавить отдельный защищённый CLI worker для outbox; мониторинг очереди и scheduler остаются отдельными задачами.
 - [x] Добавить account API endpoints для /me, logout, invitations, invitation acceptance и email verification.
 - [x] Установить HttpOnly session cookie + отдельный CSRF cookie; проверять Origin и CSRF header для cookie-auth mutations.
 - [x] Добавить RBAC permission dependencies для users.manage и roles.assign.
