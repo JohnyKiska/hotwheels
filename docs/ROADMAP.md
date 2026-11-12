@@ -182,6 +182,20 @@
 
 Архитектурные правила Premium зафиксированы в `docs/architecture/FOUNDATION-ADR-001.md`, раздел «Коммерческий доступ: планы, подписки и Premium».
 
+
+## Account identity and RBAC implementation · 2026-11-12
+
+- [x] Добавить SQLAlchemy-модели User, ExternalIdentity, EmailAddress и PasswordCredential.
+- [x] Добавить Role, Permission, RolePermission и историческую UserRole.
+- [x] Добавить Alembic migration с идемпотентным seed системных ролей, permissions и матрицы прав.
+- [x] Добавить модельные тесты уникальности identity/email/credential, FK, статусов и истории назначения ролей.
+- [x] Добавить в CI чистый SQLite upgrade и повторный upgrade; PostgreSQL migration smoke test остаётся включён.
+- [ ] Дождаться и разобрать CI run для новой миграции и моделей.
+- [ ] После CI добавить Session, Invitation, EmailVerificationToken и AuditEvent отдельной миграцией.
+- [ ] Затем реализовать сервисы создания User, linking identity и транзакционного назначения/отзыва ролей.
+
+Текущая реализация создаёт только таблицы аккаунтов и RBAC. OAuth, email/password login, сессии и API permission dependencies ещё не реализованы. Миграция не выдаёт Super Admin автоматически: bootstrap будет отдельным защищённым шагом.
+
 ## Схема аккаунтов, RBAC и Premium · 2026-11-12
 
 - [x] Изучить текущие SQLAlchemy-модели, Alembic bootstrap и соглашения миграций.
