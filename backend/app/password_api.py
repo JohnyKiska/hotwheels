@@ -68,6 +68,11 @@ class PasswordSetRequest(BaseModel):
     password: str = Field(min_length=12, max_length=128)
 
 
+class PasswordChangeRequest(BaseModel):
+    current_password: str = Field(min_length=1, max_length=128)
+    new_password: str = Field(min_length=12, max_length=128)
+
+
 class PasswordResetRequest(BaseModel):
     email: str = Field(min_length=3, max_length=320)
 
@@ -314,6 +319,69 @@ def set_password(
     _audit(db, "auth.password.created", user_id=user.id)
     db.commit()
     return {"status": "password_configured"}
+
+
+@router.post("/change")
+def change_password(
+    body: PasswordChangeRequest,
+    request: Request,
+    user: User = Depends(_current_user),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Change a password after verifying the current one; keep only this session."""
+    _require_csrf(request)
+    now = utc_now()
+    user_key = _bucket_key("password-change-user", user.id)
+    ip_key = _bucket_key("password-change-ip", _client_ip(request))
+    if _blocked(db, [user_key, ip_key], now):
+        db.commit()
+        raise HTTPException(status_code=429, detail="Too many attempts. Try again later.")
+
+    credential = db.scalar(
+        select(PasswordCredential)
+        .where(
+            PasswordCredential.user_id == user.id,
+            PasswordCredential.disabled_at.is_(None),
+        )
+        .with_for_update()
+    )
+    if credential is None or not _verify_password(
+        credential.password_hash, body.current_password
+    ):
+        _record_failure(db, user_key, now=now, threshold=5)
+        _record_failure(db, ip_key, now=now, threshold=12)
+        _audit(db, "auth.password.change", user_id=user.id, result="failure")
+        db.commit()
+        raise HTTPException(status_code=400, detail="Current password is incorrect.")
+
+    new_hash = _hash_password(body.new_password)
+    raw_session = request.cookies.get("hw_session", "")
+    if not raw_session:
+        db.rollback()
+        raise HTTPException(status_code=401, detail="Authentication required.")
+    current_session_hash = hashlib.sha256(raw_session.encode("utf-8")).hexdigest()
+
+    credential.password_hash = new_hash
+    credential.password_hash_algorithm = "argon2id"
+    credential.changed_at = now
+    db.execute(
+        UserSession.__table__.update()
+        .where(
+            UserSession.user_id == user.id,
+            UserSession.revoked_at.is_(None),
+            UserSession.token_hash != current_session_hash,
+        )
+        .values(revoked_at=now, revoke_reason="password_changed")
+    )
+    db.execute(update_reset_tokens_statement(user.id, now))
+    db.execute(
+        delete(AuthRateLimitBucket).where(
+            AuthRateLimitBucket.bucket_key.in_([user_key, ip_key])
+        )
+    )
+    _audit(db, "auth.password.changed", user_id=user.id)
+    db.commit()
+    return {"status": "password_changed"}
 
 
 @router.post("/reset/request", status_code=202)
