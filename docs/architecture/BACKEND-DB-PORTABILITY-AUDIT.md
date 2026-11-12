@@ -66,3 +66,25 @@
 ## Ограничение
 
 Этот документ не означает, что PostgreSQL уже поддерживается. Он фиксирует объём работ и конкретные места, которые необходимо исправить и проверить.
+
+
+## Статус исправления · 2026-11-12
+
+Основные блокирующие замечания исправлены в integration/catalog-foundation:
+
+1. **Engine / SQLite settings:** check_same_thread и PRAGMA foreign_keys=ON теперь применяются только к SQLite.
+2. **Alembic bootstrap:** первая revision создаёт core tables (castings, casting_variants, series, releases, release_series) до evidence/source tables. create_all пропускает уже существующие таблицы, поэтому upgrade initialized DB сохраняет записи.
+3. **Append-only journal:** SQLite сохраняет native triggers; PostgreSQL использует PL/pgSQL trigger function и два триггера. Для неподдерживаемого dialect migration завершается явной ошибкой.
+4. **Identifier seed:** boolean значения передаются как Python False через типизированный bulk insert. Уже существующие namespaces не дублируются; downgrade удаляет только строки с зарезервированными seed IDs.
+5. **PostgreSQL driver / CI:** добавлен psycopg[binary]; workflow поднимает PostgreSQL 16 и выполняет чистый alembic upgrade head, повторный upgrade и проверку блокировки UPDATE/DELETE в change_log.
+
+### Проверки
+
+GitHub Actions run #253 (https://github.com/JohnyKiska/hotwheels/actions/runs/43146301499) завершился успешно:
+- SQLite backend suite: **165 passed, 6 warnings**.
+- Чистый SQLite Alembic bootstrap: проверены core/evidence/identifier/conflict tables и запись Release.
+- Существующая SQLite DB: проверен upgrade с сохранением существующей Casting и повторный upgrade.
+- PostgreSQL 16: чистый Alembic upgrade и повторный upgrade прошли.
+- PostgreSQL 16: UPDATE и DELETE в change_log отклоняются trigger function; исходная запись сохраняется.
+
+**Ограничение:** полный набор прикладных тестов ещё не запускается на PostgreSQL. Этот CI шаг подтверждает миграционную совместимость и append-only enforcement, но не является заявлением о полной production-ready поддержке PostgreSQL. Перед staging остаются timezone round-trip tests, проверка managed PostgreSQL SSL/configuration, backup/restore и отдельная проверка миграции копии пользовательской БД.
