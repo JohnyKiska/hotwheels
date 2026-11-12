@@ -316,10 +316,13 @@ SMTP не гарантирует exactly-once delivery при разрыве с�
 - [x] Добавить enumeration-safe password reset request, encrypted email outbox, SHA-256 token hash, TTL 30 минут и одноразовое потребление.
 - [x] При успешном сбросе отзывать все существующие сессии и остальные reset tokens пользователя.
 - [x] Добавить API tests для Argon2id, входа, generic errors, throttle, reset replay, session revocation и unverified email.
-- [ ] Проверить полный CI и migration chain на SQLite и PostgreSQL 16; исправить найденные проблемы.
+- [x] Проверить полный CI и migration chain на SQLite и PostgreSQL 16; исправить найденные проблемы.
 - [ ] Подключить UI форм входа/установки/сброса пароля и проверить реальные email links.
 - [ ] Добавить смену пароля для вошедшего пользователя с подтверждением текущего пароля.
 - [ ] Добавить мониторинг rate-limit блокировок, reset queue и security events; определить retention/cleanup buckets.
 - [ ] Провести ручной E2E тест после настройки SMTP и HTTPS staging.
 
 Операционная настройка: `HW_AUTH_RATE_LIMIT_KEY` (не менее 32 случайных символов), `HW_EMAIL_ENCRYPTION_KEY`, `HW_PUBLIC_BASE_URL` и SMTP secrets задаются только в окружении сервера.
+
+
+**Email/password CI · 2026-11-12:** GitHub Actions run #314: 227 passed, 7 warnings. Полный backend suite прошёл; clean Alembic upgrade и повторный upgrade на SQLite и PostgreSQL 16 прошли; PostgreSQL append-only enforcement прошёл. Run: https://github.com/JohnyKiska/hotwheels/actions/runs/43166707308.
