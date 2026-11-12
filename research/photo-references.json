@@ -377,6 +377,21 @@
       "packaging_format": "short_blister",
       "evidence_status": "image_visually_inspected",
       "notes": "Оборот карточки; читается JJK67-N521, код 21A и штрихкод. Ссылка на галерею Etsy, в которой также присутствует лицевая сторона блистера."
+    },
+    {
+      "id": "photo_ref_ml2026_007_jjh85_user_n7c5",
+      "release_id": "rel_ml2026_jjh85",
+      "toy_number": "JJH85",
+      "article_identifier_raw": "JJH85-N7C5",
+      "source_page_url": "https://ebay.io/m/zAuLUd",
+      "image_url": null,
+      "source_name": "User-provided eBay photo reference",
+      "retrieved_at": "2026-11-12",
+      "packaging_state": "unknown",
+      "view_angle": "unknown",
+      "packaging_format": "unknown",
+      "evidence_status": "user_provided_reference_not_yet_visually_inspected",
+      "notes": "Пользователь предоставил ссылку и сообщил код JJH85-N7C5. Короткая ссылка eBay не открылась для визуальной проверки; ракурс и тип упаковки пока не подтверждены. Хранить отдельно от JJH85-N521."
     }
   ]
 }
