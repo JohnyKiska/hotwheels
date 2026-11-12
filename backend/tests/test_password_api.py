@@ -1,4 +1,4 @@
-from urllib.parse import parse_qs, urlsplit
+import json
 
 from cryptography.fernet import Fernet
 import pytest
@@ -149,10 +149,10 @@ def test_password_reset_is_single_use_and_revokes_existing_sessions(password_api
 
     with factory() as db:
         queued = db.scalar(select(OutboundEmail).where(OutboundEmail.status == "pending"))
-        payload = Fernet(__import__("os").environ["HW_EMAIL_ENCRYPTION_KEY"].encode()).decrypt(
+        payload = json.loads(Fernet(__import__("os").environ["HW_EMAIL_ENCRYPTION_KEY"].encode()).decrypt(
             queued.encrypted_payload.encode()
-        ).decode()
-        link = __import__("re").search(r"https://catalog\.example\.com/account/reset-password\?token=([^\s]+)", payload)
+        ).decode())
+        link = __import__("re").search(r"https://catalog\\.example\\.com/account/reset-password\\?token=([^\\s]+)", payload["text_body"])
         assert link
         token = link.group(1)
 
