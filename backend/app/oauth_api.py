@@ -9,8 +9,8 @@ from urllib.parse import urlencode
 
 import httpx
 import jwt
-from fastapi import APIRouter, Depends, HTTPException, Request
-from fastapi.responses import RedirectResponse
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi.responses import JSONResponse, RedirectResponse
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -66,8 +66,11 @@ def _state_cookie_name(state: str) -> str:
     return "hw_oauth_state_" + digest(state)[:20]
 
 
-def _oauth_start_response(provider: str, state: str, url: str) -> RedirectResponse:
-    response = RedirectResponse(url, status_code=303)
+def _oauth_start_response(provider: str, state: str, url: str, *, response_mode: str = "redirect"):
+    if response_mode == "json":
+        response = JSONResponse({"authorization_url": url})
+    else:
+        response = RedirectResponse(url, status_code=303)
     response.set_cookie(
         _state_cookie_name(state),
         state,
@@ -148,6 +151,7 @@ def start_oauth_link(
     provider: str,
     request: Request,
     user: User = Depends(_current_user),
+    response_mode: str = Query(default="redirect", pattern="^(redirect|json)$"),
     db: Session = Depends(get_db),
 ):
     if provider not in {"github", "google"}:
@@ -171,7 +175,7 @@ def start_oauth_link(
     except OAuthFlowError as exc:
         db.rollback()
         raise HTTPException(status_code=503, detail=exc.code) from exc
-    return _oauth_start_response(provider, state, url)
+    return _oauth_start_response(provider, state, url, response_mode=response_mode)
 
 
 def _github_profile(code: str, redirect_uri: str, verifier: str) -> dict:
