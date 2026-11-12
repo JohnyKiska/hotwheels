@@ -728,6 +728,41 @@ class AuditEvent(Base):
     )
 
 
+class PasswordResetToken(Base):
+    """Single-use password reset token; only its SHA-256 digest is stored."""
+    __tablename__ = "password_reset_tokens"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    user_id: Mapped[str] = mapped_column(
+        ForeignKey("users.id", ondelete="RESTRICT"), nullable=False, index=True
+    )
+    token_hash: Mapped[str] = mapped_column(String(64), nullable=False, unique=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, index=True)
+    consumed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+    __table_args__ = (
+        CheckConstraint("expires_at > created_at", name="ck_password_reset_expiry_after_creation"),
+        CheckConstraint("consumed_at IS NULL OR consumed_at >= created_at",
+                        name="ck_password_reset_consumed_after_creation"),
+    )
+
+
+class AuthRateLimitBucket(Base):
+    """Persistent, privacy-preserving login/reset throttle bucket."""
+    __tablename__ = "auth_rate_limit_buckets"
+
+    bucket_key: Mapped[str] = mapped_column(String(64), primary_key=True)
+    window_started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    attempts: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    blocked_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
+
+    __table_args__ = (
+        CheckConstraint("attempts >= 0", name="ck_auth_rate_limit_attempts_nonnegative"),
+    )
+
+
 class OutboundEmail(TimestampMixin, Base):
     """Transactional email outbox; message body is encrypted at rest."""
     __tablename__ = "outbound_emails"
