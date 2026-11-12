@@ -262,6 +262,22 @@
 
 
 
+### GitHub OAuth и Google OIDC · 2026-11-12
+
+- [x] Добавить короткоживущую одноразовую OAuth transaction в БД: state hash, Google nonce hash, encrypted PKCE verifier, provider, redirect URI и срок действия.
+- [x] Привязать OAuth linking transaction к конкретной текущей HW Catalog session.
+- [x] Реализовать GitHub authorization-code flow с PKCE и идентификацией по неизменяемому numeric user ID.
+- [x] Реализовать Google OIDC с проверкой подписи RS256, JWKS, issuer, audience, exp и nonce.
+- [x] Разделить вход по уже связанной identity и привязку identity из активной сессии; не объединять аккаунты по email.
+- [x] Добавить OAuth API tests для PKCE/state replay, session binding и запрета auto-link по email.
+- [ ] Проверить CI, Alembic upgrade на чистой SQLite и PostgreSQL 16, полный backend suite на обеих СУБД.
+- [ ] Добавить UI кнопки входа/привязки, управление связанными identity и понятные ошибки.
+- [ ] Добавить rate limiting, security monitoring и отдельную процедуру ротации OAuth encryption key.
+- [ ] Выполнить ручную проверку с тестовыми GitHub OAuth App и Google OAuth Client; реальные secrets не хранить в репозитории.
+
+OAuth login не создаёт аккаунт автоматически: начальная регистрация остаётся invite-only. Пользователь принимает приглашение, входит в созданную сессию и привязывает GitHub/Google; после этого может использовать провайдера для входа.
+
+
 ### SMTP adapter и email worker · 2026-11-12
 
 - [x] Добавить SMTP provider с STARTTLS, SMTP-over-TLS и явным опциональным режимом без TLS.
