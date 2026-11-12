@@ -183,18 +183,24 @@
 Архитектурные правила Premium зафиксированы в `docs/architecture/FOUNDATION-ADR-001.md`, раздел «Коммерческий доступ: планы, подписки и Premium».
 
 
-## Account identity and RBAC implementation · 2026-11-12
+## Account identity, RBAC and account security implementation · 2026-11-12
 
 - [x] Добавить SQLAlchemy-модели User, ExternalIdentity, EmailAddress и PasswordCredential.
 - [x] Добавить Role, Permission, RolePermission и историческую UserRole.
 - [x] Добавить Alembic migration с идемпотентным seed системных ролей, permissions и матрицы прав.
 - [x] Добавить модельные тесты уникальности identity/email/credential, FK, статусов и истории назначения ролей.
-- [x] Добавить в CI чистый SQLite upgrade и повторный upgrade; PostgreSQL migration smoke test остаётся включён.
-- [ ] Дождаться и разобрать CI run для новой миграции и моделей.
-- [ ] После CI добавить Session, Invitation, EmailVerificationToken и AuditEvent отдельной миграцией.
-- [ ] Затем реализовать сервисы создания User, linking identity и транзакционного назначения/отзыва ролей.
+- [x] Добавить UserSession с хранением только hash токена, сроком действия и отзывом.
+- [x] Добавить Invitation с hash одноразового токена, статусом, сроком действия и связью с приглашённым пользователем/ролью.
+- [x] Добавить EmailVerificationToken с hash токена, сроком действия и отметкой однократного использования.
+- [x] Добавить AuditEvent и защиту append-only на уровне SQLite/PostgreSQL.
+- [x] Добавить отдельную Alembic migration для сессий, приглашений, email verification и account audit.
+- [x] Добавить модельные тесты и проверку неизменяемости AuditEvent.
+- [ ] Проверить полный CI после последних изменений; устранить найденные ошибки.
+- [ ] Реализовать сервисы создания User, linking identity и транзакционного назначения/отзыва ролей.
+- [ ] Реализовать session lifecycle, invitation acceptance и email verification services.
+- [ ] Затем подключить OAuth/email-password flows и API permission dependencies.
 
-Текущая реализация создаёт только таблицы аккаунтов и RBAC. OAuth, email/password login, сессии и API permission dependencies ещё не реализованы. Миграция не выдаёт Super Admin автоматически: bootstrap будет отдельным защищённым шагом.
+Модели и миграции persistence-слоя добавлены, но authentication flows, выдача/проверка сессий, отправка email, OAuth callbacks и API authorization ещё не реализованы. Миграция не выдаёт Super Admin автоматически: bootstrap будет отдельным защищённым шагом.
 
 ## Схема аккаунтов, RBAC и Premium · 2026-11-12
 
