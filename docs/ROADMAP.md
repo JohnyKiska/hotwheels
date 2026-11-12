@@ -259,3 +259,15 @@
 - [ ] Проверить полный backend CI и устранить ошибки.
 - [ ] Подключить безопасный email delivery/outbox и API endpoints после определения конфигурации почтового провайдера.
 - [ ] Реализовать password hashing/login/reset и OAuth callbacks отдельным этапом.
+
+
+### Email delivery foundation · 2026-11-12
+
+- [x] Добавить transactional outbox с идемпотентным ключом и состояниями pending/sending/sent/failed.
+- [x] Шифровать содержимое письма Fernet-ключом из серверного секрета `HW_EMAIL_ENCRYPTION_KEY`; не хранить ссылки с одноразовыми токенами открытым текстом.
+- [x] Добавить provider-neutral интерфейс отправки и dispatcher с lease для зависших задач, backoff и ограничением попыток.
+- [x] Добавить тесты шифрования, идемпотентности, отправки, повторов и отказа при недоступном ключе.
+- [ ] Выбрать SMTP/API-провайдера и реализовать адаптер без изменения outbox/domain API.
+- [ ] Добавить шаблоны invitation/email verification и постановку писем в outbox в той же транзакции, что и выпуск токенов.
+- [ ] Добавить защищённый worker/scheduler и мониторинг очереди.
+- [ ] Добавить account API endpoints, cookie sessions, CSRF/origin checks и RBAC dependencies.
