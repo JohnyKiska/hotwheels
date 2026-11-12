@@ -9,6 +9,7 @@ import uuid
 from datetime import datetime, timezone
 
 from sqlalchemy import (
+    Boolean,
     CheckConstraint,
     DateTime,
     JSON,
@@ -456,3 +457,141 @@ class CastingVariantIdentifier(Base):
     source_note: Mapped[str | None] = mapped_column(Text)
     casting_variant: Mapped[CastingVariant] = relationship()
     identifier: Mapped[CatalogIdentifier] = relationship()
+
+
+# Account identity and administrative access foundation.
+# Authentication flows are implemented separately; these tables only define persistence.
+
+class User(TimestampMixin, Base):
+    __tablename__ = "users"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    status: Mapped[str] = mapped_column(String(24), default="pending", nullable=False)
+    display_name: Mapped[str | None] = mapped_column(String(240))
+    last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    closed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+    __table_args__ = (
+        CheckConstraint(
+            "status IN ('pending', 'active', 'suspended', 'closed')",
+            name="ck_users_status",
+        ),
+    )
+
+
+class ExternalIdentity(TimestampMixin, Base):
+    __tablename__ = "external_identities"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    user_id: Mapped[str] = mapped_column(
+        ForeignKey("users.id", ondelete="RESTRICT"), nullable=False, index=True
+    )
+    provider: Mapped[str] = mapped_column(String(32), nullable=False)
+    issuer: Mapped[str] = mapped_column(String(255), nullable=False)
+    provider_subject: Mapped[str] = mapped_column(String(255), nullable=False)
+    provider_username: Mapped[str | None] = mapped_column(String(255))
+    provider_email: Mapped[str | None] = mapped_column(String(320))
+    last_authenticated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    disabled_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+    __table_args__ = (
+        UniqueConstraint("issuer", "provider_subject", name="uq_external_identity_issuer_subject"),
+        CheckConstraint("provider IN ('github', 'google')", name="ck_external_identities_provider"),
+    )
+
+
+class EmailAddress(TimestampMixin, Base):
+    __tablename__ = "email_addresses"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    user_id: Mapped[str] = mapped_column(
+        ForeignKey("users.id", ondelete="RESTRICT"), nullable=False, index=True
+    )
+    email_normalized: Mapped[str] = mapped_column(String(320), nullable=False, unique=True)
+    email_display: Mapped[str] = mapped_column(String(320), nullable=False)
+    is_primary: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    disabled_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+    __table_args__ = (
+        CheckConstraint(
+            "email_normalized = lower(email_normalized)",
+            name="ck_email_addresses_normalized_lowercase",
+        ),
+    )
+
+
+class PasswordCredential(TimestampMixin, Base):
+    __tablename__ = "password_credentials"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    user_id: Mapped[str] = mapped_column(
+        ForeignKey("users.id", ondelete="RESTRICT"), nullable=False, unique=True
+    )
+    password_hash: Mapped[str] = mapped_column(Text, nullable=False)
+    password_hash_algorithm: Mapped[str] = mapped_column(String(40), default="argon2id", nullable=False)
+    changed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    disabled_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class Role(TimestampMixin, Base):
+    __tablename__ = "roles"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    code: Mapped[str] = mapped_column(String(60), nullable=False, unique=True)
+    name: Mapped[str] = mapped_column(String(120), nullable=False)
+    description: Mapped[str | None] = mapped_column(Text)
+    is_system: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+
+
+class Permission(TimestampMixin, Base):
+    __tablename__ = "permissions"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    code: Mapped[str] = mapped_column(String(100), nullable=False, unique=True)
+    description: Mapped[str | None] = mapped_column(Text)
+
+
+class RolePermission(Base):
+    __tablename__ = "role_permissions"
+
+    role_id: Mapped[str] = mapped_column(
+        ForeignKey("roles.id", ondelete="CASCADE"), primary_key=True
+    )
+    permission_id: Mapped[str] = mapped_column(
+        ForeignKey("permissions.id", ondelete="RESTRICT"), primary_key=True
+    )
+
+
+class UserRole(Base):
+    __tablename__ = "user_roles"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    user_id: Mapped[str] = mapped_column(
+        ForeignKey("users.id", ondelete="RESTRICT"), nullable=False, index=True
+    )
+    role_id: Mapped[str] = mapped_column(
+        ForeignKey("roles.id", ondelete="RESTRICT"), nullable=False, index=True
+    )
+    assigned_by_user_id: Mapped[str | None] = mapped_column(
+        ForeignKey("users.id", ondelete="RESTRICT")
+    )
+    assigned_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utc_now, nullable=False
+    )
+    expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    revoked_by_user_id: Mapped[str | None] = mapped_column(
+        ForeignKey("users.id", ondelete="RESTRICT")
+    )
+
+    __table_args__ = (
+        CheckConstraint(
+            "expires_at IS NULL OR expires_at > assigned_at",
+            name="ck_user_roles_expiry_after_assignment",
+        ),
+        CheckConstraint(
+            "revoked_at IS NULL OR revoked_at >= assigned_at",
+            name="ck_user_roles_revocation_after_assignment",
+        ),
+    )
