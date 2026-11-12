@@ -856,3 +856,69 @@ def test_change_log_is_append_only_after_migrations(tmp_path, monkeypatch):
             ).scalar_one() == 2
     finally:
         engine.dispose()
+
+
+
+def test_alembic_upgrade_bootstraps_clean_database(tmp_path, monkeypatch):
+    """A clean database must receive core and evidence tables from Alembic alone."""
+    from alembic import command
+    from alembic.config import Config
+    from sqlalchemy import create_engine, inspect, select
+    from sqlalchemy.orm import Session
+
+    from app import models  # noqa: F401
+    from app.models import Casting, Release
+
+    database_path = tmp_path / "clean.db"
+    url = f"sqlite:///{database_path}"
+    config = Config("alembic.ini")
+    config.set_main_option("sqlalchemy.url", url)
+    monkeypatch.setenv("DATABASE_URL", url)
+
+    command.upgrade(config, "head")
+    command.upgrade(config, "head")
+
+    engine = create_engine(url)
+    try:
+        tables = set(inspect(engine).get_table_names())
+        expected = {
+            "castings",
+            "casting_variants",
+            "series",
+            "releases",
+            "release_series",
+            "sources",
+            "source_records",
+            "evidence",
+            "media_assets",
+            "conflicts",
+            "change_log",
+            "identifier_types",
+            "catalog_identifiers",
+            "release_identifiers",
+            "casting_identifiers",
+            "casting_variant_identifiers",
+            "conflict_releases",
+            "alembic_version",
+        }
+        assert expected <= tables
+
+        with Session(engine) as db:
+            casting = Casting(name="Created after clean Alembic bootstrap")
+            release = Release(casting=casting, catalog_year=2026)
+            db.add(release)
+            db.commit()
+
+            loaded = db.scalar(
+                select(Release).where(Release.id == release.id)
+            )
+            assert loaded is not None
+            assert loaded.casting.name == "Created after clean Alembic bootstrap"
+
+            seeded_types = db.execute(
+                select(models.IdentifierType)
+            ).scalars().all()
+            assert len(seeded_types) == 9
+            assert all(item.is_globally_unique is False for item in seeded_types)
+    finally:
+        engine.dispose()
