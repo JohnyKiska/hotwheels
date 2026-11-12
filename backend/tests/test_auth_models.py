@@ -151,7 +151,7 @@ def test_user_role_history_allows_regrant_after_revocation(session):
     from datetime import datetime, timezone
 
     revoked_at = datetime.now(timezone.utc)
-    session.add(UserRole(user_id=user.id, role_id=role.id, revoked_at=revoked_at))
+    session.add(UserRole(user_id=user.id, role_id=role.id, assigned_at=revoked_at, revoked_at=revoked_at))
     session.add(UserRole(user_id=user.id, role_id=role.id))
     session.commit()
 
