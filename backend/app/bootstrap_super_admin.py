@@ -35,18 +35,21 @@ def bootstrap_super_admin(
         raise BootstrapError("GitHub ID must be a positive numeric account ID.")
 
     now = utc_now()
+    # Lock the seeded role row so concurrent PostgreSQL bootstrap attempts serialize.
+    role = session.scalar(
+        select(Role).where(Role.code == "super_admin").with_for_update()
+    )
+    if role is None:
+        raise BootstrapError("The super_admin role is missing; run database migrations first.")
+
+    # Any historical assignment means the one-time bootstrap has already been used.
     existing_admin = session.scalar(
         select(UserRole.id)
-        .join(Role, Role.id == UserRole.role_id)
-        .where(
-            Role.code == "super_admin",
-            UserRole.revoked_at.is_(None),
-            (UserRole.expires_at.is_(None)) | (UserRole.expires_at > now),
-        )
+        .where(UserRole.role_id == role.id)
         .limit(1)
     )
     if existing_admin is not None:
-        raise BootstrapError("A Super Admin is already assigned; bootstrap is one-time.")
+        raise BootstrapError("A Super Admin assignment already exists; bootstrap is one-time.")
 
     existing_identity = session.scalar(
         select(ExternalIdentity).where(
@@ -56,10 +59,6 @@ def bootstrap_super_admin(
     )
     if existing_identity is not None:
         raise BootstrapError("This GitHub identity is already linked to an HW Catalog account.")
-
-    role = session.scalar(select(Role).where(Role.code == "super_admin"))
-    if role is None:
-        raise BootstrapError("The super_admin role is missing; run database migrations first.")
 
     user = User(status="active", display_name=(github_username or None))
     session.add(user)
