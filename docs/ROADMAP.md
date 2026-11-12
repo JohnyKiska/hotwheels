@@ -306,3 +306,20 @@ SMTP не гарантирует exactly-once delivery при разрыве с�
 - [x] Установить HttpOnly session cookie + отдельный CSRF cookie; проверять Origin и CSRF header для cookie-auth mutations.
 - [x] Добавить RBAC permission dependencies для users.manage и roles.assign.
 - [ ] Добавить rate limiting для публичных token endpoints и административной отправки приглашений.
+
+### Email/password authentication · 2026-11-12
+
+- [x] Добавить Argon2id password hashing и одноразовую первичную установку пароля для аккаунта после invitation acceptance.
+- [x] Реализовать вход только для active User с подтверждённым primary email и активным PasswordCredential.
+- [x] Возвращать одинаковую ошибку входа для неизвестного email, неверного пароля, неподтверждённой почты и недоступного аккаунта.
+- [x] Добавить persistent rate-limit buckets с HMAC-идентификаторами вместо хранения исходных email/IP; атомарное обновление поддерживает SQLite и PostgreSQL.
+- [x] Добавить enumeration-safe password reset request, encrypted email outbox, SHA-256 token hash, TTL 30 минут и одноразовое потребление.
+- [x] При успешном сбросе отзывать все существующие сессии и остальные reset tokens пользователя.
+- [x] Добавить API tests для Argon2id, входа, generic errors, throttle, reset replay, session revocation и unverified email.
+- [ ] Проверить полный CI и migration chain на SQLite и PostgreSQL 16; исправить найденные проблемы.
+- [ ] Подключить UI форм входа/установки/сброса пароля и проверить реальные email links.
+- [ ] Добавить смену пароля для вошедшего пользователя с подтверждением текущего пароля.
+- [ ] Добавить мониторинг rate-limit блокировок, reset queue и security events; определить retention/cleanup buckets.
+- [ ] Провести ручной E2E тест после настройки SMTP и HTTPS staging.
+
+Операционная настройка: `HW_AUTH_RATE_LIMIT_KEY` (не менее 32 случайных символов), `HW_EMAIL_ENCRYPTION_KEY`, `HW_PUBLIC_BASE_URL` и SMTP secrets задаются только в окружении сервера.
