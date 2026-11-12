@@ -56,7 +56,7 @@ def _frontend_result(status: str) -> RedirectResponse:
     if not base:
         base = _public_base_url()
     return RedirectResponse(
-        f"{base}/login?{urlencode({'oauth': status})}",
+        f"{base}/login.html?{urlencode({'oauth': status})}",
         status_code=303,
     )
 
