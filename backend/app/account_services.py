@@ -183,6 +183,11 @@ def revoke_role(
     user = db.scalar(select(User).where(User.id == user_id).with_for_update())
     if user is None:
         raise AccountServiceError("user_not_found")
+    role = db.get(Role, role_id)
+    if role is None:
+        raise AccountServiceError("role_not_found")
+    if role.code == "super_admin":
+        raise AccountServiceError("super_admin_requires_bootstrap")
     assignment = db.scalar(select(UserRole).where(
         UserRole.user_id == user_id,
         UserRole.role_id == role_id,
@@ -193,7 +198,6 @@ def revoke_role(
     assignment.revoked_at = utc_now()
     assignment.revoked_by_user_id = revoked_by_user_id
     db.flush()
-    role = db.get(Role, role_id)
     _audit(db, "user.role.revoked", actor_user_id=revoked_by_user_id,
            target_type="user", target_id=user_id,
            metadata={"role": role.code if role else "unknown"})
