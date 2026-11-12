@@ -189,7 +189,8 @@
 - [x] Разделить RBAC (Role/Permission/UserRole) и коммерческие entitlements.
 - [x] Предусмотреть тарифы с версиями цены, подписки, платежи, webhook idempotency и ручные Premium grants.
 - [x] Зафиксировать правила аудита, индексов, FK, временных зон и PostgreSQL portability.
-- [ ] Согласовать открытые продуктовые решения и утвердить контракт схемы.
+- [x] Провести consistency review схемы: устранить дублирование primary email, уточнить OIDC identity key, историчность назначений ролей, invite-only регистрацию, lifecycle подписки и additive entitlement grants.
+- [x] Зафиксировать технический контракт базовой схемы; продуктовые решения по тарифам, ценам, платёжному провайдеру и grace policy оставить открытыми.
 - [ ] Реализовать модели и миграции небольшими этапами, начиная с аккаунтов и RBAC.
 - [ ] Проверить миграции и полный backend suite на SQLite и PostgreSQL 16.
 - [ ] После проверки реализовать GitHub OAuth, сессии и серверные permission checks.
@@ -205,3 +206,6 @@
 - [ ] Реализовать password hashing, email verification/reset tokens, rate limiting и тесты безопасности.
 - [ ] Подключить Google OIDC и GitHub OAuth через единый identity service.
 
+
+
+**Schema consistency review · 2026-11-12:** `docs/architecture/ACCOUNT-ACCESS-SCHEMA.md` уточнён: EmailAddress — единственный источник primary email; ExternalIdentity использует issuer+subject; UserRole хранит историю отзывов; Subscription отделена от ручных Premium grants; доступ после отмены привязан к оплаченному периоду; стартовая регистрация invite-only. Миграции и модели пока не создавались.
