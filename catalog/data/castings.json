@@ -834,8 +834,8 @@
       "canonical_name": "Rodger Dodger",
       "manufacturer": "Mattel",
       "casting_number": null,
-      "identity_status": "provisional",
-      "identity_basis": "Default project rule: entries sharing a Collector # are provisionally grouped as one casting until structural evidence shows a difference. Color, tampo, wheels, finish, hunt status and distribution do not alone create a new casting.",
+      "identity_status": "user_confirmed_same_casting",
+      "identity_basis": "User visually inspected the 2026 Mainline releases JJH94, JJM51 and JJK71 and confirmed that all three Rodger Dodger castings are identical.",
       "collector_number": "019",
       "year_context": 2026,
       "catalog_family": "Mainline",
@@ -867,9 +867,18 @@
           "repository": "JohnyKiska/hotwheels-fandom-archive",
           "path": "research/reviews/MAINLINE-2026-PROVISIONAL-CASTING-GROUPS.csv",
           "collector_number": "019"
+        },
+        {
+          "type": "user_visual_inspection",
+          "release_ids": [
+            "rel_ml2026_jjh94",
+            "rel_ml2026_jjm51",
+            "rel_ml2026_jjk71"
+          ],
+          "observation": "User confirmed that all three Rodger Dodger castings are identical."
         }
       ],
-      "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import."
+      "notes": "User-confirmed identical casting across the First Listed release, 2nd Color Kroger Exclusive and 3rd Color. Color, tampo, wheels and distribution remain variant-level attributes unless separately documented."
     },
     {
       "id": "cst_ml2026_020",
