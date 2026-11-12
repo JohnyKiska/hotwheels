@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import datetime, timedelta, timezone
 
 import pytest
 from sqlalchemy import create_engine, event, select
@@ -97,6 +97,17 @@ def test_role_assignment_is_idempotent_and_revocation_preserves_history(db):
     assert rows[0].revoked_at is not None
 
 
+def test_super_admin_cannot_be_revoked_through_regular_role_service(db):
+    user = create_user(db, status="active")
+    role = Role(code="super_admin", name="Super Admin")
+    db.add(role)
+    db.flush()
+    db.add(UserRole(user_id=user.id, role_id=role.id))
+    db.flush()
+    with pytest.raises(AccountServiceError, match="super_admin_requires_bootstrap"):
+        revoke_role(db, user_id=user.id, role_id=role.id)
+
+
 def test_super_admin_cannot_be_assigned_through_regular_role_service(db):
     user = create_user(db, status="active")
     role = Role(code="super_admin", name="Super Admin")
@@ -181,8 +192,9 @@ def test_email_verification_rejects_expired_token(db):
     db.add(email)
     db.flush()
     token, raw_token = create_email_verification(db, email_address_id=email.id)
-    from datetime import datetime, timezone
-    token.expires_at = datetime.now(timezone.utc) - timedelta(seconds=1)
+    now = datetime.now(timezone.utc)
+    token.created_at = now - timedelta(days=2)
+    token.expires_at = now - timedelta(days=1)
     db.flush()
 
     with pytest.raises(AccountServiceError, match="verification_token_expired"):
