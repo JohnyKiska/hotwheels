@@ -428,8 +428,8 @@ def request_password_reset(
         )
         db.add(token)
         db.flush()
-        base = _public_base_url()
-        link = f"{base}/account/reset-password?token={quote(raw_token, safe='')}"
+        base = os.environ.get("HW_FRONTEND_URL", "").strip().rstrip("/") or _public_base_url()
+        link = f"{base}/login.html?reset={quote(raw_token, safe='')}"
         queue_email(
             db,
             recipient=email.email_normalized,
