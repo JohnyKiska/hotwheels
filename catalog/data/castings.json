@@ -746,8 +746,8 @@
       "canonical_name": "Bounce'n Bass",
       "manufacturer": "Mattel",
       "casting_number": null,
-      "identity_status": "provisional",
-      "identity_basis": "Default project rule: entries sharing a Collector # are provisionally grouped as one casting until structural evidence shows a difference. Color, tampo, wheels, finish, hunt status and distribution do not alone create a new casting.",
+      "identity_status": "user_confirmed_same_casting",
+      "identity_basis": "User visually inspected the 2026 Mainline releases JJH32 and JJK69 and confirmed that both Bounce'n Bass castings are identical.",
       "collector_number": "017",
       "year_context": 2026,
       "catalog_family": "Mainline",
@@ -773,9 +773,17 @@
           "repository": "JohnyKiska/hotwheels-fandom-archive",
           "path": "research/reviews/MAINLINE-2026-PROVISIONAL-CASTING-GROUPS.csv",
           "collector_number": "017"
+        },
+        {
+          "type": "user_visual_inspection",
+          "release_ids": [
+            "rel_ml2026_jjh32",
+            "rel_ml2026_jjk69"
+          ],
+          "observation": "User confirmed that both Bounce'n Bass castings are identical."
         }
       ],
-      "notes": "Imported as a candidate casting identity; status follows the project review CSV. Group membership is not independently re-proven by this import."
+      "notes": "User-confirmed identical casting across the First Listed release and 2nd Color. Differences in color, tampo, wheels or finish remain variant-level attributes unless separately documented."
     },
     {
       "id": "cst_ml2026_018",
