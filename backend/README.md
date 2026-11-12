@@ -191,6 +191,9 @@ Endpoints:
   generic error for unknown, unverified, disabled, suspended or invalid accounts.
 - `POST /api/v1/account/password/set`: configure the first password for the
   authenticated user with a verified primary email.
+- `POST /api/v1/account/password/change`: change an existing password after
+  verifying the current password; other active sessions and pending reset links
+  are revoked while the current browser session remains active.
 - `POST /api/v1/account/password/reset/request`: enumeration-safe reset request;
   always returns HTTP 202 with the same response.
 - `POST /api/v1/account/password/reset/confirm`: consume a single-use reset
