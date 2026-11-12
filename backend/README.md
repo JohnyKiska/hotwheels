@@ -100,3 +100,43 @@ python -m app.init_db
 This creates tables for the current models but does not import catalog data. It is
 a development bootstrap, not a replacement for versioned Alembic migrations.
 The generated database and all local storage data must remain outside Git.
+
+## Transactional email worker
+
+The account invitation and email-verification flows enqueue encrypted messages
+in the transactional outbox. Sending is performed by a separate worker process,
+not by API requests.
+
+Install dependencies and configure these server-side environment variables:
+
+- `HW_EMAIL_ENCRYPTION_KEY`: Fernet key used to encrypt outbox payloads.
+  Generate one with `python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"`.
+- `HW_SMTP_HOST` and `HW_SMTP_FROM_EMAIL`: required SMTP server and sender.
+- `HW_SMTP_PORT`: defaults to 587.
+- `HW_SMTP_SECURITY`: `starttls` (default), `ssl`, or explicitly `none`.
+- `HW_SMTP_USERNAME` and `HW_SMTP_PASSWORD`: optional, but must be set together.
+- `HW_SMTP_FROM_NAME`: defaults to `HW Catalog`.
+- `HW_SMTP_TIMEOUT`: connection timeout in seconds, defaults to 20.
+- `DATABASE_URL` or the normal catalog database location settings.
+
+Run one batch:
+
+```bash
+python -m app.email_worker --once
+```
+
+Run continuously:
+
+```bash
+python -m app.email_worker --poll-seconds 5 --batch-size 20
+```
+
+Run the worker as a separate supervised process/service. Do not run it inside
+each API worker process. Keep SMTP credentials and encryption keys in the
+hosting provider's secret store, never in Git or frontend configuration.
+
+The dispatcher retries transient errors with bounded exponential backoff.
+SMTP cannot guarantee exactly-once delivery if a connection drops after the
+server accepted a message; the worker therefore provides at-least-once delivery
+in that edge case. The idempotency key is included as a diagnostic header, but
+SMTP servers are not required to deduplicate it.
