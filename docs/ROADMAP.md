@@ -149,10 +149,10 @@
 - [x] Зафиксировать целевую архитектуру: существующий FastAPI как единственный backend, GitHub OAuth для идентификации, собственный RBAC, GitHub Repository adapter для временного хранения каталога.
 - [x] Зафиксировать принцип переноса: API и доменная логика не зависят от провайдера размещения; будущая SQL-БД — PostgreSQL.
 - [x] Выполнить статический аудит SQLAlchemy-моделей и Alembic migrations на совместимость с PostgreSQL.
-- [ ] Исправить SQLite-only connect_args/PRAGMA в engine и сделать их dialect-aware.
-- [ ] Восстановить полный Alembic bootstrap для core catalog schema на чистой БД.
-- [ ] Сделать append-only triggers и boolean seed совместимыми с SQLite и PostgreSQL.
-- [ ] Добавить migration tests на пустой и существующей БД; подключить PostgreSQL CI.
+- [x] Исправить SQLite-only connect_args/PRAGMA в engine и сделать их dialect-aware.
+- [x] Восстановить полный Alembic bootstrap для core catalog schema на чистой БД.
+- [x] Сделать append-only triggers и boolean seed совместимыми с SQLite и PostgreSQL.
+- [x] Добавить migration tests на пустой и существующей SQLite БД; подключить PostgreSQL migration/trigger smoke tests в CI.
 - [ ] Только после portability gate добавлять auth/RBAC schema.
 - [ ] Спроектировать и добавить User, ExternalIdentity, Role, Permission, UserRole, Session и AuditEvent.
 - [ ] Реализовать закрытый GitHub OAuth flow и одноразовое назначение первого Super Admin.
@@ -161,6 +161,8 @@
 - [ ] Добавить страницы Login и Admin в существующий frontend.
 - [ ] Выбрать временный backend host и managed PostgreSQL, настроить staging и backup/restore.
 - [ ] Подключать frontend к API только после проверки авторизации, CORS и доступа.
+
+**Проверка DB portability · 2026-11-12:** GitHub Actions run #253: 165 passed, 6 warnings; PostgreSQL 16 clean Alembic upgrade и повторный upgrade прошли; PostgreSQL отклоняет UPDATE/DELETE в change_log. SQLite clean bootstrap и upgrade существующей БД с сохранением записи проверены отдельными тестами. Полный набор backend-тестов на PostgreSQL пока не запускался.
 
 Архитектурное решение: `docs/architecture/FOUNDATION-ADR-001.md`.\n\nРезультат статического DB portability audit: `docs/architecture/BACKEND-DB-PORTABILITY-AUDIT.md`.
 
