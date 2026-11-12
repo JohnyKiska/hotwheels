@@ -901,6 +901,7 @@ def test_alembic_upgrade_bootstraps_clean_database(tmp_path, monkeypatch):
             "conflict_releases",
             "alembic_version",
             "outbound_emails",
+            "oauth_authorization_requests",
         }
         assert expected <= tables
 
