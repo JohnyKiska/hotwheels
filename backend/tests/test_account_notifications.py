@@ -69,6 +69,7 @@ def test_invitation_and_email_are_created_in_same_transaction(monkeypatch):
 
 def test_email_verification_and_outbox_are_created_together(monkeypatch):
     monkeypatch.setenv("HW_EMAIL_ENCRYPTION_KEY", Fernet.generate_key().decode())
+    monkeypatch.setenv("HW_FRONTEND_URL", "https://frontend.example.com")
     engine, factory = make_factory()
     try:
         with factory() as db:
