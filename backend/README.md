@@ -222,11 +222,11 @@ password change, account profile, and linking an external identity.
 
 The frontend uses same-origin `/api/v1` by default. For production, serve the
 static site and FastAPI behind the same HTTPS origin, reverse-proxying
-`/api/*` to FastAPI. If a separate API origin is unavoidable, set the
-`hw-api-base` meta tag in `login.html` to the API origin and configure a
-credentialed CORS allowlist, cookie SameSite/domain policy, and CSRF protections
-before exposing it publicly. Do not put OAuth client secrets or other server
-secrets in the HTML.
+`/api/*` to FastAPI. Cross-origin frontend/API deployment is not enabled by this backend yet. Use
+same-origin reverse proxy deployment for now; do not expose a separate API origin
+until credentialed CORS, cookie SameSite/domain policy, and CSRF protections are
+implemented and tested. Do not put OAuth client secrets or other server secrets
+in the HTML.
 
 Set `HW_FRONTEND_URL` to the public static-site origin. OAuth callback results,
 invitation links, email-verification links and password-reset links return to
