@@ -4,6 +4,7 @@ from __future__ import annotations
 import base64
 import hashlib
 import os
+import secrets
 from urllib.parse import urlencode
 
 import httpx
@@ -15,6 +16,7 @@ from sqlalchemy.orm import Session
 
 from .account_api import (
     SESSION_COOKIE,
+    _cookie_secure,
     _current_user,
     _public_base_url,
     _require_csrf,
@@ -22,6 +24,7 @@ from .account_api import (
 )
 from .account_services import (
     AccountServiceError,
+    authenticate_session,
     create_session,
     link_external_identity,
 )
@@ -57,6 +60,36 @@ def _frontend_result(status: str) -> RedirectResponse:
         status_code=303,
     )
 
+
+
+def _state_cookie_name(state: str) -> str:
+    return "hw_oauth_state_" + digest(state)[:20]
+
+
+def _oauth_start_response(provider: str, state: str, url: str) -> RedirectResponse:
+    response = RedirectResponse(url, status_code=303)
+    response.set_cookie(
+        _state_cookie_name(state),
+        state,
+        max_age=600,
+        httponly=True,
+        secure=_cookie_secure(),
+        samesite="lax",
+        path=f"/api/v1/account/oauth/{provider}/callback",
+    )
+    return response
+
+
+def _oauth_finish(provider: str, state: str, status: str) -> RedirectResponse:
+    response = _frontend_result(status)
+    response.delete_cookie(
+        _state_cookie_name(state),
+        path=f"/api/v1/account/oauth/{provider}/callback",
+        secure=_cookie_secure(),
+        httponly=True,
+        samesite="lax",
+    )
+    return response
 
 def _pkce_challenge(verifier: str) -> str:
     digest_bytes = hashlib.sha256(verifier.encode("ascii")).digest()
@@ -97,10 +130,7 @@ def start_oauth_login(provider: str, db: Session = Depends(get_db)):
     redirect_uri = _redirect_uri(provider)
     # Fail before creating a state record if required client configuration is absent.
     _required(f"HW_{provider.upper()}_CLIENT_ID")
-    if provider == "github":
-        pass
-    else:
-        _required("HW_GOOGLE_CLIENT_SECRET")
+    _required(f"HW_{provider.upper()}_CLIENT_SECRET")
     try:
         _request, state, verifier, nonce = create_oauth_request(
             db, provider=provider, redirect_uri=redirect_uri
@@ -110,7 +140,7 @@ def start_oauth_login(provider: str, db: Session = Depends(get_db)):
     except OAuthFlowError as exc:
         db.rollback()
         raise HTTPException(status_code=503, detail=exc.code) from exc
-    return RedirectResponse(url, status_code=303)
+    return _oauth_start_response(provider, state, url)
 
 
 @router.post("/{provider}/link")
@@ -125,8 +155,7 @@ def start_oauth_link(
     _require_csrf(request)
     redirect_uri = _redirect_uri(provider)
     _required(f"HW_{provider.upper()}_CLIENT_ID")
-    if provider == "google":
-        _required("HW_GOOGLE_CLIENT_SECRET")
+    _required(f"HW_{provider.upper()}_CLIENT_SECRET")
     raw_session = request.cookies.get(SESSION_COOKIE, "")
     try:
         _request, state, verifier, nonce = create_oauth_request(
@@ -142,7 +171,7 @@ def start_oauth_link(
     except OAuthFlowError as exc:
         db.rollback()
         raise HTTPException(status_code=503, detail=exc.code) from exc
-    return RedirectResponse(url, status_code=303)
+    return _oauth_start_response(provider, state, url)
 
 
 def _github_profile(code: str, redirect_uri: str, verifier: str) -> dict:
@@ -267,15 +296,18 @@ def oauth_callback(
 ):
     if provider not in {"github", "google"}:
         raise HTTPException(status_code=404, detail="OAuth provider not found.")
+    browser_state = request.cookies.get(_state_cookie_name(state), "")
+    if not browser_state or not secrets.compare_digest(browser_state, state):
+        return _oauth_finish(provider, state, "invalid_state")
     try:
         transaction = consume_oauth_request(db, state, provider=provider)
         db.commit()  # Consume state before contacting the provider; callbacks are single-use.
     except OAuthFlowError:
         db.rollback()
-        return _frontend_result("invalid_state")
+        return _oauth_finish(provider, state, "invalid_state")
 
     if error or not code:
-        return _frontend_result("cancelled")
+        return _oauth_finish(provider, state, "cancelled")
 
     if transaction["intent"] == "link":
         current_session = request.cookies.get(SESSION_COOKIE, "")
@@ -283,7 +315,11 @@ def oauth_callback(
             not current_session
             or digest(current_session) != transaction["session_token_hash"]
         ):
-            return _frontend_result("session_changed")
+            return _oauth_finish(provider, state, "session_changed")
+        authenticated = authenticate_session(db, current_session)
+        db.commit()
+        if authenticated is None or authenticated[1].id != transaction["user_id"]:
+            return _oauth_finish(provider, state, "session_changed")
 
     try:
         profile = (
@@ -297,7 +333,7 @@ def oauth_callback(
             )
         )
     except (httpx.HTTPError, ValueError, KeyError, TypeError, jwt.PyJWTError):
-        return _frontend_result("provider_error")
+        return _oauth_finish(provider, state, "provider_error")
 
     try:
         if transaction["intent"] == "link":
@@ -323,13 +359,13 @@ def oauth_callback(
             ))
             if identity is None:
                 db.rollback()
-                return _frontend_result("account_not_linked")
+                return _oauth_finish(provider, state, "account_not_linked")
             user = db.scalar(select(User).where(
                 User.id == identity.user_id
             ).with_for_update())
             if user is None or user.status != "active":
                 db.rollback()
-                return _frontend_result("account_unavailable")
+                return _oauth_finish(provider, state, "account_unavailable")
             identity.last_authenticated_at = utc_now()
             if profile["username"]:
                 identity.provider_username = profile["username"]
@@ -342,9 +378,9 @@ def oauth_callback(
         db.commit()
     except AccountServiceError:
         db.rollback()
-        return _frontend_result("identity_unavailable")
+        return _oauth_finish(provider, state, "identity_unavailable")
 
-    response = _frontend_result("success")
+    response = _oauth_finish(provider, state, "success")
     lifetime = int((session.expires_at - utc_now()).total_seconds())
     _set_session_cookies(response, raw_session_token, lifetime)
     return response
