@@ -500,6 +500,33 @@ class ExternalIdentity(TimestampMixin, Base):
     )
 
 
+class OAuthAuthorizationRequest(Base):
+    """Short-lived, single-use OAuth transaction with encrypted PKCE verifier."""
+
+    __tablename__ = "oauth_authorization_requests"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    provider: Mapped[str] = mapped_column(String(32), nullable=False)
+    state_hash: Mapped[str] = mapped_column(String(64), nullable=False, unique=True)
+    nonce_hash: Mapped[str | None] = mapped_column(String(64))
+    code_verifier_encrypted: Mapped[str] = mapped_column(Text, nullable=False)
+    redirect_uri: Mapped[str] = mapped_column(Text, nullable=False)
+    intent: Mapped[str] = mapped_column(String(16), nullable=False, default="login")
+    user_id: Mapped[str | None] = mapped_column(
+        ForeignKey("users.id", ondelete="RESTRICT"), nullable=True, index=True
+    )
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    consumed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utc_now, nullable=False
+    )
+
+    __table_args__ = (
+        CheckConstraint("provider IN ('github', 'google')", name="ck_oauth_requests_provider"),
+        CheckConstraint("intent IN ('login', 'link')", name="ck_oauth_requests_intent"),
+    )
+
+
 class EmailAddress(TimestampMixin, Base):
     __tablename__ = "email_addresses"
 
