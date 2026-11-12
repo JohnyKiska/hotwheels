@@ -84,17 +84,19 @@ def test_invitation_links_inviter_role_and_accepting_user(db):
     inviter = User(status="active")
     accepted_user = User(status="active")
     role = Role(code="editor", name="Editor")
+    db.add_all([inviter, accepted_user, role])
+    db.flush()
     invitation = Invitation(
         email_normalized="collector@example.com",
         token_hash="d" * 64,
         invited_by_user_id=inviter.id,
-        role=role,
+        role_id=role.id,
         status="accepted",
         expires_at=datetime.now(timezone.utc) + timedelta(days=2),
         accepted_by_user_id=accepted_user.id,
         accepted_at=datetime.now(timezone.utc),
     )
-    db.add_all([inviter, accepted_user, role, invitation])
+    db.add(invitation)
     db.commit()
 
     loaded = db.get(Invitation, invitation.id)
@@ -104,10 +106,13 @@ def test_invitation_links_inviter_role_and_accepting_user(db):
 
 
 def test_invitation_rejects_accepted_status_without_acceptance_fields(db):
+    inviter = User(status="active")
+    db.add(inviter)
+    db.flush()
     invitation = Invitation(
         email_normalized="collector@example.com",
         token_hash="e" * 64,
-        invited_by_user_id=User(status="active").id,
+        invited_by_user_id=inviter.id,
         status="accepted",
         expires_at=datetime.now(timezone.utc) + timedelta(days=1),
     )
@@ -139,9 +144,11 @@ def test_email_verification_token_is_one_time_and_hash_only(db):
         email_normalized="new@example.com",
         email_display="New@example.com",
     )
+    db.add(email)
+    db.flush()
     now = datetime.now(timezone.utc)
     token = EmailVerificationToken(
-        email_address=email,
+        email_address_id=email.id,
         token_hash="1" * 64,
         created_at=now,
         expires_at=now + timedelta(hours=1),
@@ -164,9 +171,11 @@ def test_email_verification_rejects_expiry_before_creation(db):
         email_normalized="expired@example.com",
         email_display="expired@example.com",
     )
+    db.add(email)
+    db.flush()
     now = datetime.now(timezone.utc)
     db.add(EmailVerificationToken(
-        email_address=email,
+        email_address_id=email.id,
         token_hash="2" * 64,
         created_at=now,
         expires_at=now - timedelta(seconds=1),
@@ -178,7 +187,9 @@ def test_email_verification_rejects_expiry_before_creation(db):
 
 def test_audit_event_captures_actor_action_target_and_request(db):
     actor = User(status="active")
-    event = AuditEvent(
+    db.add(actor)
+    db.flush()
+    audit_event = AuditEvent(
         actor_user_id=actor.id,
         action="user.role.assigned",
         target_type="user",
@@ -187,10 +198,10 @@ def test_audit_event_captures_actor_action_target_and_request(db):
         result="success",
         event_metadata={"role": "editor"},
     )
-    db.add_all([actor, event])
+    db.add(audit_event)
     db.commit()
 
-    loaded = db.get(AuditEvent, event.id)
+    loaded = db.get(AuditEvent, audit_event.id)
     assert loaded is not None
     assert loaded.actor_user_id == actor.id
     assert loaded.event_metadata == {"role": "editor"}
