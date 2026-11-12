@@ -144,4 +144,19 @@
 - [x] Merge PR #85 в `integration/catalog-foundation` (squash `c787696e9dc25abfc985de485710fd8f2569d0aa`).
 - [ ] Изучить существующий frontend admin workflow и подключить read-only preview UI без persistence/apply.
 
-- [ ] Resolve backend hosting + persistent database strategy and API authentication before connecting GitHub Pages UI to the API. Do not expose write-capable conflict endpoints through permissive CORS without authentication.
+## Admin foundation · 2026-11-12
+
+- [x] Зафиксировать целевую архитектуру: существующий FastAPI как единственный backend, GitHub OAuth для идентификации, собственный RBAC, GitHub Repository adapter для временного хранения каталога.
+- [x] Зафиксировать принцип переноса: API и доменная логика не зависят от провайдера размещения; будущая SQL-БД — PostgreSQL.
+- [ ] Аудировать текущие SQLAlchemy-модели и Alembic migrations на совместимость с PostgreSQL.
+- [ ] Спроектировать и добавить User, ExternalIdentity, Role, Permission, UserRole, Session и AuditEvent.
+- [ ] Реализовать закрытый GitHub OAuth flow и одноразовое назначение первого Super Admin.
+- [ ] Закрыть все изменяющие API endpoints RBAC-проверками и тестами.
+- [ ] Реализовать серверный GitHub App adapter с минимальными правами и optimistic concurrency.
+- [ ] Добавить страницы Login и Admin в существующий frontend.
+- [ ] Выбрать временный backend host и managed PostgreSQL, настроить staging и backup/restore.
+- [ ] Подключать frontend к API только после проверки авторизации, CORS и доступа.
+
+Архитектурное решение: `docs/architecture/FOUNDATION-ADR-001.md`.
+
+Важно: Cloudflare Workers не добавляем как второй backend. Используем существующий FastAPI и переносим его между хостингами без изменения API.
