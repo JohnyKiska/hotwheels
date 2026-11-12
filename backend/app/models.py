@@ -595,3 +595,106 @@ class UserRole(Base):
             name="ck_user_roles_revocation_after_assignment",
         ),
     )
+
+
+
+class UserSession(Base):
+    """Opaque server-side session; only a hash of the bearer token is persisted."""
+    __tablename__ = "user_sessions"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    user_id: Mapped[str] = mapped_column(
+        ForeignKey("users.id", ondelete="RESTRICT"), nullable=False, index=True
+    )
+    token_hash: Mapped[str] = mapped_column(String(64), nullable=False, unique=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, index=True)
+    last_seen_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    revoke_reason: Mapped[str | None] = mapped_column(String(120))
+    user_agent: Mapped[str | None] = mapped_column(String(500))
+
+    __table_args__ = (
+        CheckConstraint("expires_at > created_at", name="ck_user_sessions_expiry_after_creation"),
+        CheckConstraint("revoked_at IS NULL OR revoked_at >= created_at",
+                        name="ck_user_sessions_revocation_after_creation"),
+    )
+
+
+class Invitation(TimestampMixin, Base):
+    __tablename__ = "invitations"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    email_normalized: Mapped[str] = mapped_column(String(320), nullable=False, index=True)
+    token_hash: Mapped[str] = mapped_column(String(64), nullable=False, unique=True)
+    invited_by_user_id: Mapped[str] = mapped_column(
+        ForeignKey("users.id", ondelete="RESTRICT"), nullable=False
+    )
+    role_id: Mapped[str | None] = mapped_column(
+        ForeignKey("roles.id", ondelete="RESTRICT")
+    )
+    status: Mapped[str] = mapped_column(String(24), default="pending", nullable=False)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    accepted_by_user_id: Mapped[str | None] = mapped_column(
+        ForeignKey("users.id", ondelete="RESTRICT")
+    )
+    accepted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+    __table_args__ = (
+        CheckConstraint("email_normalized = lower(email_normalized)",
+                        name="ck_invitations_email_normalized_lowercase"),
+        CheckConstraint("status IN ('pending', 'accepted', 'revoked', 'expired')",
+                        name="ck_invitations_status"),
+        CheckConstraint(
+            "(status != 'accepted') OR (accepted_by_user_id IS NOT NULL AND accepted_at IS NOT NULL)",
+            name="ck_invitations_accepted_fields",
+        ),
+        CheckConstraint(
+            "(status != 'revoked') OR revoked_at IS NOT NULL",
+            name="ck_invitations_revoked_at",
+        ),
+        CheckConstraint("expires_at > created_at", name="ck_invitations_expiry_after_creation"),
+    )
+
+
+class EmailVerificationToken(Base):
+    """One-time verification token; raw token material is never stored."""
+    __tablename__ = "email_verification_tokens"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    email_address_id: Mapped[str] = mapped_column(
+        ForeignKey("email_addresses.id", ondelete="RESTRICT"), nullable=False, index=True
+    )
+    token_hash: Mapped[str] = mapped_column(String(64), nullable=False, unique=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, index=True)
+    consumed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+    __table_args__ = (
+        CheckConstraint("expires_at > created_at", name="ck_email_verification_expiry_after_creation"),
+        CheckConstraint("consumed_at IS NULL OR consumed_at >= created_at",
+                        name="ck_email_verification_consumed_after_creation"),
+    )
+
+
+class AuditEvent(Base):
+    """Append-only account/security audit event; metadata must never contain secrets."""
+    __tablename__ = "audit_events"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    actor_user_id: Mapped[str | None] = mapped_column(
+        ForeignKey("users.id", ondelete="RESTRICT"), index=True
+    )
+    action: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
+    target_type: Mapped[str | None] = mapped_column(String(60), index=True)
+    target_id: Mapped[str | None] = mapped_column(String(120), index=True)
+    request_id: Mapped[str | None] = mapped_column(String(120), index=True)
+    result: Mapped[str] = mapped_column(String(24), default="success", nullable=False)
+    event_metadata: Mapped[dict | None] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
+
+    __table_args__ = (
+        CheckConstraint("result IN ('success', 'failure', 'denied')",
+                        name="ck_audit_events_result"),
+    )
