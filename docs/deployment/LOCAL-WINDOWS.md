@@ -30,14 +30,38 @@
 
 Backend уже документирует команду и формат внешнего хранилища:
 
-```powershell
-cd backend
-python -m app.init_storage "E:\HW-CATALOG" --label "HW Catalog External HDD"
-```
+    cd backend
+    python -m app.init_storage "E:\HW-CATALOG" --label "HW Catalog External HDD"
 
 Буква диска в примере условная. Команда инициализации выполняется один раз и не должна запускаться повторно поверх существующего хранилища.
 
 После инициализации на каждом ПК задаётся переменная окружения HW_CATALOG_DATA_DIR, указывающая на корневую папку HW-CATALOG. Точный путь может отличаться, если Windows назначает диску разные буквы.
+
+## Запуск и остановка
+
+Добавлены PowerShell-скрипты:
+
+- scripts/windows/start-hw-catalog.ps1 проверяет внешний диск и маркер, выбирает Python, применяет Alembic migrations и запускает backend только на 127.0.0.1.
+- scripts/windows/stop-hw-catalog.ps1 находит backend и ждёт его штатного завершения.
+
+Пример запуска из корня репозитория:
+
+    Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+    .\scripts\windows\start-hw-catalog.ps1 -StorageRoot "E:\HW-CATALOG"
+
+Откроется отдельное окно backend. Для остановки запусти во втором окне PowerShell:
+
+    .\scripts\windows\stop-hw-catalog.ps1
+
+Затем переключись в окно backend и нажми Ctrl+C. Скрипт остановки дождётся выхода процесса и не будет принудительно его убивать. Если истёк тайм-аут, HDD извлекать нельзя: проверь окно backend и повтори остановку.
+
+Скрипты сохраняют PID-файл в %LOCALAPPDATA%\HW-Catalog, а журналы backend — в HW-CATALOG\LOGS на внешнем диске. Секреты и рабочая база в Git не записываются.
+
+Требования: Python с установленными зависимостями из backend/requirements.txt; виртуальное окружение .venv в корне репозитория поддерживается автоматически. Перед первым запуском установи зависимости из папки backend:
+
+    python -m pip install -r requirements.txt
+
+Скрипты пока требуют ручной проверки на обоих реальных ПК с Windows 10. На этом этапе не извлекай диск до подтверждённого завершения процесса.
 
 ## Резервное копирование
 
