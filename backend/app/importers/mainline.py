@@ -58,19 +58,42 @@ def preview_mainline_tsv(text: str, catalog_year: int) -> dict[str, Any]:
         cells = [_clean(cell) for cell in line.split("\t")]
         first = cells[0] if cells else ""
 
+
         if first.casefold() in {"toy #", "toy number", "toy no."}:
+            continue
+
+        # Отдельно выявляем строки с неправильным Toy Number.
+        if len(cells) >= 3 and first and not _TOY_NUMBER_RE.fullmatch(first):
+            finish_record()
+            current = None
+            issues.append({
+                "row": line_number,
+                "severity": "warning",
+                "code": "invalid_toy_number",
+                "message": f"Строка {line_number} пропущена: некорректный Toy Number.",
+                "toy_number": first,
+            })
             continue
 
         if len(cells) >= 3 and _TOY_NUMBER_RE.fullmatch(first):
             finish_record()
             series_index, series_total = _parse_fraction(line)
+            series_name = cells[3] if len(cells) > 3 and cells[3] else None
+
+            if series_index is not None and series_name:
+                series_name = re.sub(
+                    r"\s*\d+\s*/\s*\d+\s*$",
+                    "",
+                    series_name,
+                ).strip() or None
+
             current = {
                 "source_row": line_number,
                 "toy_number": first,
                 "assortment_number": cells[1] or None,
                 "name": cells[2],
                 "catalog_year": catalog_year,
-                "series_name": cells[3] if len(cells) > 3 and cells[3] else None,
+                "series_name": series_name,
                 "series_index": series_index,
                 "series_total": series_total,
                 "rarity": "Mainline",
@@ -78,6 +101,7 @@ def preview_mainline_tsv(text: str, catalog_year: int) -> dict[str, Any]:
                 "raw_lines": [line],
                 "review_status": "candidate",
             }
+
             if not cells[2]:
                 issues.append({
                     "row": line_number,

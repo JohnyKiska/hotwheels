@@ -158,3 +158,36 @@ def test_fandom_html_does_not_invent_mainline_total_without_explicit_statement()
     assert result["mainline_total"] is None
     assert result["records"][0]["mainline_number"] is None
     assert result["records"][0]["collector_number"] == "141"
+
+
+def test_invalid_toy_number_row_is_not_attached_to_previous_record():
+    text = (
+        "HRY54\t125\tTest Model\tHW 2024 Mainline\n"
+        "INVALID\tABC\tBroken Model\tUnknown Series\n"
+        "HRY55\t250\tFinal Model\tHW 2024 Mainline\n"
+    )
+
+    result = preview_mainline_tsv(text, 2025)
+
+    assert [record["toy_number"] for record in result["records"]] == [
+        "HRY54",
+        "HRY55",
+    ]
+    assert "INVALID" not in result["records"][0]["raw_text"]
+    assert any(
+        issue["code"] == "invalid_toy_number"
+        for issue in result["issues"]
+    )
+
+
+def test_series_fraction_is_removed_from_series_name():
+    result = preview_mainline_tsv(
+        "HRY51\t001\tMazda Autozam\tHW Dream Garage 3/5\n",
+        2025,
+    )
+
+    record = result["records"][0]
+
+    assert record["series_name"] == "HW Dream Garage"
+    assert record["series_index"] == 3
+    assert record["series_total"] == 5
