@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HW Catalog · Project Navigator</title>
+<style>
+:root{--bg:#0c1118;--panel:#131c27;--panel2:#182433;--line:#29384a;--text:#e8eef5;--muted:#9aabba;--accent:#79c0ff;--green:#3fb950;--yellow:#d29922;--red:#f85149;--gray:#82909f;--purple:#bc8cff}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(135deg,#0c1118,#101a26 55%,#0c1118);color:var(--text);font:14px/1.5 system-ui,-apple-system,Segoe UI,Arial,sans-serif}
+header{padding:28px clamp(16px,4vw,52px) 20px;border-bottom:1px solid var(--line);background:#101923dd;position:sticky;top:0;z-index:5;backdrop-filter:blur(12px)}
+h1{margin:0;font-size:clamp(23px,3vw,34px);letter-spacing:-.5px}h1 span{color:var(--accent)}.sub{color:var(--muted);margin-top:5px}
+.wrap{max-width:1500px;margin:auto;padding:22px clamp(12px,3vw,40px) 60px}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 18px}.toolbar input,.toolbar select,.toolbar button,.action{border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:9px;padding:9px 12px;font:inherit}.toolbar input{flex:1;min-width:220px}.toolbar button,.action{cursor:pointer}.toolbar button:hover,.action:hover{border-color:var(--accent)}
+.stats{display:grid;grid-template-columns:repeat(5,minmax(120px,1fr));gap:10px;margin:16px 0}.stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:13px}.stat b{font-size:25px;display:block}.stat small{color:var(--muted)}
+.progress{height:8px;background:#253242;border-radius:10px;overflow:hidden;margin-top:12px}.progress i{display:block;height:100%;background:linear-gradient(90deg,var(--green),var(--accent));width:0}
+.layout{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(300px,.8fr);gap:16px;align-items:start}.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}.panel h2{font-size:16px;margin:0;padding:14px 16px;border-bottom:1px solid var(--line)}.panel-body{padding:12px 15px}
+.legend{display:flex;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:12px;padding:0 16px 12px}.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}
+.tree{padding:4px 12px 18px}.node{margin:2px 0}.row{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:8px;min-height:36px}.row:hover{background:#1b2a3a}.toggle{width:20px;text-align:center;color:var(--muted);cursor:pointer;flex:none}.name{flex:1;cursor:pointer;min-width:0}.name strong{font-weight:600}.meta{font-size:11px;color:var(--muted);white-space:nowrap}.children{margin-left:17px;padding-left:12px;border-left:1px solid #304155}.collapsed>.children{display:none}.badge{font-size:11px;border-radius:20px;padding:2px 8px;border:1px solid var(--line);white-space:nowrap}.s-done{color:var(--green);border-color:#245d38}.s-progress{color:var(--yellow);border-color:#73571b}.s-planned{color:var(--gray)}.s-blocked{color:var(--red);border-color:#71302e}.s-audit{color:var(--purple);border-color:#553c78}
+.detail{position:sticky;top:190px}.detail h3{margin:0 0 5px;font-size:19px}.detail .path{font:12px ui-monospace,monospace;color:var(--muted);overflow-wrap:anywhere;margin-bottom:14px}.field{margin:13px 0}.field label{display:block;color:var(--muted);font-size:12px;margin-bottom:5px}.field textarea,.field input,.field select{width:100%;background:#0e1721;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:9px;font:inherit}.field textarea{min-height:72px;resize:vertical}.detail-actions{display:flex;gap:8px;flex-wrap:wrap}.primary{background:#17324a;border-color:#315c7e}.danger{border-color:#71302e;color:#ff9b95}
+.note{background:#111e2a;border:1px solid #2b4054;border-radius:10px;padding:11px 13px;color:#c2d2e1;margin:12px 0}.muted{color:var(--muted)}.small{font-size:12px}.empty{color:var(--muted);padding:22px;text-align:center}
+@media(max-width:900px){.layout{grid-template-columns:1fr}.detail{position:static}.stats{grid-template-columns:repeat(2,1fr)}header{position:static}}
+@media print{body{background:white;color:#111}.panel,.stat{background:white;color:#111;border:1px solid #aaa}.detail,.toolbar{display:none}header{position:static;background:white;color:#111}.sub,.meta,.muted{color:#444}}
+</style>
+</head>
+<body>
+<header><h1>HW Catalog <span>Project Navigator</span></h1><div class="sub">Живая карта проекта · структура, состояние работ, решения и следующие шаги</div></header>
+<div class="wrap">
+ <div class="toolbar">
+  <input id="search" placeholder="Поиск по названию, описанию, заметкам…">
+  <select id="filter"><option value="all">Все статусы</option><option value="done">Сделано</option><option value="progress">В процессе</option><option value="planned">Запланировано</option><option value="blocked">Блокер</option><option value="audit">Требует аудита</option></select>
+  <button id="expand">Развернуть всё</button><button id="collapse">Свернуть всё</button>
+  <button id="add" class="primary">＋ Добавить пункт</button>
+  <button id="export">Экспорт JSON</button><button id="import">Импорт JSON</button><button id="print">Печать</button>
+  <input id="file" type="file" accept="application/json" hidden>
+ </div>
+ <div class="stats" id="stats"></div>
+ <div class="progress"><i id="bar"></i></div>
+ <div class="small muted" id="progressText" style="margin:6px 2px 18px"></div>
+ <div class="layout">
+  <section class="panel"><h2>🗂️ Дерево проекта</h2>
+   <div class="legend"><span><i class="dot" style="background:var(--green)"></i>Сделано</span><span><i class="dot" style="background:var(--yellow)"></i>В процессе</span><span><i class="dot" style="background:var(--gray)"></i>Запланировано</span><span><i class="dot" style="background:var(--red)"></i>Блокер</span><span><i class="dot" style="background:var(--purple)"></i>Аудит</span></div>
+   <div class="tree" id="tree"></div>
+  </section>
+  <aside class="panel detail"><h2>🔎 Карточка элемента</h2><div class="panel-body" id="detail"><div class="empty">Выбери элемент дерева, чтобы посмотреть подробности и изменить его.</div></div></aside>
+ </div>
+ <div class="note small" style="margin-top:16px"><b>Как пользоваться:</b> выбери элемент слева → измени статус и описание справа → нажми «Сохранить». Изменения автоматически сохраняются в этом браузере. Для переноса на другой компьютер используй «Экспорт JSON», а затем «Импорт JSON». Сам HTML-файл является отдельным приложением, сервер не нужен.</div>
+ <div class="small muted" style="margin-top:10px">Версия структуры: 0.1 · Срез исходного состояния: инвентаризация и рабочие обсуждения по 13.11.2026. Непроверенные функции намеренно помечены «Требует аудита».</div>
+</div>
+<script>
+const seed = [
+{id:"root",name:"HW-CATALOG",type:"root",description:"Основной репозиторий приложения и связанная инфраструктура. Рабочая ветка на последней проверке: integration/catalog-foundation.",children:[
+{id:"git",name:".git / Git",status:"audit",description:"История версий и удалённые репозитории. Текущая ветка: integration/catalog-foundation. Последний известный коммит: 07c80ab. Есть незакоммиченные изменения, их нельзя терять.",done:"Git-репозиторий и remotes archive/origin проверены.",todo:"Определить стратегию коммитов для текущих изменений; проверить .gitignore и что локальные данные не попадут в Git.",children:[
+{id:"gitbranch",name:"Ветка integration/catalog-foundation",status:"done",description:"Активная ветка на 13.11.2026.",done:"Ветка и последний коммит проверены."},
+{id:"gitdirty",name:"Незакоммиченные изменения",status:"progress",description:"Изменённые и новые файлы, которые необходимо сохранить.",done:"Зафиксирован список: start/stop scripts, ALLHW/, MEDIA_AND_EVIDENCE_METADATA.md, importer-preview.html, резервные копии скриптов.",todo:"После стабилизации разобрать изменения и решить, что коммитить."}]},
+{id:"backend",name:"backend/",description:"Python backend, API, бизнес-логика, схема БД и тесты.",children:[
+{id:"app",name:"app/",status:"audit",description:"Основной пакет приложения. Детальный состав модулей нужно сверить с актуальным деревом на домашнем ПК.",todo:"Инвентаризировать routers, models, schemas, services, storage, auth и конфигурацию.",children:[
+{id:"storage",name:"Хранилище и подключение БД",status:"done",description:"Путь к БД выбирается через DATABASE_URL, затем HW_CATALOG_DATA_DIR/DATABASE/catalog.db, иначе используется локальная dev-БД.",done:"Подтверждён внешний путь E:\\HW-CATALOG-DATA\\DATABASE\\catalog.db; health API отвечал ok; целостность SQLite проверена."},
+{id:"apihealth",name:"Health endpoint",status:"done",description:"Проверка работоспособности backend.",done:"GET /health возвращал status=ok."},
+{id:"auth",name:"Аутентификация и безопасность",status:"audit",description:"В requirements присутствуют PyJWT, argon2-cffi, cryptography. Это подтверждает зависимости, но не полноту реализации.",todo:"Проверить маршруты, модели пользователей, сессии, роли, защиту секретов, rate limiting и тесты."},
+{id:"models",name:"Модели и API-схемы",status:"audit",description:"SQLAlchemy и Pydantic используются проектом.",todo:"Сверить фактические сущности, связи, ограничения, индексы и контракты API."},
+{id:"services",name:"Бизнес-логика / сервисы",status:"audit",description:"Нужна инвентаризация сервисного слоя и границ ответственности.",todo:"Составить карту сервисов и отметить готовность каждого."}]},
+{id:"migrations",name:"migrations/ + Alembic",status:"done",description:"Механизм миграций присутствует. Startup script выполняет alembic upgrade head перед запуском backend.",done:"Команда миграции включена в сценарий запуска.",todo:"На домашнем ПК выполнить миграции на копии/проверенной БД и убедиться, что схема актуальна."},
+{id:"tests",name:"tests/",status:"audit",description:"В репозитории есть backend tests. По истории проекта последняя известная проверка: 238 passed, 1 skipped на коммите 07c80ab.",done:"Ранее тестовый набор проходил: 238 passed, 1 skipped.",todo:"Повторно запустить актуальный набор на текущем состоянии ветки и зафиксировать результат."},
+{id:"requirements",name:"requirements.txt",status:"done",description:"Зависимости backend: FastAPI, Uvicorn, SQLAlchemy, Alembic, Pydantic, Pillow, pytest, httpx, psycopg, cryptography, PyJWT, argon2-cffi.",done:"Файл найден; pip check на рабочем ПК: No broken requirements found."}]},
+{id:"catalog",name:"catalog/",status:"audit",description:"Каталожные данные, схемы, справочники и/или связанные артефакты. Точный состав нужно проверить.",todo:"Описать назначение каждого файла и связать его с сущностями БД и импортёрами."},
+{id:"allhw",name:"ALLHW/",status:"progress",description:"Новая/добавленная директория с материалами ALLHW. Присутствие подтверждено Git status, но содержимое и готовность ещё нужно инвентаризировать.",todo:"Разобрать структуру ALLHW, определить формат исходников, правила обновления, импорт и контроль качества."},
+{id:"research",name:"research/",status:"progress",description:"Исследовательские материалы по Hot Wheels, сопоставлению выпусков и отливок.",done:"Ведётся каталогизация сравнений и доказательств; накоплены 163 подтверждённые группы идентичных отливок по рабочему контексту.",todo:"Свести результаты в машиночитаемый реестр, связать каждое решение с источниками и статусом уверенности."},
+{id:"docs",name:"docs/",description:"Документация архитектуры, правил и рабочих процессов.",children:[
+{id:"mediaDoc",name:"architecture/MEDIA_AND_EVIDENCE_METADATA.md",status:"progress",description:"Новый документ о метаданных медиа и доказательств. Наличие подтверждено Git status.",done:"Файл создан/добавлен в рабочее дерево.",todo:"Провести ревью и реализовать описанную модель в БД, API, хранении и интерфейсе."},
+{id:"docsAudit",name:"Остальная документация",status:"audit",description:"Нужно проверить README, архитектурные документы, инструкции и соответствие фактической реализации.",todo:"Сверить docs с кодом, добавить диаграмму архитектуры, ER-модель, импортные процессы и инструкции эксплуатации."}]},
+{id:"scripts",name:"scripts/",description:"Скрипты разработки, импорта, обслуживания и запуска.",children:[
+{id:"winstart",name:"windows/start-hw-catalog.ps1",status:"progress",description:"Проверяет внешний диск и DEVICE_INFO.json, задаёт HW_CATALOG_DATA_DIR, запускает миграции, поднимает Uvicorn, записывает PID и логи.",done:"Проверены проверки storage_id/layout_version, запрет DATABASE_URL, миграции, health-check и запись PID.",todo:"Исправить/проверить сценарий видимого управления процессом: сейчас stdout/stderr перенаправляются в файлы, а инструкция Ctrl+C может быть неочевидной."},
+{id:"winstop",name:"windows/stop-hw-catalog.ps1",status:"progress",description:"Проверяет PID и командную строку процесса, ожидает штатной остановки, не убивает процесс принудительно.",done:"Скрипт успешно нашёл PID 10800 и дождался закрытия окна Python; HDD был безопасно отключён.",todo:"Сделать остановку однозначной и повторяемой; проверить stale PID и таймауты на домашнем ПК."},
+{id:"backupScripts",name:"Резервное копирование",status:"planned",description:"Отдельный полноценный backup/restore workflow пока не найден в scripts.",todo:"Создать резервное копирование SQLite через backup API, проверку integrity_check, ротацию, журнал и тест восстановления."}]},
+{id:"ui",name:"HTML-интерфейсы и прототипы",description:"Корневые HTML-файлы и prototype/ содержат интерфейсные наработки. Нужна классификация по назначению и уровню готовности.",children:[
+{id:"importer",name:"importer.html / importer-preview.html",status:"progress",description:"Импортные интерфейсы; importer-preview.html добавлен в рабочее дерево.",done:"Есть отдельный preview-файл.",todo:"Проверить связку с API, валидацию, предпросмотр diff, ошибки и подтверждение импорта."},
+{id:"explorer",name:"catalog-explorer.html",status:"audit",description:"Интерфейс просмотра каталога по названию файла.",todo:"Проверить текущие функции, API-интеграцию, фильтры, карточки и адаптивность."},
+{id:"compare",name:"catalog-compare.html",status:"audit",description:"Интерфейс/прототип сравнения каталога.",todo:"Проверить, какие сценарии реализованы и как сравнение связано с сущностями БД."},
+{id:"schema",name:"schema-editor.html",status:"audit",description:"Редактор схемы по названию файла.",todo:"Проверить, является ли это рабочим инструментом или прототипом."},
+{id:"otherui",name:"index.html, login.html, converter.html, prototype/",status:"audit",description:"Набор корневых страниц и прототипов.",todo:"Составить карту экранов, определить основной frontend и убрать дубли только после проверки."}]},
+{id:"imagesRepo",name:"cars-img/ и series-img/",status:"audit",description:"Каталоги изображений в репозитории. Их содержимое, назначение, объём и связь с БД ещё нужно проверить.",todo:"Инвентаризировать изображения, форматы, имена, дубликаты и правила хранения."},
+{id:"deploy",name:"Docker / Caddy / compose",status:"audit",description:"В корне присутствуют Dockerfile backend, compose.yaml и Caddyfile.",done:"Файлы инфраструктуры присутствуют.",todo:"Проверить актуальность контейнерного запуска, секреты, volumes, healthchecks, reverse proxy и production-профиль."}
+]},
+{id:"data",name:"HW-CATALOG-DATA/ · внешний диск",type:"root",description:"Отдельное хранилище данных, не смешиваемое с кодом. На рабочем ПК находилось на E:\\HW-CATALOG-DATA.",children:[
+{id:"device",name:"DEVICE_INFO.json",status:"done",description:"Маркер внешнего хранилища с storage_id af91e52b-edc9-4244-9367-02d5653c9855 и layout_version=1.",done:"Startup script проверяет маркер; диск успешно прошёл запуск."},
+{id:"database",name:"DATABASE/catalog.db",status:"done",description:"Основная SQLite база, размер на момент проверки около 593 920 байт.",done:"SQLite integrity_check = ok; 40 таблиц; health endpoint работал."},
+{id:"media",name:"MEDIA/images + MEDIA/thumbnails",status:"planned",description:"Папки созданы, на момент проверки были пустыми.",todo:"Реализовать приём, именование, хранение оригиналов/превью, контроль целостности и привязку к записям."},
+{id:"imports",name:"IMPORTS/mainline, premium, allhw",status:"planned",description:"Папки созданы, на момент проверки были пустыми.",todo:"Определить входные форматы, архив исходников, обработанные/ошибочные файлы и повторный импорт."},
+{id:"exports",name:"EXPORTS/",status:"planned",description:"Папка создана, на момент проверки пустая.",todo:"Определить форматы и сценарии экспорта каталога, коллекции, отчётов и резервных выгрузок."},
+{id:"backups",name:"BACKUPS/",status:"progress",description:"Есть BACKUPS/manual/catalog-initial-20261113.db. Папка daily пока пустая.",done:"Начальная копия создана через SQLite backup API; integrity_check = ok.",todo:"Настроить ежедневные копии, ротацию и вторую физическую копию на домашнем ПК."},
+{id:"logs",name:"LOGS/",status:"done",description:"Папка логов backend с файлами stdout/stderr.",done:"Логи запуска и ошибок направлялись на внешний HDD."},
+{id:"fat32",name:"Файловая система внешнего HDD",status:"audit",description:"На рабочем ПК HDD был FAT32, около 320 GB общий объём и около 224 GB свободно. Ограничение FAT32: файл не более 4 GB.",todo:"После создания второй физической копии оценить конвертацию в NTFS без форматирования. Не выполнять без резервной копии."}]},
+{id:"workstreams",name:"Ключевые направления каталога Hot Wheels",type:"root",description:"Предметная часть проекта: данные выпусков, отливки, варианты, доказательства и коллекционная ценность.",children:[
+{id:"mainline",name:"Mainline: годовые выпуски",status:"progress",description:"Импорт и нормализация Mainline-данных, в том числе TSV. Последний известный коммит исправлял валидацию строк и разбор серий.",done:"Исправлены row validation и series parsing; ранее тесты прошли 238/1.",todo:"Полный повторяемый импорт, контроль дублей, сверка количества записей и отчёт о пропусках."},
+{id:"premium",name:"Premium / другие линейки",status:"audit",description:"Направление присутствует в структуре импорта и папках данных, но готовность по линейкам не подтверждена.",todo:"Инвентаризировать источники, форматы и правила идентификации релизов."},
+{id:"allhwFlow",name:"ALLHW: сбор и импорт",status:"progress",description:"Директория ALLHW появилась в рабочем дереве. Содержание и завершённость процесса не проверены.",todo:"Разобрать данные и определить pipeline: raw → normalize → validate → import → reconcile."},
+{id:"casting",name:"Сопоставление отливок (casting identity)",status:"progress",description:"Длительная исследовательская работа: сравнение выпусков по форме кузова, рельефу, днищу и другим конструктивным признакам.",done:"По рабочему контексту подтверждено 163 группы идентичных отливок. Практическое правило: First listed, 2nd Color, 3rd Color обычно используют одну отливку; цвет/декор не доказывает различие формы.",todo:"Перенести все решения в структурированную таблицу, указывать уровень уверенности и доказательства. Отдельно фиксировать отличия колёс, днища, деталей и retool."},
+{id:"evidence",name:"Доказательства и источники",status:"progress",description:"Фото, ссылки на карточки, источники и сравнения должны быть связаны с конкретными вариантами и выводами.",done:"В исследовательской работе используются ссылки на Fandom, RockHeaddiecast, фото лицевой и обратной стороны блистера и пользовательские фото.",todo:"Единая схема evidence: URL/файл, тип ракурса, источник, дата доступа, привязка к release/variant/casting, заметка и оценка надёжности."},
+{id:"packaging",name:"Блистер и упаковка",status:"progress",description:"Упаковка считается самостоятельной частью ценности товара. Для некоторых источников фото блистера приоритетнее фото машинки без упаковки.",done:"Зафиксировано правило: фото блистера приоритетнее, фото без блистера вторично; отдельно важны лицевая сторона, оборот и артикул с суффиксом/без.",todo:"Ввести типы фото front/back/carded/loose/base и связь с SKU/артикулом."},
+{id:"wheels",name:"Колёса и мелкие отличия",status:"progress",description:"В ряде сравнений отливки одинаковы, но колёса отличаются. Такие отличия нужно хранить отдельно от casting identity.",todo:"Сформировать словарь типов колёс, осей, днища, тампопечати и других отличительных признаков."},
+{id:"collection",name:"Коллекция пользователя / учёт экземпляров",status:"audit",description:"Наличие полноценного пользовательского учёта экземпляров, состояния, стоимости и дублей по текущим материалам не подтверждено.",todo:"Проверить модель коллекции и решить, какие поля нужны: owned, condition, package condition, purchase price, date, notes."}
+]},
+{id:"migration",name:"Перенос на домашний ПК и эксплуатация",type:"root",description:"Состояние миграции после подготовки внешнего HDD на рабочем ПК.",children:[
+{id:"carry",name:"Перенос проекта и данных на HDD",status:"done",description:"Репозиторий и HW-CATALOG-DATA находятся на внешнем HDD.",done:"Проверены Git status, база, маркер диска и backend; сервер штатно остановлен перед извлечением."},
+{id:"homeEnv",name:"Домашнее Python-окружение",status:"planned",description:"На рабочем ПК системный Python 3.13.17 работал; backend/.venv оказался сломанным из-за пути к учётной записи houta. В корне проекта .venv отсутствовал.",todo:"На домашнем ПК установить совместимый Python, создать .venv в корне репозитория и установить backend/requirements.txt."},
+{id:"homeRun",name:"Первый запуск дома",status:"planned",description:"Запуск ещё не подтверждён на домашнем ПК.",todo:"Определить букву HDD, выполнить start-hw-catalog.ps1 с -StorageRoot, проверить PID, storage_id, /health и открыть интерфейс."},
+{id:"homeBackup",name:"Автоматические резервные копии дома",status:"planned",description:"Пользователь решил настраивать ежедневное резервирование именно на домашнем ПК.",todo:"Настроить ежедневный SQLite backup, retention, integrity_check, логирование и вторую физическую копию."},
+{id:"ntfs",name:"Переход FAT32 → NTFS",status:"planned",description:"Не делать до второй физической резервной копии.",todo:"Проверить backup на другом физическом носителе, затем отдельно принять решение о convert E: /fs:ntfs."}
+]}
+];
+
+let data=JSON.parse(localStorage.getItem("hwcat-nav-data")||"null")||seed;
+let selected="root";
+const statuses={done:"Сделано",progress:"В процессе",planned:"Запланировано",blocked:"Блокер",audit:"Требует аудита"};
+const $=id=>document.getElementById(id);
+function save(){localStorage.setItem("hwcat-nav-data",JSON.stringify(data));render()}
+function walk(nodes,fn,path=[]){nodes.forEach(n=>{fn(n,path);if(n.children)walk(n.children,fn,[...path,n.name])})}
+function find(id){let out=null;walk(data,n=>{if(n.id===id)out=n});return out}
+function parentOf(id,nodes=data,parent=null){for(const n of nodes){if(n.id===id)return parent;if(n.children){const x=parentOf(id,n.children,n);if(x)return x}}return null}
+function count(){let c={done:0,progress:0,planned:0,blocked:0,audit:0,total:0};walk(data,n=>{if(n.status){c[n.status]++;c.total++}});return c}
+function esc(s=""){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function renderStats(){let c=count(),pct=c.total?Math.round(c.done/c.total*100):0;$("stats").innerHTML=[["Всего пунктов",c.total],["Сделано",c.done],["В процессе",c.progress],["Запланировано",c.planned],["Аудит / блокеры",c.audit+c.blocked]].map(x=>`<div class="stat"><b>${x[1]}</b><small>${x[0]}</small></div>`).join("");$("bar").style.width=pct+"%";$("progressText").textContent=`${pct}% пунктов имеют статус «Сделано» · ${c.done} из ${c.total}. Это инвентаризационный ориентир, не процент готовности продукта.`}
+function renderTree(){const q=$("search").value.toLowerCase(),f=$("filter").value;
+function nodeHTML(n,path=[]){let text=(n.name+" "+(n.description||"")+" "+(n.done||"")+" "+(n.todo||"")).toLowerCase();let kids=(n.children||[]).map(ch=>nodeHTML(ch,[...path,n.name])).filter(Boolean).join("");let selfMatch=!q||text.includes(q),childMatch=!!kids;if(!selfMatch&&!childMatch)return"";if(n.status&&f!=="all"&&n.status!==f&&!childMatch)return"";let has=n.children?.length,open=q||n.id==="root"||n.type==="root"||n.id==="backend"||n.id==="workstreams"||n.id==="data"||n.id==="migration";return `<div class="node ${open?"":"collapsed"}" data-id="${esc(n.id)}"><div class="row"><span class="toggle" data-toggle="${esc(n.id)}">${has?(open?"▾":"▸"):"·"}</span><span class="name" data-select="${esc(n.id)}">${has?"📁":"📄"} <strong>${esc(n.name)}</strong></span>${n.status?`<span class="badge s-${n.status}">${statuses[n.status]}</span>`:""}<span class="meta">${has?(n.children.length+" узл."):""}</span></div>${has?`<div class="children">${kids}</div>`:""}</div>`}
+$("tree").innerHTML=data.map(n=>nodeHTML(n)).join("")||'<div class="empty">Ничего не найдено.</div>';
+document.querySelectorAll("[data-select]").forEach(el=>el.onclick=()=>{selected=el.dataset.select;renderDetail()});
+document.querySelectorAll("[data-toggle]").forEach(el=>el.onclick=()=>{let n=el.closest(".node");n.classList.toggle("collapsed");el.textContent=n.classList.contains("collapsed")?"▸":"▾"});
+}
+function pathFor(id){let parts=[];function rec(nodes){for(const n of nodes){if(n.id===id){parts.push(n.name);return true}if(n.children&&rec(n.children)){parts.unshift(n.name);return true}}return false}rec(data);return parts.join(" / ")}
+function renderDetail(){let n=find(selected);if(!n){$("detail").innerHTML='<div class="empty">Элемент не найден.</div>';return}
+$("detail").innerHTML=`<h3>${esc(n.name)}</h3><div class="path">${esc(pathFor(n.id))}</div>
+<div class="field"><label>Статус</label><select id="dStatus"><option value="">Группа / без статуса</option>${Object.entries(statuses).map(([k,v])=>`<option value="${k}" ${n.status===k?"selected":""}>${v}</option>`).join("")}</select></div>
+<div class="field"><label>Назначение / описание</label><textarea id="dDesc">${esc(n.description||"")}</textarea></div>
+<div class="field"><label>Что уже сделано / подтверждено</label><textarea id="dDone">${esc(n.done||"")}</textarea></div>
+<div class="field"><label>Что осталось / следующий шаг</label><textarea id="dTodo">${esc(n.todo||"")}</textarea></div>
+<div class="field"><label>Заметки / ссылки / решения</label><textarea id="dNotes">${esc(n.notes||"")}</textarea></div>
+<div class="detail-actions"><button class="action primary" id="saveNode">Сохранить</button><button class="action" id="addChild">＋ Подпункт</button><button class="action danger" id="deleteNode">Удалить</button></div>
+<div class="small muted" style="margin-top:12px">ID: ${esc(n.id)}</div>`;
+$("saveNode").onclick=()=>{n.status=$("dStatus").value||undefined;n.description=$("dDesc").value;n.done=$("dDone").value;n.todo=$("dTodo").value;n.notes=$("dNotes").value;save();renderDetail()};
+$("addChild").onclick=()=>addItem(n.id);
+$("deleteNode").onclick=()=>{if(n.id==="root")return alert("Корневой раздел нельзя удалить.");if(confirm("Удалить пункт и все вложенные подпункты?")){let p=parentOf(n.id);p.children=p.children.filter(x=>x.id!==n.id);selected=p.id;save();renderDetail()}};
+}
+function addItem(parentId){let parent=find(parentId);let name=prompt("Название нового пункта:");if(!name)return;let id="task-"+Date.now();parent.children=parent.children||[];parent.children.push({id,name,status:"planned",description:"Новый пункт. Заполни назначение, критерии готовности и следующий шаг."});selected=id;save();renderDetail()}
+$("add").onclick=()=>{let name=prompt("Название нового пункта верхнего уровня:");if(!name)return;let id="task-"+Date.now();data.push({id,name,type:"root",description:"Новый раздел проекта.",children:[{id:id+"-first",name:"Первый шаг",status:"planned",description:"Опиши конкретный результат."}]});selected=id;save();renderDetail()};
+$("search").addEventListener("input",renderTree);$("filter").addEventListener("change",renderTree);
+$("expand").onclick=()=>document.querySelectorAll(".node").forEach(n=>{n.classList.remove("collapsed");let t=n.querySelector(":scope > .row .toggle");if(t&&t.dataset.toggle)t.textContent="▾"});
+$("collapse").onclick=()=>document.querySelectorAll(".node").forEach(n=>{n.classList.add("collapsed");let t=n.querySelector(":scope > .row .toggle");if(t&&t.dataset.toggle)t.textContent="▸"});
+$("export").onclick=()=>{let blob=new Blob([JSON.stringify({app:"HW Catalog Project Navigator",version:1,exportedAt:new Date().toISOString(),data},null,2)],{type:"application/json"});let a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="hw-catalog-project-state.json";a.click();URL.revokeObjectURL(a.href)};
+$("import").onclick=()=>$("file").click();$("file").onchange=async e=>{let f=e.target.files[0];if(!f)return;try{let obj=JSON.parse(await f.text());let incoming=obj.data||obj;if(!Array.isArray(incoming))throw Error("Неверный формат");if(confirm("Импорт заменит текущее дерево. Перед этим рекомендуется экспортировать текущую версию. Продолжить?")){data=incoming;selected=data[0]?.id||"";save();renderDetail()}}catch(err){alert("Не удалось импортировать JSON: "+err.message)}e.target.value=""};
+$("print").onclick=()=>window.print();
+renderStats();renderTree();renderDetail();
+</script>
+</body></html>
