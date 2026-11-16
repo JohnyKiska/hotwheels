@@ -34,7 +34,7 @@ The dashboard deliberately contains no GitHub token and does not write directly 
 ## Entity boundaries
 
 - **Workstreams** group areas of work.
-- **Components** describe what exists in the system (directories, files, services, databases, domain areas).
+- **Components** describe what exists in the system (directories, files, services, databases, domain areas). Optional `completed_work` and `next_step` fields record progress and the next action without turning components into tasks.
 - **Tasks** describe work to be done and carry status, priority, dependencies and acceptance criteria.
 - **Decisions** record accepted or proposed project-level choices.
 - **Blockers** track impediments separately from ordinary tasks.
@@ -60,4 +60,4 @@ A component's status is not a task status. Do not calculate project completion b
 
 ## Current implementation boundary
 
-The dashboard loads the canonical state, shows workstreams, tasks, components, decisions, blockers and changelog, and supports editing/creating tasks, components, decisions and blockers. Changes are validated against the embedded JSON Schema and cross-reference rules before being applied to page state. Blockers can be linked to existing tasks. Local drafts and JSON import/export are supported. Browser-level automated tests, GitHub write-back and external-drive synchronization remain follow-up work.
+The dashboard opens on a hierarchical project navigator with all component groups and their descendants, search, status filtering, expand/collapse controls, component details, linked tasks, and component progress/next-step fields. It also shows workstreams, tasks, components, decisions, blockers and changelog, and supports editing/creating tasks, components, decisions and blockers. Changes are validated against the embedded JSON Schema and cross-reference rules before being applied to page state. Blockers can be linked to existing tasks. Local drafts and JSON import/export are supported. Browser-level automated tests, GitHub write-back and external-drive synchronization remain follow-up work.
