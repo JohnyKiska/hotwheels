@@ -2,7 +2,7 @@
   "schema_version": 1,
   "metadata": {
     "project_id": "hw-catalog",
-    "updated_at": "2026-11-16T01:18:37.023Z",
+    "updated_at": "2026-11-16T01:19:53.087Z",
     "source_of_truth": "github",
     "working_branch": "integration/catalog-foundation",
     "last_verified_commit": null,
@@ -125,7 +125,7 @@
       "sort_order": 30
     },
     {
-      "id": "backend",
+      "id": "backend-directory",
       "parent_id": "root",
       "workstream_id": "backend",
       "title": "backend/",
@@ -139,7 +139,7 @@
     },
     {
       "id": "app",
-      "parent_id": "backend",
+      "parent_id": "backend-directory",
       "workstream_id": "backend",
       "title": "app/",
       "path": "app",
@@ -217,7 +217,7 @@
     },
     {
       "id": "migrations",
-      "parent_id": "backend",
+      "parent_id": "backend-directory",
       "workstream_id": "backend",
       "title": "migrations/ + Alembic",
       "path": null,
@@ -230,7 +230,7 @@
     },
     {
       "id": "tests",
-      "parent_id": "backend",
+      "parent_id": "backend-directory",
       "workstream_id": "backend",
       "title": "tests/",
       "path": "tests",
@@ -243,7 +243,7 @@
     },
     {
       "id": "requirements",
-      "parent_id": "backend",
+      "parent_id": "backend-directory",
       "workstream_id": "backend",
       "title": "requirements.txt",
       "path": null,
@@ -1043,6 +1043,11 @@
     {
       "date": "2026-11-16T01:18:37.023Z",
       "summary": "Мигрировано историческое дерево из 56 компонентов; dashboard переключён на canonical JSON, задачи и компоненты разделены. Добавлены задачи на аудит дерева, строгую валидацию и браузерное тестирование.",
+      "commit": null
+    },
+    {
+      "date": "2026-11-16T01:19:53.087Z",
+      "summary": "Устранено совпадение ID backend между рабочим направлением и компонентом дерева; ссылки родительского узла обновлены.",
       "commit": null
     }
   ]
