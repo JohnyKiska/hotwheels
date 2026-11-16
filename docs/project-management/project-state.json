@@ -2,7 +2,7 @@
   "schema_version": 1,
   "metadata": {
     "project_id": "hw-catalog",
-    "updated_at": "2026-11-16T06:37:00Z",
+    "updated_at": "2026-11-16T07:16:30Z",
     "source_of_truth": "github",
     "working_branch": "integration/catalog-foundation",
     "last_verified_commit": "cc0d2f7539437d309b92e3ba9cd98a35e74c1ed7",
@@ -1235,7 +1235,7 @@
       "id": "pm-011",
       "title": "Спроектировать и подготовить переносимый backup/restore для HW-CATALOG-DATA",
       "description": "Подготовить безопасный сценарий резервирования всего HW-CATALOG-DATA с переносом на домашнее хранилище через отдельный переносной SSD, проверкой целостности и сохранением предыдущих версий. До появления отдельного носителя не выполнять перенос через единственный рабочий HDD.",
-      "status": "planned",
+      "status": "in_progress",
       "priority": "high",
       "workstream_id": "infrastructure",
       "component_id": "backups",
@@ -1249,15 +1249,22 @@
         "Домашнее хранилище на внутреннем диске ПК организовано отдельно от рабочего HDD.",
         "Предыдущая исправная версия не удаляется до успешной проверки новой копии.",
         "Есть документированный тест восстановления во временную папку и проверка SQLite integrity_check.",
-        "Покупка переносного SSD отложена до появления реальной необходимости; текущий рабочий HDD не используется как единственный транспорт."
+        "Покупка переносного SSD отложена до появления реальной необходимости; текущий рабочий HDD не используется как единственный транспорт.",
+        "Реализованы Windows backup/restore команды с явными путями, проверкой остановленного backend, манифестом SHA-256 и запретом автоматической перезаписи/очистки.",
+        "Автоматические тесты покрывают round-trip, новую DEVICE_INFO identity, path traversal, вложенные пути, непустой destination, повреждённые/отсутствующие файлы и SQLite corruption."
       ],
       "source_refs": [
         "docs/project-management/project-state.json",
         "backend/app/storage.py",
-        "backend/app/init_storage.py"
+        "backend/app/init_storage.py",
+        "docs/architecture/BACKUP_RESTORE_DESIGN.md",
+        "backend/app/backup_restore.py",
+        "backend/tests/test_backup_restore.py",
+        "scripts/windows/backup-hw-catalog.ps1",
+        "scripts/windows/restore-hw-catalog.ps1"
       ],
       "created_at": "2026-11-16T06:37:00Z",
-      "updated_at": "2026-11-16T06:37:00Z",
+      "updated_at": "2026-11-16T07:16:30Z",
       "completed_at": null
     }
   ],
@@ -1342,6 +1349,16 @@
     {
       "date": "2026-11-16T06:37:00Z",
       "summary": "Завершены SHA-256-сверка и read-only проверки основной БД и initial backup; тест восстановления во временную папку успешно пройден с совпадением SHA-256. Зафиксировано отсутствие независимой физической копии, домашнее хранилище объёмом около 800 ГБ как будущая цель и решение отложить отдельный переносной SSD до реальной необходимости; добавлена задача на переносимый backup/restore.",
+      "commit": null
+    },
+    {
+      "date": "2026-11-16T07:05:00Z",
+      "summary": "Подготовлен базовый контракт безопасного backup/restore: состав snapshot, manifest SHA-256, SQLite backup API, запрет перезаписи рабочей БД, безопасное восстановление в пустой каталог с новой DEVICE_INFO identity и план тестирования. Реализация скриптов и проверка на disposable storage остаются следующими этапами.",
+      "commit": null
+    },
+    {
+      "date": "2026-11-16T07:16:30Z",
+      "summary": "Добавлена первая реализация backup/restore: SQLite online backup, manifest SHA-256, строгая проверка путей и содержимого snapshot, восстановление в пустой каталог с новой DEVICE_INFO identity, Windows-команды с проверкой backend PID/process и автоматические тесты. GitHub Actions выполняет тестовый workflow; ручная проверка на disposable Windows storage и создание независимой копии остаются следующими этапами.",
       "commit": null
     }
   ]
