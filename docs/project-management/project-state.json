@@ -1,0 +1,234 @@
+{
+  "schema_version": 1,
+  "metadata": {
+    "project_id": "hw-catalog",
+    "updated_at": "2026-11-16T00:00:00+07:00",
+    "source_of_truth": "github",
+    "working_branch": "integration/catalog-foundation",
+    "last_verified_commit": null,
+    "timezone": "Asia/Bangkok"
+  },
+  "project": {
+    "name": "HW Catalog",
+    "summary": "Каталог Hot Wheels с проверяемой историей происхождения данных, изображений и решений по идентификации моделей.",
+    "status": "active"
+  },
+  "workstreams": [
+    {
+      "id": "project-management",
+      "title": "Project Manager",
+      "description": "Модель состояния проекта, задачи, решения, журнал и интерфейс управления.",
+      "status": "in_progress",
+      "sort_order": 10
+    },
+    {
+      "id": "frontend",
+      "title": "Frontend и каталог",
+      "description": "Визуальный каталог, навигация, поиск и пользовательские сценарии.",
+      "status": "needs_audit",
+      "sort_order": 20
+    },
+    {
+      "id": "backend",
+      "title": "Backend и API",
+      "description": "FastAPI, доменная логика, импортёры, API и тесты.",
+      "status": "needs_audit",
+      "sort_order": 30
+    },
+    {
+      "id": "data-model",
+      "title": "Модель данных и БД",
+      "description": "Канонические сущности, миграции, целостность и переносимость БД.",
+      "status": "needs_audit",
+      "sort_order": 40
+    },
+    {
+      "id": "hot-wheels-data",
+      "title": "Данные Hot Wheels",
+      "description": "Mainline, Premium, ALLHW, серии, выпуски, отливки и варианты.",
+      "status": "in_progress",
+      "sort_order": 50
+    },
+    {
+      "id": "media-evidence",
+      "title": "Фото и доказательства",
+      "description": "Фото блистеров, лицевой и обратной стороны, источники и provenance.",
+      "status": "in_progress",
+      "sort_order": 60
+    },
+    {
+      "id": "infrastructure",
+      "title": "Инфраструктура и синхронизация",
+      "description": "Запуск, окружение, GitHub и внешний диск; защита внешней БД и локальных данных.",
+      "status": "needs_audit",
+      "sort_order": 70
+    },
+    {
+      "id": "documentation",
+      "title": "Документация",
+      "description": "Актуальное состояние, архитектура, правила работы и передача контекста.",
+      "status": "in_progress",
+      "sort_order": 80
+    }
+  ],
+  "components": [],
+  "tasks": [
+    {
+      "id": "pm-001",
+      "title": "Утвердить и внедрить единую модель состояния Project Manager",
+      "description": "Отделить компоненты проекта от задач и хранить состояние в версионируемом JSON-файле.",
+      "status": "in_progress",
+      "priority": "high",
+      "workstream_id": "project-management",
+      "component_id": null,
+      "owner": "user-and-assistant",
+      "due_date": null,
+      "dependencies": [],
+      "acceptance_criteria": [
+        "Схема JSON описана и проверяется валидатором.",
+        "Состояние проекта хранится в docs/project-management/project-state.json.",
+        "У задач и компонентов раздельные модели и статусы.",
+        "Неизвестные и некорректные поля не принимаются молча."
+      ],
+      "source_refs": [
+        "docs/project-management/index.html"
+      ],
+      "created_at": "2026-11-16T00:00:00+07:00",
+      "updated_at": "2026-11-16T00:00:00+07:00",
+      "completed_at": null
+    },
+    {
+      "id": "pm-002",
+      "title": "Перевести Project Manager на загрузку canonical JSON из GitHub",
+      "description": "Убрать хардкод seed-данных из HTML; localStorage оставить только для локального черновика.",
+      "status": "planned",
+      "priority": "high",
+      "workstream_id": "project-management",
+      "component_id": null,
+      "owner": "user-and-assistant",
+      "due_date": null,
+      "dependencies": [
+        "pm-001"
+      ],
+      "acceptance_criteria": [
+        "Приложение загружает project-state.json как основной источник.",
+        "Локальные несохранённые изменения явно помечаются как черновик.",
+        "Пользователь может экспортировать валидный JSON для коммита в GitHub.",
+        "Интерфейс не требует GitHub token или секретов в браузере."
+      ],
+      "source_refs": [
+        "docs/project-management/index.html"
+      ],
+      "created_at": "2026-11-16T00:00:00+07:00",
+      "updated_at": "2026-11-16T00:00:00+07:00",
+      "completed_at": null
+    },
+    {
+      "id": "pm-003",
+      "title": "Разделить в интерфейсе архитектуру, задачи и каталог Hot Wheels",
+      "description": "Компоненты показывают состав системы; задачи показывают работу; доменные направления каталога имеют отдельные сводки.",
+      "status": "planned",
+      "priority": "high",
+      "workstream_id": "project-management",
+      "component_id": null,
+      "owner": "user-and-assistant",
+      "due_date": null,
+      "dependencies": [
+        "pm-001"
+      ],
+      "acceptance_criteria": [
+        "Дерево компонентов не используется как список задач.",
+        "Задачи фильтруются по статусу, приоритету и направлению.",
+        "Сводные показатели имеют понятную формулу и не смешивают разные типы сущностей."
+      ],
+      "source_refs": [
+        "docs/project-management/index.html"
+      ],
+      "created_at": "2026-11-16T00:00:00+07:00",
+      "updated_at": "2026-11-16T00:00:00+07:00",
+      "completed_at": null
+    },
+    {
+      "id": "pm-004",
+      "title": "Обновить документацию Project Manager и актуальный срез проекта",
+      "description": "Согласовать CURRENT_STATE, ROADMAP и SESSION_HANDOFF с актуальной веткой и новыми правилами управления состоянием.",
+      "status": "planned",
+      "priority": "medium",
+      "workstream_id": "documentation",
+      "component_id": null,
+      "owner": "user-and-assistant",
+      "due_date": null,
+      "dependencies": [
+        "pm-001"
+      ],
+      "acceptance_criteria": [
+        "У документов указаны дата и область актуальности.",
+        "Исторические записи сохранены, устаревшие сведения помечены как исторические.",
+        "Нет противоречащих друг другу инструкций о главном источнике состояния."
+      ],
+      "source_refs": [
+        "docs/CURRENT_STATE.md",
+        "docs/ROADMAP.md",
+        "docs/SESSION_HANDOFF.md"
+      ],
+      "created_at": "2026-11-16T00:00:00+07:00",
+      "updated_at": "2026-11-16T00:00:00+07:00",
+      "completed_at": null
+    },
+    {
+      "id": "pm-005",
+      "title": "Спроектировать безопасную синхронизацию GitHub и внешнего диска",
+      "description": "Определить список синхронизируемых файлов, исключения, направление копирования и проверку целостности.",
+      "status": "planned",
+      "priority": "high",
+      "workstream_id": "infrastructure",
+      "component_id": null,
+      "owner": "user-and-assistant",
+      "due_date": null,
+      "dependencies": [
+        "pm-001"
+      ],
+      "acceptance_criteria": [
+        "GitHub остаётся каноническим источником для кода и документации.",
+        "Внешняя БД и локальные секреты не попадают в Git.",
+        "Синхронизация не перезаписывает более новую версию без проверки.",
+        "Есть журнал результата и понятный сценарий восстановления."
+      ],
+      "source_refs": [
+        "docs/project-management/index.html",
+        "docs/CURRENT_STATE.md"
+      ],
+      "created_at": "2026-11-16T00:00:00+07:00",
+      "updated_at": "2026-11-16T00:00:00+07:00",
+      "completed_at": null
+    }
+  ],
+  "decisions": [
+    {
+      "id": "decision-github-source-of-truth",
+      "title": "GitHub является главным источником состояния проекта",
+      "decision": "Код, документация, модель Project Manager и её canonical JSON ведутся в GitHub. Внешний диск используется как синхронизированная копия и для данных, которые сознательно исключены из Git.",
+      "rationale": "Это даёт историю изменений, единый источник актуальной версии и возможность проверять изменения до синхронизации.",
+      "date": "2026-11-16",
+      "status": "accepted",
+      "source_refs": []
+    },
+    {
+      "id": "decision-no-browser-github-token",
+      "title": "Не хранить GitHub token в браузерном Project Manager",
+      "decision": "Project Manager работает с опубликованным JSON и локальным черновиком; изменения экспортируются для проверки и коммита в GitHub. Прямую запись в GitHub можно добавлять только через безопасный серверный механизм с авторизацией.",
+      "rationale": "Статическая HTML-страница не должна содержать долговременные секреты или токены.",
+      "date": "2026-11-16",
+      "status": "accepted",
+      "source_refs": []
+    }
+  ],
+  "blockers": [],
+  "changelog": [
+    {
+      "date": "2026-11-16T00:00:00+07:00",
+      "summary": "Создана первая версия canonical модели состояния Project Manager; GitHub выбран источником правды, внешний диск предназначен для синхронизированной копии.",
+      "commit": null
+    }
+  ]
+}
