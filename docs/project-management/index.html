@@ -141,14 +141,14 @@ function renderTaskDetail(){
  '<div class="field"><label>Описание</label><textarea id="editDescription">'+esc(t.description||"")+'</textarea></div>'+
  '<div class="field"><label>Статус</label><select id="editStatus">'+Object.keys(STATUS).map(k=>'<option value="'+k+'" '+(t.status===k?"selected":"")+'>'+STATUS[k]+'</option>').join("")+'</select></div>'+
  '<div class="field"><label>Приоритет</label><select id="editPriority">'+Object.keys(PRIORITY).map(k=>'<option value="'+k+'" '+(t.priority===k?"selected":"")+'>'+PRIORITY[k]+'</option>').join("")+'</select></div>'+
- '<div class="field"><label>Критерии готовности (каждый с новой строки)</label><textarea id="editCriteria">'+esc((t.acceptance_criteria||[]).join("\\n"))+'</textarea></div>'+
+ '<div class="field"><label>Критерии готовности (каждый с новой строки)</label><textarea id="editCriteria">'+esc((t.acceptance_criteria||[]).join("\n"))+'</textarea></div>'+
  '<div class="field"><label>Ответственный</label><input id="editOwner" value="'+esc(t.owner||"")+'"></div>'+
  '<div class="field"><label>Срок (YYYY-MM-DD)</label><input id="editDue" value="'+esc(t.due_date||"")+'" placeholder="не задан"></div>'+
  '<div class="actions"><button class="btn primary" id="saveTask">Сохранить задачу</button></div>';
  $("saveTask").onclick=()=>{
   const title=$("editTitle").value.trim();if(!title)return alert("Название задачи обязательно.");
   t.title=title;t.description=$("editDescription").value;t.status=$("editStatus").value;t.priority=$("editPriority").value;
-  t.acceptance_criteria=$("editCriteria").value.split("\\n").map(x=>x.trim()).filter(Boolean);
+  t.acceptance_criteria=$("editCriteria").value.split("\n").map(x=>x.trim()).filter(Boolean);
   t.owner=$("editOwner").value.trim()||null;t.due_date=$("editDue").value.trim()||null;t.updated_at=new Date().toISOString();
   markDirty();renderAll();renderTaskDetail();
  };
@@ -174,7 +174,7 @@ async function loadCanonical(){
  setStatus("Загружена каноническая версия из GitHub · "+(state.metadata.updated_at||"дата не указана"),"");
 }
 function saveDraft(){if(!state)return;localStorage.setItem(DRAFT_KEY,JSON.stringify(state));dirty=false;setStatus("Черновик сохранён локально в этом браузере. GitHub пока не изменён.","warn");}
-function exportState(){if(!state)return;validateState(state);state.metadata.updated_at=new Date().toISOString();const blob=new Blob([JSON.stringify(state,null,2)+"\\n"],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="project-state.json";a.click();URL.revokeObjectURL(a.href);setStatus("JSON экспортирован. Проверь файл и закоммить его в GitHub.","warn");}
+function exportState(){if(!state)return;validateState(state);state.metadata.updated_at=new Date().toISOString();const blob=new Blob([JSON.stringify(state,null,2)+"\n"],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="project-state.json";a.click();URL.revokeObjectURL(a.href);setStatus("JSON экспортирован. Проверь файл и закоммить его в GitHub.","warn");}
 function importState(file){const reader=new FileReader();reader.onload=()=>{try{const incoming=JSON.parse(reader.result);validateState(incoming);if(!confirm("Импорт заменит состояние в памяти страницы. Сначала сохрани текущую версию, если она нужна. Продолжить?"))return;state=incoming;dirty=true;renderAll();setStatus("Импортирован JSON. Это локальное изменение, не запись в GitHub.","warn");}catch(e){alert("Импорт отклонён: "+e.message);}};reader.readAsText(file);}
 function addTask(){
  if(!state)return;const title=prompt("Название задачи:");if(!title||!title.trim())return;
