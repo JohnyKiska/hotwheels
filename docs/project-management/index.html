@@ -23,8 +23,40 @@ h1{margin:0;font-size:clamp(23px,3vw,32px);letter-spacing:-.5px}h1 span{color:va
 .badge{font-size:11px;border-radius:20px;padding:3px 8px;border:1px solid var(--line);white-space:nowrap}.b-done{color:var(--green);border-color:#245d38}.b-in_progress{color:var(--yellow);border-color:#73571b}.b-blocked{color:var(--red);border-color:#71302e}.b-review{color:var(--purple);border-color:#553c78}
 .field{margin:12px 0}.field label{display:block;color:var(--muted);font-size:12px;margin-bottom:5px}.field input,.field textarea,.field select{width:100%;background:#0e1721;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:9px;font:inherit}.field textarea{min-height:76px;resize:vertical}
 .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.primary{background:#17324a;border-color:#315c7e}.danger{border-color:#71302e;color:#ff9b95}.muted{color:var(--muted)}.small{font-size:12px}.empty{color:var(--muted);padding:24px;text-align:center}.progress{height:8px;background:#253242;border-radius:10px;overflow:hidden;margin:10px 0}.progress i{display:block;height:100%;background:linear-gradient(90deg,var(--green),var(--accent));width:0}
-.tree{display:grid;gap:7px}.tree ul{list-style:none;margin:6px 0 0 17px;padding:0 0 0 15px;border-left:1px solid var(--line)}.tree-node{padding:9px 10px;border:1px solid var(--line);border-radius:9px;background:#111b26}.tree-node summary{cursor:pointer;display:flex;align-items:center;gap:8px;flex-wrap:wrap}.tree-node summary b{font-size:13px}.tree-node .tree-meta{font-size:11px;color:var(--muted);margin-left:auto}.tree-node p{margin:7px 0 0 22px;color:var(--muted);font-size:12px}.tree-node .actions{margin:7px 0 0 22px}.tree-children{margin-top:7px}.list{display:grid;gap:8px}.rowitem{padding:11px 12px;border:1px solid var(--line);border-radius:9px;background:#111b26}.rowitem b{display:block}.rowitem small{color:var(--muted)}
+.list{display:grid;gap:8px}.rowitem{padding:11px 12px;border:1px solid var(--line);border-radius:9px;background:#111b26}.rowitem b{display:block}.rowitem small{color:var(--muted)}
 .notice{padding:12px;border:1px solid #5b4a23;background:#241f13;border-radius:9px;color:#e7d6a5;margin:12px 0}.hidden{display:none!important}
+
+.navigator-grid{display:grid;grid-template-columns:minmax(320px,.95fr) minmax(340px,1.05fr);gap:14px;align-items:start}
+.tree-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.tree-toolbar input,.tree-toolbar select{background:#0e1721;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:9px;font:inherit;min-width:150px}
+.tree-toolbar input{flex:1;min-width:210px}
+.tree-list{padding:8px;max-height:72vh;overflow:auto}
+.tree-node{display:flex;align-items:center;gap:5px;min-height:36px;padding:3px 6px;border-radius:8px}
+.tree-node:hover{background:#1a2939}
+.tree-node.selected{background:#17324a;outline:1px solid #315c7e}
+.tree-toggle{width:25px;min-width:25px;height:25px;border:0;background:transparent;color:var(--muted);border-radius:6px;cursor:pointer;font:inherit}
+.tree-toggle:hover{background:#26384b;color:var(--text)}
+.tree-toggle.spacer{visibility:hidden}
+.tree-label{min-width:0;flex:1;text-align:left;border:0;background:transparent;color:var(--text);padding:5px 3px;cursor:pointer;font:inherit;display:flex;align-items:center;gap:8px}
+.tree-label strong{font-weight:580;overflow-wrap:anywhere}
+.tree-meta{color:var(--muted);font-size:11px;white-space:nowrap}
+.tree-count{font-size:10px;color:var(--muted);border:1px solid var(--line);border-radius:20px;padding:1px 6px;white-space:nowrap}
+.tree-badge{font-size:10px;border-radius:20px;padding:2px 7px;border:1px solid var(--line);white-space:nowrap}
+.status-done{color:var(--green);border-color:#245d38}.status-in_progress{color:var(--yellow);border-color:#73571b}.status-needs_audit{color:#e7b45a;border-color:#73571b}.status-planned{color:var(--accent);border-color:#315c7e}.status-not_assessed{color:var(--muted)}.status-blocked{color:var(--red);border-color:#71302e}.status-review{color:var(--purple);border-color:#553c78}
+.tree-children{margin-left:13px;border-left:1px solid #29394a}
+.tree-summary{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px}
+.tree-summary span{background:#101a25;border:1px solid var(--line);border-radius:8px;padding:6px 9px;font-size:12px;color:var(--muted)}
+.component-detail{padding:16px}
+.component-detail h3{margin:0 0 5px;font-size:19px}
+.component-detail .detail-meta{color:var(--muted);font-size:12px;overflow-wrap:anywhere}
+.component-detail .detail-section{border-top:1px solid var(--line);padding-top:12px;margin-top:14px}
+.component-detail .detail-section h4{margin:0 0 6px;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.component-detail .detail-copy{white-space:pre-wrap;overflow-wrap:anywhere}
+.related-task{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.related-task:last-child{border-bottom:0}
+.related-task button{border:0;background:transparent;color:var(--accent);cursor:pointer;text-align:left;font:inherit}
+@media(max-width:900px){.navigator-grid{grid-template-columns:1fr}.tree-list{max-height:52vh}}
+
 @media(max-width:900px){.grid{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}header{position:static}.task{grid-template-columns:1fr 1fr}.task>div:first-child{grid-column:1/-1}}
 @media print{body{background:white;color:#111}.panel,.stat,.card{background:white;color:#111;border:1px solid #aaa}.toolbar,.tabs,.actions,.filters,.detail-panel{display:none!important}header{position:static;background:white;color:#111}}
 </style>
@@ -44,12 +76,36 @@ h1{margin:0;font-size:clamp(23px,3vw,32px);letter-spacing:-.5px}h1 span{color:va
  <div class="statusline" id="statusline"><i class="led warn"></i><span>Загружаю состояние проекта…</span></div>
  <div id="draftNotice" class="notice hidden"></div>
  <nav class="tabs" aria-label="Разделы проекта">
-  <button class="tab active" data-tab="overview">Обзор</button>
+  <button class="tab active" data-tab="tree">Дерево проекта</button>
+  <button class="tab" data-tab="overview">Обзор</button>
   <button class="tab" data-tab="tasks">Задачи</button>
-  <button class="tab" data-tab="components">🌳 Дерево проекта</button>
+  <button class="tab" data-tab="components">Компоненты</button>
   <button class="tab" data-tab="decisions">Решения и блокеры</button>
   <button class="tab" data-tab="history">История</button>
  </nav>
+ <section id="view-tree">
+  <div class="stats" id="treeStats"></div>
+  <div class="tree-toolbar">
+   <input id="treeSearch" type="search" placeholder="Поиск по компонентам, путям и описаниям…">
+   <select id="treeStatus">
+    <option value="all">Все статусы</option>
+    <option value="done">Готово</option>
+    <option value="in_progress">В работе</option>
+    <option value="planned">Запланировано</option>
+    <option value="needs_audit">Требует аудита</option>
+    <option value="not_assessed">Не оценено</option>
+    <option value="blocked">Блокер</option>
+    <option value="review">Проверка</option>
+   </select>
+   <button class="btn" id="expandTree">Развернуть всё</button>
+   <button class="btn" id="collapseTree">Свернуть всё</button>
+   <button class="btn primary" id="treeAddComponent">＋ Компонент</button>
+  </div>
+  <div class="navigator-grid">
+   <section class="panel"><h2>Структура проекта <span class="muted small" id="treeCount"></span></h2><div class="tree-list" id="componentTree"><div class="empty">Загружаю дерево…</div></div></section>
+   <aside class="panel"><h2>Карточка компонента</h2><div id="componentDetail" class="component-detail"><div class="empty">Выбери компонент в дереве.</div></div></aside>
+  </div>
+ </section>
  <section id="view-overview">
   <div class="stats" id="stats"></div>
   <div class="grid">
@@ -63,12 +119,11 @@ h1{margin:0;font-size:clamp(23px,3vw,32px);letter-spacing:-.5px}h1 span{color:va
    <input id="taskSearch" placeholder="Поиск задач…">
    <select id="taskStatus"><option value="all">Все статусы</option><option value="backlog">Бэклог</option><option value="planned">Запланировано</option><option value="in_progress">В процессе</option><option value="blocked">Блокер</option><option value="review">Проверка</option><option value="done">Готово</option><option value="cancelled">Отменено</option></select>
    <select id="taskWorkstream"><option value="all">Все направления</option></select>
-   <select id="taskComponent"><option value="all">Все компоненты</option></select>
   </div>
   <div class="grid"><section class="panel"><h2>Список задач</h2><div id="taskList"></div></section><aside class="panel detail-panel"><h2>Карточка задачи</h2><div class="body" id="taskDetail"><div class="empty">Выбери задачу.</div></div></aside></div>
  </section>
  <section id="view-components" class="hidden">
-  <div class="panel"><h2>Архитектура и состав проекта</h2><div class="body"><p class="muted small">Иерархия папок, сервисов и доменных областей. Компоненты описывают устройство проекта, задачи отдельно отражают работу над ним.</p><div class="actions" style="margin:0 0 12px"><button class="btn primary" id="addComponent">＋ Добавить компонент</button></div><div class="cards" id="componentList"></div></div></div>
+  <div class="panel"><h2>Состав системы и доменные области</h2><div class="body"><p class="muted small">Компоненты описывают то, что существует в проекте. Это не задачи и их статусы не участвуют в расчёте выполнения работ.</p><div class="actions" style="margin:0 0 12px"><button class="btn primary" id="addComponent">＋ Добавить компонент</button></div><div class="cards" id="componentList"></div></div></div>
   <section class="panel hidden" id="componentEditorPanel" style="margin-top:14px"><h2 id="componentEditorHeading">Редактирование компонента</h2><div class="body" id="componentEditor"></div></section>
  </section>
  <section id="view-decisions" class="hidden">
@@ -80,7 +135,7 @@ h1{margin:0;font-size:clamp(23px,3vw,32px);letter-spacing:-.5px}h1 span{color:va
   <div class="panel"><h2>Журнал изменений</h2><div class="body list" id="historyList"></div></div>
  </section>
 </div>
-<script type="application/json" id="project-schema">{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://github.com/JohnyKiska/hotwheels/blob/integration/catalog-foundation/docs/project-management/project-state.schema.json","title":"HW Catalog Project State","description":"Canonical, version-controlled state for the HW Catalog Project Manager.","type":"object","additionalProperties":false,"required":["schema_version","metadata","project","workstreams","components","tasks","decisions","blockers","changelog"],"properties":{"schema_version":{"const":1},"metadata":{"type":"object","additionalProperties":false,"required":["project_id","updated_at","source_of_truth","working_branch"],"properties":{"project_id":{"const":"hw-catalog"},"updated_at":{"type":"string","format":"date-time"},"source_of_truth":{"const":"github"},"working_branch":{"type":"string","minLength":1},"last_verified_commit":{"type":["string","null"],"pattern":"^[0-9a-f]{7,40}$"},"timezone":{"type":"string"}}},"project":{"type":"object","additionalProperties":false,"required":["name","summary","status"],"properties":{"name":{"type":"string","minLength":1},"summary":{"type":"string"},"status":{"enum":["active","on_hold","maintenance","completed"]}}},"workstreams":{"type":"array","items":{"type":"object","additionalProperties":false,"required":["id","title","description","status"],"properties":{"id":{"$ref":"#/$defs/id"},"title":{"type":"string","minLength":1},"description":{"type":"string"},"status":{"$ref":"#/$defs/workStatus"},"sort_order":{"type":"integer"}}}},"components":{"type":"array","items":{"type":"object","additionalProperties":false,"required":["id","title","kind","status"],"properties":{"id":{"$ref":"#/$defs/id"},"parent_id":{"type":["string","null"]},"workstream_id":{"type":["string","null"]},"title":{"type":"string","minLength":1},"path":{"type":["string","null"]},"kind":{"enum":["directory","file","service","database","external_system","domain_area","other"]},"status":{"$ref":"#/$defs/workStatus"},"description":{"type":"string"},"notes":{"type":"string"},"source_refs":{"$ref":"#/$defs/stringList"},"sort_order":{"type":"integer"}}}},"tasks":{"type":"array","items":{"type":"object","additionalProperties":false,"required":["id","title","status","priority","workstream_id","acceptance_criteria"],"properties":{"id":{"$ref":"#/$defs/id"},"title":{"type":"string","minLength":1},"description":{"type":"string"},"status":{"enum":["backlog","planned","in_progress","blocked","review","done","cancelled"]},"priority":{"enum":["critical","high","medium","low"]},"workstream_id":{"type":"string","minLength":1},"component_id":{"type":["string","null"]},"owner":{"type":["string","null"]},"due_date":{"type":["string","null"],"format":"date"},"dependencies":{"$ref":"#/$defs/stringList"},"acceptance_criteria":{"type":"array","items":{"type":"string"}},"source_refs":{"$ref":"#/$defs/stringList"},"created_at":{"type":["string","null"],"format":"date-time"},"updated_at":{"type":["string","null"],"format":"date-time"},"completed_at":{"type":["string","null"],"format":"date-time"}}}},"decisions":{"type":"array","items":{"type":"object","additionalProperties":false,"required":["id","title","decision","date","status"],"properties":{"id":{"$ref":"#/$defs/id"},"title":{"type":"string","minLength":1},"decision":{"type":"string","minLength":1},"rationale":{"type":"string"},"date":{"type":"string","format":"date"},"status":{"enum":["proposed","accepted","superseded"]},"source_refs":{"$ref":"#/$defs/stringList"}}}},"blockers":{"type":"array","items":{"type":"object","additionalProperties":false,"required":["id","title","status"],"properties":{"id":{"$ref":"#/$defs/id"},"title":{"type":"string","minLength":1},"description":{"type":"string"},"status":{"enum":["open","resolved","accepted_risk"]},"related_task_ids":{"$ref":"#/$defs/stringList"},"source_refs":{"$ref":"#/$defs/stringList"}}}},"changelog":{"type":"array","items":{"type":"object","additionalProperties":false,"required":["date","summary"],"properties":{"date":{"type":"string","format":"date-time"},"summary":{"type":"string","minLength":1},"commit":{"type":["string","null"]}}}}},"$defs":{"id":{"type":"string","pattern":"^[A-Za-z0-9][A-Za-z0-9_-]*$"},"stringList":{"type":"array","uniqueItems":true,"items":{"type":"string"}},"workStatus":{"enum":["not_assessed","planned","in_progress","blocked","review","done","needs_audit"]}}}</script>
+<script type="application/json" id="project-schema">{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://github.com/JohnyKiska/hotwheels/blob/integration/catalog-foundation/docs/project-management/project-state.schema.json","title":"HW Catalog Project State","description":"Canonical, version-controlled state for the HW Catalog Project Manager.","type":"object","additionalProperties":false,"required":["schema_version","metadata","project","workstreams","components","tasks","decisions","blockers","changelog"],"properties":{"schema_version":{"const":1},"metadata":{"type":"object","additionalProperties":false,"required":["project_id","updated_at","source_of_truth","working_branch"],"properties":{"project_id":{"const":"hw-catalog"},"updated_at":{"type":"string","format":"date-time"},"source_of_truth":{"const":"github"},"working_branch":{"type":"string","minLength":1},"last_verified_commit":{"type":["string","null"],"pattern":"^[0-9a-f]{7,40}$"},"timezone":{"type":"string"}}},"project":{"type":"object","additionalProperties":false,"required":["name","summary","status"],"properties":{"name":{"type":"string","minLength":1},"summary":{"type":"string"},"status":{"enum":["active","on_hold","maintenance","completed"]}}},"workstreams":{"type":"array","items":{"type":"object","additionalProperties":false,"required":["id","title","description","status"],"properties":{"id":{"$ref":"#/$defs/id"},"title":{"type":"string","minLength":1},"description":{"type":"string"},"status":{"$ref":"#/$defs/workStatus"},"sort_order":{"type":"integer"}}}},"components":{"type":"array","items":{"type":"object","additionalProperties":false,"required":["id","title","kind","status"],"properties":{"id":{"$ref":"#/$defs/id"},"parent_id":{"type":["string","null"]},"workstream_id":{"type":["string","null"]},"title":{"type":"string","minLength":1},"path":{"type":["string","null"]},"kind":{"enum":["directory","file","service","database","external_system","domain_area","other"]},"status":{"$ref":"#/$defs/workStatus"},"description":{"type":"string"},"notes":{"type":"string"},"source_refs":{"$ref":"#/$defs/stringList"},"sort_order":{"type":"integer"},"completed_work":{"type":"string","description":"Summary of completed work for this component."},"next_step":{"type":"string","description":"Next planned action for this component."}}}},"tasks":{"type":"array","items":{"type":"object","additionalProperties":false,"required":["id","title","status","priority","workstream_id","acceptance_criteria"],"properties":{"id":{"$ref":"#/$defs/id"},"title":{"type":"string","minLength":1},"description":{"type":"string"},"status":{"enum":["backlog","planned","in_progress","blocked","review","done","cancelled"]},"priority":{"enum":["critical","high","medium","low"]},"workstream_id":{"type":"string","minLength":1},"component_id":{"type":["string","null"]},"owner":{"type":["string","null"]},"due_date":{"type":["string","null"],"format":"date"},"dependencies":{"$ref":"#/$defs/stringList"},"acceptance_criteria":{"type":"array","items":{"type":"string"}},"source_refs":{"$ref":"#/$defs/stringList"},"created_at":{"type":["string","null"],"format":"date-time"},"updated_at":{"type":["string","null"],"format":"date-time"},"completed_at":{"type":["string","null"],"format":"date-time"}}}},"decisions":{"type":"array","items":{"type":"object","additionalProperties":false,"required":["id","title","decision","date","status"],"properties":{"id":{"$ref":"#/$defs/id"},"title":{"type":"string","minLength":1},"decision":{"type":"string","minLength":1},"rationale":{"type":"string"},"date":{"type":"string","format":"date"},"status":{"enum":["proposed","accepted","superseded"]},"source_refs":{"$ref":"#/$defs/stringList"}}}},"blockers":{"type":"array","items":{"type":"object","additionalProperties":false,"required":["id","title","status"],"properties":{"id":{"$ref":"#/$defs/id"},"title":{"type":"string","minLength":1},"description":{"type":"string"},"status":{"enum":["open","resolved","accepted_risk"]},"related_task_ids":{"$ref":"#/$defs/stringList"},"source_refs":{"$ref":"#/$defs/stringList"}}}},"changelog":{"type":"array","items":{"type":"object","additionalProperties":false,"required":["date","summary"],"properties":{"date":{"type":"string","format":"date-time"},"summary":{"type":"string","minLength":1},"commit":{"type":["string","null"]}}}}},"$defs":{"id":{"type":"string","pattern":"^[A-Za-z0-9][A-Za-z0-9_-]*$"},"stringList":{"type":"array","uniqueItems":true,"items":{"type":"string"}},"workStatus":{"enum":["not_assessed","planned","in_progress","blocked","review","done","needs_audit"]}}}</script>
 <script>
 "use strict";
 const STATE_URL="./project-state.json";
@@ -89,7 +144,8 @@ const STATUS={backlog:"Бэклог",planned:"Запланировано",in_pro
 const WORK_STATUS={not_assessed:"Не оценено",planned:"Запланировано",in_progress:"В процессе",blocked:"Блокер",review:"Проверка",done:"Готово",needs_audit:"Требует аудита"};
 const PRIORITY={critical:"Критический",high:"Высокий",medium:"Средний",low:"Низкий"};
 const $=id=>document.getElementById(id);
-let state=null,selectedTaskId=null,dirty=false,sourceLabel="GitHub";
+let state=null,selectedTaskId=null,selectedComponentId=null,dirty=false,sourceLabel="GitHub";
+let expandedComponentIds=new Set(),treeExpansionInitialized=false;
 function esc(v){return String(v==null?"":v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 function setStatus(message,kind){$("statusline").innerHTML='<i class="led '+(kind||"")+'"></i><span>'+esc(message)+'</span>';}
 function markDirty(){dirty=true;setStatus("Есть несохранённые изменения в памяти страницы. Сохрани черновик или экспортируй JSON.","warn");}
@@ -122,6 +178,71 @@ function validateState(s){
 }
 function workstreamName(id){const x=state.workstreams.find(w=>w.id===id);return x?x.title:"Без направления";}
 function taskCountByWorkstream(id){return state.tasks.filter(t=>t.workstream_id===id);}
+
+function componentChildren(id){return state.components.filter(c=>(c.parent_id||null)===(id||null)).sort((a,b)=>(Number(a.sort_order)||0)-(Number(b.sort_order)||0)||a.title.localeCompare(b.title,"ru"));}
+function componentDescendants(id){const out=[];const walk=parent=>componentChildren(parent).forEach(c=>{out.push(c);walk(c.id);});walk(id);return out;}
+function componentTaskList(id){const ids=new Set([id,...componentDescendants(id).map(c=>c.id)]);return state.tasks.filter(t=>ids.has(t.component_id));}
+function componentStatusCounts(items){const counts={};items.forEach(c=>{counts[c.status]=(counts[c.status]||0)+1;});return counts;}
+function statusBadge(status){return '<span class="tree-badge status-'+esc(status)+'">'+esc(WORK_STATUS[status]||status)+'</span>';}
+function renderTree(){
+ const components=state.components;
+ if(!treeExpansionInitialized){components.filter(c=>components.some(x=>x.parent_id===c.id)).forEach(c=>expandedComponentIds.add(c.id));treeExpansionInitialized=true;}
+ const q=$("treeSearch").value.trim().toLocaleLowerCase("ru"),status=$("treeStatus").value;
+ const visible=new Set();
+ if(!q&&status==="all")components.forEach(c=>visible.add(c.id));
+ else{
+  const matches=components.filter(c=>(!c.parent_id?status==="all":status==="all"||c.status===status)&&(!q||(c.title+" "+c.id+" "+(c.path||"")+" "+(c.description||"")+" "+(c.notes||"")+" "+(c.completed_work||"")+" "+(c.next_step||"")).toLocaleLowerCase("ru").includes(q)));
+  matches.forEach(c=>{let current=c;while(current){visible.add(current.id);current=current.parent_id?components.find(x=>x.id===current.parent_id):null;}});
+ }
+ const actualComponents=components.filter(c=>c.parent_id),totalCounts=componentStatusCounts(actualComponents);
+ $("treeStats").innerHTML=[
+  ["Компонентов",actualComponents.length],
+  ["Готово",totalCounts.done||0],
+  ["В работе",totalCounts.in_progress||0],
+  ["Требуют аудита",totalCounts.needs_audit||0],
+  ["Запланировано",totalCounts.planned||0]
+ ].map(x=>'<div class="stat"><b>'+x[1]+'</b><small>'+x[0]+'</small></div>').join("");
+ $("treeCount").textContent="· "+(visible.size===components.length?components.length:visible.size+" из "+components.length);
+ if(!selectedComponentId||!components.some(c=>c.id===selectedComponentId))selectedComponentId=componentChildren(null)[0]?.id||components[0]?.id||null;
+ function renderNode(c,depth){
+  if(!visible.has(c.id))return "";
+  const children=componentChildren(c.id).filter(x=>visible.has(x.id));
+  const hasChildren=children.length>0,open=expandedComponentIds.has(c.id);
+  const tasks=componentTaskList(c.id),descendants=componentDescendants(c.id);
+  const isRoot=!c.parent_id;
+  const label=isRoot?'<span class="tree-badge">ГРУППА</span>':statusBadge(c.status);
+  const summary=isRoot?'<span class="tree-meta">'+descendants.length+' компонентов</span>':'';
+  return '<div class="tree-node '+(selectedComponentId===c.id?"selected":"")+'" style="padding-left:'+(depth*14+4)+'px">'+
+   (hasChildren?'<button class="tree-toggle" data-tree-toggle="'+esc(c.id)+'" aria-label="'+(open?"Свернуть":"Развернуть")+'">'+(open?"▾":"▸")+'</button>':'<span class="tree-toggle spacer">·</span>')+
+   '<button class="tree-label" data-select-component="'+esc(c.id)+'"><strong>'+esc(c.title)+'</strong>'+label+summary+'</button>'+
+   '<span class="tree-count" title="Задачи в этой ветке">'+tasks.length+' задач</span></div>'+
+   (hasChildren&&open?'<div class="tree-children">'+children.map(x=>renderNode(x,depth+1)).join("")+'</div>':"");
+ }
+ const roots=componentChildren(null).filter(c=>visible.has(c.id));
+ $("componentTree").innerHTML=roots.length?roots.map(c=>renderNode(c,0)).join(""):'<div class="empty">По заданным условиям компоненты не найдены.</div>';
+ document.querySelectorAll("[data-tree-toggle]").forEach(b=>b.onclick=()=>{const id=b.dataset.treeToggle;if(expandedComponentIds.has(id))expandedComponentIds.delete(id);else expandedComponentIds.add(id);renderTree();});
+ document.querySelectorAll("[data-select-component]").forEach(b=>b.onclick=()=>{selectedComponentId=b.dataset.selectComponent;renderTree();renderComponentDetail();});
+ renderComponentDetail();
+}
+function renderComponentDetail(){
+ const c=state.components.find(x=>x.id===selectedComponentId);
+ if(!c){$("componentDetail").innerHTML='<div class="empty">Выбери компонент в дереве.</div>';return;}
+ const isRoot=!c.parent_id,descendants=componentDescendants(c.id),related=componentTaskList(c.id);
+ const refs=(c.source_refs||[]).map(ref=>/^https?:\/\//i.test(ref)?'<div class="small"><a href="'+esc(ref)+'" target="_blank" rel="noopener noreferrer">'+esc(ref)+'</a></div>':'<div class="small muted">'+esc(ref)+'</div>').join("");
+ $("componentDetail").innerHTML='<h3>'+esc(c.title)+'</h3><div class="detail-meta">'+esc(c.id)+' · '+esc(c.path||c.kind||"")+'</div>'+
+  '<div class="actions">'+(isRoot?'<span class="tree-badge">ГРУППА · '+descendants.length+' компонентов</span>':statusBadge(c.status))+'<button class="btn primary" id="editSelectedComponent">Изменить компонент</button></div>'+
+  '<div class="detail-section"><h4>Описание</h4><div class="detail-copy">'+esc(c.description||"Описание пока не заполнено.")+'</div></div>'+
+  '<div class="detail-section"><h4>Что уже сделано</h4><div class="detail-copy">'+esc(c.completed_work||"Пока не зафиксировано.")+'</div></div>'+
+  '<div class="detail-section"><h4>Следующий шаг</h4><div class="detail-copy">'+esc(c.next_step||"Не определён.")+'</div></div>'+
+  '<div class="detail-section"><h4>Заметки</h4><div class="detail-copy">'+esc(c.notes||"Заметок пока нет.")+'</div></div>'+
+  '<div class="detail-section"><h4>Рабочее направление</h4><div>'+esc(workstreamName(c.workstream_id))+'</div></div>'+
+  '<div class="detail-section"><h4>Вложенные компоненты</h4><div>'+ (descendants.length?descendants.length+" элементов в этой ветке":"Дочерних компонентов нет.")+'</div></div>'+
+  '<div class="detail-section"><h4>Связанные задачи · '+related.length+'</h4>'+ (related.length?related.map(t=>'<div class="related-task"><button data-open-tree-task="'+esc(t.id)+'">'+esc(t.title)+'</button><span class="tree-meta">'+esc(STATUS[t.status]||t.status)+'</span></div>').join(""):'<div class="muted small">Связанных задач пока нет.</div>')+'</div>'+
+  (refs?'<div class="detail-section"><h4>Источники и ссылки</h4>'+refs+'</div>':"");
+ $("editSelectedComponent").onclick=()=>{setTab("components");renderComponentEditor(c.id);};
+ document.querySelectorAll("[data-open-tree-task]").forEach(b=>b.onclick=()=>{selectedTaskId=b.dataset.openTreeTask;setTab("tasks");renderTasks();});
+}
+
 function renderOverview(){
  const active=state.tasks.filter(t=>!["done","cancelled"].includes(t.status));
  const done=state.tasks.filter(t=>t.status==="done").length;
@@ -141,15 +262,12 @@ function renderOverview(){
 }
 function renderTaskFilters(){
  const current=$("taskWorkstream").value||"all";
- const currentComponent=$("taskComponent").value||"all";
  $("taskWorkstream").innerHTML='<option value="all">Все направления</option>'+state.workstreams.map(w=>'<option value="'+esc(w.id)+'">'+esc(w.title)+'</option>').join("");
  $("taskWorkstream").value=state.workstreams.some(w=>w.id===current)?current:"all";
- $("taskComponent").innerHTML='<option value="all">Все компоненты</option>'+state.components.slice().sort((a,b)=>(a.sort_order||0)-(b.sort_order||0)).map(c=>'<option value="'+esc(c.id)+'">'+esc(c.title)+' · '+esc(c.id)+'</option>').join("");
- $("taskComponent").value=state.components.some(c=>c.id===currentComponent)?currentComponent:"all";
 }
 function renderTasks(){
- const q=$("taskSearch").value.toLowerCase(),status=$("taskStatus").value,ws=$("taskWorkstream").value,component=$("taskComponent").value;
- const tasks=state.tasks.filter(t=>(status==="all"||t.status===status)&&(ws==="all"||t.workstream_id===ws)&&(component==="all"||t.component_id===component)&&((t.title+" "+(t.description||"")+" "+workstreamName(t.workstream_id)).toLowerCase().includes(q)));
+ const q=$("taskSearch").value.toLowerCase(),status=$("taskStatus").value,ws=$("taskWorkstream").value;
+ const tasks=state.tasks.filter(t=>(status==="all"||t.status===status)&&(ws==="all"||t.workstream_id===ws)&&((t.title+" "+(t.description||"")+" "+workstreamName(t.workstream_id)).toLowerCase().includes(q)));
  $("taskList").innerHTML=tasks.length?tasks.map(t=>'<div class="task"><div><div class="task-title" data-task="'+esc(t.id)+'">'+esc(t.title)+'</div><div class="task-desc">'+esc(workstreamName(t.workstream_id))+' · '+esc(t.description||"")+'</div></div><select aria-label="Статус задачи" data-status="'+esc(t.id)+'">'+Object.keys(STATUS).map(k=>'<option value="'+k+'" '+(t.status===k?"selected":"")+'>'+STATUS[k]+'</option>').join("")+'</select><select aria-label="Приоритет задачи" data-priority="'+esc(t.id)+'">'+Object.keys(PRIORITY).map(k=>'<option value="'+k+'" '+(t.priority===k?"selected":"")+'>'+PRIORITY[k]+'</option>').join("")+'</select></div>').join(""):'<div class="empty">Задачи не найдены.</div>';
  document.querySelectorAll("[data-task]").forEach(el=>el.onclick=()=>{selectedTaskId=el.dataset.task;renderTaskDetail();});
  document.querySelectorAll("[data-status]").forEach(el=>el.onchange=()=>{const t=state.tasks.find(x=>x.id===el.dataset.status);t.status=el.value;t.updated_at=new Date().toISOString();markDirty();renderOverview();renderTasks();renderTaskDetail();});
@@ -160,9 +278,8 @@ function renderTasks(){
 function renderTaskDetail(){
  const t=state.tasks.find(x=>x.id===selectedTaskId);
  if(!t){$("taskDetail").innerHTML='<div class="empty">Выбери задачу из списка.</div>';return;}
- $("taskDetail").innerHTML='<h3>'+esc(t.title)+'</h3><div class="small muted">'+esc(workstreamName(t.workstream_id))+' · '+esc(t.id)+'</div>'+(t.component_id&&state.components.some(c=>c.id===t.component_id)?'<div class="small muted">Компонент: '+esc(state.components.find(c=>c.id===t.component_id).title)+'</div><div class="actions"><button class="btn" id="openTaskComponent">Открыть в дереве проекта</button></div>':'<div class="small muted">Компонент не привязан</div>')+
+ $("taskDetail").innerHTML='<h3>'+esc(t.title)+'</h3><div class="small muted">'+esc(workstreamName(t.workstream_id))+' · '+esc(t.id)+'</div>'+
  '<div class="field"><label>Название</label><input id="editTitle" value="'+esc(t.title)+'"></div>'+
- '<div class="field"><label>Компонент проекта</label><select id="editComponent"><option value="">Не привязан</option>'+state.components.slice().sort((a,b)=>(a.sort_order||0)-(b.sort_order||0)).map(c=>'<option value="'+esc(c.id)+'" '+(t.component_id===c.id?"selected":"")+'>'+esc(c.title)+'</option>').join("")+'</select></div>'+
  '<div class="field"><label>Описание</label><textarea id="editDescription">'+esc(t.description||"")+'</textarea></div>'+
  '<div class="field"><label>Статус</label><select id="editStatus">'+Object.keys(STATUS).map(k=>'<option value="'+k+'" '+(t.status===k?"selected":"")+'>'+STATUS[k]+'</option>').join("")+'</select></div>'+
  '<div class="field"><label>Приоритет</label><select id="editPriority">'+Object.keys(PRIORITY).map(k=>'<option value="'+k+'" '+(t.priority===k?"selected":"")+'>'+PRIORITY[k]+'</option>').join("")+'</select></div>'+
@@ -170,29 +287,17 @@ function renderTaskDetail(){
  '<div class="field"><label>Ответственный</label><input id="editOwner" value="'+esc(t.owner||"")+'"></div>'+
  '<div class="field"><label>Срок (YYYY-MM-DD)</label><input id="editDue" value="'+esc(t.due_date||"")+'" placeholder="не задан"></div>'+
  '<div class="actions"><button class="btn primary" id="saveTask">Сохранить задачу</button></div>';
- const openComponent=$("openTaskComponent");if(openComponent)openComponent.onclick=()=>{setTab("components");let node=document.querySelector('[data-tree-id="'+CSS.escape(t.component_id)+'"]');while(node){node.open=true;node=node.parentElement.closest("details[data-tree-id]");}};
  $("saveTask").onclick=()=>{
   const title=$("editTitle").value.trim();if(!title)return alert("Название задачи обязательно.");
-  t.title=title;t.description=$("editDescription").value;t.component_id=$("editComponent").value||null;t.status=$("editStatus").value;t.priority=$("editPriority").value;
+  t.title=title;t.description=$("editDescription").value;t.status=$("editStatus").value;t.priority=$("editPriority").value;
   t.acceptance_criteria=$("editCriteria").value.split("\n").map(x=>x.trim()).filter(Boolean);
   t.owner=$("editOwner").value.trim()||null;t.due_date=$("editDue").value.trim()||null;t.updated_at=new Date().toISOString();
   markDirty();renderAll();renderTaskDetail();
  };
 }
 function renderComponents(){
- const byParent=new Map();
- state.components.forEach(c=>{const key=c.parent_id||"";if(!byParent.has(key))byParent.set(key,[]);byParent.get(key).push(c);});
- for(const list of byParent.values())list.sort((a,b)=>(a.sort_order||0)-(b.sort_order||0)||a.title.localeCompare(b.title,"ru"));
- const taskCount=id=>state.tasks.filter(t=>t.component_id===id).length;
- const draw=(c,depth)=>{const children=byParent.get(c.id)||[],count=taskCount(c.id);
-  return '<li><details class="tree-node" data-tree-id="'+esc(c.id)+'" '+(depth===0?'open':'')+'><summary><b>'+esc(c.title)+'</b><span class="badge '+(c.status==="done"?"b-done":c.status==="blocked"?"b-blocked":c.status==="in_progress"?"b-in_progress":"")+'">'+esc(WORK_STATUS[c.status]||c.status)+'</span><span class="tree-meta">'+esc(c.path||c.kind)+' · задач: '+count+'</span></summary>'+
-  (c.description?'<p>'+esc(c.description)+'</p>':'')+'<div class="actions"><button class="btn" data-edit-component="'+esc(c.id)+'">Изменить</button><button class="btn" data-component-tasks="'+esc(c.id)+'">Задачи ('+count+')</button></div>'+
-  (children.length?'<ul class="tree-children">'+children.map(x=>draw(x,depth+1)).join("")+'</ul>':'')+'</details></li>';
- };
- const roots=byParent.get("")||[];
- $("componentList").innerHTML=roots.length?'<ul class="tree">'+roots.map(c=>draw(c,0)).join("")+'</ul>':'<div class="empty">Компоненты пока не добавлены.</div>';
+ $("componentList").innerHTML=state.components.length?state.components.map(c=>'<article class="card"><h3>'+esc(c.title)+'</h3><p>'+esc(c.description||"")+'</p><div class="meta">'+esc(c.path||c.kind)+' · '+esc(WORK_STATUS[c.status]||c.status)+'</div><div class="actions"><button class="btn" data-edit-component="'+esc(c.id)+'">Изменить</button></div></article>').join(""):'<div class="empty">Компоненты пока не добавлены.</div>';
  document.querySelectorAll("[data-edit-component]").forEach(b=>b.onclick=()=>renderComponentEditor(b.dataset.editComponent));
- document.querySelectorAll("[data-component-tasks]").forEach(b=>b.onclick=()=>{setTab("tasks");$("taskComponent").value=b.dataset.componentTasks;renderTasks();});
 }
 function renderComponentEditor(id){
  const c=id?state.components.find(x=>x.id===id):null;
@@ -210,13 +315,15 @@ function renderComponentEditor(id){
  '<div class="field"><label>Рабочее направление</label><select id="componentWorkstream"><option value="">Без направления</option>'+streamOptions+'</select></div>'+
  '<div class="field"><label>Родительский компонент</label><select id="componentParent"><option value="">Нет родителя</option>'+parentOptions+'</select></div>'+
  '<div class="field"><label>Описание</label><textarea id="componentDescription">'+esc(c&&c.description||"")+'</textarea></div>'+
+ '<div class="field"><label>Что уже сделано</label><textarea id="componentCompleted">'+esc(c&&c.completed_work||"")+'</textarea></div>'+
+ '<div class="field"><label>Следующий шаг</label><textarea id="componentNextStep">'+esc(c&&c.next_step||"")+'</textarea></div>'+
  '<div class="field"><label>Заметки</label><textarea id="componentNotes">'+esc(c&&c.notes||"")+'</textarea></div>'+
  '<div class="field"><label>Источники / ссылки (каждая с новой строки)</label><textarea id="componentRefs">'+esc((c&&c.source_refs||[]).join("\n"))+'</textarea></div>'+
  '<div class="actions"><button class="btn primary" id="saveComponent">Сохранить компонент</button><button class="btn" id="cancelComponent">Отмена</button></div>';
  $("saveComponent").onclick=()=>{
   const title=$("componentTitle").value.trim();if(!title)return alert("Название компонента обязательно.");
   const parent=$("componentParent").value||null;if(parent===(c&&c.id))return alert("Компонент не может быть родителем самому себе.");
-  const data={title,path:$("componentPath").value.trim()||null,kind:$("componentKind").value,status:$("componentStatus").value,workstream_id:$("componentWorkstream").value||null,parent_id:parent,description:$("componentDescription").value,notes:$("componentNotes").value,source_refs:[...new Set($("componentRefs").value.split("\n").map(x=>x.trim()).filter(Boolean))]};
+  const data={title,path:$("componentPath").value.trim()||null,kind:$("componentKind").value,status:$("componentStatus").value,workstream_id:$("componentWorkstream").value||null,parent_id:parent,description:$("componentDescription").value,completed_work:$("componentCompleted").value,next_step:$("componentNextStep").value,notes:$("componentNotes").value,source_refs:[...new Set($("componentRefs").value.split("\n").map(x=>x.trim()).filter(Boolean))]};
   const candidate=JSON.parse(JSON.stringify(state));
   if(c){Object.assign(candidate.components.find(x=>x.id===c.id),data);}else{candidate.components.push({id:"component-"+Date.now(),...data,sort_order:candidate.components.reduce((n,x)=>Math.max(n,Number(x.sort_order)||0),0)+1});}
   try{validateState(candidate);}catch(e){return alert("Компонент не сохранён: "+e.message);}
@@ -278,8 +385,8 @@ function renderBlockerEditor(id){
 function renderHistory(){
  $("historyList").innerHTML=state.changelog.length?state.changelog.slice().reverse().map(x=>'<div class="rowitem"><b>'+esc(x.summary)+'</b><small>'+esc(x.date)+(x.commit?" · "+esc(x.commit):"")+'</small></div>').join(""):'<div class="empty">История пока пуста.</div>';
 }
-function renderAll(){renderOverview();renderTaskFilters();renderTasks();renderComponents();renderDecisions();renderHistory();}
-function setTab(name){document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.dataset.tab===name));["overview","tasks","components","decisions","history"].forEach(x=>$("view-"+x).classList.toggle("hidden",x!==name));}
+function renderAll(){renderTree();renderOverview();renderTaskFilters();renderTasks();renderComponents();renderDecisions();renderHistory();}
+function setTab(name){document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.dataset.tab===name));["tree","overview","tasks","components","decisions","history"].forEach(x=>$("view-"+x).classList.toggle("hidden",x!==name));}
 async function loadCanonical(){
  setStatus("Загружаю canonical JSON из GitHub…","warn");
  const response=await fetch(STATE_URL,{cache:"no-store"});if(!response.ok)throw Error("HTTP "+response.status+" при загрузке "+STATE_URL);
@@ -298,10 +405,14 @@ function addTask(){
  selectedTaskId=id;markDirty();setTab("tasks");renderAll();
 }
 document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
+ $("treeSearch").oninput=renderTree;$("treeStatus").onchange=renderTree;
+ $("expandTree").onclick=()=>{state.components.filter(c=>state.components.some(x=>x.parent_id===c.id)).forEach(c=>expandedComponentIds.add(c.id));treeExpansionInitialized=true;renderTree();};
+ $("collapseTree").onclick=()=>{expandedComponentIds.clear();treeExpansionInitialized=true;renderTree();};
+ $("treeAddComponent").onclick=()=>{setTab("components");renderComponentEditor(null);};
 $("reload").onclick=()=>{if(dirty&&!confirm("Есть несохранённые изменения. Перезагрузить canonical JSON и потерять их?"))return;loadCanonical().catch(e=>setStatus("Не удалось загрузить canonical JSON: "+e.message,"bad"));};
 $("saveDraft").onclick=saveDraft;$("export").onclick=exportState;$("import").onclick=()=>$("file").click();$("file").onchange=e=>{if(e.target.files[0])importState(e.target.files[0]);e.target.value="";};
 $("addTask").onclick=addTask;$("addComponent").onclick=()=>renderComponentEditor(null);$("addDecision").onclick=()=>renderDecisionEditor(null);$("addBlocker").onclick=()=>renderBlockerEditor(null);$("print").onclick=()=>window.print();
-$("taskSearch").oninput=renderTasks;$("taskStatus").onchange=renderTasks;$("taskWorkstream").onchange=renderTasks;$("taskComponent").onchange=renderTasks;
+$("taskSearch").oninput=renderTasks;$("taskStatus").onchange=renderTasks;$("taskWorkstream").onchange=renderTasks;
 loadCanonical().catch(e=>{setStatus("Не удалось загрузить project-state.json: "+e.message+". Открой страницу через HTTP-сервер, а не file://.","bad");});
 </script>
 </body></html>
