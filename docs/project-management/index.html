@@ -66,7 +66,8 @@ h1{margin:0;font-size:clamp(23px,3vw,32px);letter-spacing:-.5px}h1 span{color:va
   <div class="grid"><section class="panel"><h2>Список задач</h2><div id="taskList"></div></section><aside class="panel detail-panel"><h2>Карточка задачи</h2><div class="body" id="taskDetail"><div class="empty">Выбери задачу.</div></div></aside></div>
  </section>
  <section id="view-components" class="hidden">
-  <div class="panel"><h2>Состав системы и доменные области</h2><div class="body"><p class="muted small">Компоненты описывают то, что существует в проекте. Это не задачи и их статусы не участвуют в расчёте выполнения работ.</p><div class="cards" id="componentList"></div></div></div>
+  <div class="panel"><h2>Состав системы и доменные области</h2><div class="body"><p class="muted small">Компоненты описывают то, что существует в проекте. Это не задачи и их статусы не участвуют в расчёте выполнения работ.</p><div class="actions" style="margin:0 0 12px"><button class="btn primary" id="addComponent">＋ Добавить компонент</button></div><div class="cards" id="componentList"></div></div></div>
+  <section class="panel hidden" id="componentEditorPanel" style="margin-top:14px"><h2 id="componentEditorHeading">Редактирование компонента</h2><div class="body" id="componentEditor"></div></section>
  </section>
  <section id="view-decisions" class="hidden">
   <div class="grid"><section class="panel"><h2>Принятые решения</h2><div class="body list" id="decisionList"></div></section><section class="panel"><h2>Блокеры</h2><div class="body list" id="blockerList"></div></section></div>
@@ -168,7 +169,38 @@ function renderTaskDetail(){
  };
 }
 function renderComponents(){
- $("componentList").innerHTML=state.components.length?state.components.map(c=>'<article class="card"><h3>'+esc(c.title)+'</h3><p>'+esc(c.description||"")+'</p><div class="meta">'+esc(c.path||c.kind)+' · '+esc(WORK_STATUS[c.status]||c.status)+'</div></article>').join(""):'<div class="empty">Компоненты ещё не инвентаризированы. Добавим их после переноса фактического дерева репозитория.</div>';
+ $("componentList").innerHTML=state.components.length?state.components.map(c=>'<article class="card"><h3>'+esc(c.title)+'</h3><p>'+esc(c.description||"")+'</p><div class="meta">'+esc(c.path||c.kind)+' · '+esc(WORK_STATUS[c.status]||c.status)+'</div><div class="actions"><button class="btn" data-edit-component="'+esc(c.id)+'">Изменить</button></div></article>').join(""):'<div class="empty">Компоненты пока не добавлены.</div>';
+ document.querySelectorAll("[data-edit-component]").forEach(b=>b.onclick=()=>renderComponentEditor(b.dataset.editComponent));
+}
+function renderComponentEditor(id){
+ const c=id?state.components.find(x=>x.id===id):null;
+ if(id&&!c)return;
+ $("componentEditorPanel").classList.remove("hidden");
+ $("componentEditorHeading").textContent=c?"Редактировать компонент · "+c.id:"Новый компонент";
+ const parentOptions=state.components.filter(x=>!c||x.id!==c.id).map(x=>'<option value="'+esc(x.id)+'" '+(c&&c.parent_id===x.id?"selected":"")+'>'+esc(x.title)+" · "+esc(x.id)+'</option>').join("");
+ const streamOptions=state.workstreams.map(x=>'<option value="'+esc(x.id)+'" '+(c&&c.workstream_id===x.id?"selected":"")+'>'+esc(x.title)+'</option>').join("");
+ const kinds={directory:"Папка",file:"Файл",service:"Сервис",database:"База данных",external_system:"Внешняя система",domain_area:"Доменная область",other:"Другое"};
+ $("componentEditor").innerHTML=(c?'<div class="small muted">ID: '+esc(c.id)+'</div>':'<div class="small muted">ID будет создан автоматически при сохранении.</div>')+
+ '<div class="field"><label>Название</label><input id="componentTitle" value="'+esc(c?c.title:"")+'"></div>'+
+ '<div class="field"><label>Путь / расположение</label><input id="componentPath" value="'+esc(c&&c.path||"")+'" placeholder="например, src/catalog/"></div>'+
+ '<div class="field"><label>Тип</label><select id="componentKind">'+Object.keys(kinds).map(k=>'<option value="'+k+'" '+((c?c.kind:"domain_area")===k?"selected":"")+'>'+kinds[k]+'</option>').join("")+'</select></div>'+
+ '<div class="field"><label>Статус оценки</label><select id="componentStatus">'+Object.keys(WORK_STATUS).map(k=>'<option value="'+k+'" '+((c?c.status:"not_assessed")===k?"selected":"")+'>'+WORK_STATUS[k]+'</option>').join("")+'</select></div>'+
+ '<div class="field"><label>Рабочее направление</label><select id="componentWorkstream"><option value="">Без направления</option>'+streamOptions+'</select></div>'+
+ '<div class="field"><label>Родительский компонент</label><select id="componentParent"><option value="">Нет родителя</option>'+parentOptions+'</select></div>'+
+ '<div class="field"><label>Описание</label><textarea id="componentDescription">'+esc(c&&c.description||"")+'</textarea></div>'+
+ '<div class="field"><label>Заметки</label><textarea id="componentNotes">'+esc(c&&c.notes||"")+'</textarea></div>'+
+ '<div class="field"><label>Источники / ссылки (каждая с новой строки)</label><textarea id="componentRefs">'+esc((c&&c.source_refs||[]).join("\n"))+'</textarea></div>'+
+ '<div class="actions"><button class="btn primary" id="saveComponent">Сохранить компонент</button><button class="btn" id="cancelComponent">Отмена</button></div>';
+ $("saveComponent").onclick=()=>{
+  const title=$("componentTitle").value.trim();if(!title)return alert("Название компонента обязательно.");
+  const parent=$("componentParent").value||null;if(parent===(c&&c.id))return alert("Компонент не может быть родителем самому себе.");
+  const data={title,path:$("componentPath").value.trim()||null,kind:$("componentKind").value,status:$("componentStatus").value,workstream_id:$("componentWorkstream").value||null,parent_id:parent,description:$("componentDescription").value,notes:$("componentNotes").value,source_refs:[...new Set($("componentRefs").value.split("\n").map(x=>x.trim()).filter(Boolean))]};
+  const candidate=JSON.parse(JSON.stringify(state));
+  if(c){Object.assign(candidate.components.find(x=>x.id===c.id),data);}else{candidate.components.push({id:"component-"+Date.now(),...data,sort_order:candidate.components.reduce((n,x)=>Math.max(n,Number(x.sort_order)||0),0)+1});}
+  try{validateState(candidate);}catch(e){return alert("Компонент не сохранён: "+e.message);}
+  state=candidate;markDirty();$("componentEditorPanel").classList.add("hidden");renderAll();
+ };
+ $("cancelComponent").onclick=()=>$("componentEditorPanel").classList.add("hidden");
 }
 function renderDecisions(){
  $("decisionList").innerHTML=state.decisions.length?state.decisions.map(d=>'<div class="rowitem"><b>'+esc(d.title)+'</b><small>'+esc(d.date)+' · '+esc(d.status)+'</small><p>'+esc(d.decision)+'</p></div>').join(""):'<div class="empty">Решений пока нет.</div>';
@@ -199,7 +231,7 @@ function addTask(){
 document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
 $("reload").onclick=()=>{if(dirty&&!confirm("Есть несохранённые изменения. Перезагрузить canonical JSON и потерять их?"))return;loadCanonical().catch(e=>setStatus("Не удалось загрузить canonical JSON: "+e.message,"bad"));};
 $("saveDraft").onclick=saveDraft;$("export").onclick=exportState;$("import").onclick=()=>$("file").click();$("file").onchange=e=>{if(e.target.files[0])importState(e.target.files[0]);e.target.value="";};
-$("addTask").onclick=addTask;$("print").onclick=()=>window.print();
+$("addTask").onclick=addTask;$("addComponent").onclick=()=>renderComponentEditor(null);$("print").onclick=()=>window.print();
 $("taskSearch").oninput=renderTasks;$("taskStatus").onchange=renderTasks;$("taskWorkstream").onchange=renderTasks;
 loadCanonical().catch(e=>{setStatus("Не удалось загрузить project-state.json: "+e.message+". Открой страницу через HTTP-сервер, а не file://.","bad");});
 </script>
