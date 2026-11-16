@@ -20,6 +20,14 @@ Then open `http://localhost:8000/docs/project-management/`.
 - Browser storage may keep an explicitly marked local draft, but must never silently replace the canonical state.
 - Exported changes must be validated and reviewed before being committed.
 
+## Project tree and task links
+
+- The **Project tree** tab renders components as a collapsible hierarchy using each component's `parent_id`.
+- The tree keeps architecture separate from work tracking: component status does not represent task completion.
+- Each tree node shows how many tasks are linked to that component and provides a shortcut to the filtered task list.
+- Tasks can be assigned to a component in the task editor. From a linked task, **Open in project tree** expands the relevant branch.
+- Existing tasks are not auto-assigned to components: links should be added only after the relationship is confirmed.
+
 ## Dashboard workflow
 
 1. Load the canonical JSON from GitHub.
