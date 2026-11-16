@@ -191,18 +191,19 @@ function renderTree(){
  const visible=new Set();
  if(!q&&status==="all")components.forEach(c=>visible.add(c.id));
  else{
-  const matches=components.filter(c=>(status==="all"||c.status===status)&&(!q||(c.title+" "+c.id+" "+(c.path||"")+" "+(c.description||"")+" "+(c.notes||"")).toLocaleLowerCase("ru").includes(q)));
+  const matches=components.filter(c=>(!c.parent_id?status==="all":status==="all"||c.status===status)&&(!q||(c.title+" "+c.id+" "+(c.path||"")+" "+(c.description||"")+" "+(c.notes||"")+" "+(c.completed_work||"")+" "+(c.next_step||"")).toLocaleLowerCase("ru").includes(q)));
   matches.forEach(c=>{let current=c;while(current){visible.add(current.id);current=current.parent_id?components.find(x=>x.id===current.parent_id):null;}});
  }
- const totalCounts=componentStatusCounts(components);
+ const actualComponents=components.filter(c=>c.parent_id),totalCounts=componentStatusCounts(actualComponents);
  $("treeStats").innerHTML=[
-  ["Компонентов",components.length],
+  ["Компонентов",actualComponents.length],
   ["Готово",totalCounts.done||0],
   ["В работе",totalCounts.in_progress||0],
   ["Требуют аудита",totalCounts.needs_audit||0],
-  ["Не оценено",totalCounts.not_assessed||0]
+  ["Запланировано",totalCounts.planned||0]
  ].map(x=>'<div class="stat"><b>'+x[1]+'</b><small>'+x[0]+'</small></div>').join("");
  $("treeCount").textContent="· "+(visible.size===components.length?components.length:visible.size+" из "+components.length);
+ if(!selectedComponentId||!components.some(c=>c.id===selectedComponentId))selectedComponentId=componentChildren(null)[0]?.id||components[0]?.id||null;
  function renderNode(c,depth){
   if(!visible.has(c.id))return "";
   const children=componentChildren(c.id).filter(x=>visible.has(x.id));
@@ -221,7 +222,6 @@ function renderTree(){
  $("componentTree").innerHTML=roots.length?roots.map(c=>renderNode(c,0)).join(""):'<div class="empty">По заданным условиям компоненты не найдены.</div>';
  document.querySelectorAll("[data-tree-toggle]").forEach(b=>b.onclick=()=>{const id=b.dataset.treeToggle;if(expandedComponentIds.has(id))expandedComponentIds.delete(id);else expandedComponentIds.add(id);renderTree();});
  document.querySelectorAll("[data-select-component]").forEach(b=>b.onclick=()=>{selectedComponentId=b.dataset.selectComponent;renderTree();renderComponentDetail();});
- if(!selectedComponentId||!components.some(c=>c.id===selectedComponentId))selectedComponentId=roots[0]?.id||components[0]?.id||null;
  renderComponentDetail();
 }
 function renderComponentDetail(){
@@ -232,7 +232,9 @@ function renderComponentDetail(){
  $("componentDetail").innerHTML='<h3>'+esc(c.title)+'</h3><div class="detail-meta">'+esc(c.id)+' · '+esc(c.path||c.kind||"")+'</div>'+
   '<div class="actions">'+(isRoot?'<span class="tree-badge">ГРУППА · '+descendants.length+' компонентов</span>':statusBadge(c.status))+'<button class="btn primary" id="editSelectedComponent">Изменить компонент</button></div>'+
   '<div class="detail-section"><h4>Описание</h4><div class="detail-copy">'+esc(c.description||"Описание пока не заполнено.")+'</div></div>'+
-  '<div class="detail-section"><h4>Заметки и ход работы</h4><div class="detail-copy">'+esc(c.notes||"Заметок пока нет.")+'</div></div>'+
+  '<div class="detail-section"><h4>Что уже сделано</h4><div class="detail-copy">'+esc(c.completed_work||"Пока не зафиксировано.")+'</div></div>'+
+  '<div class="detail-section"><h4>Следующий шаг</h4><div class="detail-copy">'+esc(c.next_step||"Не определён.")+'</div></div>'+
+  '<div class="detail-section"><h4>Заметки</h4><div class="detail-copy">'+esc(c.notes||"Заметок пока нет.")+'</div></div>'+
   '<div class="detail-section"><h4>Рабочее направление</h4><div>'+esc(workstreamName(c.workstream_id))+'</div></div>'+
   '<div class="detail-section"><h4>Вложенные компоненты</h4><div>'+ (descendants.length?descendants.length+" элементов в этой ветке":"Дочерних компонентов нет.")+'</div></div>'+
   '<div class="detail-section"><h4>Связанные задачи · '+related.length+'</h4>'+ (related.length?related.map(t=>'<div class="related-task"><button data-open-tree-task="'+esc(t.id)+'">'+esc(t.title)+'</button><span class="tree-meta">'+esc(STATUS[t.status]||t.status)+'</span></div>').join(""):'<div class="muted small">Связанных задач пока нет.</div>')+'</div>'+
@@ -313,13 +315,15 @@ function renderComponentEditor(id){
  '<div class="field"><label>Рабочее направление</label><select id="componentWorkstream"><option value="">Без направления</option>'+streamOptions+'</select></div>'+
  '<div class="field"><label>Родительский компонент</label><select id="componentParent"><option value="">Нет родителя</option>'+parentOptions+'</select></div>'+
  '<div class="field"><label>Описание</label><textarea id="componentDescription">'+esc(c&&c.description||"")+'</textarea></div>'+
+ '<div class="field"><label>Что уже сделано</label><textarea id="componentCompleted">'+esc(c&&c.completed_work||"")+'</textarea></div>'+
+ '<div class="field"><label>Следующий шаг</label><textarea id="componentNextStep">'+esc(c&&c.next_step||"")+'</textarea></div>'+
  '<div class="field"><label>Заметки</label><textarea id="componentNotes">'+esc(c&&c.notes||"")+'</textarea></div>'+
  '<div class="field"><label>Источники / ссылки (каждая с новой строки)</label><textarea id="componentRefs">'+esc((c&&c.source_refs||[]).join("\n"))+'</textarea></div>'+
  '<div class="actions"><button class="btn primary" id="saveComponent">Сохранить компонент</button><button class="btn" id="cancelComponent">Отмена</button></div>';
  $("saveComponent").onclick=()=>{
   const title=$("componentTitle").value.trim();if(!title)return alert("Название компонента обязательно.");
   const parent=$("componentParent").value||null;if(parent===(c&&c.id))return alert("Компонент не может быть родителем самому себе.");
-  const data={title,path:$("componentPath").value.trim()||null,kind:$("componentKind").value,status:$("componentStatus").value,workstream_id:$("componentWorkstream").value||null,parent_id:parent,description:$("componentDescription").value,notes:$("componentNotes").value,source_refs:[...new Set($("componentRefs").value.split("\n").map(x=>x.trim()).filter(Boolean))]};
+  const data={title,path:$("componentPath").value.trim()||null,kind:$("componentKind").value,status:$("componentStatus").value,workstream_id:$("componentWorkstream").value||null,parent_id:parent,description:$("componentDescription").value,completed_work:$("componentCompleted").value,next_step:$("componentNextStep").value,notes:$("componentNotes").value,source_refs:[...new Set($("componentRefs").value.split("\n").map(x=>x.trim()).filter(Boolean))]};
   const candidate=JSON.parse(JSON.stringify(state));
   if(c){Object.assign(candidate.components.find(x=>x.id===c.id),data);}else{candidate.components.push({id:"component-"+Date.now(),...data,sort_order:candidate.components.reduce((n,x)=>Math.max(n,Number(x.sort_order)||0),0)+1});}
   try{validateState(candidate);}catch(e){return alert("Компонент не сохранён: "+e.message);}
