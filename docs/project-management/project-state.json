@@ -1,0 +1,1125 @@
+{
+  "schema_version": 1,
+  "metadata": {
+    "project_id": "hw-catalog",
+    "updated_at": "2026-11-16T01:28:03.412Z",
+    "source_of_truth": "github",
+    "working_branch": "integration/catalog-foundation",
+    "last_verified_commit": null,
+    "timezone": "Asia/Bangkok"
+  },
+  "project": {
+    "name": "HW Catalog",
+    "summary": "Каталог Hot Wheels с проверяемой историей происхождения данных, изображений и решений по идентификации моделей.",
+    "status": "active"
+  },
+  "workstreams": [
+    {
+      "id": "project-management",
+      "title": "Project Manager",
+      "description": "Модель состояния проекта, задачи, решения, журнал и интерфейс управления.",
+      "status": "in_progress",
+      "sort_order": 10
+    },
+    {
+      "id": "frontend",
+      "title": "Frontend и каталог",
+      "description": "Визуальный каталог, навигация, поиск и пользовательские сценарии.",
+      "status": "needs_audit",
+      "sort_order": 20
+    },
+    {
+      "id": "backend",
+      "title": "Backend и API",
+      "description": "FastAPI, доменная логика, импортёры, API и тесты.",
+      "status": "needs_audit",
+      "sort_order": 30
+    },
+    {
+      "id": "data-model",
+      "title": "Модель данных и БД",
+      "description": "Канонические сущности, миграции, целостность и переносимость БД.",
+      "status": "needs_audit",
+      "sort_order": 40
+    },
+    {
+      "id": "hot-wheels-data",
+      "title": "Данные Hot Wheels",
+      "description": "Mainline, Premium, ALLHW, серии, выпуски, отливки и варианты.",
+      "status": "in_progress",
+      "sort_order": 50
+    },
+    {
+      "id": "media-evidence",
+      "title": "Фото и доказательства",
+      "description": "Фото блистеров, лицевой и обратной стороны, источники и provenance.",
+      "status": "in_progress",
+      "sort_order": 60
+    },
+    {
+      "id": "infrastructure",
+      "title": "Инфраструктура и синхронизация",
+      "description": "Запуск, окружение, GitHub и внешний диск; защита внешней БД и локальных данных.",
+      "status": "needs_audit",
+      "sort_order": 70
+    },
+    {
+      "id": "documentation",
+      "title": "Документация",
+      "description": "Актуальное состояние, архитектура, правила работы и передача контекста.",
+      "status": "in_progress",
+      "sort_order": 80
+    }
+  ],
+  "components": [
+    {
+      "id": "root",
+      "parent_id": null,
+      "workstream_id": null,
+      "title": "HW-CATALOG",
+      "path": null,
+      "kind": "directory",
+      "status": "not_assessed",
+      "description": "Основной репозиторий приложения и связанная инфраструктура. Рабочая ветка на последней проверке: integration/catalog-foundation.",
+      "notes": "",
+      "source_refs": [],
+      "sort_order": 0
+    },
+    {
+      "id": "git",
+      "parent_id": "root",
+      "workstream_id": "infrastructure",
+      "title": ".git / Git",
+      "path": null,
+      "kind": "directory",
+      "status": "needs_audit",
+      "description": "История версий и удалённые репозитории. Текущая ветка: integration/catalog-foundation. Последний известный коммит: 07c80ab. Есть незакоммиченные изменения, их нельзя терять.",
+      "notes": "Подтверждено: Git-репозиторий и remotes archive/origin проверены.\n\nСледующий шаг: Определить стратегию коммитов для текущих изменений; проверить .gitignore и что локальные данные не попадут в Git.",
+      "source_refs": [],
+      "sort_order": 10
+    },
+    {
+      "id": "gitbranch",
+      "parent_id": "git",
+      "workstream_id": "infrastructure",
+      "title": "Ветка integration/catalog-foundation",
+      "path": null,
+      "kind": "other",
+      "status": "done",
+      "description": "Активная ветка на 13.11.2026.",
+      "notes": "Подтверждено: Ветка и последний коммит проверены.",
+      "source_refs": [],
+      "sort_order": 20
+    },
+    {
+      "id": "gitdirty",
+      "parent_id": "git",
+      "workstream_id": "infrastructure",
+      "title": "Незакоммиченные изменения",
+      "path": null,
+      "kind": "other",
+      "status": "in_progress",
+      "description": "Изменённые и новые файлы, которые необходимо сохранить.",
+      "notes": "Подтверждено: Зафиксирован список: start/stop scripts, ALLHW/, MEDIA_AND_EVIDENCE_METADATA.md, importer-preview.html, резервные копии скриптов.\n\nСледующий шаг: После стабилизации разобрать изменения и решить, что коммитить.",
+      "source_refs": [],
+      "sort_order": 30
+    },
+    {
+      "id": "backend-directory",
+      "parent_id": "root",
+      "workstream_id": "backend",
+      "title": "backend/",
+      "path": "backend",
+      "kind": "directory",
+      "status": "not_assessed",
+      "description": "Python backend, API, бизнес-логика, схема БД и тесты.",
+      "notes": "",
+      "source_refs": [],
+      "sort_order": 40
+    },
+    {
+      "id": "app",
+      "parent_id": "backend-directory",
+      "workstream_id": "backend",
+      "title": "app/",
+      "path": "app",
+      "kind": "directory",
+      "status": "needs_audit",
+      "description": "Основной пакет приложения. Детальный состав модулей нужно сверить с актуальным деревом на домашнем ПК.",
+      "notes": "Следующий шаг: Инвентаризировать routers, models, schemas, services, storage, auth и конфигурацию.",
+      "source_refs": [],
+      "sort_order": 50
+    },
+    {
+      "id": "storage",
+      "parent_id": "app",
+      "workstream_id": "backend",
+      "title": "Хранилище и подключение БД",
+      "path": null,
+      "kind": "service",
+      "status": "done",
+      "description": "Путь к БД выбирается через DATABASE_URL, затем HW_CATALOG_DATA_DIR/DATABASE/catalog.db, иначе используется локальная dev-БД.",
+      "notes": "Подтверждено: Подтверждён внешний путь E:\\HW-CATALOG-DATA\\DATABASE\\catalog.db; health API отвечал ok; целостность SQLite проверена.",
+      "source_refs": [],
+      "sort_order": 60
+    },
+    {
+      "id": "apihealth",
+      "parent_id": "app",
+      "workstream_id": "backend",
+      "title": "Health endpoint",
+      "path": null,
+      "kind": "service",
+      "status": "done",
+      "description": "Проверка работоспособности backend.",
+      "notes": "Подтверждено: GET /health возвращал status=ok.",
+      "source_refs": [],
+      "sort_order": 70
+    },
+    {
+      "id": "auth",
+      "parent_id": "app",
+      "workstream_id": "backend",
+      "title": "Аутентификация и безопасность",
+      "path": null,
+      "kind": "service",
+      "status": "needs_audit",
+      "description": "В requirements присутствуют PyJWT, argon2-cffi, cryptography. Это подтверждает зависимости, но не полноту реализации.",
+      "notes": "Следующий шаг: Проверить маршруты, модели пользователей, сессии, роли, защиту секретов, rate limiting и тесты.",
+      "source_refs": [],
+      "sort_order": 80
+    },
+    {
+      "id": "models",
+      "parent_id": "app",
+      "workstream_id": "backend",
+      "title": "Модели и API-схемы",
+      "path": null,
+      "kind": "service",
+      "status": "needs_audit",
+      "description": "SQLAlchemy и Pydantic используются проектом.",
+      "notes": "Следующий шаг: Сверить фактические сущности, связи, ограничения, индексы и контракты API.",
+      "source_refs": [],
+      "sort_order": 90
+    },
+    {
+      "id": "services",
+      "parent_id": "app",
+      "workstream_id": "backend",
+      "title": "Бизнес-логика / сервисы",
+      "path": null,
+      "kind": "service",
+      "status": "needs_audit",
+      "description": "Нужна инвентаризация сервисного слоя и границ ответственности.",
+      "notes": "Следующий шаг: Составить карту сервисов и отметить готовность каждого.",
+      "source_refs": [],
+      "sort_order": 100
+    },
+    {
+      "id": "migrations",
+      "parent_id": "backend-directory",
+      "workstream_id": "backend",
+      "title": "migrations/ + Alembic",
+      "path": null,
+      "kind": "other",
+      "status": "done",
+      "description": "Механизм миграций присутствует. Startup script выполняет alembic upgrade head перед запуском backend.",
+      "notes": "Подтверждено: Команда миграции включена в сценарий запуска.\n\nСледующий шаг: На домашнем ПК выполнить миграции на копии/проверенной БД и убедиться, что схема актуальна.",
+      "source_refs": [],
+      "sort_order": 110
+    },
+    {
+      "id": "tests",
+      "parent_id": "backend-directory",
+      "workstream_id": "backend",
+      "title": "tests/",
+      "path": "tests",
+      "kind": "directory",
+      "status": "needs_audit",
+      "description": "В репозитории есть backend tests. По истории проекта последняя известная проверка: 238 passed, 1 skipped на коммите 07c80ab.",
+      "notes": "Подтверждено: Ранее тестовый набор проходил: 238 passed, 1 skipped.\n\nСледующий шаг: Повторно запустить актуальный набор на текущем состоянии ветки и зафиксировать результат.",
+      "source_refs": [],
+      "sort_order": 120
+    },
+    {
+      "id": "requirements",
+      "parent_id": "backend-directory",
+      "workstream_id": "backend",
+      "title": "requirements.txt",
+      "path": null,
+      "kind": "other",
+      "status": "done",
+      "description": "Зависимости backend: FastAPI, Uvicorn, SQLAlchemy, Alembic, Pydantic, Pillow, pytest, httpx, psycopg, cryptography, PyJWT, argon2-cffi.",
+      "notes": "Подтверждено: Файл найден; pip check на рабочем ПК: No broken requirements found.",
+      "source_refs": [],
+      "sort_order": 130
+    },
+    {
+      "id": "catalog",
+      "parent_id": "root",
+      "workstream_id": "data-model",
+      "title": "catalog/",
+      "path": "catalog",
+      "kind": "directory",
+      "status": "needs_audit",
+      "description": "Каталожные данные, схемы, справочники и/или связанные артефакты. Точный состав нужно проверить.",
+      "notes": "Следующий шаг: Описать назначение каждого файла и связать его с сущностями БД и импортёрами.",
+      "source_refs": [],
+      "sort_order": 140
+    },
+    {
+      "id": "allhw",
+      "parent_id": "root",
+      "workstream_id": "hot-wheels-data",
+      "title": "ALLHW/",
+      "path": "ALLHW",
+      "kind": "directory",
+      "status": "in_progress",
+      "description": "Новая/добавленная директория с материалами ALLHW. Присутствие подтверждено Git status, но содержимое и готовность ещё нужно инвентаризировать.",
+      "notes": "Следующий шаг: Разобрать структуру ALLHW, определить формат исходников, правила обновления, импорт и контроль качества.",
+      "source_refs": [],
+      "sort_order": 150
+    },
+    {
+      "id": "research",
+      "parent_id": "root",
+      "workstream_id": "hot-wheels-data",
+      "title": "research/",
+      "path": "research",
+      "kind": "directory",
+      "status": "in_progress",
+      "description": "Исследовательские материалы по Hot Wheels, сопоставлению выпусков и отливок.",
+      "notes": "Подтверждено: Ведётся каталогизация сравнений и доказательств; накоплены 163 подтверждённые группы идентичных отливок по рабочему контексту.\n\nСледующий шаг: Свести результаты в машиночитаемый реестр, связать каждое решение с источниками и статусом уверенности.",
+      "source_refs": [],
+      "sort_order": 160
+    },
+    {
+      "id": "docs",
+      "parent_id": "root",
+      "workstream_id": "documentation",
+      "title": "docs/",
+      "path": "docs",
+      "kind": "directory",
+      "status": "not_assessed",
+      "description": "Документация архитектуры, правил и рабочих процессов.",
+      "notes": "",
+      "source_refs": [],
+      "sort_order": 170
+    },
+    {
+      "id": "mediaDoc",
+      "parent_id": "docs",
+      "workstream_id": "documentation",
+      "title": "architecture/MEDIA_AND_EVIDENCE_METADATA.md",
+      "path": null,
+      "kind": "other",
+      "status": "in_progress",
+      "description": "Новый документ о метаданных медиа и доказательств. Наличие подтверждено Git status.",
+      "notes": "Подтверждено: Файл создан/добавлен в рабочее дерево.\n\nСледующий шаг: Провести ревью и реализовать описанную модель в БД, API, хранении и интерфейсе.",
+      "source_refs": [],
+      "sort_order": 180
+    },
+    {
+      "id": "docsAudit",
+      "parent_id": "docs",
+      "workstream_id": "documentation",
+      "title": "Остальная документация",
+      "path": null,
+      "kind": "other",
+      "status": "needs_audit",
+      "description": "Нужно проверить README, архитектурные документы, инструкции и соответствие фактической реализации.",
+      "notes": "Следующий шаг: Сверить docs с кодом, добавить диаграмму архитектуры, ER-модель, импортные процессы и инструкции эксплуатации.",
+      "source_refs": [],
+      "sort_order": 190
+    },
+    {
+      "id": "scripts",
+      "parent_id": "root",
+      "workstream_id": "infrastructure",
+      "title": "scripts/",
+      "path": "scripts",
+      "kind": "directory",
+      "status": "not_assessed",
+      "description": "Скрипты разработки, импорта, обслуживания и запуска.",
+      "notes": "",
+      "source_refs": [],
+      "sort_order": 200
+    },
+    {
+      "id": "winstart",
+      "parent_id": "scripts",
+      "workstream_id": "infrastructure",
+      "title": "windows/start-hw-catalog.ps1",
+      "path": null,
+      "kind": "other",
+      "status": "in_progress",
+      "description": "Проверяет внешний диск и DEVICE_INFO.json, задаёт HW_CATALOG_DATA_DIR, запускает миграции, поднимает Uvicorn, записывает PID и логи.",
+      "notes": "Подтверждено: Проверены проверки storage_id/layout_version, запрет DATABASE_URL, миграции, health-check и запись PID.\n\nСледующий шаг: Исправить/проверить сценарий видимого управления процессом: сейчас stdout/stderr перенаправляются в файлы, а инструкция Ctrl+C может быть неочевидной.",
+      "source_refs": [],
+      "sort_order": 210
+    },
+    {
+      "id": "winstop",
+      "parent_id": "scripts",
+      "workstream_id": "infrastructure",
+      "title": "windows/stop-hw-catalog.ps1",
+      "path": null,
+      "kind": "other",
+      "status": "in_progress",
+      "description": "Проверяет PID и командную строку процесса, ожидает штатной остановки, не убивает процесс принудительно.",
+      "notes": "Подтверждено: Скрипт успешно нашёл PID 10800 и дождался закрытия окна Python; HDD был безопасно отключён.\n\nСледующий шаг: Сделать остановку однозначной и повторяемой; проверить stale PID и таймауты на домашнем ПК.",
+      "source_refs": [],
+      "sort_order": 220
+    },
+    {
+      "id": "backupScripts",
+      "parent_id": "scripts",
+      "workstream_id": "infrastructure",
+      "title": "Резервное копирование",
+      "path": null,
+      "kind": "other",
+      "status": "planned",
+      "description": "Отдельный полноценный backup/restore workflow пока не найден в scripts.",
+      "notes": "Следующий шаг: Создать резервное копирование SQLite через backup API, проверку integrity_check, ротацию, журнал и тест восстановления.",
+      "source_refs": [],
+      "sort_order": 230
+    },
+    {
+      "id": "ui",
+      "parent_id": "root",
+      "workstream_id": "frontend",
+      "title": "HTML-интерфейсы и прототипы",
+      "path": null,
+      "kind": "directory",
+      "status": "not_assessed",
+      "description": "Корневые HTML-файлы и prototype/ содержат интерфейсные наработки. Нужна классификация по назначению и уровню готовности.",
+      "notes": "",
+      "source_refs": [],
+      "sort_order": 240
+    },
+    {
+      "id": "importer",
+      "parent_id": "ui",
+      "workstream_id": "frontend",
+      "title": "importer.html / importer-preview.html",
+      "path": null,
+      "kind": "other",
+      "status": "in_progress",
+      "description": "Импортные интерфейсы; importer-preview.html добавлен в рабочее дерево.",
+      "notes": "Подтверждено: Есть отдельный preview-файл.\n\nСледующий шаг: Проверить связку с API, валидацию, предпросмотр diff, ошибки и подтверждение импорта.",
+      "source_refs": [],
+      "sort_order": 250
+    },
+    {
+      "id": "explorer",
+      "parent_id": "ui",
+      "workstream_id": "frontend",
+      "title": "catalog-explorer.html",
+      "path": null,
+      "kind": "other",
+      "status": "needs_audit",
+      "description": "Интерфейс просмотра каталога по названию файла.",
+      "notes": "Следующий шаг: Проверить текущие функции, API-интеграцию, фильтры, карточки и адаптивность.",
+      "source_refs": [],
+      "sort_order": 260
+    },
+    {
+      "id": "compare",
+      "parent_id": "ui",
+      "workstream_id": "frontend",
+      "title": "catalog-compare.html",
+      "path": null,
+      "kind": "other",
+      "status": "needs_audit",
+      "description": "Интерфейс/прототип сравнения каталога.",
+      "notes": "Следующий шаг: Проверить, какие сценарии реализованы и как сравнение связано с сущностями БД.",
+      "source_refs": [],
+      "sort_order": 270
+    },
+    {
+      "id": "schema",
+      "parent_id": "ui",
+      "workstream_id": "frontend",
+      "title": "schema-editor.html",
+      "path": null,
+      "kind": "other",
+      "status": "needs_audit",
+      "description": "Редактор схемы по названию файла.",
+      "notes": "Следующий шаг: Проверить, является ли это рабочим инструментом или прототипом.",
+      "source_refs": [],
+      "sort_order": 280
+    },
+    {
+      "id": "otherui",
+      "parent_id": "ui",
+      "workstream_id": "frontend",
+      "title": "index.html, login.html, converter.html, prototype/",
+      "path": "index.html, login.html, converter.html, prototype",
+      "kind": "directory",
+      "status": "needs_audit",
+      "description": "Набор корневых страниц и прототипов.",
+      "notes": "Следующий шаг: Составить карту экранов, определить основной frontend и убрать дубли только после проверки.",
+      "source_refs": [],
+      "sort_order": 290
+    },
+    {
+      "id": "imagesRepo",
+      "parent_id": "root",
+      "workstream_id": "media-evidence",
+      "title": "cars-img/ и series-img/",
+      "path": "cars-img/ и series-img",
+      "kind": "directory",
+      "status": "needs_audit",
+      "description": "Каталоги изображений в репозитории. Их содержимое, назначение, объём и связь с БД ещё нужно проверить.",
+      "notes": "Следующий шаг: Инвентаризировать изображения, форматы, имена, дубликаты и правила хранения.",
+      "source_refs": [],
+      "sort_order": 300
+    },
+    {
+      "id": "deploy",
+      "parent_id": "root",
+      "workstream_id": "infrastructure",
+      "title": "Docker / Caddy / compose",
+      "path": null,
+      "kind": "other",
+      "status": "needs_audit",
+      "description": "В корне присутствуют Dockerfile backend, compose.yaml и Caddyfile.",
+      "notes": "Подтверждено: Файлы инфраструктуры присутствуют.\n\nСледующий шаг: Проверить актуальность контейнерного запуска, секреты, volumes, healthchecks, reverse proxy и production-профиль.",
+      "source_refs": [],
+      "sort_order": 310
+    },
+    {
+      "id": "data",
+      "parent_id": null,
+      "workstream_id": null,
+      "title": "HW-CATALOG-DATA/ · внешний диск",
+      "path": null,
+      "kind": "external_system",
+      "status": "not_assessed",
+      "description": "Отдельное хранилище данных, не смешиваемое с кодом. На рабочем ПК находилось на E:\\HW-CATALOG-DATA.",
+      "notes": "",
+      "source_refs": [],
+      "sort_order": 320
+    },
+    {
+      "id": "device",
+      "parent_id": "data",
+      "workstream_id": "infrastructure",
+      "title": "DEVICE_INFO.json",
+      "path": null,
+      "kind": "other",
+      "status": "done",
+      "description": "Маркер внешнего хранилища с storage_id af91e52b-edc9-4244-9367-02d5653c9855 и layout_version=1.",
+      "notes": "Подтверждено: Startup script проверяет маркер; диск успешно прошёл запуск.",
+      "source_refs": [],
+      "sort_order": 330
+    },
+    {
+      "id": "database",
+      "parent_id": "data",
+      "workstream_id": "infrastructure",
+      "title": "DATABASE/catalog.db",
+      "path": null,
+      "kind": "database",
+      "status": "done",
+      "description": "Основная SQLite база, размер на момент проверки около 593 920 байт.",
+      "notes": "Подтверждено: SQLite integrity_check = ok; 40 таблиц; health endpoint работал.",
+      "source_refs": [],
+      "sort_order": 340
+    },
+    {
+      "id": "media",
+      "parent_id": "data",
+      "workstream_id": "media-evidence",
+      "title": "MEDIA/images + MEDIA/thumbnails",
+      "path": null,
+      "kind": "other",
+      "status": "planned",
+      "description": "Папки созданы, на момент проверки были пустыми.",
+      "notes": "Следующий шаг: Реализовать приём, именование, хранение оригиналов/превью, контроль целостности и привязку к записям.",
+      "source_refs": [],
+      "sort_order": 350
+    },
+    {
+      "id": "imports",
+      "parent_id": "data",
+      "workstream_id": "infrastructure",
+      "title": "IMPORTS/mainline, premium, allhw",
+      "path": null,
+      "kind": "other",
+      "status": "planned",
+      "description": "Папки созданы, на момент проверки были пустыми.",
+      "notes": "Следующий шаг: Определить входные форматы, архив исходников, обработанные/ошибочные файлы и повторный импорт.",
+      "source_refs": [],
+      "sort_order": 360
+    },
+    {
+      "id": "exports",
+      "parent_id": "data",
+      "workstream_id": "infrastructure",
+      "title": "EXPORTS/",
+      "path": "EXPORTS",
+      "kind": "directory",
+      "status": "planned",
+      "description": "Папка создана, на момент проверки пустая.",
+      "notes": "Следующий шаг: Определить форматы и сценарии экспорта каталога, коллекции, отчётов и резервных выгрузок.",
+      "source_refs": [],
+      "sort_order": 370
+    },
+    {
+      "id": "backups",
+      "parent_id": "data",
+      "workstream_id": "infrastructure",
+      "title": "BACKUPS/",
+      "path": "BACKUPS",
+      "kind": "directory",
+      "status": "in_progress",
+      "description": "Есть BACKUPS/manual/catalog-initial-20261113.db. Папка daily пока пустая.",
+      "notes": "Подтверждено: Начальная копия создана через SQLite backup API; integrity_check = ok.\n\nСледующий шаг: Настроить ежедневные копии, ротацию и вторую физическую копию на домашнем ПК.",
+      "source_refs": [],
+      "sort_order": 380
+    },
+    {
+      "id": "logs",
+      "parent_id": "data",
+      "workstream_id": "infrastructure",
+      "title": "LOGS/",
+      "path": "LOGS",
+      "kind": "directory",
+      "status": "done",
+      "description": "Папка логов backend с файлами stdout/stderr.",
+      "notes": "Подтверждено: Логи запуска и ошибок направлялись на внешний HDD.",
+      "source_refs": [],
+      "sort_order": 390
+    },
+    {
+      "id": "fat32",
+      "parent_id": "data",
+      "workstream_id": "infrastructure",
+      "title": "Файловая система внешнего HDD",
+      "path": null,
+      "kind": "other",
+      "status": "needs_audit",
+      "description": "На рабочем ПК HDD был FAT32, около 320 GB общий объём и около 224 GB свободно. Ограничение FAT32: файл не более 4 GB.",
+      "notes": "Следующий шаг: После создания второй физической копии оценить конвертацию в NTFS без форматирования. Не выполнять без резервной копии.",
+      "source_refs": [],
+      "sort_order": 400
+    },
+    {
+      "id": "workstreams",
+      "parent_id": null,
+      "workstream_id": null,
+      "title": "Ключевые направления каталога Hot Wheels",
+      "path": null,
+      "kind": "domain_area",
+      "status": "not_assessed",
+      "description": "Предметная часть проекта: данные выпусков, отливки, варианты, доказательства и коллекционная ценность.",
+      "notes": "",
+      "source_refs": [],
+      "sort_order": 410
+    },
+    {
+      "id": "mainline",
+      "parent_id": "workstreams",
+      "workstream_id": "hot-wheels-data",
+      "title": "Mainline: годовые выпуски",
+      "path": null,
+      "kind": "domain_area",
+      "status": "in_progress",
+      "description": "Импорт и нормализация Mainline-данных, в том числе TSV. Последний известный коммит исправлял валидацию строк и разбор серий.",
+      "notes": "Подтверждено: Исправлены row validation и series parsing; ранее тесты прошли 238/1.\n\nСледующий шаг: Полный повторяемый импорт, контроль дублей, сверка количества записей и отчёт о пропусках.",
+      "source_refs": [],
+      "sort_order": 420
+    },
+    {
+      "id": "premium",
+      "parent_id": "workstreams",
+      "workstream_id": "hot-wheels-data",
+      "title": "Premium / другие линейки",
+      "path": null,
+      "kind": "domain_area",
+      "status": "needs_audit",
+      "description": "Направление присутствует в структуре импорта и папках данных, но готовность по линейкам не подтверждена.",
+      "notes": "Следующий шаг: Инвентаризировать источники, форматы и правила идентификации релизов.",
+      "source_refs": [],
+      "sort_order": 430
+    },
+    {
+      "id": "allhwFlow",
+      "parent_id": "workstreams",
+      "workstream_id": "hot-wheels-data",
+      "title": "ALLHW: сбор и импорт",
+      "path": null,
+      "kind": "domain_area",
+      "status": "in_progress",
+      "description": "Директория ALLHW появилась в рабочем дереве. Содержание и завершённость процесса не проверены.",
+      "notes": "Следующий шаг: Разобрать данные и определить pipeline: raw → normalize → validate → import → reconcile.",
+      "source_refs": [],
+      "sort_order": 440
+    },
+    {
+      "id": "casting",
+      "parent_id": "workstreams",
+      "workstream_id": "hot-wheels-data",
+      "title": "Сопоставление отливок (casting identity)",
+      "path": null,
+      "kind": "domain_area",
+      "status": "in_progress",
+      "description": "Длительная исследовательская работа: сравнение выпусков по форме кузова, рельефу, днищу и другим конструктивным признакам.",
+      "notes": "Подтверждено: По рабочему контексту подтверждено 163 группы идентичных отливок. Практическое правило: First listed, 2nd Color, 3rd Color обычно используют одну отливку; цвет/декор не доказывает различие формы.\n\nСледующий шаг: Перенести все решения в структурированную таблицу, указывать уровень уверенности и доказательства. Отдельно фиксировать отличия колёс, днища, деталей и retool.",
+      "source_refs": [],
+      "sort_order": 450
+    },
+    {
+      "id": "evidence",
+      "parent_id": "workstreams",
+      "workstream_id": "media-evidence",
+      "title": "Доказательства и источники",
+      "path": null,
+      "kind": "domain_area",
+      "status": "in_progress",
+      "description": "Фото, ссылки на карточки, источники и сравнения должны быть связаны с конкретными вариантами и выводами.",
+      "notes": "Подтверждено: В исследовательской работе используются ссылки на Fandom, RockHeaddiecast, фото лицевой и обратной стороны блистера и пользовательские фото.\n\nСледующий шаг: Единая схема evidence: URL/файл, тип ракурса, источник, дата доступа, привязка к release/variant/casting, заметка и оценка надёжности.",
+      "source_refs": [],
+      "sort_order": 460
+    },
+    {
+      "id": "packaging",
+      "parent_id": "workstreams",
+      "workstream_id": "media-evidence",
+      "title": "Блистер и упаковка",
+      "path": null,
+      "kind": "domain_area",
+      "status": "in_progress",
+      "description": "Упаковка считается самостоятельной частью ценности товара. Для некоторых источников фото блистера приоритетнее фото машинки без упаковки.",
+      "notes": "Подтверждено: Зафиксировано правило: фото блистера приоритетнее, фото без блистера вторично; отдельно важны лицевая сторона, оборот и артикул с суффиксом/без.\n\nСледующий шаг: Ввести типы фото front/back/carded/loose/base и связь с SKU/артикулом.",
+      "source_refs": [],
+      "sort_order": 470
+    },
+    {
+      "id": "wheels",
+      "parent_id": "workstreams",
+      "workstream_id": "hot-wheels-data",
+      "title": "Колёса и мелкие отличия",
+      "path": null,
+      "kind": "domain_area",
+      "status": "in_progress",
+      "description": "В ряде сравнений отливки одинаковы, но колёса отличаются. Такие отличия нужно хранить отдельно от casting identity.",
+      "notes": "Следующий шаг: Сформировать словарь типов колёс, осей, днища, тампопечати и других отличительных признаков.",
+      "source_refs": [],
+      "sort_order": 480
+    },
+    {
+      "id": "collection",
+      "parent_id": "workstreams",
+      "workstream_id": "hot-wheels-data",
+      "title": "Коллекция пользователя / учёт экземпляров",
+      "path": null,
+      "kind": "domain_area",
+      "status": "needs_audit",
+      "description": "Наличие полноценного пользовательского учёта экземпляров, состояния, стоимости и дублей по текущим материалам не подтверждено.",
+      "notes": "Следующий шаг: Проверить модель коллекции и решить, какие поля нужны: owned, condition, package condition, purchase price, date, notes.",
+      "source_refs": [],
+      "sort_order": 490
+    },
+    {
+      "id": "migration",
+      "parent_id": null,
+      "workstream_id": "infrastructure",
+      "title": "Перенос на домашний ПК и эксплуатация",
+      "path": null,
+      "kind": "directory",
+      "status": "not_assessed",
+      "description": "Состояние миграции после подготовки внешнего HDD на рабочем ПК.",
+      "notes": "",
+      "source_refs": [],
+      "sort_order": 500
+    },
+    {
+      "id": "carry",
+      "parent_id": "migration",
+      "workstream_id": "infrastructure",
+      "title": "Перенос проекта и данных на HDD",
+      "path": null,
+      "kind": "other",
+      "status": "done",
+      "description": "Репозиторий и HW-CATALOG-DATA находятся на внешнем HDD.",
+      "notes": "Подтверждено: Проверены Git status, база, маркер диска и backend; сервер штатно остановлен перед извлечением.",
+      "source_refs": [],
+      "sort_order": 510
+    },
+    {
+      "id": "homeEnv",
+      "parent_id": "migration",
+      "workstream_id": "infrastructure",
+      "title": "Домашнее Python-окружение",
+      "path": null,
+      "kind": "other",
+      "status": "planned",
+      "description": "На рабочем ПК системный Python 3.13.17 работал; backend/.venv оказался сломанным из-за пути к учётной записи houta. В корне проекта .venv отсутствовал.",
+      "notes": "Следующий шаг: На домашнем ПК установить совместимый Python, создать .venv в корне репозитория и установить backend/requirements.txt.",
+      "source_refs": [],
+      "sort_order": 520
+    },
+    {
+      "id": "homeRun",
+      "parent_id": "migration",
+      "workstream_id": "infrastructure",
+      "title": "Первый запуск дома",
+      "path": null,
+      "kind": "other",
+      "status": "planned",
+      "description": "Запуск ещё не подтверждён на домашнем ПК.",
+      "notes": "Следующий шаг: Определить букву HDD, выполнить start-hw-catalog.ps1 с -StorageRoot, проверить PID, storage_id, /health и открыть интерфейс.",
+      "source_refs": [],
+      "sort_order": 530
+    },
+    {
+      "id": "homeBackup",
+      "parent_id": "migration",
+      "workstream_id": "infrastructure",
+      "title": "Автоматические резервные копии дома",
+      "path": null,
+      "kind": "other",
+      "status": "planned",
+      "description": "Пользователь решил настраивать ежедневное резервирование именно на домашнем ПК.",
+      "notes": "Следующий шаг: Настроить ежедневный SQLite backup, retention, integrity_check, логирование и вторую физическую копию.",
+      "source_refs": [],
+      "sort_order": 540
+    },
+    {
+      "id": "ntfs",
+      "parent_id": "migration",
+      "workstream_id": "infrastructure",
+      "title": "Переход FAT32 → NTFS",
+      "path": null,
+      "kind": "other",
+      "status": "planned",
+      "description": "Не делать до второй физической резервной копии.",
+      "notes": "Следующий шаг: Проверить backup на другом физическом носителе, затем отдельно принять решение о convert E: /fs:ntfs.",
+      "source_refs": [],
+      "sort_order": 550
+    }
+  ],
+  "tasks": [
+    {
+      "id": "pm-001",
+      "title": "Утвердить и внедрить единую модель состояния Project Manager",
+      "description": "Отделить компоненты проекта от задач и хранить состояние в версионируемом JSON-файле.",
+      "status": "in_progress",
+      "priority": "high",
+      "workstream_id": "project-management",
+      "component_id": null,
+      "owner": "user-and-assistant",
+      "due_date": null,
+      "dependencies": [],
+      "acceptance_criteria": [
+        "Схема JSON описана и проверяется валидатором.",
+        "Состояние проекта хранится в docs/project-management/project-state.json.",
+        "У задач и компонентов раздельные модели и статусы.",
+        "Неизвестные и некорректные поля не принимаются молча."
+      ],
+      "source_refs": [
+        "docs/project-management/index.html"
+      ],
+      "created_at": "2026-11-16T00:00:00+07:00",
+      "updated_at": "2026-11-16T00:00:00+07:00",
+      "completed_at": null
+    },
+    {
+      "id": "pm-002",
+      "title": "Перевести Project Manager на загрузку canonical JSON из GitHub",
+      "description": "Убрать хардкод seed-данных из HTML; localStorage оставить только для локального черновика.",
+      "status": "done",
+      "priority": "high",
+      "workstream_id": "project-management",
+      "component_id": null,
+      "owner": "user-and-assistant",
+      "due_date": null,
+      "dependencies": [
+        "pm-001"
+      ],
+      "acceptance_criteria": [
+        "Приложение загружает project-state.json как основной источник.",
+        "Локальные несохранённые изменения явно помечаются как черновик.",
+        "Пользователь может экспортировать валидный JSON для коммита в GitHub.",
+        "Интерфейс не требует GitHub token или секретов в браузере."
+      ],
+      "source_refs": [
+        "docs/project-management/index.html"
+      ],
+      "created_at": "2026-11-16T00:00:00+07:00",
+      "updated_at": "2026-11-16T01:18:37.023Z",
+      "completed_at": "2026-11-16T01:18:37.023Z"
+    },
+    {
+      "id": "pm-003",
+      "title": "Разделить в интерфейсе архитектуру, задачи и каталог Hot Wheels",
+      "description": "Компоненты показывают состав системы; задачи показывают работу; доменные направления каталога имеют отдельные сводки.",
+      "status": "done",
+      "priority": "high",
+      "workstream_id": "project-management",
+      "component_id": null,
+      "owner": "user-and-assistant",
+      "due_date": null,
+      "dependencies": [
+        "pm-001"
+      ],
+      "acceptance_criteria": [
+        "Дерево компонентов не используется как список задач.",
+        "Задачи фильтруются по статусу, приоритету и направлению.",
+        "Сводные показатели имеют понятную формулу и не смешивают разные типы сущностей."
+      ],
+      "source_refs": [
+        "docs/project-management/index.html"
+      ],
+      "created_at": "2026-11-16T00:00:00+07:00",
+      "updated_at": "2026-11-16T01:18:37.023Z",
+      "completed_at": "2026-11-16T01:18:37.023Z"
+    },
+    {
+      "id": "pm-004",
+      "title": "Обновить документацию Project Manager и актуальный срез проекта",
+      "description": "Согласовать CURRENT_STATE, ROADMAP и SESSION_HANDOFF с актуальной веткой и новыми правилами управления состоянием.",
+      "status": "planned",
+      "priority": "medium",
+      "workstream_id": "documentation",
+      "component_id": null,
+      "owner": "user-and-assistant",
+      "due_date": null,
+      "dependencies": [
+        "pm-001"
+      ],
+      "acceptance_criteria": [
+        "У документов указаны дата и область актуальности.",
+        "Исторические записи сохранены, устаревшие сведения помечены как исторические.",
+        "Нет противоречащих друг другу инструкций о главном источнике состояния."
+      ],
+      "source_refs": [
+        "docs/CURRENT_STATE.md",
+        "docs/ROADMAP.md",
+        "docs/SESSION_HANDOFF.md"
+      ],
+      "created_at": "2026-11-16T00:00:00+07:00",
+      "updated_at": "2026-11-16T00:00:00+07:00",
+      "completed_at": null
+    },
+    {
+      "id": "pm-005",
+      "title": "Спроектировать безопасную синхронизацию GitHub и внешнего диска",
+      "description": "Определить список синхронизируемых файлов, исключения, направление копирования и проверку целостности.",
+      "status": "planned",
+      "priority": "high",
+      "workstream_id": "infrastructure",
+      "component_id": null,
+      "owner": "user-and-assistant",
+      "due_date": null,
+      "dependencies": [
+        "pm-001"
+      ],
+      "acceptance_criteria": [
+        "GitHub остаётся каноническим источником для кода и документации.",
+        "Внешняя БД и локальные секреты не попадают в Git.",
+        "Синхронизация не перезаписывает более новую версию без проверки.",
+        "Есть журнал результата и понятный сценарий восстановления."
+      ],
+      "source_refs": [
+        "docs/project-management/index.html",
+        "docs/CURRENT_STATE.md"
+      ],
+      "created_at": "2026-11-16T00:00:00+07:00",
+      "updated_at": "2026-11-16T00:00:00+07:00",
+      "completed_at": null
+    },
+    {
+      "id": "pm-006",
+      "title": "Проверить и актуализировать перенесённое дерево компонентов",
+      "description": "Сверить 56 исторических узлов с фактическим деревом текущей ветки; уточнить пути, типы, статусы и связи с направлениями.",
+      "status": "in_progress",
+      "priority": "high",
+      "workstream_id": "project-management",
+      "component_id": null,
+      "owner": "user-and-assistant",
+      "due_date": null,
+      "dependencies": [
+        "pm-001"
+      ],
+      "acceptance_criteria": [
+        "Каждый компонент сверён с текущим репозиторием или помечен как исторический/непроверенный.",
+        "Пути и типы компонентов соответствуют фактическому назначению.",
+        "Устаревшие факты не отображаются как подтверждённые текущие сведения."
+      ],
+      "source_refs": [
+        "docs/project-management/project-state.json"
+      ],
+      "created_at": "2026-11-16T01:18:37.023Z",
+      "updated_at": "2026-11-16T01:18:37.023Z",
+      "completed_at": null
+    },
+    {
+      "id": "pm-007",
+      "title": "Подключить полноценную валидацию по JSON Schema",
+      "description": "Добавить валидатор схемы в браузерный интерфейс или отдельный проверяемый инструмент, включая cross-reference checks.",
+      "status": "done",
+      "priority": "high",
+      "workstream_id": "project-management",
+      "component_id": null,
+      "owner": "user-and-assistant",
+      "due_date": null,
+      "dependencies": [
+        "pm-001"
+      ],
+      "acceptance_criteria": [
+        "Импорт и экспорт проверяются по project-state.schema.json.",
+        "Проверяются уникальность ID, enum-значения, форматы дат и все ссылки между сущностями.",
+        "Ошибки показываются с понятным указанием поля."
+      ],
+      "source_refs": [
+        "docs/project-management/project-state.schema.json"
+      ],
+      "created_at": "2026-11-16T01:18:37.023Z",
+      "updated_at": "2026-11-16T01:24:04.776Z",
+      "completed_at": "2026-11-16T01:24:04.776Z"
+    },
+    {
+      "id": "pm-008",
+      "title": "Провести браузерное тестирование Project Manager",
+      "description": "Проверить загрузку GitHub JSON, редактирование, локальный черновик, импорт, экспорт, фильтры и адаптивность.",
+      "status": "planned",
+      "priority": "medium",
+      "workstream_id": "project-management",
+      "component_id": null,
+      "owner": "user-and-assistant",
+      "due_date": null,
+      "dependencies": [
+        "pm-002",
+        "pm-003"
+      ],
+      "acceptance_criteria": [
+        "Проверен запуск через HTTP, а не file://.",
+        "Проверены основные сценарии на desktop и узком экране.",
+        "Ошибки загрузки, повреждённый JSON и конфликт черновика обрабатываются без потери данных."
+      ],
+      "source_refs": [
+        "docs/project-management/index.html"
+      ],
+      "created_at": "2026-11-16T01:18:37.023Z",
+      "updated_at": "2026-11-16T01:18:37.023Z",
+      "completed_at": null
+    },
+    {
+      "id": "pm-009",
+      "title": "Добавить создание и редактирование компонентов в Project Manager",
+      "description": "Реализовать интерфейс редактирования карточек компонентов и безопасное добавление новых узлов с проверкой схемы и связей.",
+      "status": "done",
+      "priority": "high",
+      "workstream_id": "project-management",
+      "component_id": null,
+      "owner": "user-and-assistant",
+      "due_date": null,
+      "dependencies": [
+        "pm-007"
+      ],
+      "acceptance_criteria": [
+        "Можно редактировать название, путь, тип, статус, направление, родителя, описание, заметки и источники.",
+        "Можно добавить новый компонент с автоматически созданным уникальным ID.",
+        "Изменения проходят JSON Schema и cross-reference validation до применения.",
+        "Сохранение остаётся локальным черновиком и не записывает данные напрямую в GitHub."
+      ],
+      "source_refs": [
+        "docs/project-management/index.html",
+        "docs/project-management/project-state.schema.json"
+      ],
+      "created_at": "2026-11-16T01:25:42.796Z",
+      "updated_at": "2026-11-16T01:25:42.796Z",
+      "completed_at": "2026-11-16T01:25:42.796Z"
+    },
+    {
+      "id": "pm-010",
+      "title": "Добавить создание и редактирование решений и блокеров",
+      "description": "Реализовать формы управления принятыми решениями и блокерами, включая связи блокеров с задачами и безопасную проверку изменений.",
+      "status": "done",
+      "priority": "high",
+      "workstream_id": "project-management",
+      "component_id": null,
+      "owner": "user-and-assistant",
+      "due_date": null,
+      "dependencies": [
+        "pm-007",
+        "pm-009"
+      ],
+      "acceptance_criteria": [
+        "Можно добавлять и редактировать решения: название, текст, обоснование, дата, статус и источники.",
+        "Можно добавлять и редактировать блокеры: название, описание, статус, связанные задачи и источники.",
+        "Связанные задачи выбираются из существующих задач проекта.",
+        "Изменения проходят JSON Schema и cross-reference validation до применения.",
+        "Изменения остаются в локальном состоянии/черновике и не записываются напрямую в GitHub."
+      ],
+      "source_refs": [
+        "docs/project-management/index.html",
+        "docs/project-management/project-state.schema.json"
+      ],
+      "created_at": "2026-11-16T01:28:03.412Z",
+      "updated_at": "2026-11-16T01:28:03.412Z",
+      "completed_at": "2026-11-16T01:28:03.412Z"
+    }
+  ],
+  "decisions": [
+    {
+      "id": "decision-github-source-of-truth",
+      "title": "GitHub является главным источником состояния проекта",
+      "decision": "Код, документация, модель Project Manager и её canonical JSON ведутся в GitHub. Внешний диск используется как синхронизированная копия и для данных, которые сознательно исключены из Git.",
+      "rationale": "Это даёт историю изменений, единый источник актуальной версии и возможность проверять изменения до синхронизации.",
+      "date": "2026-11-16",
+      "status": "accepted",
+      "source_refs": []
+    },
+    {
+      "id": "decision-no-browser-github-token",
+      "title": "Не хранить GitHub token в браузерном Project Manager",
+      "decision": "Project Manager работает с опубликованным JSON и локальным черновиком; изменения экспортируются для проверки и коммита в GitHub. Прямую запись в GitHub можно добавлять только через безопасный серверный механизм с авторизацией.",
+      "rationale": "Статическая HTML-страница не должна содержать долговременные секреты или токены.",
+      "date": "2026-11-16",
+      "status": "accepted",
+      "source_refs": []
+    }
+  ],
+  "blockers": [],
+  "changelog": [
+    {
+      "date": "2026-11-16T00:00:00+07:00",
+      "summary": "Создана первая версия canonical модели состояния Project Manager; GitHub выбран источником правды, внешний диск предназначен для синхронизированной копии.",
+      "commit": null
+    },
+    {
+      "date": "2026-11-16T01:18:22.253Z",
+      "summary": "Перенесено историческое дерево Project Manager в отдельную модель components; устаревшие статусы сохранены как требующие аудита/в работе, без потери заметок.",
+      "commit": null
+    },
+    {
+      "date": "2026-11-16T01:18:37.023Z",
+      "summary": "Мигрировано историческое дерево из 56 компонентов; dashboard переключён на canonical JSON, задачи и компоненты разделены. Добавлены задачи на аудит дерева, строгую валидацию и браузерное тестирование.",
+      "commit": null
+    },
+    {
+      "date": "2026-11-16T01:19:53.087Z",
+      "summary": "Устранено совпадение ID backend между рабочим направлением и компонентом дерева; ссылки родительского узла обновлены.",
+      "commit": null
+    },
+    {
+      "date": "2026-11-16T01:24:04.776Z",
+      "summary": "Добавлена проверка canonical state и импорта/экспорта по JSON Schema; сохранена совместимость с историческими camelCase ID, добавлены проверки ссылочной целостности.",
+      "commit": null
+    },
+    {
+      "date": "2026-11-16T01:25:42.796Z",
+      "summary": "Добавлены создание и редактирование компонентов в Project Manager; сохранение проверяется схемой и связями, циклические родительские связи отклоняются.",
+      "commit": null
+    },
+    {
+      "date": "2026-11-16T01:28:03.412Z",
+      "summary": "Добавлены формы создания и редактирования решений и блокеров; связи блокеров с задачами проверяются валидатором до применения.",
+      "commit": null
+    }
+  ]
+}
