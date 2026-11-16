@@ -2,7 +2,7 @@
   "schema_version": 1,
   "metadata": {
     "project_id": "hw-catalog",
-    "updated_at": "2026-11-16T02:10:00Z",
+    "updated_at": "2026-11-16T03:55:00Z",
     "source_of_truth": "github",
     "working_branch": "integration/catalog-foundation",
     "last_verified_commit": "cc0d2f7539437d309b92e3ba9cd98a35e74c1ed7",
@@ -615,9 +615,9 @@
       "title": "DEVICE_INFO.json",
       "path": null,
       "kind": "other",
-      "status": "needs_audit",
+      "status": "done",
       "description": "DEVICE_INFO.json — маркер внешнего хранилища.",
-      "notes": "Формат и проверки маркера подтверждены кодом, но фактический DEVICE_INFO.json на внешнем диске не доступен через GitHub и не перепроверен. Исторический storage_id не считать текущим без проверки.",
+      "notes": "Проверено read-only 2026-11-16 на внешнем HDD E:\\HW-CATALOG-DATA: DEVICE_INFO.json существует и является валидным JSON; присутствуют storage_id и layout_version = 1. Сам machine-specific storage_id не дублируется в Project Manager.",
       "source_refs": [
         "backend/app/storage.py",
         "backend/app/init_storage.py"
@@ -631,9 +631,9 @@
       "title": "DATABASE/catalog.db",
       "path": null,
       "kind": "database",
-      "status": "needs_audit",
+      "status": "in_progress",
       "description": "DATABASE/catalog.db — пользовательская SQLite база на внешнем диске.",
-      "notes": "Файл БД исключён из Git и не доступен для проверки через репозиторий. Размер, число таблиц, integrity_check и фактическая актуальность не подтверждены на дату аудита.",
+      "notes": "Проверено read-only 2026-11-16: DATABASE/catalog.db существует, размер 593 920 байт; SQLite integrity_check = ok; 40 таблиц, 50 строк суммарно. Заполнены только seed/reference таблицы: alembic_version, identifier_types, permissions, role_permissions, roles. Пользовательских каталожных записей пока нет.",
       "source_refs": [
         "backend/app/storage.py",
         "docs/architecture/BACKEND-DB-PORTABILITY-AUDIT.md"
@@ -647,9 +647,9 @@
       "title": "MEDIA/images + MEDIA/thumbnails",
       "path": null,
       "kind": "other",
-      "status": "needs_audit",
+      "status": "in_progress",
       "description": "MEDIA/images и MEDIA/thumbnails на внешнем диске.",
-      "notes": "Существование и наполнение папок на текущем HDD через GitHub не проверяются. Предыдущая запись о пустых папках является исторической.",
+      "notes": "Проверено read-only 2026-11-16: раздел MEDIA существует, файлов пока нет. Хранилище изображений ещё не наполнено; отдельно предстоит подтвердить структуру images/thumbnails и правила именования и связи с карточками.",
       "source_refs": [
         "docs/architecture/MEDIA_AND_EVIDENCE_METADATA.md"
       ],
@@ -662,9 +662,9 @@
       "title": "IMPORTS/mainline, premium, allhw",
       "path": null,
       "kind": "other",
-      "status": "needs_audit",
+      "status": "in_progress",
       "description": "IMPORTS: входящие материалы Mainline, Premium и ALLHW на внешнем диске.",
-      "notes": "Фактическое содержимое внешней папки IMPORTS не проверено. Репозиторные источники ALLHW и импортёры подтверждены отдельно.",
+      "notes": "Проверено read-only 2026-11-16: IMPORTS существует, файлов пока нет. Репозиторные источники ALLHW и импортёры подтверждены отдельно; загрузка входящих наборов на внешний диск ещё не выполнялась.",
       "source_refs": [
         "docs/ALL_HOT_WHEELS_IMPORTER.md",
         "docs/importers/MAINLINE_IMPORTER_SPEC.md"
@@ -678,9 +678,9 @@
       "title": "EXPORTS/",
       "path": "EXPORTS",
       "kind": "directory",
-      "status": "needs_audit",
+      "status": "done",
       "description": "EXPORTS/ — внешняя папка для выгрузок.",
-      "notes": "Наличие и содержимое папки на HDD не проверены; прежняя отметка planned не подтверждает текущее состояние.",
+      "notes": "Проверено read-only 2026-11-16: папка EXPORTS существует и пока пуста. Наличие структурного элемента подтверждено; реальные сценарии экспорта предстоит реализовать и проверить отдельно.",
       "source_refs": [],
       "sort_order": 370
     },
@@ -693,7 +693,7 @@
       "kind": "directory",
       "status": "needs_audit",
       "description": "BACKUPS/ — резервные копии внешней базы и данные для восстановления.",
-      "notes": "Наличие каталога и актуальность резервных копий на HDD не проверены. Нужны проверка второй физической копии и тест восстановления; не считать старый initial backup достаточной страховкой.",
+      "notes": "Проверено read-only 2026-11-16: в BACKUPS найден 1 файл размером 593 920 байт. Совпадение с DATABASE/catalog.db по размеру не доказывает идентичность или пригодность копии. Требуются SHA-256-сравнение, проверка независимой физической копии и тест восстановления.",
       "source_refs": [
         "docs/architecture/BACKEND-DB-PORTABILITY-AUDIT.md"
       ],
@@ -706,9 +706,9 @@
       "title": "LOGS/",
       "path": "LOGS",
       "kind": "directory",
-      "status": "needs_audit",
+      "status": "done",
       "description": "LOGS/ — журналы backend на внешнем диске.",
-      "notes": "Фактические журналы на HDD не доступны через GitHub; старое описание stdout/stderr является историческим.",
+      "notes": "Проверено read-only 2026-11-16: в LOGS найдено 2 файла общим размером 534 байта. Наличие каталога и файлов подтверждено; содержимое и полнота журналирования в этот аудит не анализировались.",
       "source_refs": [
         "scripts/windows/start-hw-catalog.ps1"
       ],
@@ -721,9 +721,9 @@
       "title": "Файловая система внешнего HDD",
       "path": null,
       "kind": "other",
-      "status": "needs_audit",
+      "status": "done",
       "description": "Файловая система внешнего HDD и её ограничения.",
-      "notes": "FAT32, ёмкость и свободное место были зафиксированы в прежней сессии, но не перепроверены. Не конвертировать в NTFS до подтверждённой второй физической копии и проверки восстановления.",
+      "notes": "Проверено read-only 2026-11-16: внешний USB HDD ADATA SH93, том E:, FAT32; ёмкость 319 992 135 680 байт, свободно 224 367 902 720 байт. FAT32 ограничивает размер отдельного файла 4 GiB. Не конвертировать в NTFS до подтверждённой второй физической копии и проверки восстановления.",
       "source_refs": [
         "docs/deployment/LOCAL-WINDOWS.md"
       ],
@@ -1292,6 +1292,11 @@
     {
       "date": "2026-11-16T02:10:00Z",
       "summary": "Проведён первый аудит всех 56 компонентов по HEAD integration/catalog-foundation: исправлены подтверждённые пути и описания, устаревшие статусы внешнего диска переведены в needs_audit, добавлены ссылки на исходники; задачи связаны с компонентами.",
+      "commit": null
+    },
+    {
+      "date": "2026-11-16T03:55:00Z",
+      "summary": "Зафиксированы результаты read-only аудита внешнего HDD: подтверждены DEVICE_INFO.json, целостность SQLite, структура каталогов, наличие резервного файла и параметры FAT32. Компоненты обновлены по фактическим данным; резервная копия оставлена needs_audit до SHA-256-сверки и теста восстановления.",
       "commit": null
     }
   ]
