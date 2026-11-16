@@ -109,6 +109,8 @@ function validateState(s){
  const ids=new Set();["workstreams","components","tasks","decisions","blockers"].forEach(k=>s[k].forEach(x=>{if(ids.has(x.id))errors.push(k+"."+x.id+": повторяющийся ID");ids.add(x.id);}));
  const ws=new Set(s.workstreams.map(x=>x.id)),cs=new Set(s.components.map(x=>x.id)),ts=new Set(s.tasks.map(x=>x.id));
  s.components.forEach(x=>{if(x.parent_id&&!cs.has(x.parent_id))errors.push("components."+x.id+".parent_id: компонент не найден");if(x.parent_id===x.id)errors.push("components."+x.id+".parent_id: нельзя ссылаться на себя");if(x.workstream_id&&!ws.has(x.workstream_id))errors.push("components."+x.id+".workstream_id: направление не найдено");});
+ const componentMap=new Map(s.components.map(x=>[x.id,x]));
+ s.components.forEach(x=>{const seen=new Set([x.id]);let parent=x.parent_id;while(parent&&componentMap.has(parent)){if(seen.has(parent)){errors.push("components."+x.id+".parent_id: обнаружен цикл родительских связей");break;}seen.add(parent);parent=componentMap.get(parent).parent_id;}});
  s.tasks.forEach(x=>{if(!ws.has(x.workstream_id))errors.push("tasks."+x.id+".workstream_id: направление не найдено");if(x.component_id&&!cs.has(x.component_id))errors.push("tasks."+x.id+".component_id: компонент не найден");(x.dependencies||[]).forEach(d=>{if(!ts.has(d))errors.push("tasks."+x.id+".dependencies: задача "+d+" не найдена");if(d===x.id)errors.push("tasks."+x.id+".dependencies: нельзя зависеть от самой себя");});});
  s.blockers.forEach(x=>(x.related_task_ids||[]).forEach(id=>{if(!ts.has(id))errors.push("blockers."+x.id+".related_task_ids: задача "+id+" не найдена");}));
  if(errors.length)throw Error("Проверка связей: "+errors.slice(0,12).join("; ")+(errors.length>12?"; … ещё "+(errors.length-12):""));
