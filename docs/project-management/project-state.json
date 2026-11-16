@@ -2,7 +2,7 @@
   "schema_version": 1,
   "metadata": {
     "project_id": "hw-catalog",
-    "updated_at": "2026-11-16T01:19:53.087Z",
+    "updated_at": "2026-11-16T01:24:04.776Z",
     "source_of_truth": "github",
     "working_branch": "integration/catalog-foundation",
     "last_verified_commit": null,
@@ -960,7 +960,7 @@
       "id": "pm-007",
       "title": "Подключить полноценную валидацию по JSON Schema",
       "description": "Добавить валидатор схемы в браузерный интерфейс или отдельный проверяемый инструмент, включая cross-reference checks.",
-      "status": "planned",
+      "status": "done",
       "priority": "high",
       "workstream_id": "project-management",
       "component_id": null,
@@ -978,8 +978,8 @@
         "docs/project-management/project-state.schema.json"
       ],
       "created_at": "2026-11-16T01:18:37.023Z",
-      "updated_at": "2026-11-16T01:18:37.023Z",
-      "completed_at": null
+      "updated_at": "2026-11-16T01:24:04.776Z",
+      "completed_at": "2026-11-16T01:24:04.776Z"
     },
     {
       "id": "pm-008",
@@ -1048,6 +1048,11 @@
     {
       "date": "2026-11-16T01:19:53.087Z",
       "summary": "Устранено совпадение ID backend между рабочим направлением и компонентом дерева; ссылки родительского узла обновлены.",
+      "commit": null
+    },
+    {
+      "date": "2026-11-16T01:24:04.776Z",
+      "summary": "Добавлена проверка canonical state и импорта/экспорта по JSON Schema; сохранена совместимость с историческими camelCase ID, добавлены проверки ссылочной целостности.",
       "commit": null
     }
   ]
