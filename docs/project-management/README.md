@@ -1,4 +1,16 @@
-# Project Manager data
+# Project Manager
+
+## Open the dashboard
+
+Open [Project Manager](./index.html) through a local HTTP server or the project's static hosting. The dashboard loads `project-state.json` relative to this page. Do not open it through `file://`, because browsers normally block the JSON fetch in that mode.
+
+For a quick local preview from the repository root:
+
+```powershell
+py -m http.server 8000
+```
+
+Then open `http://localhost:8000/docs/project-management/`.
 
 ## Canonical source
 
@@ -7,6 +19,17 @@
 - GitHub on `integration/catalog-foundation` is the source of truth.
 - Browser storage may keep an explicitly marked local draft, but must never silently replace the canonical state.
 - Exported changes must be validated and reviewed before being committed.
+
+## Dashboard workflow
+
+1. Load the canonical JSON from GitHub.
+2. Make changes in the dashboard. They remain in page memory until saved as a browser-local draft or exported.
+3. Use **Save draft** only as a local convenience. It does not update GitHub.
+4. Use **Export JSON** to download the complete state.
+5. Review the exported file, validate it, and commit it to `docs/project-management/project-state.json`.
+6. Reload from GitHub after the commit to confirm the canonical version.
+
+The dashboard deliberately contains no GitHub token and does not write directly to the repository.
 
 ## Entity boundaries
 
@@ -34,3 +57,7 @@ A component's status is not a task status. Do not calculate project completion b
 3. Validate imported JSON against the schema and check ID uniqueness and all cross-references.
 4. Preserve the previous canonical JSON before replacing it.
 5. Synchronize the external drive only after the GitHub version has been reviewed and committed.
+
+## Current implementation boundary
+
+The first dashboard version loads the canonical state, shows workstreams, tasks, components, decisions, blockers and changelog, and supports task edits, local drafts, JSON import and export. Component editing, full schema-validator integration, GitHub write-back, automated tests and external-drive synchronization remain follow-up work.
