@@ -60,4 +60,4 @@ A component's status is not a task status. Do not calculate project completion b
 
 ## Current implementation boundary
 
-The first dashboard version loads the canonical state, shows workstreams, tasks, components, decisions, blockers and changelog, and supports task edits, local drafts, JSON import and export. Component editing, full schema-validator integration, GitHub write-back, automated tests and external-drive synchronization remain follow-up work.
+The dashboard loads the canonical state, shows workstreams, tasks, components, decisions, blockers and changelog, and supports editing/creating tasks, components, decisions and blockers. Changes are validated against the embedded JSON Schema and cross-reference rules before being applied to page state. Blockers can be linked to existing tasks. Local drafts and JSON import/export are supported. Browser-level automated tests, GitHub write-back and external-drive synchronization remain follow-up work.
