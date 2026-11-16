@@ -2,10 +2,10 @@
   "schema_version": 1,
   "metadata": {
     "project_id": "hw-catalog",
-    "updated_at": "2026-11-16T07:16:30Z",
+    "updated_at": "2026-11-16T09:30:00Z",
     "source_of_truth": "github",
     "working_branch": "integration/catalog-foundation",
-    "last_verified_commit": "cc0d2f7539437d309b92e3ba9cd98a35e74c1ed7",
+    "last_verified_commit": "ccfdf34ec6e37dc0dc400dce0db73c37d787a4f6",
     "timezone": "Asia/Bangkok"
   },
   "project": {
@@ -317,15 +317,17 @@
       "id": "allhw",
       "parent_id": "root",
       "workstream_id": "hot-wheels-data",
-      "title": "ALLHW/",
-      "path": "ALLHW",
+      "title": "ALLHW archive",
+      "path": null,
       "kind": "directory",
       "status": "in_progress",
-      "description": "Локальный архив HTML-страниц Hot Wheels Wiki / All Hot Wheels по годам.",
-      "notes": "Подтверждены годовые каталоги 1968–2026; присутствуют сохранённые HTML-страницы, для 2010 есть отдельные обычная и International версии. Наличие файлов подтверждено, полнота архива и дата/происхождение каждой страницы требуют отдельной инвентаризации.",
+      "description": "Архив исходных HTML-страниц Hot Wheels Wiki / All Hot Wheels по годам в отдельном репозитории.",
+      "notes": "60 HTML-файлов за 1968–2026 годы перенесены в JohnyKiska/hotwheels-fandom-archive/ALLHW. Имена и относительные пути сохранены; MANIFEST.csv содержит 60 записей с размерами и SHA-256. Проверены количество файлов и суммарный размер (34,138,971 bytes). Read-only importer остаётся в основном репозитории. Полноту исходного набора и корректность парсинга предстоит проверять отдельно.",
       "source_refs": [
-        "docs/ALL_HOT_WHEELS_IMPORTER.md",
-        "backend/app/importers/all_hot_wheels.py"
+        "https://github.com/JohnyKiska/hotwheels-fandom-archive/tree/main/ALLHW",
+        "https://github.com/JohnyKiska/hotwheels-fandom-archive/blob/main/MANIFEST.csv",
+        "backend/app/importers/all_hot_wheels.py",
+        "docs/ALL_HOT_WHEELS_IMPORTER.md"
       ],
       "sort_order": 150
     },
@@ -785,10 +787,10 @@
       "path": null,
       "kind": "domain_area",
       "status": "in_progress",
-      "description": "ALLHW: локальный сбор годовых HTML-источников и read-only importer preview.",
-      "notes": "Подтверждены ALLHW/1968–2026, backend/app/importers/all_hot_wheels.py, importer contract и документация. Проверить полноту, повторяемость парсинга, дубли и сопоставление с Mainline; не считать Fandom и AllHW независимыми без доказательств.",
+      "description": "ALLHW: HTML-архив в отдельном репозитории и read-only importer preview в HW Catalog.",
+      "notes": "Исходные HTML-страницы 1968–2026 хранятся в hotwheels-fandom-archive/ALLHW (60 файлов, MANIFEST.csv с SHA-256). В основном репозитории остаются backend/app/importers/all_hot_wheels.py и документация. Проверить полноту, повторяемость парсинга, дубли и сопоставление с Mainline; не считать Fandom и AllHW независимыми без доказательств.",
       "source_refs": [
-        "ALLHW",
+        "https://github.com/JohnyKiska/hotwheels-fandom-archive/tree/main/ALLHW",
         "backend/app/importers/all_hot_wheels.py",
         "docs/ALL_HOT_WHEELS_IMPORTER.md"
       ],
