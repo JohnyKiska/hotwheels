@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>HW Catalog · Project Manager</title>
+<style>
+:root{--bg:#0b1118;--panel:#131d29;--panel2:#192636;--line:#2b3b4e;--text:#e8eef5;--muted:#9aabba;--accent:#79c0ff;--green:#3fb950;--yellow:#d29922;--red:#f85149;--purple:#bc8cff}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(135deg,#0b1118,#101b28 55%,#0b1118);color:var(--text);font:14px/1.5 system-ui,-apple-system,Segoe UI,Arial,sans-serif}
+header{padding:24px clamp(16px,4vw,48px) 18px;border-bottom:1px solid var(--line);background:#101923ed;position:sticky;top:0;z-index:5;backdrop-filter:blur(12px)}
+.header-inner{max-width:1500px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:16px}.resource-nav{display:inline-flex;align-items:center;justify-content:center;min-height:38px;padding:8px 12px;border:1px solid #315c7e;border-radius:9px;background:#17324a;color:var(--text);text-decoration:none;font-weight:650;white-space:nowrap}.resource-nav:hover{border-color:var(--accent);color:#fff}@media(max-width:560px){.header-inner{align-items:flex-start;flex-direction:column;gap:10px}}
+h1{margin:0;font-size:clamp(23px,3vw,32px);letter-spacing:-.5px}h1 span{color:var(--accent)}.sub{color:var(--muted);margin-top:5px}
+.wrap{max-width:1500px;margin:auto;padding:20px clamp(12px,3vw,38px) 60px}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}.toolbar button,.toolbar select,.toolbar input,.btn{border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:9px;padding:9px 12px;font:inherit}.toolbar button,.btn{cursor:pointer}.toolbar button:hover,.btn:hover{border-color:var(--accent)}button:disabled{opacity:.45;cursor:not-allowed}
+.statusline{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:10px 13px;background:var(--panel);border:1px solid var(--line);border-radius:10px;color:var(--muted);font-size:12px}.led{width:8px;height:8px;border-radius:50%;display:inline-block;background:var(--green)}.led.warn{background:var(--yellow)}.led.bad{background:var(--red)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:18px 0 14px}.tab{background:transparent;border:1px solid var(--line);color:var(--muted);padding:9px 13px;border-radius:9px;cursor:pointer;font:inherit}.tab.active{background:#17324a;border-color:#315c7e;color:var(--text)}
+.stats{display:grid;grid-template-columns:repeat(5,minmax(120px,1fr));gap:10px;margin:14px 0}.stat,.panel,.card{background:var(--panel);border:1px solid var(--line);border-radius:12px}.stat{padding:13px}.stat b{font-size:24px;display:block}.stat small{color:var(--muted)}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,.42fr);gap:14px;align-items:start}.panel{overflow:hidden}.panel h2{font-size:16px;margin:0;padding:14px 16px;border-bottom:1px solid var(--line)}.body{padding:14px 16px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}.card{padding:13px}.card h3{font-size:14px;margin:0 0 6px}.card p{margin:0;color:var(--muted);font-size:12px}.card .meta{margin-top:10px;color:var(--muted);font-size:11px}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.filters input{flex:1;min-width:180px}.filters input,.filters select{background:#0e1721;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:9px;font:inherit}
+.task{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:12px;align-items:center;padding:12px;border-bottom:1px solid var(--line)}.task:last-child{border-bottom:0}.task-title{font-weight:600;cursor:pointer}.task-title:hover{color:var(--accent)}.task-desc{font-size:12px;color:var(--muted);margin-top:3px}.task select{max-width:145px;background:#0e1721;color:var(--text);border:1px solid var(--line);border-radius:7px;padding:7px;font:inherit;font-size:12px}
+.badge{font-size:11px;border-radius:20px;padding:3px 8px;border:1px solid var(--line);white-space:nowrap}.b-done{color:var(--green);border-color:#245d38}.b-in_progress{color:var(--yellow);border-color:#73571b}.b-blocked{color:var(--red);border-color:#71302e}.b-review{color:var(--purple);border-color:#553c78}
+.field{margin:12px 0}.field label{display:block;color:var(--muted);font-size:12px;margin-bottom:5px}.field input,.field textarea,.field select{width:100%;background:#0e1721;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:9px;font:inherit}.field textarea{min-height:76px;resize:vertical}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.primary{background:#17324a;border-color:#315c7e}.danger{border-color:#71302e;color:#ff9b95}.muted{color:var(--muted)}.small{font-size:12px}.empty{color:var(--muted);padding:24px;text-align:center}.progress{height:8px;background:#253242;border-radius:10px;overflow:hidden;margin:10px 0}.progress i{display:block;height:100%;background:linear-gradient(90deg,var(--green),var(--accent));width:0}
+.list{display:grid;gap:8px}.rowitem{padding:11px 12px;border:1px solid var(--line);border-radius:9px;background:#111b26}.rowitem b{display:block}.rowitem small{color:var(--muted)}
+.notice{padding:12px;border:1px solid #5b4a23;background:#241f13;border-radius:9px;color:#e7d6a5;margin:12px 0}.hidden{display:none!important}
+@media(max-width:900px){.grid{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}header{position:static}.task{grid-template-columns:1fr 1fr}.task>div:first-child{grid-column:1/-1}}
+@media print{body{background:white;color:#111}.panel,.stat,.card{background:white;color:#111;border:1px solid #aaa}.toolbar,.tabs,.actions,.filters,.detail-panel{display:none!important}header{position:static;background:white;color:#111}}
+</style>
+</head>
+<body>
+<header><div class="header-inner"><div><h1>HW Catalog <span>Project Manager</span></h1><div class="sub">Единая карта проекта, задач и принятых решений</div></div><a class="resource-nav" href="../../">← В каталог</a></div></header>
+<div class="wrap">
+ <div class="toolbar">
+  <button id="reload">↻ Загрузить из GitHub</button>
+  <button id="saveDraft">Сохранить черновик</button>
+  <button id="export" class="primary">Экспорт JSON</button>
+  <button id="import">Импорт JSON</button>
+  <button id="addTask">＋ Новая задача</button>
+  <button id="print">Печать</button>
+  <input id="file" type="file" accept="application/json" hidden>
+ </div>
+ <div class="statusline" id="statusline"><i class="led warn"></i><span>Загружаю состояние проекта…</span></div>
+ <div id="draftNotice" class="notice hidden"></div>
+ <nav class="tabs" aria-label="Разделы проекта">
+  <button class="tab active" data-tab="overview">Обзор</button>
+  <button class="tab" data-tab="tasks">Задачи</button>
+  <button class="tab" data-tab="components">Компоненты</button>
+  <button class="tab" data-tab="decisions">Решения и блокеры</button>
+  <button class="tab" data-tab="history">История</button>
+ </nav>
+ <section id="view-overview">
+  <div class="stats" id="stats"></div>
+  <div class="grid">
+   <section class="panel"><h2>Рабочие направления</h2><div class="body"><div class="cards" id="workstreams"></div></div></section>
+   <section class="panel"><h2>Ближайшие задачи</h2><div class="body list" id="nextTasks"></div></section>
+  </div>
+  <div class="notice">GitHub хранит каноническую версию. Изменения в браузере пока являются локальным черновиком: после проверки экспортируй JSON и закоммить его в репозиторий. Прямой записи в GitHub и хранения токенов в браузере нет.</div>
+ </section>
+ <section id="view-tasks" class="hidden">
+  <div class="filters">
+   <input id="taskSearch" placeholder="Поиск задач…">
+   <select id="taskStatus"><option value="all">Все статусы</option><option value="backlog">Бэклог</option><option value="planned">Запланировано</option><option value="in_progress">В процессе</option><option value="blocked">Блокер</option><option value="review">Проверка</option><option value="done">Готово</option><option value="cancelled">Отменено</option></select>
+   <select id="taskWorkstream"><option value="all">Все направления</option></select>
+  </div>
+  <div class="grid"><section class="panel"><h2>Список задач</h2><div id="taskList"></div></section><aside class="panel detail-panel"><h2>Карточка задачи</h2><div class="body" id="taskDetail"><div class="empty">Выбери задачу.</div></div></aside></div>
+ </section>
+ <section id="view-components" class="hidden">
+  <div class="panel"><h2>Состав системы и доменные области</h2><div class="body"><p class="muted small">Компоненты описывают то, что существует в проекте. Это не задачи и их статусы не участвуют в расчёте выполнения работ.</p><div class="actions" style="margin:0 0 12px"><button class="btn primary" id="addComponent">＋ Добавить компонент</button></div><div class="cards" id="componentList"></div></div></div>
+  <section class="panel hidden" id="componentEditorPanel" style="margin-top:14px"><h2 id="componentEditorHeading">Редактирование компонента</h2><div class="body" id="componentEditor"></div></section>
+ </section>
+ <section id="view-decisions" class="hidden">
+  <div class="grid"><section class="panel"><h2>Принятые решения</h2><div class="body"><div class="actions" style="margin:0 0 12px"><button class="btn primary" id="addDecision">＋ Добавить решение</button></div><div class="list" id="decisionList"></div></div></section><section class="panel"><h2>Блокеры</h2><div class="body"><div class="actions" style="margin:0 0 12px"><button class="btn primary" id="addBlocker">＋ Добавить блокер</button></div><div class="list" id="blockerList"></div></div></section></div>
+  <section class="panel hidden" id="decisionEditorPanel" style="margin-top:14px"><h2 id="decisionEditorHeading">Редактирование решения</h2><div class="body" id="decisionEditor"></div></section>
+  <section class="panel hidden" id="blockerEditorPanel" style="margin-top:14px"><h2 id="blockerEditorHeading">Редактирование блокера</h2><div class="body" id="blockerEditor"></div></section>
+ </section>
+ <section id="view-history" class="hidden">
+  <div class="panel"><h2>Журнал изменений</h2><div class="body list" id="historyList"></div></div>
+ </section>
+</div>
+<script type="application/json" id="project-schema">{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://github.com/JohnyKiska/hotwheels/blob/integration/catalog-foundation/docs/project-management/project-state.schema.json","title":"HW Catalog Project State","description":"Canonical, version-controlled state for the HW Catalog Project Manager.","type":"object","additionalProperties":false,"required":["schema_version","metadata","project","workstreams","components","tasks","decisions","blockers","changelog"],"properties":{"schema_version":{"const":1},"metadata":{"type":"object","additionalProperties":false,"required":["project_id","updated_at","source_of_truth","working_branch"],"properties":{"project_id":{"const":"hw-catalog"},"updated_at":{"type":"string","format":"date-time"},"source_of_truth":{"const":"github"},"working_branch":{"type":"string","minLength":1},"last_verified_commit":{"type":["string","null"],"pattern":"^[0-9a-f]{7,40}$"},"timezone":{"type":"string"}}},"project":{"type":"object","additionalProperties":false,"required":["name","summary","status"],"properties":{"name":{"type":"string","minLength":1},"summary":{"type":"string"},"status":{"enum":["active","on_hold","maintenance","completed"]}}},"workstreams":{"type":"array","items":{"type":"object","additionalProperties":false,"required":["id","title","description","status"],"properties":{"id":{"$ref":"#/$defs/id"},"title":{"type":"string","minLength":1},"description":{"type":"string"},"status":{"$ref":"#/$defs/workStatus"},"sort_order":{"type":"integer"}}}},"components":{"type":"array","items":{"type":"object","additionalProperties":false,"required":["id","title","kind","status"],"properties":{"id":{"$ref":"#/$defs/id"},"parent_id":{"type":["string","null"]},"workstream_id":{"type":["string","null"]},"title":{"type":"string","minLength":1},"path":{"type":["string","null"]},"kind":{"enum":["directory","file","service","database","external_system","domain_area","other"]},"status":{"$ref":"#/$defs/workStatus"},"description":{"type":"string"},"notes":{"type":"string"},"source_refs":{"$ref":"#/$defs/stringList"},"sort_order":{"type":"integer"}}}},"tasks":{"type":"array","items":{"type":"object","additionalProperties":false,"required":["id","title","status","priority","workstream_id","acceptance_criteria"],"properties":{"id":{"$ref":"#/$defs/id"},"title":{"type":"string","minLength":1},"description":{"type":"string"},"status":{"enum":["backlog","planned","in_progress","blocked","review","done","cancelled"]},"priority":{"enum":["critical","high","medium","low"]},"workstream_id":{"type":"string","minLength":1},"component_id":{"type":["string","null"]},"owner":{"type":["string","null"]},"due_date":{"type":["string","null"],"format":"date"},"dependencies":{"$ref":"#/$defs/stringList"},"acceptance_criteria":{"type":"array","items":{"type":"string"}},"source_refs":{"$ref":"#/$defs/stringList"},"created_at":{"type":["string","null"],"format":"date-time"},"updated_at":{"type":["string","null"],"format":"date-time"},"completed_at":{"type":["string","null"],"format":"date-time"}}}},"decisions":{"type":"array","items":{"type":"object","additionalProperties":false,"required":["id","title","decision","date","status"],"properties":{"id":{"$ref":"#/$defs/id"},"title":{"type":"string","minLength":1},"decision":{"type":"string","minLength":1},"rationale":{"type":"string"},"date":{"type":"string","format":"date"},"status":{"enum":["proposed","accepted","superseded"]},"source_refs":{"$ref":"#/$defs/stringList"}}}},"blockers":{"type":"array","items":{"type":"object","additionalProperties":false,"required":["id","title","status"],"properties":{"id":{"$ref":"#/$defs/id"},"title":{"type":"string","minLength":1},"description":{"type":"string"},"status":{"enum":["open","resolved","accepted_risk"]},"related_task_ids":{"$ref":"#/$defs/stringList"},"source_refs":{"$ref":"#/$defs/stringList"}}}},"changelog":{"type":"array","items":{"type":"object","additionalProperties":false,"required":["date","summary"],"properties":{"date":{"type":"string","format":"date-time"},"summary":{"type":"string","minLength":1},"commit":{"type":["string","null"]}}}}},"$defs":{"id":{"type":"string","pattern":"^[A-Za-z0-9][A-Za-z0-9_-]*$"},"stringList":{"type":"array","uniqueItems":true,"items":{"type":"string"}},"workStatus":{"enum":["not_assessed","planned","in_progress","blocked","review","done","needs_audit"]}}}</script>
+<script>
+"use strict";
+const STATE_URL="./project-state.json";
+const DRAFT_KEY="hwcat-project-manager-draft-v1";
+const STATUS={backlog:"Бэклог",planned:"Запланировано",in_progress:"В процессе",blocked:"Блокер",review:"Проверка",done:"Готово",cancelled:"Отменено"};
+const WORK_STATUS={not_assessed:"Не оценено",planned:"Запланировано",in_progress:"В процессе",blocked:"Блокер",review:"Проверка",done:"Готово",needs_audit:"Требует аудита"};
+const PRIORITY={critical:"Критический",high:"Высокий",medium:"Средний",low:"Низкий"};
+const $=id=>document.getElementById(id);
+let state=null,selectedTaskId=null,dirty=false,sourceLabel="GitHub";
+function esc(v){return String(v==null?"":v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function setStatus(message,kind){$("statusline").innerHTML='<i class="led '+(kind||"")+'"></i><span>'+esc(message)+'</span>';}
+function markDirty(){dirty=true;setStatus("Есть несохранённые изменения в памяти страницы. Сохрани черновик или экспортируй JSON.","warn");}
+function validateState(s){
+ const schema=JSON.parse(document.getElementById("project-schema").textContent);
+ const errors=[],has=(o,k)=>Object.prototype.hasOwnProperty.call(o,k),same=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
+ function resolveRef(ref){if(!ref.startsWith("#/"))throw Error("Неподдерживаемая ссылка схемы: "+ref);return ref.slice(2).split("/").reduce((v,k)=>v&&v[k.replace(/~1/g,"/").replace(/~0/g,"~")],schema);}
+ function validDate(v){const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(v);if(!m)return false;const d=new Date(Date.UTC(+m[1],+m[2]-1,+m[3]));return d.getUTCFullYear()===+m[1]&&d.getUTCMonth()===+m[2]-1&&d.getUTCDate()===+m[3];}
+ function validDateTime(v){return /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/.test(v)&&!Number.isNaN(Date.parse(v))&&validDate(v.slice(0,10));}
+ function check(value,rule,path){
+  if(rule.$ref){check(value,resolveRef(rule.$ref),path);return;}
+  if(rule.const!==undefined&&!same(value,rule.const))errors.push(path+": ожидается "+JSON.stringify(rule.const));
+  if(rule.enum&&!rule.enum.some(x=>same(x,value)))errors.push(path+": недопустимое значение "+JSON.stringify(value));
+  if(rule.type){const types=Array.isArray(rule.type)?rule.type:[rule.type];const ok=types.some(t=>t==="null"?value===null:t==="array"?Array.isArray(value):t==="object"?value!==null&&typeof value==="object"&&!Array.isArray(value):t==="integer"?Number.isInteger(value):t==="number"?typeof value==="number"&&Number.isFinite(value):t==="string"?typeof value==="string":t==="boolean"?typeof value==="boolean":false);if(!ok){errors.push(path+": неверный тип, ожидался "+types.join(" или "));return;}}
+  if(typeof value==="string"){if(rule.minLength!==undefined&&value.length<rule.minLength)errors.push(path+": строка короче "+rule.minLength+" символов");if(rule.pattern&&!new RegExp(rule.pattern).test(value))errors.push(path+": строка не соответствует шаблону");if(rule.format==="date"&&!validDate(value))errors.push(path+": неверная дата YYYY-MM-DD");if(rule.format==="date-time"&&!validDateTime(value))errors.push(path+": неверная дата/время ISO 8601");}
+  if(Array.isArray(value)){if(rule.uniqueItems&&value.some((v,i)=>value.slice(0,i).some(x=>same(x,v))))errors.push(path+": элементы массива должны быть уникальны");if(rule.items)value.forEach((v,i)=>check(v,rule.items,path+"["+i+"]"));}
+  if(value&&typeof value==="object"&&!Array.isArray(value)){(rule.required||[]).forEach(k=>{if(!has(value,k))errors.push(path+"."+k+": обязательное поле отсутствует");});if(rule.properties)Object.keys(value).forEach(k=>{if(has(rule.properties,k))check(value[k],rule.properties[k],path+"."+k);else if(rule.additionalProperties===false)errors.push(path+"."+k+": неизвестное поле");});}
+ }
+ check(s,schema,"$");
+ if(errors.length)throw Error("JSON Schema: "+errors.slice(0,12).join("; ")+(errors.length>12?"; … ещё "+(errors.length-12):""));
+ const ids=new Set();["workstreams","components","tasks","decisions","blockers"].forEach(k=>s[k].forEach(x=>{if(ids.has(x.id))errors.push(k+"."+x.id+": повторяющийся ID");ids.add(x.id);}));
+ const ws=new Set(s.workstreams.map(x=>x.id)),cs=new Set(s.components.map(x=>x.id)),ts=new Set(s.tasks.map(x=>x.id));
+ s.components.forEach(x=>{if(x.parent_id&&!cs.has(x.parent_id))errors.push("components."+x.id+".parent_id: компонент не найден");if(x.parent_id===x.id)errors.push("components."+x.id+".parent_id: нельзя ссылаться на себя");if(x.workstream_id&&!ws.has(x.workstream_id))errors.push("components."+x.id+".workstream_id: направление не найдено");});
+ const componentMap=new Map(s.components.map(x=>[x.id,x]));
+ s.components.forEach(x=>{const seen=new Set([x.id]);let parent=x.parent_id;while(parent&&componentMap.has(parent)){if(seen.has(parent)){errors.push("components."+x.id+".parent_id: обнаружен цикл родительских связей");break;}seen.add(parent);parent=componentMap.get(parent).parent_id;}});
+ s.tasks.forEach(x=>{if(!ws.has(x.workstream_id))errors.push("tasks."+x.id+".workstream_id: направление не найдено");if(x.component_id&&!cs.has(x.component_id))errors.push("tasks."+x.id+".component_id: компонент не найден");(x.dependencies||[]).forEach(d=>{if(!ts.has(d))errors.push("tasks."+x.id+".dependencies: задача "+d+" не найдена");if(d===x.id)errors.push("tasks."+x.id+".dependencies: нельзя зависеть от самой себя");});});
+ s.blockers.forEach(x=>(x.related_task_ids||[]).forEach(id=>{if(!ts.has(id))errors.push("blockers."+x.id+".related_task_ids: задача "+id+" не найдена");}));
+ if(errors.length)throw Error("Проверка связей: "+errors.slice(0,12).join("; ")+(errors.length>12?"; … ещё "+(errors.length-12):""));
+ return true;
+}
+function workstreamName(id){const x=state.workstreams.find(w=>w.id===id);return x?x.title:"Без направления";}
+function taskCountByWorkstream(id){return state.tasks.filter(t=>t.workstream_id===id);}
+function renderOverview(){
+ const active=state.tasks.filter(t=>!["done","cancelled"].includes(t.status));
+ const done=state.tasks.filter(t=>t.status==="done").length;
+ const blocked=state.tasks.filter(t=>t.status==="blocked").length;
+ const review=state.tasks.filter(t=>t.status==="review").length;
+ const pct=state.tasks.length?Math.round(done/state.tasks.length*100):0;
+ $("stats").innerHTML=[
+  ["Всего задач",state.tasks.length],["Готово",done],["В работе",state.tasks.filter(t=>t.status==="in_progress").length],
+  ["На проверке",review],["Блокеры",blocked]
+ ].map(x=>'<div class="stat"><b>'+x[1]+'</b><small>'+x[0]+'</small></div>').join("");
+ $("workstreams").innerHTML=state.workstreams.map(w=>{
+  const tasks=taskCountByWorkstream(w.id),completed=tasks.filter(t=>t.status==="done").length;
+  return '<article class="card"><h3>'+esc(w.title)+'</h3><p>'+esc(w.description||"")+'</p><div class="progress"><i style="width:'+(tasks.length?Math.round(completed/tasks.length*100):0)+'%"></i></div><div class="meta">'+esc(WORK_STATUS[w.status]||w.status)+' · задач: '+tasks.length+' · готово: '+completed+'</div></article>';
+ }).join("");
+ const next=active.filter(t=>t.status!=="blocked").slice(0,6);
+ $("nextTasks").innerHTML=next.length?next.map(t=>'<div class="rowitem"><b>'+esc(t.title)+'</b><small>'+esc(workstreamName(t.workstream_id))+' · '+esc(STATUS[t.status]||t.status)+' · '+esc(PRIORITY[t.priority]||t.priority)+'</small></div>').join(""):'<div class="empty">Активных задач нет.</div>';
+}
+function renderTaskFilters(){
+ const current=$("taskWorkstream").value||"all";
+ $("taskWorkstream").innerHTML='<option value="all">Все направления</option>'+state.workstreams.map(w=>'<option value="'+esc(w.id)+'">'+esc(w.title)+'</option>').join("");
+ $("taskWorkstream").value=state.workstreams.some(w=>w.id===current)?current:"all";
+}
+function renderTasks(){
+ const q=$("taskSearch").value.toLowerCase(),status=$("taskStatus").value,ws=$("taskWorkstream").value;
+ const tasks=state.tasks.filter(t=>(status==="all"||t.status===status)&&(ws==="all"||t.workstream_id===ws)&&((t.title+" "+(t.description||"")+" "+workstreamName(t.workstream_id)).toLowerCase().includes(q)));
+ $("taskList").innerHTML=tasks.length?tasks.map(t=>'<div class="task"><div><div class="task-title" data-task="'+esc(t.id)+'">'+esc(t.title)+'</div><div class="task-desc">'+esc(workstreamName(t.workstream_id))+' · '+esc(t.description||"")+'</div></div><select aria-label="Статус задачи" data-status="'+esc(t.id)+'">'+Object.keys(STATUS).map(k=>'<option value="'+k+'" '+(t.status===k?"selected":"")+'>'+STATUS[k]+'</option>').join("")+'</select><select aria-label="Приоритет задачи" data-priority="'+esc(t.id)+'">'+Object.keys(PRIORITY).map(k=>'<option value="'+k+'" '+(t.priority===k?"selected":"")+'>'+PRIORITY[k]+'</option>').join("")+'</select></div>').join(""):'<div class="empty">Задачи не найдены.</div>';
+ document.querySelectorAll("[data-task]").forEach(el=>el.onclick=()=>{selectedTaskId=el.dataset.task;renderTaskDetail();});
+ document.querySelectorAll("[data-status]").forEach(el=>el.onchange=()=>{const t=state.tasks.find(x=>x.id===el.dataset.status);t.status=el.value;t.updated_at=new Date().toISOString();markDirty();renderOverview();renderTasks();renderTaskDetail();});
+ document.querySelectorAll("[data-priority]").forEach(el=>el.onchange=()=>{const t=state.tasks.find(x=>x.id===el.dataset.priority);t.priority=el.value;t.updated_at=new Date().toISOString();markDirty();renderOverview();});
+ if(selectedTaskId&&!state.tasks.some(t=>t.id===selectedTaskId))selectedTaskId=null;
+ renderTaskDetail();
+}
+function renderTaskDetail(){
+ const t=state.tasks.find(x=>x.id===selectedTaskId);
+ if(!t){$("taskDetail").innerHTML='<div class="empty">Выбери задачу из списка.</div>';return;}
+ $("taskDetail").innerHTML='<h3>'+esc(t.title)+'</h3><div class="small muted">'+esc(workstreamName(t.workstream_id))+' · '+esc(t.id)+'</div>'+
+ '<div class="field"><label>Название</label><input id="editTitle" value="'+esc(t.title)+'"></div>'+
+ '<div class="field"><label>Описание</label><textarea id="editDescription">'+esc(t.description||"")+'</textarea></div>'+
+ '<div class="field"><label>Статус</label><select id="editStatus">'+Object.keys(STATUS).map(k=>'<option value="'+k+'" '+(t.status===k?"selected":"")+'>'+STATUS[k]+'</option>').join("")+'</select></div>'+
+ '<div class="field"><label>Приоритет</label><select id="editPriority">'+Object.keys(PRIORITY).map(k=>'<option value="'+k+'" '+(t.priority===k?"selected":"")+'>'+PRIORITY[k]+'</option>').join("")+'</select></div>'+
+ '<div class="field"><label>Критерии готовности (каждый с новой строки)</label><textarea id="editCriteria">'+esc((t.acceptance_criteria||[]).join("\n"))+'</textarea></div>'+
+ '<div class="field"><label>Ответственный</label><input id="editOwner" value="'+esc(t.owner||"")+'"></div>'+
+ '<div class="field"><label>Срок (YYYY-MM-DD)</label><input id="editDue" value="'+esc(t.due_date||"")+'" placeholder="не задан"></div>'+
+ '<div class="actions"><button class="btn primary" id="saveTask">Сохранить задачу</button></div>';
+ $("saveTask").onclick=()=>{
+  const title=$("editTitle").value.trim();if(!title)return alert("Название задачи обязательно.");
+  t.title=title;t.description=$("editDescription").value;t.status=$("editStatus").value;t.priority=$("editPriority").value;
+  t.acceptance_criteria=$("editCriteria").value.split("\n").map(x=>x.trim()).filter(Boolean);
+  t.owner=$("editOwner").value.trim()||null;t.due_date=$("editDue").value.trim()||null;t.updated_at=new Date().toISOString();
+  markDirty();renderAll();renderTaskDetail();
+ };
+}
+function renderComponents(){
+ $("componentList").innerHTML=state.components.length?state.components.map(c=>'<article class="card"><h3>'+esc(c.title)+'</h3><p>'+esc(c.description||"")+'</p><div class="meta">'+esc(c.path||c.kind)+' · '+esc(WORK_STATUS[c.status]||c.status)+'</div><div class="actions"><button class="btn" data-edit-component="'+esc(c.id)+'">Изменить</button></div></article>').join(""):'<div class="empty">Компоненты пока не добавлены.</div>';
+ document.querySelectorAll("[data-edit-component]").forEach(b=>b.onclick=()=>renderComponentEditor(b.dataset.editComponent));
+}
+function renderComponentEditor(id){
+ const c=id?state.components.find(x=>x.id===id):null;
+ if(id&&!c)return;
+ $("componentEditorPanel").classList.remove("hidden");
+ $("componentEditorHeading").textContent=c?"Редактировать компонент · "+c.id:"Новый компонент";
+ const parentOptions=state.components.filter(x=>!c||x.id!==c.id).map(x=>'<option value="'+esc(x.id)+'" '+(c&&c.parent_id===x.id?"selected":"")+'>'+esc(x.title)+" · "+esc(x.id)+'</option>').join("");
+ const streamOptions=state.workstreams.map(x=>'<option value="'+esc(x.id)+'" '+(c&&c.workstream_id===x.id?"selected":"")+'>'+esc(x.title)+'</option>').join("");
+ const kinds={directory:"Папка",file:"Файл",service:"Сервис",database:"База данных",external_system:"Внешняя система",domain_area:"Доменная область",other:"Другое"};
+ $("componentEditor").innerHTML=(c?'<div class="small muted">ID: '+esc(c.id)+'</div>':'<div class="small muted">ID будет создан автоматически при сохранении.</div>')+
+ '<div class="field"><label>Название</label><input id="componentTitle" value="'+esc(c?c.title:"")+'"></div>'+
+ '<div class="field"><label>Путь / расположение</label><input id="componentPath" value="'+esc(c&&c.path||"")+'" placeholder="например, src/catalog/"></div>'+
+ '<div class="field"><label>Тип</label><select id="componentKind">'+Object.keys(kinds).map(k=>'<option value="'+k+'" '+((c?c.kind:"domain_area")===k?"selected":"")+'>'+kinds[k]+'</option>').join("")+'</select></div>'+
+ '<div class="field"><label>Статус оценки</label><select id="componentStatus">'+Object.keys(WORK_STATUS).map(k=>'<option value="'+k+'" '+((c?c.status:"not_assessed")===k?"selected":"")+'>'+WORK_STATUS[k]+'</option>').join("")+'</select></div>'+
+ '<div class="field"><label>Рабочее направление</label><select id="componentWorkstream"><option value="">Без направления</option>'+streamOptions+'</select></div>'+
+ '<div class="field"><label>Родительский компонент</label><select id="componentParent"><option value="">Нет родителя</option>'+parentOptions+'</select></div>'+
+ '<div class="field"><label>Описание</label><textarea id="componentDescription">'+esc(c&&c.description||"")+'</textarea></div>'+
+ '<div class="field"><label>Заметки</label><textarea id="componentNotes">'+esc(c&&c.notes||"")+'</textarea></div>'+
+ '<div class="field"><label>Источники / ссылки (каждая с новой строки)</label><textarea id="componentRefs">'+esc((c&&c.source_refs||[]).join("\n"))+'</textarea></div>'+
+ '<div class="actions"><button class="btn primary" id="saveComponent">Сохранить компонент</button><button class="btn" id="cancelComponent">Отмена</button></div>';
+ $("saveComponent").onclick=()=>{
+  const title=$("componentTitle").value.trim();if(!title)return alert("Название компонента обязательно.");
+  const parent=$("componentParent").value||null;if(parent===(c&&c.id))return alert("Компонент не может быть родителем самому себе.");
+  const data={title,path:$("componentPath").value.trim()||null,kind:$("componentKind").value,status:$("componentStatus").value,workstream_id:$("componentWorkstream").value||null,parent_id:parent,description:$("componentDescription").value,notes:$("componentNotes").value,source_refs:[...new Set($("componentRefs").value.split("\n").map(x=>x.trim()).filter(Boolean))]};
+  const candidate=JSON.parse(JSON.stringify(state));
+  if(c){Object.assign(candidate.components.find(x=>x.id===c.id),data);}else{candidate.components.push({id:"component-"+Date.now(),...data,sort_order:candidate.components.reduce((n,x)=>Math.max(n,Number(x.sort_order)||0),0)+1});}
+  try{validateState(candidate);}catch(e){return alert("Компонент не сохранён: "+e.message);}
+  state=candidate;markDirty();$("componentEditorPanel").classList.add("hidden");renderAll();
+ };
+ $("cancelComponent").onclick=()=>$("componentEditorPanel").classList.add("hidden");
+}
+function renderDecisions(){
+ $("decisionList").innerHTML=state.decisions.length?state.decisions.map(d=>'<div class="rowitem"><b>'+esc(d.title)+'</b><small>'+esc(d.date)+' · '+esc(d.status)+'</small><p>'+esc(d.decision)+'</p><div class="actions"><button class="btn" data-edit-decision="'+esc(d.id)+'">Изменить</button></div></div>').join(""):'<div class="empty">Решений пока нет.</div>';
+ $("blockerList").innerHTML=state.blockers.length?state.blockers.map(b=>'<div class="rowitem"><b>'+esc(b.title)+'</b><small>'+esc(b.status)+'</small><p>'+esc(b.description||"")+'</p><small>Связанные задачи: '+esc((b.related_task_ids||[]).map(id=>{const t=state.tasks.find(x=>x.id===id);return t?t.title:id;}).join(", ")||"нет")+'</small><div class="actions"><button class="btn" data-edit-blocker="'+esc(b.id)+'">Изменить</button></div></div>').join(""):'<div class="empty">Блокеров пока нет.</div>';
+ document.querySelectorAll("[data-edit-decision]").forEach(b=>b.onclick=()=>renderDecisionEditor(b.dataset.editDecision));
+ document.querySelectorAll("[data-edit-blocker]").forEach(b=>b.onclick=()=>renderBlockerEditor(b.dataset.editBlocker));
+}
+function renderDecisionEditor(id){
+ const d=id?state.decisions.find(x=>x.id===id):null;if(id&&!d)return;
+ $("decisionEditorPanel").classList.remove("hidden");
+ $("decisionEditorHeading").textContent=d?"Редактировать решение · "+d.id:"Новое решение";
+ $("decisionEditor").innerHTML=(d?'<div class="small muted">ID: '+esc(d.id)+'</div>':'<div class="small muted">ID будет создан автоматически.</div>')+
+ '<div class="field"><label>Название</label><input id="decisionTitle" value="'+esc(d?d.title:"")+'"></div>'+
+ '<div class="field"><label>Решение</label><textarea id="decisionText">'+esc(d?d.decision:"")+'</textarea></div>'+
+ '<div class="field"><label>Обоснование</label><textarea id="decisionRationale">'+esc(d&&d.rationale||"")+'</textarea></div>'+
+ '<div class="field"><label>Дата</label><input id="decisionDate" type="date" value="'+esc(d?d.date:new Date().toISOString().slice(0,10))+'"></div>'+
+ '<div class="field"><label>Статус</label><select id="decisionStatus">'+["proposed","accepted","superseded"].map(x=>'<option value="'+x+'" '+((d?d.status:"proposed")===x?"selected":"")+'>'+({proposed:"Предложено",accepted:"Принято",superseded:"Заменено"}[x])+'</option>').join("")+'</select></div>'+
+ '<div class="field"><label>Источники / ссылки (каждая с новой строки)</label><textarea id="decisionRefs">'+esc((d&&d.source_refs||[]).join("\n"))+'</textarea></div>'+
+ '<div class="actions"><button class="btn primary" id="saveDecision">Сохранить решение</button><button class="btn" id="cancelDecision">Отмена</button></div>';
+ $("saveDecision").onclick=()=>{
+  const title=$("decisionTitle").value.trim(),decision=$("decisionText").value.trim(),date=$("decisionDate").value;
+  if(!title||!decision||!date)return alert("Название, текст решения и дата обязательны.");
+  const data={title,decision,rationale:$("decisionRationale").value,date,status:$("decisionStatus").value,source_refs:[...new Set($("decisionRefs").value.split("\n").map(x=>x.trim()).filter(Boolean))]};
+  const candidate=JSON.parse(JSON.stringify(state));
+  if(d)Object.assign(candidate.decisions.find(x=>x.id===d.id),data);else candidate.decisions.push({id:"decision-"+Date.now(),...data});
+  try{validateState(candidate);}catch(e){return alert("Решение не сохранено: "+e.message);}
+  state=candidate;markDirty();$("decisionEditorPanel").classList.add("hidden");renderAll();
+ };
+ $("cancelDecision").onclick=()=>$("decisionEditorPanel").classList.add("hidden");
+}
+function renderBlockerEditor(id){
+ const b=id?state.blockers.find(x=>x.id===id):null;if(id&&!b)return;
+ $("blockerEditorPanel").classList.remove("hidden");
+ $("blockerEditorHeading").textContent=b?"Редактировать блокер · "+b.id:"Новый блокер";
+ const selected=new Set(b&&b.related_task_ids||[]);
+ $("blockerEditor").innerHTML=(b?'<div class="small muted">ID: '+esc(b.id)+'</div>':'<div class="small muted">ID будет создан автоматически.</div>')+
+ '<div class="field"><label>Название</label><input id="blockerTitle" value="'+esc(b?b.title:"")+'"></div>'+
+ '<div class="field"><label>Описание / что мешает работе</label><textarea id="blockerDescription">'+esc(b&&b.description||"")+'</textarea></div>'+
+ '<div class="field"><label>Статус</label><select id="blockerStatus">'+["open","resolved","accepted_risk"].map(x=>'<option value="'+x+'" '+((b?b.status:"open")===x?"selected":"")+'>'+({open:"Открыт",resolved:"Решён",accepted_risk:"Принятый риск"}[x])+'</option>').join("")+'</select></div>'+
+ '<div class="field"><label>Связанные задачи</label><div class="list">'+state.tasks.map(t=>'<label class="small"><input type="checkbox" name="blockerTask" value="'+esc(t.id)+'" '+(selected.has(t.id)?"checked":"")+' style="width:auto;margin-right:7px">'+esc(t.title)+'</label>').join("")+'</div></div>'+
+ '<div class="field"><label>Источники / ссылки (каждая с новой строки)</label><textarea id="blockerRefs">'+esc((b&&b.source_refs||[]).join("\n"))+'</textarea></div>'+
+ '<div class="actions"><button class="btn primary" id="saveBlocker">Сохранить блокер</button><button class="btn" id="cancelBlocker">Отмена</button></div>';
+ $("saveBlocker").onclick=()=>{
+  const title=$("blockerTitle").value.trim();if(!title)return alert("Название блокера обязательно.");
+  const data={title,description:$("blockerDescription").value,status:$("blockerStatus").value,related_task_ids:[...document.querySelectorAll('input[name="blockerTask"]:checked')].map(x=>x.value),source_refs:[...new Set($("blockerRefs").value.split("\n").map(x=>x.trim()).filter(Boolean))]};
+  const candidate=JSON.parse(JSON.stringify(state));
+  if(b)Object.assign(candidate.blockers.find(x=>x.id===b.id),data);else candidate.blockers.push({id:"blocker-"+Date.now(),...data});
+  try{validateState(candidate);}catch(e){return alert("Блокер не сохранён: "+e.message);}
+  state=candidate;markDirty();$("blockerEditorPanel").classList.add("hidden");renderAll();
+ };
+ $("cancelBlocker").onclick=()=>$("blockerEditorPanel").classList.add("hidden");
+}
+function renderHistory(){
+ $("historyList").innerHTML=state.changelog.length?state.changelog.slice().reverse().map(x=>'<div class="rowitem"><b>'+esc(x.summary)+'</b><small>'+esc(x.date)+(x.commit?" · "+esc(x.commit):"")+'</small></div>').join(""):'<div class="empty">История пока пуста.</div>';
+}
+function renderAll(){renderOverview();renderTaskFilters();renderTasks();renderComponents();renderDecisions();renderHistory();}
+function setTab(name){document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.dataset.tab===name));["overview","tasks","components","decisions","history"].forEach(x=>$("view-"+x).classList.toggle("hidden",x!==name));}
+async function loadCanonical(){
+ setStatus("Загружаю canonical JSON из GitHub…","warn");
+ const response=await fetch(STATE_URL,{cache:"no-store"});if(!response.ok)throw Error("HTTP "+response.status+" при загрузке "+STATE_URL);
+ const incoming=await response.json();validateState(incoming);state=incoming;dirty=false;sourceLabel="GitHub";renderAll();
+ const draft=localStorage.getItem(DRAFT_KEY);
+ if(draft){$("draftNotice").classList.remove("hidden");$("draftNotice").innerHTML="В этом браузере найден локальный черновик. <button class='btn' id='restoreDraft'>Восстановить</button> <button class='btn' id='ignoreDraft'>Не использовать</button>";$("restoreDraft").onclick=()=>{try{const obj=JSON.parse(draft);validateState(obj);state=obj;dirty=true;renderAll();setStatus("Загружен локальный черновик. Экспортируй его после проверки.","warn");$("draftNotice").classList.add("hidden");}catch(e){alert("Черновик повреждён: "+e.message);}};$("ignoreDraft").onclick=()=>{$("draftNotice").classList.add("hidden");localStorage.removeItem(DRAFT_KEY);};}
+ setStatus("Загружена каноническая версия из GitHub · "+(state.metadata.updated_at||"дата не указана"),"");
+}
+function saveDraft(){if(!state)return;localStorage.setItem(DRAFT_KEY,JSON.stringify(state));dirty=false;setStatus("Черновик сохранён локально в этом браузере. GitHub пока не изменён.","warn");}
+function exportState(){if(!state)return;validateState(state);state.metadata.updated_at=new Date().toISOString();const blob=new Blob([JSON.stringify(state,null,2)+"\n"],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="project-state.json";a.click();URL.revokeObjectURL(a.href);setStatus("JSON экспортирован. Проверь файл и закоммить его в GitHub.","warn");}
+function importState(file){const reader=new FileReader();reader.onload=()=>{try{const incoming=JSON.parse(reader.result);validateState(incoming);if(!confirm("Импорт заменит состояние в памяти страницы. Сначала сохрани текущую версию, если она нужна. Продолжить?"))return;state=incoming;dirty=true;renderAll();setStatus("Импортирован JSON. Это локальное изменение, не запись в GitHub.","warn");}catch(e){alert("Импорт отклонён: "+e.message);}};reader.readAsText(file);}
+function addTask(){
+ if(!state)return;const title=prompt("Название задачи:");if(!title||!title.trim())return;
+ const ws=state.workstreams[0];const id="task-"+Date.now();
+ state.tasks.push({id,title:title.trim(),description:"",status:"planned",priority:"medium",workstream_id:ws.id,component_id:null,owner:null,due_date:null,dependencies:[],acceptance_criteria:[],source_refs:[],created_at:new Date().toISOString(),updated_at:new Date().toISOString(),completed_at:null});
+ selectedTaskId=id;markDirty();setTab("tasks");renderAll();
+}
+document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
+$("reload").onclick=()=>{if(dirty&&!confirm("Есть несохранённые изменения. Перезагрузить canonical JSON и потерять их?"))return;loadCanonical().catch(e=>setStatus("Не удалось загрузить canonical JSON: "+e.message,"bad"));};
+$("saveDraft").onclick=saveDraft;$("export").onclick=exportState;$("import").onclick=()=>$("file").click();$("file").onchange=e=>{if(e.target.files[0])importState(e.target.files[0]);e.target.value="";};
+$("addTask").onclick=addTask;$("addComponent").onclick=()=>renderComponentEditor(null);$("addDecision").onclick=()=>renderDecisionEditor(null);$("addBlocker").onclick=()=>renderBlockerEditor(null);$("print").onclick=()=>window.print();
+$("taskSearch").oninput=renderTasks;$("taskStatus").onchange=renderTasks;$("taskWorkstream").onchange=renderTasks;
+loadCanonical().catch(e=>{setStatus("Не удалось загрузить project-state.json: "+e.message+". Открой страницу через HTTP-сервер, а не file://.","bad");});
+</script>
+</body></html>
