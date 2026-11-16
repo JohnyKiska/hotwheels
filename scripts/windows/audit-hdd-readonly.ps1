@@ -4,13 +4,20 @@ param(
     [string]$StorageRoot,
 
     [Parameter(Mandatory = $false)]
-    [string]$RepositoryRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path,
+    [string]$RepositoryRoot,
 
     [Parameter(Mandatory = $false)]
     [string]$ReportPath = (Join-Path $env:TEMP ("hw-catalog-audit-{0}.json" -f (Get-Date -Format "yyyyMMdd-HHmmss")))
 )
 
 $ErrorActionPreference = "Stop"
+
+if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) {
+    if ([string]::IsNullOrWhiteSpace($PSScriptRoot)) {
+        throw "RepositoryRoot was not supplied and PSScriptRoot is unavailable."
+    }
+    $RepositoryRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "..\..")).Path
+}
 
 function Get-FolderStats {
     param([string]$Path)
