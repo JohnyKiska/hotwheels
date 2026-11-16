@@ -25,6 +25,38 @@ h1{margin:0;font-size:clamp(23px,3vw,32px);letter-spacing:-.5px}h1 span{color:va
 .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.primary{background:#17324a;border-color:#315c7e}.danger{border-color:#71302e;color:#ff9b95}.muted{color:var(--muted)}.small{font-size:12px}.empty{color:var(--muted);padding:24px;text-align:center}.progress{height:8px;background:#253242;border-radius:10px;overflow:hidden;margin:10px 0}.progress i{display:block;height:100%;background:linear-gradient(90deg,var(--green),var(--accent));width:0}
 .list{display:grid;gap:8px}.rowitem{padding:11px 12px;border:1px solid var(--line);border-radius:9px;background:#111b26}.rowitem b{display:block}.rowitem small{color:var(--muted)}
 .notice{padding:12px;border:1px solid #5b4a23;background:#241f13;border-radius:9px;color:#e7d6a5;margin:12px 0}.hidden{display:none!important}
+
+.navigator-grid{display:grid;grid-template-columns:minmax(320px,.95fr) minmax(340px,1.05fr);gap:14px;align-items:start}
+.tree-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.tree-toolbar input,.tree-toolbar select{background:#0e1721;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:9px;font:inherit;min-width:150px}
+.tree-toolbar input{flex:1;min-width:210px}
+.tree-list{padding:8px;max-height:72vh;overflow:auto}
+.tree-node{display:flex;align-items:center;gap:5px;min-height:36px;padding:3px 6px;border-radius:8px}
+.tree-node:hover{background:#1a2939}
+.tree-node.selected{background:#17324a;outline:1px solid #315c7e}
+.tree-toggle{width:25px;min-width:25px;height:25px;border:0;background:transparent;color:var(--muted);border-radius:6px;cursor:pointer;font:inherit}
+.tree-toggle:hover{background:#26384b;color:var(--text)}
+.tree-toggle.spacer{visibility:hidden}
+.tree-label{min-width:0;flex:1;text-align:left;border:0;background:transparent;color:var(--text);padding:5px 3px;cursor:pointer;font:inherit;display:flex;align-items:center;gap:8px}
+.tree-label strong{font-weight:580;overflow-wrap:anywhere}
+.tree-meta{color:var(--muted);font-size:11px;white-space:nowrap}
+.tree-count{font-size:10px;color:var(--muted);border:1px solid var(--line);border-radius:20px;padding:1px 6px;white-space:nowrap}
+.tree-badge{font-size:10px;border-radius:20px;padding:2px 7px;border:1px solid var(--line);white-space:nowrap}
+.status-done{color:var(--green);border-color:#245d38}.status-in_progress{color:var(--yellow);border-color:#73571b}.status-needs_audit{color:#e7b45a;border-color:#73571b}.status-planned{color:var(--accent);border-color:#315c7e}.status-not_assessed{color:var(--muted)}.status-blocked{color:var(--red);border-color:#71302e}.status-review{color:var(--purple);border-color:#553c78}
+.tree-children{margin-left:13px;border-left:1px solid #29394a}
+.tree-summary{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px}
+.tree-summary span{background:#101a25;border:1px solid var(--line);border-radius:8px;padding:6px 9px;font-size:12px;color:var(--muted)}
+.component-detail{padding:16px}
+.component-detail h3{margin:0 0 5px;font-size:19px}
+.component-detail .detail-meta{color:var(--muted);font-size:12px;overflow-wrap:anywhere}
+.component-detail .detail-section{border-top:1px solid var(--line);padding-top:12px;margin-top:14px}
+.component-detail .detail-section h4{margin:0 0 6px;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.component-detail .detail-copy{white-space:pre-wrap;overflow-wrap:anywhere}
+.related-task{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.related-task:last-child{border-bottom:0}
+.related-task button{border:0;background:transparent;color:var(--accent);cursor:pointer;text-align:left;font:inherit}
+@media(max-width:900px){.navigator-grid{grid-template-columns:1fr}.tree-list{max-height:52vh}}
+
 @media(max-width:900px){.grid{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}header{position:static}.task{grid-template-columns:1fr 1fr}.task>div:first-child{grid-column:1/-1}}
 @media print{body{background:white;color:#111}.panel,.stat,.card{background:white;color:#111;border:1px solid #aaa}.toolbar,.tabs,.actions,.filters,.detail-panel{display:none!important}header{position:static;background:white;color:#111}}
 </style>
@@ -44,12 +76,36 @@ h1{margin:0;font-size:clamp(23px,3vw,32px);letter-spacing:-.5px}h1 span{color:va
  <div class="statusline" id="statusline"><i class="led warn"></i><span>Загружаю состояние проекта…</span></div>
  <div id="draftNotice" class="notice hidden"></div>
  <nav class="tabs" aria-label="Разделы проекта">
-  <button class="tab active" data-tab="overview">Обзор</button>
+  <button class="tab active" data-tab="tree">Дерево проекта</button>
+  <button class="tab" data-tab="overview">Обзор</button>
   <button class="tab" data-tab="tasks">Задачи</button>
   <button class="tab" data-tab="components">Компоненты</button>
   <button class="tab" data-tab="decisions">Решения и блокеры</button>
   <button class="tab" data-tab="history">История</button>
  </nav>
+ <section id="view-tree">
+  <div class="stats" id="treeStats"></div>
+  <div class="tree-toolbar">
+   <input id="treeSearch" type="search" placeholder="Поиск по компонентам, путям и описаниям…">
+   <select id="treeStatus">
+    <option value="all">Все статусы</option>
+    <option value="done">Готово</option>
+    <option value="in_progress">В работе</option>
+    <option value="planned">Запланировано</option>
+    <option value="needs_audit">Требует аудита</option>
+    <option value="not_assessed">Не оценено</option>
+    <option value="blocked">Блокер</option>
+    <option value="review">Проверка</option>
+   </select>
+   <button class="btn" id="expandTree">Развернуть всё</button>
+   <button class="btn" id="collapseTree">Свернуть всё</button>
+   <button class="btn primary" id="treeAddComponent">＋ Компонент</button>
+  </div>
+  <div class="navigator-grid">
+   <section class="panel"><h2>Структура проекта <span class="muted small" id="treeCount"></span></h2><div class="tree-list" id="componentTree"><div class="empty">Загружаю дерево…</div></div></section>
+   <aside class="panel"><h2>Карточка компонента</h2><div id="componentDetail" class="component-detail"><div class="empty">Выбери компонент в дереве.</div></div></aside>
+  </div>
+ </section>
  <section id="view-overview">
   <div class="stats" id="stats"></div>
   <div class="grid">
@@ -88,7 +144,8 @@ const STATUS={backlog:"Бэклог",planned:"Запланировано",in_pro
 const WORK_STATUS={not_assessed:"Не оценено",planned:"Запланировано",in_progress:"В процессе",blocked:"Блокер",review:"Проверка",done:"Готово",needs_audit:"Требует аудита"};
 const PRIORITY={critical:"Критический",high:"Высокий",medium:"Средний",low:"Низкий"};
 const $=id=>document.getElementById(id);
-let state=null,selectedTaskId=null,dirty=false,sourceLabel="GitHub";
+let state=null,selectedTaskId=null,selectedComponentId=null,dirty=false,sourceLabel="GitHub";
+let expandedComponentIds=new Set(),treeExpansionInitialized=false;
 function esc(v){return String(v==null?"":v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 function setStatus(message,kind){$("statusline").innerHTML='<i class="led '+(kind||"")+'"></i><span>'+esc(message)+'</span>';}
 function markDirty(){dirty=true;setStatus("Есть несохранённые изменения в памяти страницы. Сохрани черновик или экспортируй JSON.","warn");}
@@ -121,6 +178,69 @@ function validateState(s){
 }
 function workstreamName(id){const x=state.workstreams.find(w=>w.id===id);return x?x.title:"Без направления";}
 function taskCountByWorkstream(id){return state.tasks.filter(t=>t.workstream_id===id);}
+
+function componentChildren(id){return state.components.filter(c=>(c.parent_id||null)===(id||null)).sort((a,b)=>(Number(a.sort_order)||0)-(Number(b.sort_order)||0)||a.title.localeCompare(b.title,"ru"));}
+function componentDescendants(id){const out=[];const walk=parent=>componentChildren(parent).forEach(c=>{out.push(c);walk(c.id);});walk(id);return out;}
+function componentTaskList(id){const ids=new Set([id,...componentDescendants(id).map(c=>c.id)]);return state.tasks.filter(t=>ids.has(t.component_id));}
+function componentStatusCounts(items){const counts={};items.forEach(c=>{counts[c.status]=(counts[c.status]||0)+1;});return counts;}
+function statusBadge(status){return '<span class="tree-badge status-'+esc(status)+'">'+esc(WORK_STATUS[status]||status)+'</span>';}
+function renderTree(){
+ const components=state.components;
+ if(!treeExpansionInitialized){components.filter(c=>components.some(x=>x.parent_id===c.id)).forEach(c=>expandedComponentIds.add(c.id));treeExpansionInitialized=true;}
+ const q=$("treeSearch").value.trim().toLocaleLowerCase("ru"),status=$("treeStatus").value;
+ const visible=new Set();
+ if(!q&&status==="all")components.forEach(c=>visible.add(c.id));
+ else{
+  const matches=components.filter(c=>(status==="all"||c.status===status)&&(!q||(c.title+" "+c.id+" "+(c.path||"")+" "+(c.description||"")+" "+(c.notes||"")).toLocaleLowerCase("ru").includes(q)));
+  matches.forEach(c=>{let current=c;while(current){visible.add(current.id);current=current.parent_id?components.find(x=>x.id===current.parent_id):null;}});
+ }
+ const totalCounts=componentStatusCounts(components);
+ $("treeStats").innerHTML=[
+  ["Компонентов",components.length],
+  ["Готово",totalCounts.done||0],
+  ["В работе",totalCounts.in_progress||0],
+  ["Требуют аудита",totalCounts.needs_audit||0],
+  ["Не оценено",totalCounts.not_assessed||0]
+ ].map(x=>'<div class="stat"><b>'+x[1]+'</b><small>'+x[0]+'</small></div>').join("");
+ $("treeCount").textContent="· "+(visible.size===components.length?components.length:visible.size+" из "+components.length);
+ function renderNode(c,depth){
+  if(!visible.has(c.id))return "";
+  const children=componentChildren(c.id).filter(x=>visible.has(x.id));
+  const hasChildren=children.length>0,open=expandedComponentIds.has(c.id);
+  const tasks=componentTaskList(c.id),descendants=componentDescendants(c.id);
+  const isRoot=!c.parent_id;
+  const label=isRoot?'<span class="tree-badge">ГРУППА</span>':statusBadge(c.status);
+  const summary=isRoot?'<span class="tree-meta">'+descendants.length+' компонентов</span>':'';
+  return '<div class="tree-node '+(selectedComponentId===c.id?"selected":"")+'" style="padding-left:'+(depth*14+4)+'px">'+
+   (hasChildren?'<button class="tree-toggle" data-tree-toggle="'+esc(c.id)+'" aria-label="'+(open?"Свернуть":"Развернуть")+'">'+(open?"▾":"▸")+'</button>':'<span class="tree-toggle spacer">·</span>')+
+   '<button class="tree-label" data-select-component="'+esc(c.id)+'"><strong>'+esc(c.title)+'</strong>'+label+summary+'</button>'+
+   '<span class="tree-count" title="Задачи в этой ветке">'+tasks.length+' задач</span></div>'+
+   (hasChildren&&open?'<div class="tree-children">'+children.map(x=>renderNode(x,depth+1)).join("")+'</div>':"");
+ }
+ const roots=componentChildren(null).filter(c=>visible.has(c.id));
+ $("componentTree").innerHTML=roots.length?roots.map(c=>renderNode(c,0)).join(""):'<div class="empty">По заданным условиям компоненты не найдены.</div>';
+ document.querySelectorAll("[data-tree-toggle]").forEach(b=>b.onclick=()=>{const id=b.dataset.treeToggle;if(expandedComponentIds.has(id))expandedComponentIds.delete(id);else expandedComponentIds.add(id);renderTree();});
+ document.querySelectorAll("[data-select-component]").forEach(b=>b.onclick=()=>{selectedComponentId=b.dataset.selectComponent;renderTree();renderComponentDetail();});
+ if(!selectedComponentId||!components.some(c=>c.id===selectedComponentId))selectedComponentId=roots[0]?.id||components[0]?.id||null;
+ renderComponentDetail();
+}
+function renderComponentDetail(){
+ const c=state.components.find(x=>x.id===selectedComponentId);
+ if(!c){$("componentDetail").innerHTML='<div class="empty">Выбери компонент в дереве.</div>';return;}
+ const isRoot=!c.parent_id,descendants=componentDescendants(c.id),related=componentTaskList(c.id);
+ const refs=(c.source_refs||[]).map(ref=>/^https?:\/\//i.test(ref)?'<div class="small"><a href="'+esc(ref)+'" target="_blank" rel="noopener noreferrer">'+esc(ref)+'</a></div>':'<div class="small muted">'+esc(ref)+'</div>').join("");
+ $("componentDetail").innerHTML='<h3>'+esc(c.title)+'</h3><div class="detail-meta">'+esc(c.id)+' · '+esc(c.path||c.kind||"")+'</div>'+
+  '<div class="actions">'+(isRoot?'<span class="tree-badge">ГРУППА · '+descendants.length+' компонентов</span>':statusBadge(c.status))+'<button class="btn primary" id="editSelectedComponent">Изменить компонент</button></div>'+
+  '<div class="detail-section"><h4>Описание</h4><div class="detail-copy">'+esc(c.description||"Описание пока не заполнено.")+'</div></div>'+
+  '<div class="detail-section"><h4>Заметки и ход работы</h4><div class="detail-copy">'+esc(c.notes||"Заметок пока нет.")+'</div></div>'+
+  '<div class="detail-section"><h4>Рабочее направление</h4><div>'+esc(workstreamName(c.workstream_id))+'</div></div>'+
+  '<div class="detail-section"><h4>Вложенные компоненты</h4><div>'+ (descendants.length?descendants.length+" элементов в этой ветке":"Дочерних компонентов нет.")+'</div></div>'+
+  '<div class="detail-section"><h4>Связанные задачи · '+related.length+'</h4>'+ (related.length?related.map(t=>'<div class="related-task"><button data-open-tree-task="'+esc(t.id)+'">'+esc(t.title)+'</button><span class="tree-meta">'+esc(STATUS[t.status]||t.status)+'</span></div>').join(""):'<div class="muted small">Связанных задач пока нет.</div>')+'</div>'+
+  (refs?'<div class="detail-section"><h4>Источники и ссылки</h4>'+refs+'</div>':"");
+ $("editSelectedComponent").onclick=()=>{setTab("components");renderComponentEditor(c.id);};
+ document.querySelectorAll("[data-open-tree-task]").forEach(b=>b.onclick=()=>{selectedTaskId=b.dataset.openTreeTask;setTab("tasks");renderTasks();});
+}
+
 function renderOverview(){
  const active=state.tasks.filter(t=>!["done","cancelled"].includes(t.status));
  const done=state.tasks.filter(t=>t.status==="done").length;
@@ -261,8 +381,8 @@ function renderBlockerEditor(id){
 function renderHistory(){
  $("historyList").innerHTML=state.changelog.length?state.changelog.slice().reverse().map(x=>'<div class="rowitem"><b>'+esc(x.summary)+'</b><small>'+esc(x.date)+(x.commit?" · "+esc(x.commit):"")+'</small></div>').join(""):'<div class="empty">История пока пуста.</div>';
 }
-function renderAll(){renderOverview();renderTaskFilters();renderTasks();renderComponents();renderDecisions();renderHistory();}
-function setTab(name){document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.dataset.tab===name));["overview","tasks","components","decisions","history"].forEach(x=>$("view-"+x).classList.toggle("hidden",x!==name));}
+function renderAll(){renderTree();renderOverview();renderTaskFilters();renderTasks();renderComponents();renderDecisions();renderHistory();}
+function setTab(name){document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.dataset.tab===name));["tree","overview","tasks","components","decisions","history"].forEach(x=>$("view-"+x).classList.toggle("hidden",x!==name));}
 async function loadCanonical(){
  setStatus("Загружаю canonical JSON из GitHub…","warn");
  const response=await fetch(STATE_URL,{cache:"no-store"});if(!response.ok)throw Error("HTTP "+response.status+" при загрузке "+STATE_URL);
@@ -281,6 +401,10 @@ function addTask(){
  selectedTaskId=id;markDirty();setTab("tasks");renderAll();
 }
 document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
+ $("treeSearch").oninput=renderTree;$("treeStatus").onchange=renderTree;
+ $("expandTree").onclick=()=>{state.components.filter(c=>state.components.some(x=>x.parent_id===c.id)).forEach(c=>expandedComponentIds.add(c.id));treeExpansionInitialized=true;renderTree();};
+ $("collapseTree").onclick=()=>{expandedComponentIds.clear();treeExpansionInitialized=true;renderTree();};
+ $("treeAddComponent").onclick=()=>{setTab("components");renderComponentEditor(null);};
 $("reload").onclick=()=>{if(dirty&&!confirm("Есть несохранённые изменения. Перезагрузить canonical JSON и потерять их?"))return;loadCanonical().catch(e=>setStatus("Не удалось загрузить canonical JSON: "+e.message,"bad"));};
 $("saveDraft").onclick=saveDraft;$("export").onclick=exportState;$("import").onclick=()=>$("file").click();$("file").onchange=e=>{if(e.target.files[0])importState(e.target.files[0]);e.target.value="";};
 $("addTask").onclick=addTask;$("addComponent").onclick=()=>renderComponentEditor(null);$("addDecision").onclick=()=>renderDecisionEditor(null);$("addBlocker").onclick=()=>renderBlockerEditor(null);$("print").onclick=()=>window.print();
