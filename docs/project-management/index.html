@@ -160,7 +160,7 @@ function renderTasks(){
 function renderTaskDetail(){
  const t=state.tasks.find(x=>x.id===selectedTaskId);
  if(!t){$("taskDetail").innerHTML='<div class="empty">Выбери задачу из списка.</div>';return;}
- $("taskDetail").innerHTML='<h3>'+esc(t.title)+'</h3><div class="small muted">'+esc(workstreamName(t.workstream_id))+' · '+esc(t.id)+'</div>'+(t.component_id&&state.components.some(c=>c.id===t.component_id)?'<div class="small muted">Компонент: '+esc(state.components.find(c=>c.id===t.component_id).title)+'</div>':'<div class="small muted">Компонент не привязан</div>')+
+ $("taskDetail").innerHTML='<h3>'+esc(t.title)+'</h3><div class="small muted">'+esc(workstreamName(t.workstream_id))+' · '+esc(t.id)+'</div>'+(t.component_id&&state.components.some(c=>c.id===t.component_id)?'<div class="small muted">Компонент: '+esc(state.components.find(c=>c.id===t.component_id).title)+'</div><div class="actions"><button class="btn" id="openTaskComponent">Открыть в дереве проекта</button></div>':'<div class="small muted">Компонент не привязан</div>')+
  '<div class="field"><label>Название</label><input id="editTitle" value="'+esc(t.title)+'"></div>'+
  '<div class="field"><label>Компонент проекта</label><select id="editComponent"><option value="">Не привязан</option>'+state.components.slice().sort((a,b)=>(a.sort_order||0)-(b.sort_order||0)).map(c=>'<option value="'+esc(c.id)+'" '+(t.component_id===c.id?"selected":"")+'>'+esc(c.title)+'</option>').join("")+'</select></div>'+
  '<div class="field"><label>Описание</label><textarea id="editDescription">'+esc(t.description||"")+'</textarea></div>'+
@@ -170,6 +170,7 @@ function renderTaskDetail(){
  '<div class="field"><label>Ответственный</label><input id="editOwner" value="'+esc(t.owner||"")+'"></div>'+
  '<div class="field"><label>Срок (YYYY-MM-DD)</label><input id="editDue" value="'+esc(t.due_date||"")+'" placeholder="не задан"></div>'+
  '<div class="actions"><button class="btn primary" id="saveTask">Сохранить задачу</button></div>';
+ const openComponent=$("openTaskComponent");if(openComponent)openComponent.onclick=()=>{setTab("components");let node=document.querySelector('[data-tree-id="'+CSS.escape(t.component_id)+'"]');while(node){node.open=true;node=node.parentElement.closest("details[data-tree-id]");}};
  $("saveTask").onclick=()=>{
   const title=$("editTitle").value.trim();if(!title)return alert("Название задачи обязательно.");
   t.title=title;t.description=$("editDescription").value;t.component_id=$("editComponent").value||null;t.status=$("editStatus").value;t.priority=$("editPriority").value;
@@ -184,7 +185,7 @@ function renderComponents(){
  for(const list of byParent.values())list.sort((a,b)=>(a.sort_order||0)-(b.sort_order||0)||a.title.localeCompare(b.title,"ru"));
  const taskCount=id=>state.tasks.filter(t=>t.component_id===id).length;
  const draw=(c,depth)=>{const children=byParent.get(c.id)||[],count=taskCount(c.id);
-  return '<li><details class="tree-node" '+(depth===0?'open':'')+'><summary><b>'+esc(c.title)+'</b><span class="badge '+(c.status==="done"?"b-done":c.status==="blocked"?"b-blocked":c.status==="in_progress"?"b-in_progress":"")+'">'+esc(WORK_STATUS[c.status]||c.status)+'</span><span class="tree-meta">'+esc(c.path||c.kind)+' · задач: '+count+'</span></summary>'+
+  return '<li><details class="tree-node" data-tree-id="'+esc(c.id)+'" '+(depth===0?'open':'')+'><summary><b>'+esc(c.title)+'</b><span class="badge '+(c.status==="done"?"b-done":c.status==="blocked"?"b-blocked":c.status==="in_progress"?"b-in_progress":"")+'">'+esc(WORK_STATUS[c.status]||c.status)+'</span><span class="tree-meta">'+esc(c.path||c.kind)+' · задач: '+count+'</span></summary>'+
   (c.description?'<p>'+esc(c.description)+'</p>':'')+'<div class="actions"><button class="btn" data-edit-component="'+esc(c.id)+'">Изменить</button><button class="btn" data-component-tasks="'+esc(c.id)+'">Задачи ('+count+')</button></div>'+
   (children.length?'<ul class="tree-children">'+children.map(x=>draw(x,depth+1)).join("")+'</ul>':'')+'</details></li>';
  };
