@@ -70,7 +70,9 @@ h1{margin:0;font-size:clamp(23px,3vw,32px);letter-spacing:-.5px}h1 span{color:va
   <section class="panel hidden" id="componentEditorPanel" style="margin-top:14px"><h2 id="componentEditorHeading">Редактирование компонента</h2><div class="body" id="componentEditor"></div></section>
  </section>
  <section id="view-decisions" class="hidden">
-  <div class="grid"><section class="panel"><h2>Принятые решения</h2><div class="body list" id="decisionList"></div></section><section class="panel"><h2>Блокеры</h2><div class="body list" id="blockerList"></div></section></div>
+  <div class="grid"><section class="panel"><h2>Принятые решения</h2><div class="body"><div class="actions" style="margin:0 0 12px"><button class="btn primary" id="addDecision">＋ Добавить решение</button></div><div class="list" id="decisionList"></div></div></section><section class="panel"><h2>Блокеры</h2><div class="body"><div class="actions" style="margin:0 0 12px"><button class="btn primary" id="addBlocker">＋ Добавить блокер</button></div><div class="list" id="blockerList"></div></div></section></div>
+  <section class="panel hidden" id="decisionEditorPanel" style="margin-top:14px"><h2 id="decisionEditorHeading">Редактирование решения</h2><div class="body" id="decisionEditor"></div></section>
+  <section class="panel hidden" id="blockerEditorPanel" style="margin-top:14px"><h2 id="blockerEditorHeading">Редактирование блокера</h2><div class="body" id="blockerEditor"></div></section>
  </section>
  <section id="view-history" class="hidden">
   <div class="panel"><h2>Журнал изменений</h2><div class="body list" id="historyList"></div></div>
@@ -205,8 +207,55 @@ function renderComponentEditor(id){
  $("cancelComponent").onclick=()=>$("componentEditorPanel").classList.add("hidden");
 }
 function renderDecisions(){
- $("decisionList").innerHTML=state.decisions.length?state.decisions.map(d=>'<div class="rowitem"><b>'+esc(d.title)+'</b><small>'+esc(d.date)+' · '+esc(d.status)+'</small><p>'+esc(d.decision)+'</p></div>').join(""):'<div class="empty">Решений пока нет.</div>';
- $("blockerList").innerHTML=state.blockers.length?state.blockers.map(b=>'<div class="rowitem"><b>'+esc(b.title)+'</b><small>'+esc(b.status)+'</small><p>'+esc(b.description||"")+'</p></div>').join(""):'<div class="empty">Открытых блокеров не зарегистрировано.</div>';
+ $("decisionList").innerHTML=state.decisions.length?state.decisions.map(d=>'<div class="rowitem"><b>'+esc(d.title)+'</b><small>'+esc(d.date)+' · '+esc(d.status)+'</small><p>'+esc(d.decision)+'</p><div class="actions"><button class="btn" data-edit-decision="'+esc(d.id)+'">Изменить</button></div></div>').join(""):'<div class="empty">Решений пока нет.</div>';
+ $("blockerList").innerHTML=state.blockers.length?state.blockers.map(b=>'<div class="rowitem"><b>'+esc(b.title)+'</b><small>'+esc(b.status)+'</small><p>'+esc(b.description||"")+'</p><small>Связанные задачи: '+esc((b.related_task_ids||[]).map(id=>{const t=state.tasks.find(x=>x.id===id);return t?t.title:id;}).join(", ")||"нет")+'</small><div class="actions"><button class="btn" data-edit-blocker="'+esc(b.id)+'">Изменить</button></div></div>').join(""):'<div class="empty">Блокеров пока нет.</div>';
+ document.querySelectorAll("[data-edit-decision]").forEach(b=>b.onclick=()=>renderDecisionEditor(b.dataset.editDecision));
+ document.querySelectorAll("[data-edit-blocker]").forEach(b=>b.onclick=()=>renderBlockerEditor(b.dataset.editBlocker));
+}
+function renderDecisionEditor(id){
+ const d=id?state.decisions.find(x=>x.id===id):null;if(id&&!d)return;
+ $("decisionEditorPanel").classList.remove("hidden");
+ $("decisionEditorHeading").textContent=d?"Редактировать решение · "+d.id:"Новое решение";
+ $("decisionEditor").innerHTML=(d?'<div class="small muted">ID: '+esc(d.id)+'</div>':'<div class="small muted">ID будет создан автоматически.</div>')+
+ '<div class="field"><label>Название</label><input id="decisionTitle" value="'+esc(d?d.title:"")+'"></div>'+
+ '<div class="field"><label>Решение</label><textarea id="decisionText">'+esc(d?d.decision:"")+'</textarea></div>'+
+ '<div class="field"><label>Обоснование</label><textarea id="decisionRationale">'+esc(d&&d.rationale||"")+'</textarea></div>'+
+ '<div class="field"><label>Дата</label><input id="decisionDate" type="date" value="'+esc(d?d.date:new Date().toISOString().slice(0,10))+'"></div>'+
+ '<div class="field"><label>Статус</label><select id="decisionStatus">'+["proposed","accepted","superseded"].map(x=>'<option value="'+x+'" '+((d?d.status:"proposed")===x?"selected":"")+'>'+({proposed:"Предложено",accepted:"Принято",superseded:"Заменено"}[x])+'</option>').join("")+'</select></div>'+
+ '<div class="field"><label>Источники / ссылки (каждая с новой строки)</label><textarea id="decisionRefs">'+esc((d&&d.source_refs||[]).join("\n"))+'</textarea></div>'+
+ '<div class="actions"><button class="btn primary" id="saveDecision">Сохранить решение</button><button class="btn" id="cancelDecision">Отмена</button></div>';
+ $("saveDecision").onclick=()=>{
+  const title=$("decisionTitle").value.trim(),decision=$("decisionText").value.trim(),date=$("decisionDate").value;
+  if(!title||!decision||!date)return alert("Название, текст решения и дата обязательны.");
+  const data={title,decision,rationale:$("decisionRationale").value,date,status:$("decisionStatus").value,source_refs:[...new Set($("decisionRefs").value.split("\n").map(x=>x.trim()).filter(Boolean))]};
+  const candidate=JSON.parse(JSON.stringify(state));
+  if(d)Object.assign(candidate.decisions.find(x=>x.id===d.id),data);else candidate.decisions.push({id:"decision-"+Date.now(),...data});
+  try{validateState(candidate);}catch(e){return alert("Решение не сохранено: "+e.message);}
+  state=candidate;markDirty();$("decisionEditorPanel").classList.add("hidden");renderAll();
+ };
+ $("cancelDecision").onclick=()=>$("decisionEditorPanel").classList.add("hidden");
+}
+function renderBlockerEditor(id){
+ const b=id?state.blockers.find(x=>x.id===id):null;if(id&&!b)return;
+ $("blockerEditorPanel").classList.remove("hidden");
+ $("blockerEditorHeading").textContent=b?"Редактировать блокер · "+b.id:"Новый блокер";
+ const selected=new Set(b&&b.related_task_ids||[]);
+ $("blockerEditor").innerHTML=(b?'<div class="small muted">ID: '+esc(b.id)+'</div>':'<div class="small muted">ID будет создан автоматически.</div>')+
+ '<div class="field"><label>Название</label><input id="blockerTitle" value="'+esc(b?b.title:"")+'"></div>'+
+ '<div class="field"><label>Описание / что мешает работе</label><textarea id="blockerDescription">'+esc(b&&b.description||"")+'</textarea></div>'+
+ '<div class="field"><label>Статус</label><select id="blockerStatus">'+["open","resolved","accepted_risk"].map(x=>'<option value="'+x+'" '+((b?b.status:"open")===x?"selected":"")+'>'+({open:"Открыт",resolved:"Решён",accepted_risk:"Принятый риск"}[x])+'</option>').join("")+'</select></div>'+
+ '<div class="field"><label>Связанные задачи</label><div class="list">'+state.tasks.map(t=>'<label class="small"><input type="checkbox" name="blockerTask" value="'+esc(t.id)+'" '+(selected.has(t.id)?"checked":"")+' style="width:auto;margin-right:7px">'+esc(t.title)+'</label>').join("")+'</div></div>'+
+ '<div class="field"><label>Источники / ссылки (каждая с новой строки)</label><textarea id="blockerRefs">'+esc((b&&b.source_refs||[]).join("\n"))+'</textarea></div>'+
+ '<div class="actions"><button class="btn primary" id="saveBlocker">Сохранить блокер</button><button class="btn" id="cancelBlocker">Отмена</button></div>';
+ $("saveBlocker").onclick=()=>{
+  const title=$("blockerTitle").value.trim();if(!title)return alert("Название блокера обязательно.");
+  const data={title,description:$("blockerDescription").value,status:$("blockerStatus").value,related_task_ids:[...document.querySelectorAll('input[name="blockerTask"]:checked')].map(x=>x.value),source_refs:[...new Set($("blockerRefs").value.split("\n").map(x=>x.trim()).filter(Boolean))]};
+  const candidate=JSON.parse(JSON.stringify(state));
+  if(b)Object.assign(candidate.blockers.find(x=>x.id===b.id),data);else candidate.blockers.push({id:"blocker-"+Date.now(),...data});
+  try{validateState(candidate);}catch(e){return alert("Блокер не сохранён: "+e.message);}
+  state=candidate;markDirty();$("blockerEditorPanel").classList.add("hidden");renderAll();
+ };
+ $("cancelBlocker").onclick=()=>$("blockerEditorPanel").classList.add("hidden");
 }
 function renderHistory(){
  $("historyList").innerHTML=state.changelog.length?state.changelog.slice().reverse().map(x=>'<div class="rowitem"><b>'+esc(x.summary)+'</b><small>'+esc(x.date)+(x.commit?" · "+esc(x.commit):"")+'</small></div>').join(""):'<div class="empty">История пока пуста.</div>';
@@ -233,7 +282,7 @@ function addTask(){
 document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
 $("reload").onclick=()=>{if(dirty&&!confirm("Есть несохранённые изменения. Перезагрузить canonical JSON и потерять их?"))return;loadCanonical().catch(e=>setStatus("Не удалось загрузить canonical JSON: "+e.message,"bad"));};
 $("saveDraft").onclick=saveDraft;$("export").onclick=exportState;$("import").onclick=()=>$("file").click();$("file").onchange=e=>{if(e.target.files[0])importState(e.target.files[0]);e.target.value="";};
-$("addTask").onclick=addTask;$("addComponent").onclick=()=>renderComponentEditor(null);$("print").onclick=()=>window.print();
+$("addTask").onclick=addTask;$("addComponent").onclick=()=>renderComponentEditor(null);$("addDecision").onclick=()=>renderDecisionEditor(null);$("addBlocker").onclick=()=>renderBlockerEditor(null);$("print").onclick=()=>window.print();
 $("taskSearch").oninput=renderTasks;$("taskStatus").onchange=renderTasks;$("taskWorkstream").onchange=renderTasks;
 loadCanonical().catch(e=>{setStatus("Не удалось загрузить project-state.json: "+e.message+". Открой страницу через HTTP-сервер, а не file://.","bad");});
 </script>
