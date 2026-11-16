@@ -2,7 +2,7 @@
   "schema_version": 1,
   "metadata": {
     "project_id": "hw-catalog",
-    "updated_at": "2026-11-16T01:18:22.249Z",
+    "updated_at": "2026-11-16T01:18:37.023Z",
     "source_of_truth": "github",
     "working_branch": "integration/catalog-foundation",
     "last_verified_commit": null,
@@ -830,7 +830,7 @@
       "id": "pm-002",
       "title": "Перевести Project Manager на загрузку canonical JSON из GitHub",
       "description": "Убрать хардкод seed-данных из HTML; localStorage оставить только для локального черновика.",
-      "status": "planned",
+      "status": "done",
       "priority": "high",
       "workstream_id": "project-management",
       "component_id": null,
@@ -849,14 +849,14 @@
         "docs/project-management/index.html"
       ],
       "created_at": "2026-11-16T00:00:00+07:00",
-      "updated_at": "2026-11-16T00:00:00+07:00",
-      "completed_at": null
+      "updated_at": "2026-11-16T01:18:37.023Z",
+      "completed_at": "2026-11-16T01:18:37.023Z"
     },
     {
       "id": "pm-003",
       "title": "Разделить в интерфейсе архитектуру, задачи и каталог Hot Wheels",
       "description": "Компоненты показывают состав системы; задачи показывают работу; доменные направления каталога имеют отдельные сводки.",
-      "status": "planned",
+      "status": "done",
       "priority": "high",
       "workstream_id": "project-management",
       "component_id": null,
@@ -874,8 +874,8 @@
         "docs/project-management/index.html"
       ],
       "created_at": "2026-11-16T00:00:00+07:00",
-      "updated_at": "2026-11-16T00:00:00+07:00",
-      "completed_at": null
+      "updated_at": "2026-11-16T01:18:37.023Z",
+      "completed_at": "2026-11-16T01:18:37.023Z"
     },
     {
       "id": "pm-004",
@@ -930,6 +930,82 @@
       "created_at": "2026-11-16T00:00:00+07:00",
       "updated_at": "2026-11-16T00:00:00+07:00",
       "completed_at": null
+    },
+    {
+      "id": "pm-006",
+      "title": "Проверить и актуализировать перенесённое дерево компонентов",
+      "description": "Сверить 56 исторических узлов с фактическим деревом текущей ветки; уточнить пути, типы, статусы и связи с направлениями.",
+      "status": "in_progress",
+      "priority": "high",
+      "workstream_id": "project-management",
+      "component_id": null,
+      "owner": "user-and-assistant",
+      "due_date": null,
+      "dependencies": [
+        "pm-001"
+      ],
+      "acceptance_criteria": [
+        "Каждый компонент сверён с текущим репозиторием или помечен как исторический/непроверенный.",
+        "Пути и типы компонентов соответствуют фактическому назначению.",
+        "Устаревшие факты не отображаются как подтверждённые текущие сведения."
+      ],
+      "source_refs": [
+        "docs/project-management/project-state.json"
+      ],
+      "created_at": "2026-11-16T01:18:37.023Z",
+      "updated_at": "2026-11-16T01:18:37.023Z",
+      "completed_at": null
+    },
+    {
+      "id": "pm-007",
+      "title": "Подключить полноценную валидацию по JSON Schema",
+      "description": "Добавить валидатор схемы в браузерный интерфейс или отдельный проверяемый инструмент, включая cross-reference checks.",
+      "status": "planned",
+      "priority": "high",
+      "workstream_id": "project-management",
+      "component_id": null,
+      "owner": "user-and-assistant",
+      "due_date": null,
+      "dependencies": [
+        "pm-001"
+      ],
+      "acceptance_criteria": [
+        "Импорт и экспорт проверяются по project-state.schema.json.",
+        "Проверяются уникальность ID, enum-значения, форматы дат и все ссылки между сущностями.",
+        "Ошибки показываются с понятным указанием поля."
+      ],
+      "source_refs": [
+        "docs/project-management/project-state.schema.json"
+      ],
+      "created_at": "2026-11-16T01:18:37.023Z",
+      "updated_at": "2026-11-16T01:18:37.023Z",
+      "completed_at": null
+    },
+    {
+      "id": "pm-008",
+      "title": "Провести браузерное тестирование Project Manager",
+      "description": "Проверить загрузку GitHub JSON, редактирование, локальный черновик, импорт, экспорт, фильтры и адаптивность.",
+      "status": "planned",
+      "priority": "medium",
+      "workstream_id": "project-management",
+      "component_id": null,
+      "owner": "user-and-assistant",
+      "due_date": null,
+      "dependencies": [
+        "pm-002",
+        "pm-003"
+      ],
+      "acceptance_criteria": [
+        "Проверен запуск через HTTP, а не file://.",
+        "Проверены основные сценарии на desktop и узком экране.",
+        "Ошибки загрузки, повреждённый JSON и конфликт черновика обрабатываются без потери данных."
+      ],
+      "source_refs": [
+        "docs/project-management/index.html"
+      ],
+      "created_at": "2026-11-16T01:18:37.023Z",
+      "updated_at": "2026-11-16T01:18:37.023Z",
+      "completed_at": null
     }
   ],
   "decisions": [
@@ -962,6 +1038,11 @@
     {
       "date": "2026-11-16T01:18:22.253Z",
       "summary": "Перенесено историческое дерево Project Manager в отдельную модель components; устаревшие статусы сохранены как требующие аудита/в работе, без потери заметок.",
+      "commit": null
+    },
+    {
+      "date": "2026-11-16T01:18:37.023Z",
+      "summary": "Мигрировано историческое дерево из 56 компонентов; dashboard переключён на canonical JSON, задачи и компоненты разделены. Добавлены задачи на аудит дерева, строгую валидацию и браузерное тестирование.",
       "commit": null
     }
   ]
