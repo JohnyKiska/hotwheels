@@ -809,7 +809,7 @@
       "status": "in_progress",
       "priority": "high",
       "workstream_id": "project-management",
-      "component_id": null,
+      "component_id": "docs",
       "owner": "user-and-assistant",
       "due_date": null,
       "dependencies": [],
@@ -833,7 +833,7 @@
       "status": "done",
       "priority": "high",
       "workstream_id": "project-management",
-      "component_id": null,
+      "component_id": "docs",
       "owner": "user-and-assistant",
       "due_date": null,
       "dependencies": [
@@ -859,7 +859,7 @@
       "status": "done",
       "priority": "high",
       "workstream_id": "project-management",
-      "component_id": null,
+      "component_id": "docs",
       "owner": "user-and-assistant",
       "due_date": null,
       "dependencies": [
@@ -884,7 +884,7 @@
       "status": "planned",
       "priority": "medium",
       "workstream_id": "documentation",
-      "component_id": null,
+      "component_id": "docsAudit",
       "owner": "user-and-assistant",
       "due_date": null,
       "dependencies": [
@@ -911,7 +911,7 @@
       "status": "planned",
       "priority": "high",
       "workstream_id": "infrastructure",
-      "component_id": null,
+      "component_id": "git",
       "owner": "user-and-assistant",
       "due_date": null,
       "dependencies": [
@@ -938,7 +938,7 @@
       "status": "in_progress",
       "priority": "high",
       "workstream_id": "project-management",
-      "component_id": null,
+      "component_id": "root",
       "owner": "user-and-assistant",
       "due_date": null,
       "dependencies": [
@@ -963,7 +963,7 @@
       "status": "done",
       "priority": "high",
       "workstream_id": "project-management",
-      "component_id": null,
+      "component_id": "docs",
       "owner": "user-and-assistant",
       "due_date": null,
       "dependencies": [
@@ -988,7 +988,7 @@
       "status": "planned",
       "priority": "medium",
       "workstream_id": "project-management",
-      "component_id": null,
+      "component_id": "docs",
       "owner": "user-and-assistant",
       "due_date": null,
       "dependencies": [
@@ -1014,7 +1014,7 @@
       "status": "done",
       "priority": "high",
       "workstream_id": "project-management",
-      "component_id": null,
+      "component_id": "docs",
       "owner": "user-and-assistant",
       "due_date": null,
       "dependencies": [
@@ -1041,7 +1041,7 @@
       "status": "done",
       "priority": "high",
       "workstream_id": "project-management",
-      "component_id": null,
+      "component_id": "docs",
       "owner": "user-and-assistant",
       "due_date": null,
       "dependencies": [
