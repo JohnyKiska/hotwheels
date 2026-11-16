@@ -7,5 +7,6 @@
 - [Текущее состояние](docs/CURRENT_STATE.md)
 - [Дорожная карта](docs/ROADMAP.md)
 - [Передача контекста](docs/SESSION_HANDOFF.md)
+- [Архив HTML-страниц Hot Wheels Wiki / ALLHW](https://github.com/JohnyKiska/hotwheels-fandom-archive/tree/main/ALLHW)
 
 Главная визуальная основа перенесена из `prototype/catalog-visual-v1`. Старый `catalog/editor.html` используется только как источник механики drag & drop. Подключение к backend и перенос drag & drop ещё предстоит.
