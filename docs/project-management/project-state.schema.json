@@ -175,6 +175,14 @@
           },
           "sort_order": {
             "type": "integer"
+          },
+          "completed_work": {
+            "type": "string",
+            "description": "Summary of completed work for this component."
+          },
+          "next_step": {
+            "type": "string",
+            "description": "Next planned action for this component."
           }
         }
       }
