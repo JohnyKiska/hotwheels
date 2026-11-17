@@ -2,7 +2,7 @@
   "schema_version": 1,
   "metadata": {
     "project_id": "hw-catalog",
-    "updated_at": "2026-11-16T09:30:00Z",
+    "updated_at": "2026-11-17T01:34:00Z",
     "source_of_truth": "github",
     "working_branch": "integration/catalog-foundation",
     "last_verified_commit": "ccfdf34ec6e37dc0dc400dce0db73c37d787a4f6",
@@ -322,7 +322,7 @@
       "kind": "directory",
       "status": "in_progress",
       "description": "Архив исходных HTML-страниц Hot Wheels Wiki / All Hot Wheels по годам в отдельном репозитории.",
-      "notes": "60 HTML-файлов за 1968–2026 годы перенесены в JohnyKiska/hotwheels-fandom-archive/ALLHW. Имена и относительные пути сохранены; MANIFEST.csv содержит 60 записей с размерами и SHA-256. Проверены количество файлов и суммарный размер (34,138,971 bytes). Read-only importer остаётся в основном репозитории. Полноту исходного набора и корректность парсинга предстоит проверять отдельно.",
+      "notes": "60 исходных HTML-файлов за 1968–2026 годы хранятся в JohnyKiska/hotwheels-fandom-archive/ALLHW. MANIFEST.csv содержит 60 записей с размерами и SHA-256. 2026-11-16 исправленный архив main проверен локально: 60 записей, 0 ошибок; затем все 60 файлов скопированы на внешний HDD в E:\\\\HW-CATALOG-DATA\\\\IMPORTS\\\\ALLHW и повторно сверены по размеру и SHA-256: 60/60, ошибок 0. Read-only importer остаётся в основном репозитории. Полноту исходного набора и корректность парсинга предстоит проверять отдельно.",
       "source_refs": [
         "https://github.com/JohnyKiska/hotwheels-fandom-archive/tree/main/ALLHW",
         "https://github.com/JohnyKiska/hotwheels-fandom-archive/blob/main/MANIFEST.csv",
@@ -603,7 +603,7 @@
       "kind": "external_system",
       "status": "not_assessed",
       "description": "HW-CATALOG-DATA/ — внешнее хранилище данных, отделённое от Git-репозитория.",
-      "notes": "GitHub-аудит не даёт доступа к содержимому подключённого HDD. Последние сведения о букве диска, папках и БД являются историческими и требуют подтверждения на ПК.",
+      "notes": "Внешнее хранилище HW-CATALOG-DATA на ADATA SH93, том E:, FAT32. 2026-11-16 подтверждён перенос ALLHW: 60 HTML-файлов в IMPORTS/ALLHW, SHA-256 проверен до и после копирования, ошибок 0. DATABASE/catalog.db и BACKUPS не изменялись. Остальные сведения о БД и структуре относятся к read-only проверке 2026-11-16; независимой физической резервной копии всё ещё нет.",
       "source_refs": [
         "backend/app/storage.py",
         "docs/deployment/LOCAL-WINDOWS.md"
@@ -666,10 +666,11 @@
       "kind": "other",
       "status": "in_progress",
       "description": "IMPORTS: входящие материалы Mainline, Premium и ALLHW на внешнем диске.",
-      "notes": "Проверено read-only 2026-11-16: IMPORTS существует, файлов пока нет. Репозиторные источники ALLHW и импортёры подтверждены отдельно; загрузка входящих наборов на внешний диск ещё не выполнялась.",
+      "notes": "Проверено и обновлено 2026-11-16: на внешнем HDD в IMPORTS/ALLHW находятся 60 HTML-файлов за 1968–2026 годы. Исходные файлы проверены по MANIFEST.csv (60/60); после копирования на HDD повторная проверка размеров и SHA-256 также дала 60/60 совпадений, ошибок 0. Содержимое IMPORTS/mainline и IMPORTS/premium отдельно не подтверждено; не считать их заполненными.",
       "source_refs": [
         "docs/ALL_HOT_WHEELS_IMPORTER.md",
-        "docs/importers/MAINLINE_IMPORTER_SPEC.md"
+        "docs/importers/MAINLINE_IMPORTER_SPEC.md",
+        "https://github.com/JohnyKiska/hotwheels-fandom-archive/blob/main/MANIFEST.csv"
       ],
       "sort_order": 360
     },
@@ -1361,6 +1362,11 @@
     {
       "date": "2026-11-16T07:16:30Z",
       "summary": "Добавлена первая реализация backup/restore: SQLite online backup, manifest SHA-256, строгая проверка путей и содержимого snapshot, восстановление в пустой каталог с новой DEVICE_INFO identity, Windows-команды с проверкой backend PID/process и автоматические тесты. GitHub Actions выполняет тестовый workflow; ручная проверка на disposable Windows storage и создание независимой копии остаются следующими этапами.",
+      "commit": null
+    },
+    {
+      "date": "2026-11-17T01:34:00Z",
+      "summary": "Архив ALLHW синхронизирован с внешним HDD: 60 HTML-файлов скопированы в IMPORTS/ALLHW; SHA-256 проверен до и после копирования, 60/60 совпадений, ошибок 0. DATABASE и BACKUPS не затрагивались.",
       "commit": null
     }
   ]
