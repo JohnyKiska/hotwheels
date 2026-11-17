@@ -315,14 +315,6 @@ def patch_release(
         raise HTTPException(status_code=422, detail="At least one release field must be supplied.")
     if "status" in changes and changes["status"] is None:
         raise HTTPException(status_code=422, detail="Release status cannot be null.")
-    if "casting_variant_id" in changes and changes["casting_variant_id"] is not None:
-        from .models import CastingVariant
-        variant = db.get(CastingVariant, changes["casting_variant_id"])
-        if variant is None or variant.casting_id != db.scalar(
-            select(Release.casting_id).where(Release.id == release_id)
-        ):
-            raise HTTPException(status_code=422, detail="Variant must belong to the release casting.")
-
     release = db.scalar(
         select(Release).where(Release.id == release_id).options(
             selectinload(Release.casting),
@@ -332,6 +324,12 @@ def patch_release(
     )
     if release is None:
         raise HTTPException(status_code=404, detail="Release not found.")
+
+    if "casting_variant_id" in changes and changes["casting_variant_id"] is not None:
+        from .models import CastingVariant
+        variant = db.get(CastingVariant, changes["casting_variant_id"])
+        if variant is None or variant.casting_id != release.casting_id:
+            raise HTTPException(status_code=422, detail="Variant must belong to the release casting.")
     try:
         _apply_audited_patch(
             db, entity=release, entity_type="release", changes=changes,
