@@ -31,6 +31,11 @@ class UserStatusRequest(BaseModel):
     reason: str = Field(min_length=1, max_length=4000)
 
 
+class RoleRevokeRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    reason: str = Field(min_length=1, max_length=4000)
+
+
 def _is_super_admin(db: Session, user_id: str) -> bool:
     return db.scalar(
         select(UserRole.id)
@@ -105,7 +110,6 @@ def list_users(
         )
         filters.append(or_(
             User.display_name.ilike(term),
-            User.id == matching_email_ids.scalar_subquery(),
             User.id.in_(matching_email_ids),
         ))
     total = db.scalar(select(func.count(User.id)).where(*filters)) or 0
@@ -214,7 +218,7 @@ def post_user_role(
 def post_revoke_user_role(
     user_id: str,
     role_id: str,
-    body: UserStatusRequest,
+    body: RoleRevokeRequest,
     request: Request,
     actor: User = Depends(_require_permission("roles.assign")),
     db: Session = Depends(get_db),
