@@ -36,6 +36,7 @@ class SourceCreate(BaseModel):
     base_url: str | None = None
     publisher: str | None = Field(default=None, max_length=240)
     notes: str | None = None
+    reason: str = Field(min_length=1, max_length=4000)
 
 
 class RecordCreate(BaseModel):
@@ -90,6 +91,7 @@ class EvidenceLinkCreate(BaseModel):
     model_config = ConfigDict(extra="forbid")
     evidence_id: str
     role: Literal["supports", "contradicts", "illustrates"] = "supports"
+    reason: str = Field(min_length=1, max_length=4000)
 
 
 def _safe_storage_key(value: str) -> str:
@@ -137,7 +139,7 @@ def _audit(db: Session, actor: User, entity_id: str, action: str, old: dict, new
     db.add(ChangeLog(
         entity_type="media_asset", entity_id=entity_id, action=action,
         old_values=old or None, new_values=new or None, reason=reason,
-        actor_type="human", actor_id=actor.id,
+        actor_type="user", actor_id=actor.id,
     ))
 
 
@@ -158,8 +160,11 @@ def create_source(
 ) -> dict:
     _require_csrf(request)
     name = body.name.strip()
-    if not name:
-        raise HTTPException(status_code=422, detail="Source name cannot be empty.")
+    if not name or not body.source_type.strip():
+        raise HTTPException(status_code=422, detail="Source name and type cannot be empty.")
+    reason = body.reason.strip()
+    if not reason:
+        raise HTTPException(status_code=422, detail="A non-empty reason is required.")
     existing = db.scalar(select(Source).where(func.lower(Source.name) == name.lower(), Source.source_type == body.source_type))
     if existing:
         return {"id": existing.id, "name": existing.name, "created": False}
@@ -167,7 +172,7 @@ def create_source(
     db.add(source)
     try:
         db.flush()
-        _audit(db, actor, source.id, "create", {}, {"name": name, "source_type": source.source_type}, "Media source registered")
+        _audit(db, actor, source.id, "create", {}, {"name": name, "source_type": source.source_type}, reason)
         db.commit()
     except IntegrityError:
         db.rollback()
@@ -330,12 +335,14 @@ def link_evidence(
     db: Session = Depends(get_db),
 ) -> dict:
     _require_csrf(request)
+    if not body.reason.strip():
+        raise HTTPException(status_code=422, detail="A non-empty reason is required.")
     asset, evidence = db.get(MediaAsset, asset_id), db.get(Evidence, body.evidence_id)
     if asset is None or evidence is None:
         raise HTTPException(status_code=404, detail="Media asset or evidence not found.")
     if db.get(MediaAssetEvidence, {"media_asset_id": asset.id, "evidence_id": evidence.id}):
         raise HTTPException(status_code=409, detail="Evidence is already linked to this asset.")
     db.add(MediaAssetEvidence(media_asset_id=asset.id, evidence_id=evidence.id, role=body.role))
-    _audit(db, actor, asset.id, "link_evidence", {}, {"evidence_id": evidence.id, "role": body.role}, "Evidence linked to media asset")
+    _audit(db, actor, asset.id, "link_evidence", {}, {"evidence_id": evidence.id, "role": body.role}, body.reason.strip())
     db.commit()
     return {"asset_id": asset.id, "evidence_id": evidence.id, "role": body.role}
