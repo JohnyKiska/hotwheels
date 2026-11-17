@@ -278,6 +278,7 @@ class Evidence(TimestampMixin, Base):
     variant_links: Mapped[list[EvidenceCastingVariant]] = relationship(back_populates="evidence", cascade="all, delete-orphan")
     release_links: Mapped[list[EvidenceRelease]] = relationship(back_populates="evidence", cascade="all, delete-orphan")
     series_links: Mapped[list[EvidenceSeries]] = relationship(back_populates="evidence", cascade="all, delete-orphan")
+    media_links: Mapped[list[MediaAssetEvidence]] = relationship(back_populates="evidence", cascade="all, delete-orphan")
 
 
 class MediaAsset(TimestampMixin, Base):
@@ -292,8 +293,42 @@ class MediaAsset(TimestampMixin, Base):
     checksum_sha256: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
     description: Mapped[str | None] = mapped_column(Text)
     captured_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    category: Mapped[str] = mapped_column(String(32), default="reference_photo", nullable=False)
+    angle: Mapped[str | None] = mapped_column(String(32))
+    status: Mapped[str] = mapped_column(String(24), default="unreviewed", nullable=False)
+    rights_status: Mapped[str] = mapped_column(String(32), default="unknown", nullable=False)
+    rights_holder: Mapped[str | None] = mapped_column(String(240))
+    rights_notes: Mapped[str | None] = mapped_column(Text)
+    contributor_name: Mapped[str | None] = mapped_column(String(240))
+    photographer_name: Mapped[str | None] = mapped_column(String(240))
+    uploader_user_id: Mapped[str | None] = mapped_column(ForeignKey("users.id", ondelete="RESTRICT"), index=True)
+    original_media_asset_id: Mapped[str | None] = mapped_column(ForeignKey("media_assets.id", ondelete="RESTRICT"), index=True)
+    width: Mapped[int | None] = mapped_column(Integer)
+    height: Mapped[int | None] = mapped_column(Integer)
+    byte_size: Mapped[int | None] = mapped_column(Integer)
+    is_featured: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
 
+    __table_args__ = (
+        CheckConstraint("category IN ('reference_photo', 'evidence_photo', 'package_photo', 'physical_specimen', 'document', 'other')", name="ck_media_assets_category"),
+        CheckConstraint("angle IS NULL OR angle IN ('front', 'rear', 'left', 'right', 'top', 'bottom', 'package_front', 'package_back', 'detail', 'other')", name="ck_media_assets_angle"),
+        CheckConstraint("status IN ('unreviewed', 'approved', 'rejected', 'archived')", name="ck_media_assets_status"),
+        CheckConstraint("rights_status IN ('unknown', 'permission_requested', 'permitted', 'restricted', 'denied')", name="ck_media_assets_rights_status"),
+        CheckConstraint("width IS NULL OR width > 0", name="ck_media_assets_width_positive"),
+        CheckConstraint("height IS NULL OR height > 0", name="ck_media_assets_height_positive"),
+        CheckConstraint("byte_size IS NULL OR byte_size >= 0", name="ck_media_assets_byte_size_nonnegative"),
+    )
     source_record: Mapped[SourceRecord] = relationship(back_populates="media_assets")
+    evidence_links: Mapped[list[MediaAssetEvidence]] = relationship(back_populates="media_asset", cascade="all, delete-orphan")
+    original: Mapped[MediaAsset | None] = relationship(remote_side="MediaAsset.id", foreign_keys=[original_media_asset_id])
+
+
+class MediaAssetEvidence(Base):
+    __tablename__ = "media_asset_evidence"
+    media_asset_id: Mapped[str] = mapped_column(ForeignKey("media_assets.id", ondelete="RESTRICT"), primary_key=True)
+    evidence_id: Mapped[str] = mapped_column(ForeignKey("evidence.id", ondelete="RESTRICT"), primary_key=True)
+    role: Mapped[str] = mapped_column(String(32), default="supports", nullable=False)
+    media_asset: Mapped[MediaAsset] = relationship(back_populates="evidence_links")
+    evidence: Mapped[Evidence] = relationship(back_populates="media_links")
 
 
 class EvidenceCasting(Base):
