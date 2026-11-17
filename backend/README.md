@@ -40,7 +40,7 @@ pytest
 uvicorn app.main:app --reload
 ```
 
-Then open `/health` or `/docs` on the local server.
+Then open `/admin` for the catalog administration interface, or `/health` and `/docs` for API checks.
 
 ## Database location
 
