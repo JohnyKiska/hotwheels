@@ -2,10 +2,10 @@
   "schema_version": 1,
   "metadata": {
     "project_id": "hw-catalog",
-    "updated_at": "2026-11-17T01:34:00Z",
+    "updated_at": "2026-11-17T16:30:00+07:00",
     "source_of_truth": "github",
     "working_branch": "integration/catalog-foundation",
-    "last_verified_commit": "ccfdf34ec6e37dc0dc400dce0db73c37d787a4f6",
+    "last_verified_commit": "c6512c0e31e0722f17c425aa9dbf9a43014419ce",
     "timezone": "Asia/Bangkok"
   },
   "project": {
@@ -60,7 +60,7 @@
       "id": "infrastructure",
       "title": "Инфраструктура и синхронизация",
       "description": "Запуск, окружение, GitHub и внешний диск; защита внешней БД и локальных данных.",
-      "status": "needs_audit",
+      "status": "in_progress",
       "sort_order": 70
     },
     {
@@ -173,7 +173,7 @@
       "kind": "service",
       "status": "done",
       "description": "Разрешение DATABASE_URL и HW_CATALOG_DATA_DIR, проверка внешнего хранилища и DEVICE_INFO.json; локальная dev-БД используется только без явной внешней конфигурации.",
-      "notes": "Backend storage layer: backend/app/storage.py. На внешнем HDD HW-CATALOG-DATA (ADATA SH93, том E:, FAT32) подтверждены DEVICE_INFO.json и перенос ALLHW (60 файлов, SHA-256 60/60). Рабочая БД остаётся в DATABASE/catalog.db. Общая синхронизация репозитория не настроена; Project Manager будет копироваться отдельным ограниченным snapshot в PROJECT-MANAGEMENT, не затрагивая DATABASE, MEDIA, IMPORTS, EXPORTS, BACKUPS, LOGS и DEVICE_INFO.json.",
+      "notes": "Backend storage layer: backend/app/storage.py. На внешнем HDD HW-CATALOG-DATA (ADATA SH93, том E:, FAT32) ранее подтверждены DEVICE_INFO.json и перенос ALLHW (60 файлов, SHA-256 60/60). Рабочая БД остаётся в DATABASE/catalog.db. PR #117 добавляет отдельный MEDIA file store с HW_CATALOG_MEDIA_DIR / HW_CATALOG_DATA_DIR/MEDIA и fail-closed при недоступности явно заданного внешнего хранилища; PR открыт, CI успешен. Физический HDD в текущей сессии не проверялся.",
       "source_refs": [
         "backend/app/storage.py",
         "backend/app/init_storage.py",
@@ -373,7 +373,7 @@
       "kind": "other",
       "status": "in_progress",
       "description": "Проект требований к метаданным медиафайлов и доказательств.",
-      "notes": "Точный путь подтверждён. Документ имеет статус Draft; описывает типы фото, ракурсы, происхождение и недостающие связи MediaAsset↔Evidence. Это проект требований, не доказательство полной реализации.",
+      "notes": "Документ требований обновлён 2026-11-17: раздел 15 фиксирует реализацию PR #117 (пока открыт, CI успешен), ограничения прав и следующий этап. Схема метаданных и provenance остаётся отдельной от физической загрузки; UI и физический тест внешнего HDD не выполнены.",
       "source_refs": [
         "docs/architecture/MEDIA_AND_EVIDENCE_METADATA.md"
       ],
@@ -603,7 +603,7 @@
       "kind": "external_system",
       "status": "not_assessed",
       "description": "HW-CATALOG-DATA/ — внешнее хранилище данных, отделённое от Git-репозитория.",
-      "notes": "Внешнее хранилище HW-CATALOG-DATA на ADATA SH93, том E:, FAT32. 2026-11-16 подтверждён перенос ALLHW: 60 HTML-файлов в IMPORTS/ALLHW, SHA-256 проверен до и после копирования, ошибок 0. DATABASE/catalog.db и BACKUPS не изменялись. Независимая физическая резервная копия всё ещё не подтверждена. Точечная копия Project Manager планируется в PROJECT-MANAGEMENT после слияния и проверки canonical state.",
+      "notes": "Внешнее хранилище HW-CATALOG-DATA на ADATA SH93, том E:, FAT32. 2026-11-16 подтверждён перенос ALLHW: 60 HTML-файлов в IMPORTS/ALLHW, SHA-256 проверен до и после копирования, ошибок 0. DATABASE/catalog.db и BACKUPS не изменялись. В репозитории подготовлен ограниченный Project Manager snapshot sync script; он не запускался на физическом диске. Независимая физическая резервная копия всё ещё не подтверждена.",
       "source_refs": [
         "backend/app/storage.py",
         "docs/deployment/LOCAL-WINDOWS.md"
@@ -649,9 +649,9 @@
       "title": "MEDIA/images + MEDIA/thumbnails",
       "path": null,
       "kind": "other",
-      "status": "in_progress",
+      "status": "review",
       "description": "MEDIA/images и MEDIA/thumbnails на внешнем диске.",
-      "notes": "Проверено read-only 2026-11-16: раздел MEDIA существует, файлов пока нет. Хранилище изображений ещё не наполнено; отдельно предстоит подтвердить структуру images/thumbnails и правила именования и связи с карточками.",
+      "notes": "Внешний раздел MEDIA был подтверждён read-only аудитом 2026-11-16; наличие и актуальное состояние файлов на HDD в текущей сессии не проверялись. PR #117 добавляет файловое хранилище, загрузку, SHA-256 и WEBP thumbnails; актуальный PR head bc7acfbab18c0ffb7f09da0558fafe5ba4db799c, CI успешен, PR ещё открыт. Физический тест записи/чтения на HDD и включение MEDIA в backup/restore остаются незавершёнными.",
       "source_refs": [
         "docs/architecture/MEDIA_AND_EVIDENCE_METADATA.md"
       ],
@@ -970,6 +970,40 @@
         "docs/deployment/LOCAL-WINDOWS.md"
       ],
       "sort_order": 550
+    },
+    {
+      "id": "mediaUploadStorage",
+      "parent_id": "app",
+      "workstream_id": "backend",
+      "title": "Файловое хранилище MediaAsset",
+      "path": "backend/app/media_storage.py",
+      "kind": "service",
+      "status": "review",
+      "description": "Внешнее/локальное файловое хранилище оригиналов и миниатюр, SHA-256, атомарная запись и безопасное разрешение storage keys.",
+      "notes": "Реализация находится в PR #117, пока не влита. CI latest head bc7acfbab18c0ffb7f09da0558fafe5ba4db799c прошёл. UI загрузки и физический HDD round-trip отложены.",
+      "source_refs": [
+        "backend/app/media_storage.py",
+        "backend/app/admin_media_api.py",
+        "docs/architecture/MEDIA_AND_EVIDENCE_METADATA.md"
+      ],
+      "sort_order": 105
+    },
+    {
+      "id": "projectManagerExternalSync",
+      "parent_id": "data",
+      "workstream_id": "infrastructure",
+      "title": "Project Manager snapshot sync",
+      "path": "scripts/windows/sync-project-manager-to-external.ps1",
+      "kind": "file",
+      "status": "review",
+      "description": "Ограниченная копия четырёх canonical Project Manager файлов на внешний диск с staging и SHA-256 проверкой.",
+      "notes": "Скрипт и инструкция подготовлены в docs/external-storage-sync-handoff. Он требует clean integration checkout, проверяет DEVICE_INFO.json, сохраняет предыдущий snapshot и копирует только PROJECT-MANAGEMENT. Физический запуск на E: ещё не выполнялся.",
+      "source_refs": [
+        "scripts/windows/sync-project-manager-to-external.ps1",
+        "docs/deployment/EXTERNAL_STORAGE_SYNC.md",
+        "docs/project-management/README.md"
+      ],
+      "sort_order": 390
     }
   ],
   "tasks": [
@@ -1078,8 +1112,8 @@
     {
       "id": "pm-005",
       "title": "Спроектировать безопасную синхронизацию GitHub и внешнего диска",
-      "description": "Определить список синхронизируемых файлов, исключения, направление копирования и проверку целостности.",
-      "status": "planned",
+      "description": "Спроектировать и подготовить ограниченную синхронизацию canonical Project Manager snapshot с внешним диском. Код и документы остаются в GitHub; база, медиа, импорты, экспорты, backups и device identity не зеркалируются.",
+      "status": "in_progress",
       "priority": "high",
       "workstream_id": "infrastructure",
       "component_id": "git",
@@ -1089,10 +1123,11 @@
         "pm-001"
       ],
       "acceptance_criteria": [
-        "GitHub остаётся каноническим источником для кода и документации.",
-        "Внешняя БД и локальные секреты не попадают в Git.",
-        "Синхронизация не перезаписывает более новую версию без проверки.",
-        "Есть журнал результата и понятный сценарий восстановления."
+        "GitHub остаётся каноническим источником кода, документации и Project Manager state.",
+        "Определён закрытый список из четырёх файлов Project Manager для переносимого snapshot.",
+        "Синхронизация не перезаписывает предыдущую версию без сохранения timestamped копии.",
+        "Скрипт проверяет clean integration checkout, storage identity и SHA-256 staged/final files.",
+        "Физический запуск на внешнем HDD и проверка результата документируются отдельной задачей."
       ],
       "source_refs": [
         "docs/project-management/index.html",
@@ -1269,6 +1304,62 @@
       "created_at": "2026-11-16T06:37:00Z",
       "updated_at": "2026-11-16T07:16:30Z",
       "completed_at": null
+    },
+    {
+      "id": "pm-012",
+      "title": "Выполнить Project Manager snapshot sync на внешнем HDD",
+      "description": "После merge документации и обновления локальной integration-ветки запустить ограниченный sync script на рабочем HDD, проверить SHA-256 и сохранение предыдущего snapshot.",
+      "status": "planned",
+      "priority": "high",
+      "workstream_id": "infrastructure",
+      "component_id": "projectManagerExternalSync",
+      "owner": "user-and-assistant",
+      "due_date": null,
+      "dependencies": [
+        "pm-005"
+      ],
+      "acceptance_criteria": [
+        "Локальная копия находится на integration/catalog-foundation и имеет чистый Git working tree.",
+        "DEVICE_INFO.json и storage layout проверены скриптом на подключённом внешнем диске.",
+        "Скопированы только index.html, project-state.json, project-state.schema.json и README.md в PROJECT-MANAGEMENT.",
+        "SHA-256 всех четырёх файлов совпадает с Git working copy.",
+        "Предыдущая версия сохранена; DATABASE, MEDIA, IMPORTS, EXPORTS, BACKUPS, LOGS и DEVICE_INFO.json не изменены.",
+        "Результат и дата физической синхронизации внесены в Project Manager."
+      ],
+      "source_refs": [
+        "scripts/windows/sync-project-manager-to-external.ps1",
+        "docs/deployment/EXTERNAL_STORAGE_SYNC.md"
+      ],
+      "created_at": "2026-11-17T16:30:00+07:00",
+      "updated_at": "2026-11-17T16:30:00+07:00",
+      "completed_at": null
+    },
+    {
+      "id": "pm-013",
+      "title": "Добавить загрузку фотографий в Media Library UI",
+      "description": "После merge PR #117 добавить интерфейс загрузки файлов, выбора SourceRecord, категории, ракурса и статуса прав, просмотра миниатюры и результата загрузки.",
+      "status": "planned",
+      "priority": "high",
+      "workstream_id": "media-evidence",
+      "component_id": "media",
+      "owner": "user-and-assistant",
+      "due_date": null,
+      "dependencies": [],
+      "acceptance_criteria": [
+        "Администратор может выбрать или создать SourceRecord для фотографии.",
+        "UI принимает поддерживаемые изображения и показывает понятные ошибки лимита/формата/дубликата.",
+        "После загрузки отображаются миниатюра, оригинал, checksum и классификация.",
+        "CSRF, RBAC, обязательная причина аудита и rights_status сохраняются.",
+        "Проверен ручной сценарий на тестовых фотографиях; права unknown не дают публичной публикации."
+      ],
+      "source_refs": [
+        "backend/app/admin_media_api.py",
+        "admin.html",
+        "docs/architecture/MEDIA_AND_EVIDENCE_METADATA.md"
+      ],
+      "created_at": "2026-11-17T16:30:00+07:00",
+      "updated_at": "2026-11-17T16:30:00+07:00",
+      "completed_at": null
     }
   ],
   "decisions": [
@@ -1367,6 +1458,11 @@
     {
       "date": "2026-11-17T01:34:00Z",
       "summary": "Архив ALLHW синхронизирован с внешним HDD: 60 HTML-файлов скопированы в IMPORTS/ALLHW; SHA-256 проверен до и после копирования, 60/60 совпадений, ошибок 0. DATABASE и BACKUPS не затрагивались.",
+      "commit": null
+    },
+    {
+      "date": "2026-11-17T16:30:00+07:00",
+      "summary": "Подготовлены документация и ограниченный PowerShell sync для Project Manager snapshot на внешний HDD; обновлены media storage notes и план: PR #117 CI зелёный, PR ещё открыт, физический HDD не трогали. Добавлены задачи на физическую синхронизацию и UI загрузки.",
       "commit": null
     }
   ]
