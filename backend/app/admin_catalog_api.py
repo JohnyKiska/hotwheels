@@ -6,11 +6,12 @@ from typing import Literal
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import func, or_, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, selectinload
 
 from .account_api import _require_csrf, _require_permission
 from .db import get_db
-from .models import Casting, ChangeLog, Release, User
+from .models import Casting, CastingVariant, ChangeLog, Release, User
 
 router = APIRouter(prefix="/api/v1/admin/catalog", tags=["admin-catalog"])
 
@@ -385,3 +386,218 @@ def patch_casting_variant(
         "status": variant.status,
         "updated_at": variant.updated_at.isoformat(),
     }
+
+
+class CastingCreate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    name: str = Field(min_length=1, max_length=240)
+    description: str | None = None
+    first_known_year: int | None = Field(default=None, ge=1968, le=2100)
+    status: CastingStatus = "candidate"
+    reason: str = Field(min_length=1, max_length=4000)
+
+
+class CastingVariantCreate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    name: str | None = Field(default=None, max_length=240)
+    description: str | None = None
+    status: CastingStatus = "candidate"
+    reason: str = Field(min_length=1, max_length=4000)
+
+
+class ReleaseCreate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    casting_id: str = Field(min_length=1, max_length=36)
+    casting_variant_id: str | None = Field(default=None, max_length=36)
+    catalog_year: int | None = Field(default=None, ge=1968, le=2100)
+    name: str | None = Field(default=None, max_length=240)
+    assortment_number: str | None = Field(default=None, max_length=80)
+    description: str | None = None
+    status: CastingStatus = "candidate"
+    reason: str = Field(min_length=1, max_length=4000)
+
+
+def _clean_optional_text(value: str | None) -> str | None:
+    return value.strip() or None if value is not None else None
+
+
+def _variant_payload(variant: CastingVariant) -> dict:
+    return {
+        "id": variant.id,
+        "casting_id": variant.casting_id,
+        "name": variant.name,
+        "description": variant.description,
+        "status": variant.status,
+        "created_at": variant.created_at.isoformat(),
+        "updated_at": variant.updated_at.isoformat(),
+    }
+
+
+@router.post("/castings", status_code=201)
+def create_casting(
+    body: CastingCreate,
+    request: Request,
+    user: User = Depends(_require_permission("catalog.create")),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Create a casting and its audit event in one transaction."""
+    _require_csrf(request)
+    name = body.name.strip()
+    reason = body.reason.strip()
+    if not name:
+        raise HTTPException(status_code=422, detail="Casting name cannot be empty.")
+    if not reason:
+        raise HTTPException(status_code=422, detail="A non-empty creation reason is required.")
+
+    casting = Casting(
+        name=name,
+        description=_clean_optional_text(body.description),
+        first_known_year=body.first_known_year,
+        status=body.status,
+    )
+    try:
+        db.add(casting)
+        db.flush()
+        db.add(ChangeLog(
+            entity_type="casting",
+            entity_id=casting.id,
+            action="create",
+            old_values=None,
+            new_values={
+                "name": casting.name,
+                "description": casting.description,
+                "first_known_year": casting.first_known_year,
+                "status": casting.status,
+            },
+            reason=reason,
+            actor_type="user",
+            actor_id=user.id,
+        ))
+        db.commit()
+        db.refresh(casting)
+    except Exception:
+        db.rollback()
+        raise
+    return _casting_payload(casting)
+
+
+@router.post("/castings/{casting_id}/variants", status_code=201)
+def create_casting_variant(
+    casting_id: str,
+    body: CastingVariantCreate,
+    request: Request,
+    user: User = Depends(_require_permission("catalog.create")),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Create a construction variant under the selected casting."""
+    _require_csrf(request)
+    reason = body.reason.strip()
+    if not reason:
+        raise HTTPException(status_code=422, detail="A non-empty creation reason is required.")
+    casting = db.get(Casting, casting_id)
+    if casting is None:
+        raise HTTPException(status_code=404, detail="Casting not found.")
+
+    variant = CastingVariant(
+        casting_id=casting.id,
+        name=_clean_optional_text(body.name),
+        description=_clean_optional_text(body.description),
+        status=body.status,
+    )
+    try:
+        db.add(variant)
+        db.flush()
+        db.add(ChangeLog(
+            entity_type="casting_variant",
+            entity_id=variant.id,
+            action="create",
+            old_values=None,
+            new_values={
+                "casting_id": variant.casting_id,
+                "name": variant.name,
+                "description": variant.description,
+                "status": variant.status,
+            },
+            reason=reason,
+            actor_type="user",
+            actor_id=user.id,
+        ))
+        db.commit()
+        db.refresh(variant)
+    except Exception:
+        db.rollback()
+        raise
+    return _variant_payload(variant)
+
+
+@router.post("/releases", status_code=201)
+def create_release(
+    body: ReleaseCreate,
+    request: Request,
+    user: User = Depends(_require_permission("catalog.create")),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Create a release after validating its casting and optional variant."""
+    _require_csrf(request)
+    reason = body.reason.strip()
+    if not reason:
+        raise HTTPException(status_code=422, detail="A non-empty creation reason is required.")
+
+    casting = db.get(Casting, body.casting_id)
+    if casting is None:
+        raise HTTPException(status_code=404, detail="Casting not found.")
+    if body.casting_variant_id is not None:
+        variant = db.get(CastingVariant, body.casting_variant_id)
+        if variant is None or variant.casting_id != casting.id:
+            raise HTTPException(
+                status_code=422,
+                detail="Variant must belong to the release casting.",
+            )
+
+    release = Release(
+        casting_id=casting.id,
+        casting_variant_id=body.casting_variant_id,
+        catalog_year=body.catalog_year,
+        name=_clean_optional_text(body.name),
+        assortment_number=_clean_optional_text(body.assortment_number),
+        description=_clean_optional_text(body.description),
+        status=body.status,
+    )
+    try:
+        db.add(release)
+        db.flush()
+        db.add(ChangeLog(
+            entity_type="release",
+            entity_id=release.id,
+            action="create",
+            old_values=None,
+            new_values={
+                "casting_id": release.casting_id,
+                "casting_variant_id": release.casting_variant_id,
+                "catalog_year": release.catalog_year,
+                "name": release.name,
+                "assortment_number": release.assortment_number,
+                "description": release.description,
+                "status": release.status,
+            },
+            reason=reason,
+            actor_type="user",
+            actor_id=user.id,
+        ))
+        db.commit()
+        db.refresh(release)
+        # Load relationships used by the standard release response.
+        db.refresh(release, attribute_names=["casting", "casting_variant", "series"])
+    except IntegrityError as exc:
+        db.rollback()
+        raise HTTPException(
+            status_code=409,
+            detail="A release with this casting, catalog year and assortment number may already exist.",
+        ) from exc
+    except Exception:
+        db.rollback()
+        raise
+    return _release_payload(release)
