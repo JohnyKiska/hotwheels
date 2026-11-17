@@ -32,6 +32,7 @@ table{width:100%;border-collapse:collapse}th{text-align:left;font-size:10px;lett
 <button data-view="releases"><span class="nav-icon">▤</span>Выпуски <span class="nav-count" id="releaseCount">…</span></button>
 <button data-view="series"><span class="nav-icon">▱</span>Серии <span class="nav-count" id="seriesCount">…</span></button>
 <button data-view="history"><span class="nav-icon">◷</span>История <span class="nav-count" id="historyCount">…</span></button>
+<button data-view="users"><span class="nav-icon">♙</span>Пользователи <span class="nav-count" id="userCount">…</span></button>
 </nav><div class="aside-note"><b>Защита изменений</b>Все правки проходят через серверный API, проверку прав и CSRF. Причина изменения обязательна, история формируется автоматически.</div></aside>
 <main>
 <div class="crumb">Администрирование / <span id="crumbCurrent">Обзор</span></div>
@@ -46,12 +47,13 @@ table{width:100%;border-collapse:collapse}th{text-align:left;font-size:10px;lett
 <section id="view-releases" hidden><div class="toolbar"><label class="search"><span>⌕</span><input id="releaseSearch" type="search" placeholder="Название, номер или отливка…"></label><select id="releaseYear"><option value="">Все годы</option></select><select id="releaseStatus"><option value="">Все статусы</option><option value="candidate">Кандидат</option><option value="under_review">На проверке</option><option value="confirmed">Подтверждено</option><option value="rejected">Отклонено</option></select><span class="spacer"></span><span class="result-count" id="releaseResults">—</span></div><div class="panel"><div class="panel-head"><h2>Реестр выпусков</h2><small>Нажми на строку, чтобы открыть карточку</small></div><div class="table-wrap" id="releaseTable"><div class="empty">Загружаю каталог…</div></div><div class="pagination"><span id="releasePageInfo">—</span><div class="pager"><button id="releasePrev">←</button><button id="releaseNext">→</button></div></div></div></section>
 <section id="view-series" hidden><div class="toolbar"><label class="search"><span>⌕</span><input id="seriesSearch" type="search" placeholder="Название, описание или тип серии…"></label><select id="seriesStatus"><option value="">Все статусы</option><option value="candidate">Кандидат</option><option value="under_review">На проверке</option><option value="confirmed">Подтверждено</option><option value="rejected">Отклонено</option></select><span class="spacer"></span><span class="result-count" id="seriesResults">—</span></div><div class="panel"><div class="panel-head"><h2>Реестр серий</h2><small>Создание, редактирование и привязка к выпускам</small></div><div class="table-wrap" id="seriesTable"><div class="empty">Загружаю серии…</div></div><div class="pagination"><span id="seriesPageInfo">—</span><div class="pager"><button id="seriesPrev">←</button><button id="seriesNext">→</button></div></div></div></section>
 <section id="view-history" hidden><div class="toolbar"><select id="historyEntityType"><option value="">Все сущности</option><option value="casting">Отливки</option><option value="casting_variant">Варианты</option><option value="release">Выпуски</option><option value="series">Серии</option></select><select id="historyAction"><option value="">Все действия</option><option value="create">Создание</option><option value="update">Изменение</option><option value="update_series">Изменение серий</option></select><span class="spacer"></span><span class="result-count" id="historyResults">—</span></div><div class="panel"><div class="panel-head"><h2>Журнал аудита</h2><small>Записи доступны только для чтения</small></div><div class="table-wrap" id="historyTable"><div class="empty">Загружаю историю…</div></div><div class="pagination"><span id="historyPageInfo">—</span><div class="pager"><button id="historyPrev">←</button><button id="historyNext">→</button></div></div></div></section>
+<section id="view-users" hidden><div class="toolbar"><input id="userSearch" placeholder="Имя, email или ID пользователя"><select id="userStatus"><option value="">Все статусы</option><option value="pending">Ожидает</option><option value="active">Активен</option><option value="suspended">Приостановлен</option><option value="closed">Закрыт</option></select><span class="spacer"></span><span class="result-count" id="userResults">—</span></div><div class="panel"><div class="panel-head"><h2>Учётные записи</h2><small>Роли, статусы и приглашения</small></div><div class="table-wrap" id="userTable"><div class="empty">Загружаю пользователей…</div></div><div class="pagination"><span id="userPageInfo">—</span><div class="pager"><button id="userPrev">←</button><button id="userNext">→</button></div></div></div></section>
 </main></div>
 <div class="drawer-backdrop" id="backdrop"></div><aside class="drawer" id="drawer" aria-label="Карточка записи"><div class="drawer-head"><div><h2 id="drawerTitle">Карточка</h2><p id="drawerSub"></p></div><button class="close" id="drawerClose" aria-label="Закрыть">✕</button></div><div class="drawer-body" id="drawerBody"></div></aside><div class="toast" id="toast"></div>
 <script>
 (() => {
 const $ = id => document.getElementById(id);
-const state = {view:"overview",castingPage:0,releasePage:0,seriesPage:0,historyPage:0,pageSize:25,castingTotal:0,releaseTotal:0,seriesTotal:0,historyTotal:0,castingRows:[],releaseRows:[],selected:null,debounce:null};
+const state = {view:"overview",castingPage:0,releasePage:0,seriesPage:0,historyPage:0,userPage:0,pageSize:25,castingTotal:0,releaseTotal:0,seriesTotal:0,historyTotal:0,userTotal:0,castingRows:[],releaseRows:[],selected:null,debounce:null};
 const statusLabel = {candidate:"Кандидат",under_review:"На проверке",confirmed:"Подтверждено",rejected:"Отклонено"};
 const esc = value => String(value ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const cookie = name => document.cookie.split(";").map(v=>v.trim()).find(v=>v.startsWith(name+"="))?.slice(name.length+1) || "";
@@ -68,11 +70,11 @@ const showAlert=(message,type="info")=>{const el=$("alert");el.textContent=messa
 const toast=message=>{const el=$("toast");el.textContent=message;el.classList.add("show");setTimeout(()=>el.classList.remove("show"),2400)};
 const setView = view => {
  state.view=view;document.querySelectorAll(".nav button[data-view]").forEach(b=>b.classList.toggle("active",b.dataset.view===view));
- ["overview","castings","releases","series","history"].forEach(v=>$("view-"+v).hidden=v!==view);
- const titles={overview:["Обзор каталога","Рабочее пространство для управления отливками и выпусками."],castings:["Отливки","Базовые конструкции Hot Wheels и их конструктивные варианты."],releases:["Выпуски","Каталожные выпуски с годом, номером и связями."],series:["Серии","Управление сериями каталога."],history:["История изменений","Аудит действий пользователей и изменений каталога."]};
+ ["overview","castings","releases","series","history","users"].forEach(v=>$("view-"+v).hidden=v!==view);
+ const titles={overview:["Обзор каталога","Рабочее пространство для управления отливками и выпусками."],castings:["Отливки","Базовые конструкции Hot Wheels и их конструктивные варианты."],releases:["Выпуски","Каталожные выпуски с годом, номером и связями."],series:["Серии","Управление сериями каталога."],history:["История изменений","Аудит действий пользователей и изменений каталога."],users:["Пользователи","Управление учётными записями, ролями и приглашениями."]};
  $("pageTitle").textContent=titles[view][0];$("pageSubtitle").textContent=titles[view][1];$("crumbCurrent").textContent=titles[view][0];
- $("newBtn").disabled=!["castings","releases","series"].includes(view);$("newBtn").textContent=view==="releases"?"＋ Новый выпуск":view==="series"?"＋ Новая серия":"＋ Новая отливка";$("newBtn").title=$("newBtn").disabled?"Создание доступно в разделах «Отливки», «Выпуски» и «Серии»":"";
- if(view==="castings")loadCastings();if(view==="releases")loadReleases();if(view==="series")loadSeries();if(view==="history")loadHistory();
+ $("newBtn").disabled=!["castings","releases","series","users"].includes(view);$("newBtn").textContent=view==="users"?"＋ Пригласить пользователя":view==="releases"?"＋ Новый выпуск":view==="series"?"＋ Новая серия":"＋ Новая отливка";$("newBtn").title=$("newBtn").disabled?"Создание доступно в разделах каталога, приглашения в разделе «Пользователи»":"";
+ if(view==="castings")loadCastings();if(view==="releases")loadReleases();if(view==="series")loadSeries();if(view==="history")loadHistory();if(view==="users")loadUsers();
 };
 const status = value=>'<span class="status s-'+esc(value)+'">'+esc(statusLabel[value]||value||"Не указан")+'</span>';
 const emptyTable = message=>'<div class="empty"><b>Нет записей</b>'+esc(message)+'</div>';
@@ -116,6 +118,62 @@ const loadSeries = async () => {
  const params=new URLSearchParams({limit:state.pageSize,offset:state.seriesPage*state.pageSize});
  if($("seriesSearch").value.trim())params.set("q",$("seriesSearch").value.trim());if($("seriesStatus").value)params.set("status",$("seriesStatus").value);
  try{const data=await api("/api/v1/admin/catalog/series?"+params);state.seriesTotal=data.total;$("seriesResults").textContent=data.total.toLocaleString("ru-RU")+" серий";$("seriesCount").textContent=data.total.toLocaleString("ru-RU");$("seriesPageInfo").textContent=data.total?("Страница "+(state.seriesPage+1)+" из "+Math.max(1,Math.ceil(data.total/state.pageSize))):"Нет результатов";$("seriesPrev").disabled=state.seriesPage===0;$("seriesNext").disabled=(state.seriesPage+1)*state.pageSize>=data.total;$("seriesTable").innerHTML=data.items.length?'<table><thead><tr><th>Серия</th><th>Тип</th><th>Выпусков</th><th>Статус</th><th></th></tr></thead><tbody>'+data.items.map(x=>'<tr data-id="'+esc(x.id)+'"><td><span class="primary-cell">'+esc(x.name)+'</span><span class="secondary">'+esc(x.description||"")+'</span></td><td>'+esc(x.series_type||"—")+'</td><td>'+esc(x.release_count)+'</td><td>'+status(x.status)+'</td><td><span class="row-action">Открыть →</span></td></tr>').join("")+'</tbody></table>':emptyTable("Добавь первую серию или измени фильтр.");$("seriesTable").querySelectorAll("tbody tr").forEach(row=>row.addEventListener("click",()=>openSeriesDetail(row.dataset.id)));}catch(error){$("seriesTable").innerHTML=emptyTable(error.message);showAlert(error.message,"error");}
+};
+const loadUsers = async () => {
+ $("userTable").innerHTML='<div class="empty">Загружаю пользователей…</div>';
+ const params=new URLSearchParams({limit:state.pageSize,offset:state.userPage*state.pageSize});
+ if($("userSearch").value.trim())params.set("q",$("userSearch").value.trim());
+ if($("userStatus").value)params.set("status",$("userStatus").value);
+ try{
+  const data=await api("/api/v1/admin/users?"+params);state.userTotal=data.total;
+  $("userResults").textContent=data.total.toLocaleString("ru-RU")+" пользователей";
+  $("userCount").textContent=data.total.toLocaleString("ru-RU");
+  $("userPageInfo").textContent=data.total?("Страница "+(state.userPage+1)+" из "+Math.max(1,Math.ceil(data.total/state.pageSize))):"Нет пользователей";
+  $("userPrev").disabled=state.userPage===0;$("userNext").disabled=(state.userPage+1)*state.pageSize>=data.total;
+  $("userTable").innerHTML=data.items.length?'<table><thead><tr><th>Пользователь</th><th>Email</th><th>Статус</th><th>Роли</th><th>Последний вход</th><th></th></tr></thead><tbody>'+data.items.map(x=>'<tr data-id="'+esc(x.id)+'"><td><b>'+esc(x.display_name||"Без имени")+'</b><span class="secondary">'+esc(x.id)+'</span></td><td>'+esc((x.emails||[]).map(e=>e.email).join(", ")||"—")+'</td><td><span class="status s-'+esc(x.status)+'">'+esc(({active:"Активен",pending:"Ожидает",suspended:"Приостановлен",closed:"Закрыт"})[x.status]||x.status)+'</span></td><td>'+esc((x.roles||[]).map(r=>r.name).join(", ")||"—")+'</td><td>'+esc(x.last_login_at?new Date(x.last_login_at).toLocaleString("ru-RU"):"—")+'</td><td><span class="action">Открыть →</span></td></tr>').join("")+'</tbody></table>':emptyTable("Пользователей пока нет или фильтр ничего не нашёл.");
+  $("userTable").querySelectorAll("tbody tr").forEach(row=>row.addEventListener("click",()=>openUserDetail(row.dataset.id)));
+ }catch(error){$("userTable").innerHTML=emptyTable(error.message);showAlert(error.message,"error");}
+};
+const openUserDetail = async id => {
+ openDrawer();$("drawerTitle").textContent="Загружаю пользователя…";$("drawerSub").textContent=id;$("drawerBody").innerHTML='<div class="empty">Получаю данные…</div>';
+ try{
+  const item=await api("/api/v1/admin/users/"+encodeURIComponent(id));
+  let roles=[];
+  try{roles=(await api("/api/v1/admin/roles")).items||[]}catch{}
+  const roleRows=(item.roles||[]).map(r=>'<div class="detail-field"><label>'+esc(r.name)+' · '+esc(r.code)+'</label><div>'+esc(r.expires_at?"До "+new Date(r.expires_at).toLocaleString("ru-RU"):"Без срока")+(item.is_super_admin?"":' <button class="btn small" data-revoke="'+esc(r.id)+'">Отозвать</button>')+'</div></div>').join("");
+  $("drawerTitle").textContent=item.display_name||"Пользователь";$("drawerSub").textContent=item.id;
+  let html='<div class="detail-grid">'+field("Статус",item.status)+field("Создан",new Date(item.created_at).toLocaleString("ru-RU"))+field("Последний вход",item.last_login_at?new Date(item.last_login_at).toLocaleString("ru-RU"):"Не входил")+field("Активные сессии",item.active_sessions)+field("Email",(item.emails||[]).map(e=>e.email+(e.verified?" ✓":"")).join(", ")||"Не указан")+'</div><div class="section-title">Назначенные роли</div>'+ (roleRows||'<div class="empty">Ролей пока нет.</div>');
+  if(item.is_super_admin){html+='<div class="alert info">Учётная запись Super Admin защищена от изменений через обычную админку.</div>';}
+  else{
+   if(roles.length)html+='<form class="edit-form" id="assignRoleForm"><div class="section-title">Назначить роль</div><div class="field"><label>Роль</label><select name="role_id" required>'+roles.map(r=>'<option value="'+esc(r.id)+'">'+esc(r.name)+' ('+esc(r.code)+')</option>').join("")+'</select></div><div class="field"><label>Причина *</label><textarea name="reason" required minlength="3"></textarea></div><button class="btn primary" type="submit">Назначить роль</button></form>';
+   if(["active","suspended"].includes(item.status))html+='<form class="edit-form" id="userStatusForm"><div class="section-title">Статус учётной записи</div><div class="field"><label>Причина *</label><textarea name="reason" required minlength="3"></textarea></div><button class="btn '+(item.status==="active"?"danger":"primary")+'" type="submit">'+(item.status==="active"?"Приостановить аккаунт":"Восстановить аккаунт")+'</button></form>';
+  }
+  $("drawerBody").innerHTML=html;
+  $("drawerBody").querySelectorAll("[data-revoke]").forEach(button=>button.addEventListener("click",async()=>{
+   const reason=prompt("Причина отзыва роли:");if(!reason||!reason.trim())return;
+   try{await api("/api/v1/admin/users/"+encodeURIComponent(id)+"/roles/"+encodeURIComponent(button.dataset.revoke)+"/revoke",{method:"POST",body:JSON.stringify({reason})});toast("Роль отозвана");await openUserDetail(id);await loadUsers();}catch(e){showAlert(e.message,"error");}
+  }));
+  if($("assignRoleForm"))$("assignRoleForm").addEventListener("submit",async event=>{
+   event.preventDefault();const fd=new FormData(event.currentTarget);
+   try{await api("/api/v1/admin/users/"+encodeURIComponent(id)+"/roles",{method:"POST",body:JSON.stringify({role_id:fd.get("role_id"),reason:fd.get("reason")})});toast("Роль назначена");await openUserDetail(id);await loadUsers();}catch(e){showAlert(e.message,"error");}
+  });
+  if($("userStatusForm"))$("userStatusForm").addEventListener("submit",async event=>{
+   event.preventDefault();const fd=new FormData(event.currentTarget);const next=item.status==="active"?"suspended":"active";
+   try{await api("/api/v1/admin/users/"+encodeURIComponent(id)+"/status",{method:"PATCH",body:JSON.stringify({status:next,reason:fd.get("reason")})});toast(next==="suspended"?"Аккаунт приостановлен":"Аккаунт восстановлен");await openUserDetail(id);await loadUsers();}catch(e){showAlert(e.message,"error");}
+  });
+ }catch(error){$("drawerBody").innerHTML='<div class="alert error">'+esc(error.message)+'</div>';}
+};
+const openInviteUser = async () => {
+ openDrawer();$("drawerTitle").textContent="Пригласить пользователя";$("drawerSub").textContent="Новое приглашение по email";
+ let roleOptions="";
+ try{const roles=await api("/api/v1/admin/roles");roleOptions='<div class="field"><label>Роль (необязательно)</label><select name="role_id"><option value="">Без роли</option>'+roles.items.map(r=>'<option value="'+esc(r.id)+'">'+esc(r.name)+'</option>').join("")+'</select></div>';}catch{}
+ $("drawerBody").innerHTML='<form class="edit-form" id="inviteUserForm"><div class="section-title">Данные приглашения</div><div class="field"><label>Email *</label><input type="email" name="email" maxlength="320" required></div><div class="field"><label>Имя получателя</label><input name="recipient_name" maxlength="240"></div>'+roleOptions+'<p class="secondary">Приглашение будет отправлено на указанный адрес. Ссылка одноразовая и ограничена по сроку действия.</p><div class="form-actions"><button type="button" class="btn" id="cancelInvite">Отмена</button><button type="submit" class="btn primary">Отправить приглашение</button></div></form>';
+ $("cancelInvite").addEventListener("click",closeDrawer);
+ $("inviteUserForm").addEventListener("submit",async event=>{
+  event.preventDefault();const fd=new FormData(event.currentTarget);const payload={email:fd.get("email"),recipient_name:fd.get("recipient_name")||null};if(fd.get("role_id"))payload.role_id=fd.get("role_id");
+  const button=event.currentTarget.querySelector('button[type="submit"]');button.disabled=true;button.textContent="Отправляю…";
+  try{await api("/api/v1/account/invitations",{method:"POST",body:JSON.stringify(payload)});toast("Приглашение отправлено");closeDrawer();await loadUsers();}catch(e){showAlert(e.message,"error");button.disabled=false;button.textContent="Отправить приглашение";}
+ });
 };
 const loadHistory = async () => {
  $("historyTable").innerHTML='<div class="empty">Загружаю журнал…</div>';const params=new URLSearchParams({limit:state.pageSize,offset:state.historyPage*state.pageSize});if($("historyEntityType").value)params.set("entity_type",$("historyEntityType").value);if($("historyAction").value)params.set("action",$("historyAction").value);
@@ -231,14 +289,14 @@ const saveVariant = async (event,castingId) => {
 const bindSearch=(id,fn)=>$(id).addEventListener("input",()=>{clearTimeout(state.debounce);state.debounce=setTimeout(()=>{if(state.view===fn){if(fn==="castings")state.castingPage=0;else state.releasePage=0; (fn==="castings"?loadCastings:loadReleases)();}},250);});
 document.querySelectorAll(".nav button[data-view]").forEach(b=>b.addEventListener("click",()=>!b.disabled&&setView(b.dataset.view)));
 document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>setView(b.dataset.go)));
-$("newBtn").addEventListener("click",()=>{if(state.view==="series")openCreateSeries();else openCreate(state.view==="releases"?"release":"casting")});$("refreshBtn").addEventListener("click",()=>{if(state.view==="overview")loadOverview();else if(state.view==="castings")loadCastings();else if(state.view==="releases")loadReleases();else if(state.view==="series")loadSeries();else if(state.view==="history")loadHistory();});
+$("newBtn").addEventListener("click",()=>{if(state.view==="users")openInviteUser();else if(state.view==="series")openCreateSeries();else openCreate(state.view==="releases"?"release":"casting")});$("refreshBtn").addEventListener("click",()=>{if(state.view==="overview")loadOverview();else if(state.view==="castings")loadCastings();else if(state.view==="releases")loadReleases();else if(state.view==="series")loadSeries();else if(state.view==="history")loadHistory();else if(state.view==="users")loadUsers();});
 $("castingSearch").addEventListener("input",()=>{clearTimeout(state.debounce);state.debounce=setTimeout(()=>{state.castingPage=0;loadCastings()},250)});
 $("releaseSearch").addEventListener("input",()=>{clearTimeout(state.debounce);state.debounce=setTimeout(()=>{state.releasePage=0;loadReleases()},250)});
 ["castingStatus"].forEach(id=>$(id).addEventListener("change",()=>{state.castingPage=0;loadCastings()}));
 ["releaseStatus","releaseYear"].forEach(id=>$(id).addEventListener("change",()=>{state.releasePage=0;loadReleases()}));
 $("castingPrev").addEventListener("click",()=>{state.castingPage=Math.max(0,state.castingPage-1);loadCastings()});$("castingNext").addEventListener("click",()=>{state.castingPage++;loadCastings()});
 $("releasePrev").addEventListener("click",()=>{state.releasePage=Math.max(0,state.releasePage-1);loadReleases()});$("releaseNext").addEventListener("click",()=>{state.releasePage++;loadReleases()});
-$("seriesSearch").addEventListener("input",()=>{clearTimeout(state.debounce);state.debounce=setTimeout(()=>{state.seriesPage=0;loadSeries()},250)});$("seriesStatus").addEventListener("change",()=>{state.seriesPage=0;loadSeries()});$("seriesPrev").addEventListener("click",()=>{state.seriesPage=Math.max(0,state.seriesPage-1);loadSeries()});$("seriesNext").addEventListener("click",()=>{state.seriesPage++;loadSeries()});["historyEntityType","historyAction"].forEach(id=>$(id).addEventListener("change",()=>{state.historyPage=0;loadHistory()}));$("historyPrev").addEventListener("click",()=>{state.historyPage=Math.max(0,state.historyPage-1);loadHistory()});$("historyNext").addEventListener("click",()=>{state.historyPage++;loadHistory()});$("drawerClose").addEventListener("click",closeDrawer);$("backdrop").addEventListener("click",closeDrawer);document.addEventListener("keydown",e=>{if(e.key==="Escape")closeDrawer()});
+$("seriesSearch").addEventListener("input",()=>{clearTimeout(state.debounce);state.debounce=setTimeout(()=>{state.seriesPage=0;loadSeries()},250)});$("seriesStatus").addEventListener("change",()=>{state.seriesPage=0;loadSeries()});$("seriesPrev").addEventListener("click",()=>{state.seriesPage=Math.max(0,state.seriesPage-1);loadSeries()});$("seriesNext").addEventListener("click",()=>{state.seriesPage++;loadSeries()});["historyEntityType","historyAction"].forEach(id=>$(id).addEventListener("change",()=>{state.historyPage=0;loadHistory()}));$("userSearch").addEventListener("input",()=>{clearTimeout(state.debounce);state.debounce=setTimeout(()=>{state.userPage=0;loadUsers()},250)});$("userStatus").addEventListener("change",()=>{state.userPage=0;loadUsers()});$("userPrev").addEventListener("click",()=>{state.userPage=Math.max(0,state.userPage-1);loadUsers()});$("userNext").addEventListener("click",()=>{state.userPage++;loadUsers()});$("historyPrev").addEventListener("click",()=>{state.historyPage=Math.max(0,state.historyPage-1);loadHistory()});$("historyNext").addEventListener("click",()=>{state.historyPage++;loadHistory()});$("drawerClose").addEventListener("click",closeDrawer);$("backdrop").addEventListener("click",closeDrawer);document.addEventListener("keydown",e=>{if(e.key==="Escape")closeDrawer()});
 loadOverview();
 })();
 </script>

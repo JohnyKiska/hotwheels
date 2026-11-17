@@ -141,6 +141,7 @@ def assign_role(
     user_id: str,
     role_id: str,
     assigned_by_user_id: str | None = None,
+    reason: str | None = None,
 ) -> UserRole:
     """Assign a role idempotently while retaining historical revoked rows."""
     user = db.scalar(select(User).where(User.id == user_id).with_for_update())
@@ -169,7 +170,7 @@ def assign_role(
     db.add(assignment)
     db.flush()
     _audit(db, "user.role.assigned", actor_user_id=assigned_by_user_id,
-           target_type="user", target_id=user_id, metadata={"role": role.code})
+           target_type="user", target_id=user_id, metadata={"role": role.code, **({"reason": reason.strip()} if reason and reason.strip() else {})})
     return assignment
 
 
@@ -179,6 +180,7 @@ def revoke_role(
     user_id: str,
     role_id: str,
     revoked_by_user_id: str | None = None,
+    reason: str | None = None,
 ) -> bool:
     user = db.scalar(select(User).where(User.id == user_id).with_for_update())
     if user is None:
@@ -200,7 +202,7 @@ def revoke_role(
     db.flush()
     _audit(db, "user.role.revoked", actor_user_id=revoked_by_user_id,
            target_type="user", target_id=user_id,
-           metadata={"role": role.code if role else "unknown"})
+           metadata={"role": role.code if role else "unknown", **({"reason": reason.strip()} if reason and reason.strip() else {})})
     return True
 
 

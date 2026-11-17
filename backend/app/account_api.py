@@ -30,6 +30,7 @@ from .models import (
     ExternalIdentity,
     PasswordCredential,
     Permission,
+    Role,
     RolePermission,
     User,
     UserRole,
@@ -40,6 +41,7 @@ from .models import (
 router = APIRouter(prefix="/api/v1/account", tags=["accounts"])
 SESSION_COOKIE = "hw_session"
 CSRF_COOKIE = "hw_csrf"
+PRIVILEGED_ROLE_PERMISSIONS = {"users.manage", "roles.assign", "settings.manage", "billing.manage", "catalog.delete"}
 
 
 class InvitationCreateRequest(BaseModel):
@@ -237,8 +239,30 @@ def create_account_invitation(
     db: Session = Depends(get_db),
 ) -> dict:
     _require_csrf(request)
-    if body.role_id and not _has_permission(db, user.id, "roles.assign"):
-        raise HTTPException(status_code=403, detail="Insufficient permission to assign roles.")
+    if body.role_id:
+        if not _has_permission(db, user.id, "roles.assign"):
+            raise HTTPException(status_code=403, detail="Insufficient permission to assign roles.")
+        role = db.get(Role, body.role_id)
+        if role is None:
+            raise HTTPException(status_code=404, detail="Role not found.")
+        actor_is_super_admin = db.scalar(
+            select(UserRole.id)
+            .join(Role, Role.id == UserRole.role_id)
+            .where(
+                UserRole.user_id == user.id,
+                Role.code == "super_admin",
+                UserRole.revoked_at.is_(None),
+                or_(UserRole.expires_at.is_(None), UserRole.expires_at > utc_now()),
+            )
+            .limit(1)
+        ) is not None
+        role_permissions = set(db.scalars(
+            select(Permission.code)
+            .join(RolePermission, RolePermission.permission_id == Permission.id)
+            .where(RolePermission.role_id == role.id)
+        ).all())
+        if (role.code == "admin" or PRIVILEGED_ROLE_PERMISSIONS.intersection(role_permissions)) and not actor_is_super_admin:
+            raise HTTPException(status_code=403, detail="Only a Super Admin can invite users into administrative roles.")
     try:
         invitation = create_invitation_and_queue_email(
             db,

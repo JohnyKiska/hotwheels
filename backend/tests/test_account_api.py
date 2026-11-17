@@ -177,3 +177,20 @@ def test_invitation_api_denies_user_without_users_manage_permission(api_factory)
         },
     )
     assert response.status_code == 403
+
+
+
+def test_regular_admin_cannot_invite_user_with_administrator_role(api_factory):
+    client, _ = create_authenticated_client(api_factory, role_code="admin")
+    with api_factory() as db:
+        admin_role = db.scalar(select(Role).where(Role.code == "admin"))
+        role_id = admin_role.id
+    response = client.post(
+        "/api/v1/account/invitations",
+        json={"email": "new-admin@example.com", "role_id": role_id},
+        headers={
+            "Origin": "https://catalog.example.com",
+            "X-CSRF-Token": "csrf-test-token",
+        },
+    )
+    assert response.status_code == 403
