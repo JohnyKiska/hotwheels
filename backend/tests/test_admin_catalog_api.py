@@ -1,3 +1,5 @@
+import uuid
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, event, select
@@ -43,7 +45,7 @@ def api_factory(monkeypatch):
 def authenticated_client(factory, permissions=("catalog.read", "catalog.update")):
     with factory() as db:
         user = User(status="active", display_name="Catalog admin")
-        role = Role(code="test_admin", name="Test admin")
+        role = Role(code=f"test_admin_{uuid.uuid4().hex[:12]}", name="Test admin")
         db.add_all([user, role])
         db.flush()
         for code in permissions:
