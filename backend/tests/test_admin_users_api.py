@@ -254,3 +254,27 @@ def test_super_admin_cannot_be_suspended_or_managed(api_factory):
         headers=csrf_headers(),
     )
     assert response.status_code == 403
+
+
+
+def test_regular_admin_cannot_assign_custom_role_with_privileged_permissions(api_factory):
+    with api_factory() as db:
+        target = User(status="active", display_name="Target")
+        privileged = Role(code="custom_ops", name="Custom operations")
+        permission = Permission(code="users.manage", description="Manage users")
+        db.add_all([target, privileged, permission])
+        db.flush()
+        db.add(RolePermission(role_id=privileged.id, permission_id=permission.id))
+        target_id, role_id = target.id, privileged.id
+        db.commit()
+
+    client, _ = authenticated_client(api_factory)
+    response = client.post(
+        f"/api/v1/admin/users/{target_id}/roles",
+        json={"role_id": role_id, "reason": "Attempt privilege escalation"},
+        headers=csrf_headers(),
+    )
+    assert response.status_code == 403
+    roles = client.get("/api/v1/admin/roles")
+    assert roles.status_code == 200
+    assert role_id not in {item["id"] for item in roles.json()["items"]}
