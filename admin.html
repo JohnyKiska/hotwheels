@@ -188,7 +188,7 @@ const openInviteUser = async () => {
 
 const moderationStatusLabel={open:"Открыт",under_review:"На проверке",resolved:"Разрешён",accepted_difference:"Допустимое различие"};
 const severityLabel={critical:"Критическая",high:"Высокая",medium:"Средняя",low:"Низкая"};
-const safeUrl=value=>{try{const u=new URL(value,location.origin);return ["http:","https:"].includes(u.protocol)?u.href:"";}catch{return "";}};
+const safeUrl=value=>{if(typeof value!=="string"||!value.trim())return "";try{const u=new URL(value,location.origin);return ["http:","https:"].includes(u.protocol)?u.href:"";}catch{return "";}};
 const loadModeration=async()=>{
  $("moderationTable").innerHTML='<div class="empty">Загружаю очередь…</div>';
  const params=new URLSearchParams({limit:state.pageSize,offset:state.moderationPage*state.pageSize});
