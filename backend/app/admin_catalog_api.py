@@ -6,11 +6,11 @@ from typing import Literal
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import func, or_, select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from .account_api import _require_csrf, _require_permission
 from .db import get_db
-from .models import Casting, ChangeLog, User
+from .models import Casting, ChangeLog, Release, User
 
 router = APIRouter(prefix="/api/v1/admin/catalog", tags=["admin-catalog"])
 
@@ -153,3 +153,95 @@ def patch_casting(
         db.rollback()
         raise
     return _casting_payload(casting)
+
+
+def _release_payload(release: Release) -> dict:
+    return {
+        "id": release.id,
+        "casting_id": release.casting_id,
+        "casting_name": release.casting.name,
+        "casting_variant_id": release.casting_variant_id,
+        "casting_variant_name": release.casting_variant.name if release.casting_variant else None,
+        "catalog_year": release.catalog_year,
+        "name": release.name,
+        "assortment_number": release.assortment_number,
+        "description": release.description,
+        "status": release.status,
+        "series": [
+            {"id": item.id, "name": item.name}
+            for item in sorted(release.series, key=lambda item: (item.name.lower(), item.id))
+        ],
+        "created_at": release.created_at.isoformat(),
+        "updated_at": release.updated_at.isoformat(),
+    }
+
+
+@router.get("/releases")
+def list_releases(
+    q: str | None = Query(default=None, max_length=240),
+    casting_id: str | None = Query(default=None, max_length=36),
+    catalog_year: int | None = Query(default=None, ge=1968, le=2100),
+    status: CastingStatus | None = None,
+    limit: int = Query(default=50, ge=1, le=100),
+    offset: int = Query(default=0, ge=0),
+    _user: User = Depends(_require_permission("catalog.read")),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Search and paginate releases without mutating catalog data."""
+    filters = []
+    if q and q.strip():
+        term = f"%{q.strip()}%"
+        filters.append(or_(
+            Release.name.ilike(term),
+            Release.assortment_number.ilike(term),
+            Casting.name.ilike(term),
+        ))
+    if casting_id:
+        filters.append(Release.casting_id == casting_id)
+    if catalog_year is not None:
+        filters.append(Release.catalog_year == catalog_year)
+    if status:
+        filters.append(Release.status == status)
+
+    statement = select(Release).join(Casting, Casting.id == Release.casting_id).where(*filters)
+    total = db.scalar(
+        select(func.count(Release.id))
+        .join(Casting, Casting.id == Release.casting_id)
+        .where(*filters)
+    ) or 0
+    rows = db.scalars(
+        statement.options(
+            selectinload(Release.casting),
+            selectinload(Release.casting_variant),
+            selectinload(Release.series),
+        )
+        .order_by(Release.catalog_year.desc().nullslast(), Release.name, Release.id)
+        .limit(limit)
+        .offset(offset)
+    ).all()
+    return {
+        "items": [_release_payload(item) for item in rows],
+        "total": total,
+        "limit": limit,
+        "offset": offset,
+    }
+
+
+@router.get("/releases/{release_id}")
+def get_release(
+    release_id: str,
+    _user: User = Depends(_require_permission("catalog.read")),
+    db: Session = Depends(get_db),
+) -> dict:
+    release = db.scalar(
+        select(Release)
+        .where(Release.id == release_id)
+        .options(
+            selectinload(Release.casting),
+            selectinload(Release.casting_variant),
+            selectinload(Release.series),
+        )
+    )
+    if release is None:
+        raise HTTPException(status_code=404, detail="Release not found.")
+    return _release_payload(release)
