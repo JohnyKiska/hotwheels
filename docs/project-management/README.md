@@ -20,6 +20,16 @@ Then open `http://localhost:8000/docs/project-management/`.
 - Browser storage may keep an explicitly marked local draft, but must never silently replace the canonical state.
 - Exported changes must be validated and reviewed before being committed.
 
+## Latest verified archive transfer (2026-11-17)
+
+The user confirmed that the 60-file ALLHW archive was copied to the external drive at:
+
+`E:\\HW-CATALOG-DATA\\IMPORTS\\ALLHW`
+
+The copy was checked against the corrected `MANIFEST.csv`: 60 files checked, zero size or SHA-256 errors. This confirms the ALLHW import operation only; it is not a full audit of the external drive, database, or other import folders.
+
+The archive source remains in [the separate archive repository](https://github.com/JohnyKiska/hotwheels-fandom-archive/tree/main/ALLHW). The main repository retains the read-only importer and its documentation. Parsing completeness, duplicate detection, and reconciliation with Mainline remain follow-up work.
+
 ## Dashboard workflow
 
 1. Load the canonical JSON from GitHub.
