@@ -245,3 +245,145 @@ def get_release(
     if release is None:
         raise HTTPException(status_code=404, detail="Release not found.")
     return _release_payload(release)
+
+
+class ReleasePatch(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    casting_variant_id: str | None = Field(default=None, max_length=36)
+    catalog_year: int | None = Field(default=None, ge=1968, le=2100)
+    name: str | None = Field(default=None, max_length=240)
+    assortment_number: str | None = Field(default=None, max_length=80)
+    description: str | None = None
+    status: CastingStatus | None = None
+    reason: str = Field(min_length=1, max_length=4000)
+
+
+class CastingVariantPatch(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    name: str | None = Field(default=None, max_length=240)
+    description: str | None = None
+    status: CastingStatus | None = None
+    reason: str = Field(min_length=1, max_length=4000)
+
+
+def _apply_audited_patch(db: Session, *, entity, entity_type: str, changes: dict,
+                         reason: str, user: User) -> dict:
+    old_values = {}
+    new_values = {}
+    for field, value in changes.items():
+        if isinstance(value, str) and field in {"name", "assortment_number"}:
+            value = value.strip() or None
+        current = getattr(entity, field)
+        if current != value:
+            old_values[field] = current
+            new_values[field] = value
+    if not new_values:
+        return {}
+    for field, value in new_values.items():
+        setattr(entity, field, value)
+    db.add(ChangeLog(
+        entity_type=entity_type,
+        entity_id=entity.id,
+        action="update",
+        old_values=old_values,
+        new_values=new_values,
+        reason=reason,
+        actor_type="user",
+        actor_id=user.id,
+    ))
+    return new_values
+
+
+@router.patch("/releases/{release_id}")
+def patch_release(
+    release_id: str,
+    body: ReleasePatch,
+    request: Request,
+    user: User = Depends(_require_permission("catalog.update")),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Update release metadata and its selected variant with an atomic audit event."""
+    _require_csrf(request)
+    reason = body.reason.strip()
+    if not reason:
+        raise HTTPException(status_code=422, detail="A non-empty change reason is required.")
+    changes = body.model_dump(exclude_unset=True)
+    changes.pop("reason", None)
+    if not changes:
+        raise HTTPException(status_code=422, detail="At least one release field must be supplied.")
+    if "status" in changes and changes["status"] is None:
+        raise HTTPException(status_code=422, detail="Release status cannot be null.")
+    if "casting_variant_id" in changes and changes["casting_variant_id"] is not None:
+        from .models import CastingVariant
+        variant = db.get(CastingVariant, changes["casting_variant_id"])
+        if variant is None or variant.casting_id != db.scalar(
+            select(Release.casting_id).where(Release.id == release_id)
+        ):
+            raise HTTPException(status_code=422, detail="Variant must belong to the release casting.")
+
+    release = db.scalar(
+        select(Release).where(Release.id == release_id).options(
+            selectinload(Release.casting),
+            selectinload(Release.casting_variant),
+            selectinload(Release.series),
+        )
+    )
+    if release is None:
+        raise HTTPException(status_code=404, detail="Release not found.")
+    try:
+        _apply_audited_patch(
+            db, entity=release, entity_type="release", changes=changes,
+            reason=reason, user=user,
+        )
+        db.commit()
+        db.refresh(release)
+    except Exception:
+        db.rollback()
+        raise
+    return _release_payload(release)
+
+
+@router.patch("/variants/{variant_id}")
+def patch_casting_variant(
+    variant_id: str,
+    body: CastingVariantPatch,
+    request: Request,
+    user: User = Depends(_require_permission("catalog.update")),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Update variant metadata without changing its parent casting."""
+    _require_csrf(request)
+    reason = body.reason.strip()
+    if not reason:
+        raise HTTPException(status_code=422, detail="A non-empty change reason is required.")
+    changes = body.model_dump(exclude_unset=True)
+    changes.pop("reason", None)
+    if not changes:
+        raise HTTPException(status_code=422, detail="At least one variant field must be supplied.")
+    if "status" in changes and changes["status"] is None:
+        raise HTTPException(status_code=422, detail="Variant status cannot be null.")
+
+    from .models import CastingVariant
+    variant = db.get(CastingVariant, variant_id)
+    if variant is None:
+        raise HTTPException(status_code=404, detail="Casting variant not found.")
+    try:
+        _apply_audited_patch(
+            db, entity=variant, entity_type="casting_variant", changes=changes,
+            reason=reason, user=user,
+        )
+        db.commit()
+        db.refresh(variant)
+    except Exception:
+        db.rollback()
+        raise
+    return {
+        "id": variant.id,
+        "casting_id": variant.casting_id,
+        "name": variant.name,
+        "description": variant.description,
+        "status": variant.status,
+        "updated_at": variant.updated_at.isoformat(),
+    }
