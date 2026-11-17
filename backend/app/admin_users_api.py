@@ -17,6 +17,7 @@ from .models import (
 )
 
 router = APIRouter(prefix="/api/v1/admin", tags=["admin-users"])
+PRIVILEGED_ROLE_PERMISSIONS = {"users.manage", "roles.assign", "settings.manage", "billing.manage", "catalog.delete"}
 
 
 class RoleAssignmentRequest(BaseModel):
@@ -163,6 +164,8 @@ def list_assignable_roles(
             .where(RolePermission.role_id == role.id)
             .order_by(Permission.code)
         ).all()
+        if not super_admin and PRIVILEGED_ROLE_PERMISSIONS.intersection(permissions):
+            continue
         items.append({
             "id": role.id, "code": role.code, "name": role.name,
             "description": role.description, "is_system": role.is_system,
@@ -194,8 +197,12 @@ def post_user_role(
     actor_is_super = _is_super_admin(db, actor.id)
     if role.code == "super_admin":
         raise HTTPException(status_code=403, detail="Super Admin is managed only by one-time bootstrap.")
-    if role.code == "admin" and not actor_is_super:
-        raise HTTPException(status_code=403, detail="Only a Super Admin can assign the Administrator role.")
+    role_permissions = set(db.scalars(
+        select(Permission.code).join(RolePermission, RolePermission.permission_id == Permission.id)
+        .where(RolePermission.role_id == role.id)
+    ).all())
+    if (role.code == "admin" or PRIVILEGED_ROLE_PERMISSIONS.intersection(role_permissions)) and not actor_is_super:
+        raise HTTPException(status_code=403, detail="Only a Super Admin can assign roles with administrative permissions.")
     if _is_super_admin(db, target.id):
         raise HTTPException(status_code=403, detail="Super Admin accounts cannot be changed here.")
     try:
