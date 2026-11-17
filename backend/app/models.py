@@ -308,15 +308,6 @@ class MediaAsset(TimestampMixin, Base):
     byte_size: Mapped[int | None] = mapped_column(Integer)
     is_featured: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
 
-    __table_args__ = (
-        CheckConstraint("category IN ('reference_photo', 'evidence_photo', 'package_photo', 'physical_specimen', 'document', 'other')", name="ck_media_assets_category"),
-        CheckConstraint("angle IS NULL OR angle IN ('front', 'rear', 'left', 'right', 'top', 'bottom', 'package_front', 'package_back', 'detail', 'other')", name="ck_media_assets_angle"),
-        CheckConstraint("status IN ('unreviewed', 'approved', 'rejected', 'archived')", name="ck_media_assets_status"),
-        CheckConstraint("rights_status IN ('unknown', 'permission_requested', 'permitted', 'restricted', 'denied')", name="ck_media_assets_rights_status"),
-        CheckConstraint("width IS NULL OR width > 0", name="ck_media_assets_width_positive"),
-        CheckConstraint("height IS NULL OR height > 0", name="ck_media_assets_height_positive"),
-        CheckConstraint("byte_size IS NULL OR byte_size >= 0", name="ck_media_assets_byte_size_nonnegative"),
-    )
     source_record: Mapped[SourceRecord] = relationship(back_populates="media_assets")
     evidence_links: Mapped[list[MediaAssetEvidence]] = relationship(back_populates="media_asset", cascade="all, delete-orphan")
  
