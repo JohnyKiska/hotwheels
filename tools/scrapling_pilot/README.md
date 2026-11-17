@@ -127,3 +127,36 @@ python .\export_images.py --input .\scrapling-pilot-v3.json --output-dir .\photo
 Выгрузка выполняет сетевые GET-запросы только к URL, уже записанным в JSON,
 с короткой паузой между изображениями. Учитывай условия использования Fandom.
 Она не меняет JSON-отчёт, исходный HTML, код импортёра или базу данных.
+
+
+## Выгрузка изображений через Chrome (Cloudflare)
+
+Если обычный экспортёр получает HTTP 403, используй отдельный браузерный
+экспортёр. Он открывает установленный Chrome через Playwright и использует
+постоянный профиль `pilot-output/chrome-test-profile`. Если появится
+Cloudflare challenge, его нужно пройти вручную в окне Chrome. Скрипт не
+обходит и не автоматизирует проверку.
+
+Установка (один раз):
+
+```powershell
+py -m pip install playwright
+```
+
+Пробный запуск первых пяти записей (из корня репозитория):
+
+```powershell
+py .\tools\scrapling_pilot\pilot-output\export_images_browser.py --limit 5
+```
+
+Если тест прошёл, выгрузка всех записей:
+
+```powershell
+py .\tools\scrapling_pilot\pilot-output\export_images_browser.py --limit 0
+```
+
+По умолчанию JSON читается из той же папки, фотографии сохраняются в
+`pilot-output/photos` по папкам страниц/моделей, а отдельный манифест
+`photo_manifest_browser.csv` создаётся рядом с папкой `photos`.
+Уже существующие файлы пропускаются. Старый `export_images.py` и его
+`photo_manifest.csv` остаются без изменений.
