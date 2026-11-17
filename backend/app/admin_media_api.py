@@ -17,7 +17,7 @@ from sqlalchemy.orm import Session, selectinload
 from .account_api import _require_csrf, _require_permission
 from .db import get_db
 from .models import (
-    ChangeLog, Evidence, MediaAsset, MediaAssetEvidence, Release,
+    ChangeLog, Evidence, EvidenceRelease, MediaAsset, MediaAssetEvidence, Release,
     Source, SourceRecord, User,
 )
 
@@ -190,6 +190,7 @@ def list_assets(
     db: Session = Depends(get_db),
 ) -> dict:
     stmt = select(MediaAsset).join(SourceRecord).join(Source)
+    count_stmt = select(func.count(func.distinct(MediaAsset.id))).select_from(MediaAsset).join(SourceRecord).join(Source)
     filters = []
     if q and q.strip():
         term = f"%{q.strip()}%"
@@ -200,9 +201,10 @@ def list_assets(
     if status: filters.append(MediaAsset.status == status)
     if rights_status: filters.append(MediaAsset.rights_status == rights_status)
     if release_id:
-        stmt = stmt.join(MediaAssetEvidence).join(Evidence).join(__import__("app.models", fromlist=["EvidenceRelease"]).EvidenceRelease)
-        filters.append(__import__("app.models", fromlist=["EvidenceRelease"]).EvidenceRelease.release_id == release_id)
-    total = db.scalar(select(func.count(func.distinct(MediaAsset.id))).select_from(stmt.subquery())) or 0
+        stmt = stmt.join(MediaAssetEvidence).join(Evidence).join(EvidenceRelease)
+        count_stmt = count_stmt.join(MediaAssetEvidence).join(Evidence).join(EvidenceRelease)
+        filters.append(EvidenceRelease.release_id == release_id)
+    total = db.scalar(count_stmt.where(*filters)) or 0
     rows = db.scalars(stmt.where(*filters).options(
         selectinload(MediaAsset.source_record).selectinload(SourceRecord.source),
         selectinload(MediaAsset.evidence_links).selectinload(MediaAssetEvidence.evidence).selectinload(Evidence.release_links),
