@@ -2,10 +2,10 @@
   "schema_version": 1,
   "metadata": {
     "project_id": "hw-catalog",
-    "updated_at": "2026-11-17T01:34:00Z",
+    "updated_at": "2026-11-17T06:49:00Z",
     "source_of_truth": "github",
     "working_branch": "integration/catalog-foundation",
-    "last_verified_commit": "ccfdf34ec6e37dc0dc400dce0db73c37d787a4f6",
+    "last_verified_commit": "5a52187d90625356fd948b6fcd28be6a547c1fcd",
     "timezone": "Asia/Bangkok"
   },
   "project": {
@@ -25,7 +25,7 @@
       "id": "frontend",
       "title": "Frontend и каталог",
       "description": "Визуальный каталог, навигация, поиск и пользовательские сценарии.",
-      "status": "needs_audit",
+      "status": "in_progress",
       "sort_order": 20
     },
     {
@@ -53,14 +53,14 @@
       "id": "media-evidence",
       "title": "Фото и доказательства",
       "description": "Фото блистеров, лицевой и обратной стороны, источники и provenance.",
-      "status": "in_progress",
+      "status": "blocked",
       "sort_order": 60
     },
     {
       "id": "infrastructure",
       "title": "Инфраструктура и синхронизация",
       "description": "Запуск, окружение, GitHub и внешний диск; защита внешней БД и локальных данных.",
-      "status": "needs_audit",
+      "status": "in_progress",
       "sort_order": 70
     },
     {
@@ -1052,7 +1052,7 @@
       "id": "pm-004",
       "title": "Обновить документацию Project Manager и актуальный срез проекта",
       "description": "Согласовать CURRENT_STATE, ROADMAP и SESSION_HANDOFF с актуальной веткой и новыми правилами управления состоянием.",
-      "status": "planned",
+      "status": "done",
       "priority": "medium",
       "workstream_id": "documentation",
       "component_id": "docsAudit",
@@ -1072,14 +1072,14 @@
         "docs/SESSION_HANDOFF.md"
       ],
       "created_at": "2026-11-16T00:00:00+07:00",
-      "updated_at": "2026-11-16T00:00:00+07:00",
-      "completed_at": null
+      "updated_at": "2026-11-17T06:49:00Z",
+      "completed_at": "2026-11-17T06:49:00Z"
     },
     {
       "id": "pm-005",
       "title": "Спроектировать безопасную синхронизацию GitHub и внешнего диска",
-      "description": "Определить список синхронизируемых файлов, исключения, направление копирования и проверку целостности.",
-      "status": "planned",
+      "description": "Подготовить и выполнить безопасную сверку GitHub и внешнего HDD в конце рабочего дня: сначала read-only инвентаризация и сравнение, затем согласованное копирование с защитой БД, BACKUPS и локальных данных.",
+      "status": "in_progress",
       "priority": "high",
       "workstream_id": "infrastructure",
       "component_id": "git",
@@ -1089,17 +1089,18 @@
         "pm-001"
       ],
       "acceptance_criteria": [
-        "GitHub остаётся каноническим источником для кода и документации.",
-        "Внешняя БД и локальные секреты не попадают в Git.",
-        "Синхронизация не перезаписывает более новую версию без проверки.",
-        "Есть журнал результата и понятный сценарий восстановления."
+        "GitHub остаётся каноническим источником кода, документации и Project Manager.",
+        "До копирования проверены локальный git status, текущий HEAD и фактическое содержимое внешнего HDD.",
+        "Сформирован явный include/exclude список; DATABASE, BACKUPS, секреты и machine-specific данные не перезаписываются.",
+        "Перед заменой файлов сохранена предыдущая версия; направление копирования согласовано по каждому конфликту.",
+        "После копирования выполнена SHA-256-проверка и записан результат; при неоднозначности синхронизация остановлена."
       ],
       "source_refs": [
         "docs/project-management/index.html",
         "docs/CURRENT_STATE.md"
       ],
       "created_at": "2026-11-16T00:00:00+07:00",
-      "updated_at": "2026-11-16T00:00:00+07:00",
+      "updated_at": "2026-11-17T06:49:00Z",
       "completed_at": null
     },
     {
@@ -1269,6 +1270,59 @@
       "created_at": "2026-11-16T06:37:00Z",
       "updated_at": "2026-11-16T07:16:30Z",
       "completed_at": null
+    },
+    {
+      "id": "admin-001",
+      "title": "Провести аудит существующей админки и подготовить план улучшений",
+      "description": "Инвентаризировать административные экраны, действия, связанные API endpoints, RBAC-проверки, ошибки и основные пользовательские сценарии. Сначала зафиксировать текущее состояние и gaps, затем приоритизировать изменения.",
+      "status": "in_progress",
+      "priority": "high",
+      "workstream_id": "frontend",
+      "component_id": "ui",
+      "owner": "user-and-assistant",
+      "due_date": null,
+      "dependencies": [],
+      "acceptance_criteria": [
+        "Составлен список существующих административных экранов и доступных действий.",
+        "Для изменяющих действий указаны API endpoints и проверки RBAC.",
+        "Отмечены отсутствующие, дублирующиеся и неудобные сценарии без предположений о несуществующей функциональности.",
+        "Подготовлен короткий приоритизированный план улучшений и согласован следующий шаг."
+      ],
+      "source_refs": [
+        "docs/CURRENT_STATE.md",
+        "docs/SESSION_HANDOFF.md"
+      ],
+      "created_at": "2026-11-17T06:49:00Z",
+      "updated_at": "2026-11-17T06:49:00Z",
+      "completed_at": null
+    },
+    {
+      "id": "photo-001",
+      "title": "Провести пилот сбора фотографий упакованных выпусков через eBay Browse API",
+      "description": "После одобрения eBay Developers Program собрать все релевантные объявления и доступные фото для пяти тестовых артикулов. Группировать по вариантам блистера, отдельно фиксировать лицо/оборот/дополнительные ракурсы и качество каждого изображения.",
+      "status": "blocked",
+      "priority": "high",
+      "workstream_id": "media-evidence",
+      "component_id": "evidence",
+      "owner": "user-and-assistant",
+      "due_date": null,
+      "dependencies": [],
+      "acceptance_criteria": [
+        "Пилот охватывает JJM14 Gazella GT, JJM01 '92 Dodge Viper RT/10, JJM05 2016 Ford GT Race, JJJ77 Pedal Driver и HTF62 '87 Dodge D100.",
+        "Собираются несколько релевантных объявлений на один артикул, а не только одно лучшее.",
+        "Варианты высокого/низкого и другие обнаруженные варианты блистера остаются раздельными.",
+        "Для каждого изображения записаны URL объявления, URL фото, ракурс, размеры/качество, вариант упаковки и статус соответствия.",
+        "Похожие изображения не удаляются автоматически; loose-фото остаются вне пилота.",
+        "API credentials хранятся локально и не попадают в Git; публичное использование фото проходит отдельную проверку условий и прав."
+      ],
+      "source_refs": [
+        "docs/CURRENT_STATE.md",
+        "docs/ROADMAP.md",
+        "docs/architecture/MEDIA_AND_EVIDENCE_METADATA.md"
+      ],
+      "created_at": "2026-11-17T06:49:00Z",
+      "updated_at": "2026-11-17T06:49:00Z",
+      "completed_at": null
     }
   ],
   "decisions": [
@@ -1300,9 +1354,35 @@
       "source_refs": [
         "docs/project-management/project-state.json"
       ]
+    },
+    {
+      "id": "decision-ebay-packaged-photo-source",
+      "title": "eBay — приоритетный источник фотографий упакованных выпусков",
+      "decision": "Для фото упакованных Hot Wheels сначала исследуются релевантные объявления eBay. На один артикул собирается несколько объявлений и все доступные фото; варианты блистера не смешиваются, лицо и оборот оцениваются отдельно. Hot Wheels Wiki используется как вспомогательный источник, loose-фото откладываются до community uploads после публичного запуска.",
+      "rationale": "Несколько объявлений помогают выявить варианты высокого/низкого блистера и закрыть пробелы, когда у одного продавца хорошее лицо, но плохой оборот, а у другого наоборот. Фотографии сохраняют provenance; доступность URL не означает разрешение на публичное переиспользование.",
+      "date": "2026-11-17",
+      "status": "accepted",
+      "source_refs": [
+        "docs/CURRENT_STATE.md",
+        "docs/ROADMAP.md"
+      ]
     }
   ],
-  "blockers": [],
+  "blockers": [
+    {
+      "id": "ebay-developer-approval",
+      "title": "Ожидается одобрение регистрации eBay Developers Program",
+      "description": "Заявка на регистрацию приложения находится на проверке. По сообщению интерфейса eBay срок может составить до одного рабочего дня. До одобрения API-пилот не запускается.",
+      "status": "open",
+      "related_task_ids": [
+        "photo-001"
+      ],
+      "source_refs": [
+        "docs/CURRENT_STATE.md",
+        "docs/SESSION_HANDOFF.md"
+      ]
+    }
+  ],
   "changelog": [
     {
       "date": "2026-11-16T00:00:00+07:00",
@@ -1367,6 +1447,11 @@
     {
       "date": "2026-11-17T01:34:00Z",
       "summary": "Архив ALLHW синхронизирован с внешним HDD: 60 HTML-файлов скопированы в IMPORTS/ALLHW; SHA-256 проверен до и после копирования, 60/60 совпадений, ошибок 0. DATABASE и BACKUPS не затрагивались.",
+      "commit": null
+    },
+    {
+      "date": "2026-11-17T06:49:00Z",
+      "summary": "Зафиксирован текущий фокус: аудит админки до изменений; eBay выбран приоритетным источником фото упакованных выпусков с пилотом на пяти артикулах после одобрения Developers Program; loose-фото отложены; запланирована осторожная сверка с внешним HDD в конце дня.",
       "commit": null
     }
   ]
