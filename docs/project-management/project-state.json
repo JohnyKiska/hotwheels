@@ -2,10 +2,10 @@
   "schema_version": 1,
   "metadata": {
     "project_id": "hw-catalog",
-    "updated_at": "2026-11-16T09:30:00Z",
+    "updated_at": "2026-11-17T00:00:00Z",
     "source_of_truth": "github",
     "working_branch": "integration/catalog-foundation",
-    "last_verified_commit": "ccfdf34ec6e37dc0dc400dce0db73c37d787a4f6",
+    "last_verified_commit": "71316a7e3e028c8fac717d5dbc3956845c21f082",
     "timezone": "Asia/Bangkok"
   },
   "project": {
@@ -320,16 +320,18 @@
       "title": "ALLHW archive",
       "path": null,
       "kind": "directory",
-      "status": "in_progress",
+      "status": "done",
       "description": "Архив исходных HTML-страниц Hot Wheels Wiki / All Hot Wheels по годам в отдельном репозитории.",
-      "notes": "60 HTML-файлов за 1968–2026 годы перенесены в JohnyKiska/hotwheels-fandom-archive/ALLHW. Имена и относительные пути сохранены; MANIFEST.csv содержит 60 записей с размерами и SHA-256. Проверены количество файлов и суммарный размер (34,138,971 bytes). Read-only importer остаётся в основном репозитории. Полноту исходного набора и корректность парсинга предстоит проверять отдельно.",
+      "notes": "Архив исходных HTML-страниц Hot Wheels Wiki / All Hot Wheels по годам хранится в отдельном репозитории JohnyKiska/hotwheels-fandom-archive/ALLHW. 60 HTML-файлов за 1968–2026 годы; MANIFEST.csv содержит 60 записей с размерами и SHA-256. 2026-11-17 пользователь подтвердил перенос в E:\\HW-CATALOG-DATA\\IMPORTS\\ALLHW и повторную проверку на HDD: 60 файлов, 0 ошибок SHA-256. Исходные HTML удалены из основного репозитория после архивирования. Полнота исходного набора и корректность парсинга остаются отдельной проверкой.",
       "source_refs": [
         "https://github.com/JohnyKiska/hotwheels-fandom-archive/tree/main/ALLHW",
         "https://github.com/JohnyKiska/hotwheels-fandom-archive/blob/main/MANIFEST.csv",
         "backend/app/importers/all_hot_wheels.py",
         "docs/ALL_HOT_WHEELS_IMPORTER.md"
       ],
-      "sort_order": 150
+      "sort_order": 150,
+      "completed_work": "Архив из 60 HTML-файлов перенесён на внешний HDD; пользователь подтвердил успешную повторную сверку всех SHA-256.",
+      "next_step": "Использовать локальный архив как read-only источник для проверки и развития ALLHW importer; отдельно подтвердить полноту покрытия и качество парсинга."
     },
     {
       "id": "research",
@@ -603,12 +605,14 @@
       "kind": "external_system",
       "status": "not_assessed",
       "description": "HW-CATALOG-DATA/ — внешнее хранилище данных, отделённое от Git-репозитория.",
-      "notes": "GitHub-аудит не даёт доступа к содержимому подключённого HDD. Последние сведения о букве диска, папках и БД являются историческими и требуют подтверждения на ПК.",
+      "notes": "GitHub-аудит не даёт прямого доступа к содержимому подключённого HDD. Последняя операция, подтверждённая пользователем 2026-11-17: импорт 60 HTML-файлов ALLHW в E:\\HW-CATALOG-DATA\\IMPORTS\\ALLHW и повторная SHA-256 проверка без ошибок. Это подтверждение конкретной операции, а не полный текущий аудит диска, БД и всех каталогов.",
       "source_refs": [
         "backend/app/storage.py",
         "docs/deployment/LOCAL-WINDOWS.md"
       ],
-      "sort_order": 320
+      "sort_order": 320,
+      "completed_work": "Пользователь подтвердил запись и проверку ALLHW/ (60 файлов) на внешнем HDD.",
+      "next_step": "При следующей работе на ПК выполнить read-only инвентаризацию HDD и синхронизировать оставшиеся сведения без перезаписи пользовательских данных."
     },
     {
       "id": "device",
@@ -666,12 +670,14 @@
       "kind": "other",
       "status": "in_progress",
       "description": "IMPORTS: входящие материалы Mainline, Premium и ALLHW на внешнем диске.",
-      "notes": "Проверено read-only 2026-11-16: IMPORTS существует, файлов пока нет. Репозиторные источники ALLHW и импортёры подтверждены отдельно; загрузка входящих наборов на внешний диск ещё не выполнялась.",
+      "notes": "Структура IMPORTS на внешнем HDD: 2026-11-17 пользователь подтвердил успешный импорт ALLHW в E:\\HW-CATALOG-DATA\\IMPORTS\\ALLHW. В наборе 60 HTML-файлов; все 60 прошли повторную проверку SHA-256, ошибок 0. Папки/наборы Mainline и Premium в рамках этой операции не обновлялись и требуют отдельной инвентаризации. Состояние всего диска удалённо не проверяется.",
       "source_refs": [
         "docs/ALL_HOT_WHEELS_IMPORTER.md",
         "docs/importers/MAINLINE_IMPORTER_SPEC.md"
       ],
-      "sort_order": 360
+      "sort_order": 360,
+      "completed_work": "ALLHW (60 HTML) загружен в IMPORTS/ALLHW и проверен по SHA-256.",
+      "next_step": "Отдельно инвентаризировать входящие материалы Mainline и Premium; затем связать ALLHW с read-only preview importer."
     },
     {
       "id": "exports",
@@ -788,13 +794,15 @@
       "kind": "domain_area",
       "status": "in_progress",
       "description": "ALLHW: HTML-архив в отдельном репозитории и read-only importer preview в HW Catalog.",
-      "notes": "Исходные HTML-страницы 1968–2026 хранятся в hotwheels-fandom-archive/ALLHW (60 файлов, MANIFEST.csv с SHA-256). В основном репозитории остаются backend/app/importers/all_hot_wheels.py и документация. Проверить полноту, повторяемость парсинга, дубли и сопоставление с Mainline; не считать Fandom и AllHW независимыми без доказательств.",
+      "notes": "Исходные HTML-страницы 1968–2026 (60 файлов) хранятся в JohnyKiska/hotwheels-fandom-archive/ALLHW; исправленный MANIFEST.csv содержит 60 SHA-256. 2026-11-17 пользователь подтвердил перенос копии на внешний HDD E:\\HW-CATALOG-DATA\\IMPORTS\\ALLHW и повторную проверку 60/60 без ошибок. В основном репозитории остаются backend/app/importers/all_hot_wheels.py и документация. Следующие этапы: полнота, повторяемость парсинга, дубли и сопоставление с Mainline; Fandom и AllHW не считать независимыми без доказательств.",
       "source_refs": [
         "https://github.com/JohnyKiska/hotwheels-fandom-archive/tree/main/ALLHW",
         "backend/app/importers/all_hot_wheels.py",
         "docs/ALL_HOT_WHEELS_IMPORTER.md"
       ],
-      "sort_order": 440
+      "sort_order": 440,
+      "completed_work": "Архив ALLHW опубликован отдельно и перенесён на HDD; целостность 60 файлов подтверждена повторной SHA-256 проверкой.",
+      "next_step": "Проверить read-only importer на локальном архиве: полноту извлечения, повторяемость, пропуски, дубли и сопоставление с Mainline."
     },
     {
       "id": "casting",
@@ -1051,7 +1059,7 @@
       "id": "pm-004",
       "title": "Обновить документацию Project Manager и актуальный срез проекта",
       "description": "Согласовать CURRENT_STATE, ROADMAP и SESSION_HANDOFF с актуальной веткой и новыми правилами управления состоянием.",
-      "status": "planned",
+      "status": "done",
       "priority": "medium",
       "workstream_id": "documentation",
       "component_id": "docsAudit",
@@ -1071,8 +1079,8 @@
         "docs/SESSION_HANDOFF.md"
       ],
       "created_at": "2026-11-16T00:00:00+07:00",
-      "updated_at": "2026-11-16T00:00:00+07:00",
-      "completed_at": null
+      "updated_at": "2026-11-17T00:00:00Z",
+      "completed_at": "2026-11-17T00:00:00Z"
     },
     {
       "id": "pm-005",
@@ -1105,7 +1113,7 @@
       "id": "pm-006",
       "title": "Проверить и актуализировать перенесённое дерево компонентов",
       "description": "Сверить 56 исторических узлов с фактическим деревом текущей ветки; уточнить пути, типы, статусы и связи с направлениями.",
-      "status": "in_progress",
+      "status": "done",
       "priority": "high",
       "workstream_id": "project-management",
       "component_id": "root",
@@ -1123,8 +1131,8 @@
         "docs/project-management/project-state.json"
       ],
       "created_at": "2026-11-16T01:18:37.023Z",
-      "updated_at": "2026-11-16T01:18:37.023Z",
-      "completed_at": null
+      "updated_at": "2026-11-17T00:00:00Z",
+      "completed_at": "2026-11-17T00:00:00Z"
     },
     {
       "id": "pm-007",
@@ -1361,6 +1369,11 @@
     {
       "date": "2026-11-16T07:16:30Z",
       "summary": "Добавлена первая реализация backup/restore: SQLite online backup, manifest SHA-256, строгая проверка путей и содержимого snapshot, восстановление в пустой каталог с новой DEVICE_INFO identity, Windows-команды с проверкой backend PID/process и автоматические тесты. GitHub Actions выполняет тестовый workflow; ручная проверка на disposable Windows storage и создание независимой копии остаются следующими этапами.",
+      "commit": null
+    },
+    {
+      "date": "2026-11-17T00:00:00Z",
+      "summary": "Подтверждён перенос ALLHW на внешний HDD: 60 HTML-файлов в IMPORTS/ALLHW, повторная проверка SHA-256 на HDD завершилась без ошибок. Обновлены статусы и сведения Project Navigator; полный аудит HDD остаётся отдельной задачей.",
       "commit": null
     }
   ]
