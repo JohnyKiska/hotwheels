@@ -13,6 +13,7 @@ from .account_api import router as account_router
 from .admin_catalog_api import router as admin_catalog_router
 from .admin_users_api import router as admin_users_router
 from .admin_moderation_api import router as admin_moderation_router
+from .admin_media_api import router as admin_media_router
 from .oauth_api import router as oauth_router
 from .password_api import router as password_router
 from .importers.all_hot_wheels import preview_all_hot_wheels_html
@@ -32,6 +33,7 @@ app.include_router(account_router)
 app.include_router(admin_catalog_router)
 app.include_router(admin_users_router)
 app.include_router(admin_moderation_router)
+app.include_router(admin_media_router)
 app.include_router(oauth_router)
 app.include_router(password_router)
 

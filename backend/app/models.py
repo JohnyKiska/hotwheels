@@ -278,6 +278,7 @@ class Evidence(TimestampMixin, Base):
     variant_links: Mapped[list[EvidenceCastingVariant]] = relationship(back_populates="evidence", cascade="all, delete-orphan")
     release_links: Mapped[list[EvidenceRelease]] = relationship(back_populates="evidence", cascade="all, delete-orphan")
     series_links: Mapped[list[EvidenceSeries]] = relationship(back_populates="evidence", cascade="all, delete-orphan")
+    media_links: Mapped[list[MediaAssetEvidence]] = relationship(back_populates="evidence", cascade="all, delete-orphan")
 
 
 class MediaAsset(TimestampMixin, Base):
@@ -292,8 +293,32 @@ class MediaAsset(TimestampMixin, Base):
     checksum_sha256: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
     description: Mapped[str | None] = mapped_column(Text)
     captured_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    category: Mapped[str] = mapped_column(String(32), default="reference_photo", nullable=False)
+    angle: Mapped[str | None] = mapped_column(String(32))
+    status: Mapped[str] = mapped_column(String(24), default="unreviewed", nullable=False)
+    rights_status: Mapped[str] = mapped_column(String(32), default="unknown", nullable=False)
+    rights_holder: Mapped[str | None] = mapped_column(String(240))
+    rights_notes: Mapped[str | None] = mapped_column(Text)
+    contributor_name: Mapped[str | None] = mapped_column(String(240))
+    photographer_name: Mapped[str | None] = mapped_column(String(240))
+    uploader_user_id: Mapped[str | None] = mapped_column(String(36), index=True)
+    original_media_asset_id: Mapped[str | None] = mapped_column(String(36), index=True)
+    width: Mapped[int | None] = mapped_column(Integer)
+    height: Mapped[int | None] = mapped_column(Integer)
+    byte_size: Mapped[int | None] = mapped_column(Integer)
+    is_featured: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
 
     source_record: Mapped[SourceRecord] = relationship(back_populates="media_assets")
+    evidence_links: Mapped[list[MediaAssetEvidence]] = relationship(back_populates="media_asset", cascade="all, delete-orphan")
+ 
+
+class MediaAssetEvidence(Base):
+    __tablename__ = "media_asset_evidence"
+    media_asset_id: Mapped[str] = mapped_column(ForeignKey("media_assets.id", ondelete="RESTRICT"), primary_key=True)
+    evidence_id: Mapped[str] = mapped_column(ForeignKey("evidence.id", ondelete="RESTRICT"), primary_key=True)
+    role: Mapped[str] = mapped_column(String(32), default="supports", nullable=False)
+    media_asset: Mapped[MediaAsset] = relationship(back_populates="evidence_links")
+    evidence: Mapped[Evidence] = relationship(back_populates="media_links")
 
 
 class EvidenceCasting(Base):
