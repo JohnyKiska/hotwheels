@@ -71,7 +71,7 @@ const setView = view => {
  ["overview","castings","releases","series","history"].forEach(v=>$("view-"+v).hidden=v!==view);
  const titles={overview:["Обзор каталога","Рабочее пространство для управления отливками и выпусками."],castings:["Отливки","Базовые конструкции Hot Wheels и их конструктивные варианты."],releases:["Выпуски","Каталожные выпуски с годом, номером и связями."],series:["Серии","Управление сериями каталога."],history:["История изменений","Аудит действий пользователей и изменений каталога."]};
  $("pageTitle").textContent=titles[view][0];$("pageSubtitle").textContent=titles[view][1];$("crumbCurrent").textContent=titles[view][0];
- $("newBtn").disabled=true;$("newBtn").title="Создание подключим следующим этапом";
+ $("newBtn").disabled=!["castings","releases"].includes(view);$("newBtn").textContent=view==="releases"?"＋ Новый выпуск":"＋ Новая отливка";$("newBtn").title=$("newBtn").disabled?"Создание доступно в разделах «Отливки» и «Выпуски»":"";
  if(view==="castings")loadCastings();if(view==="releases")loadReleases();
 };
 const status = value=>'<span class="status s-'+esc(value)+'">'+esc(statusLabel[value]||value||"Не указан")+'</span>';
@@ -125,6 +125,7 @@ const openDetail = async (type,id) => {
   html+='</div>';
   if(item.description)html+='<div class="section-title">Описание</div><p>'+esc(item.description)+'</p>';
   if(type==="casting"){html+='<div class="section-title">Конструктивные варианты ('+(item.variants||[]).length+')</div>';html+=(item.variants||[]).length?item.variants.map(v=>'<div class="variant"><div><b>'+esc(v.name||"Без названия")+'</b><small>'+esc(v.description||"Описание отсутствует")+'</small></div>'+status(v.status)+'</div>').join(""):'<p class="hint">Варианты пока не заведены.</p>';}
+  if(type==="casting")html+='<button class="btn" id="addVariantBtn" type="button">＋ Добавить вариант</button><form class="edit-form" id="variantForm" hidden><div class="section-title">Новый конструктивный вариант</div><div class="field"><label>Название варианта</label><input name="name" maxlength="240" placeholder="Например: Opening Hood"></div><div class="field"><label>Описание</label><textarea name="description"></textarea></div><div class="field"><label>Причина создания *</label><textarea name="reason" required minlength="1" maxlength="4000"></textarea></div><div class="form-actions"><button type="button" class="btn" id="cancelVariant">Отмена</button><button type="submit" class="btn primary">Создать вариант</button></div></form>';
   else{html+='<div class="section-title">Серии</div><p class="hint">'+((item.series||[]).map(s=>esc(s.name)).join(", ")||"Связанные серии не указаны.")+'</p>';}
   html+='<button class="btn primary" id="toggleEdit">✎ Редактировать</button><form class="edit-form" id="editForm" hidden><div class="section-title" style="margin:0">Изменение записи</div>';
   if(type==="casting"){html+='<div class="field"><label>Название</label><input name="name" maxlength="240" required value="'+esc(item.name)+'"></div><div class="field"><label>Описание</label><textarea name="description">'+esc(item.description||"")+'</textarea></div><div class="field"><label>Первый известный год</label><input name="first_known_year" type="number" min="1968" max="2100" value="'+esc(item.first_known_year??"")+'"></div>';}
@@ -133,7 +134,7 @@ const openDetail = async (type,id) => {
   $("drawerBody").innerHTML=html;
   $("toggleEdit").addEventListener("click",()=>{$("editForm").hidden=!$("editForm").hidden;$("toggleEdit").hidden=true;});
   $("cancelEdit").addEventListener("click",()=>{$("editForm").hidden=true;$("toggleEdit").hidden=false;});
-  $("editForm").addEventListener("submit",event=>saveEdit(event,type,id));
+  $("editForm").addEventListener("submit",event=>saveEdit(event,type,id));if(type==="casting"){$("addVariantBtn").addEventListener("click",()=>{$("variantForm").hidden=!$("variantForm").hidden;});$("cancelVariant").addEventListener("click",()=>{$("variantForm").hidden=true;});$("variantForm").addEventListener("submit",event=>saveVariant(event,id));}
  }catch(error){$("drawerTitle").textContent="Не удалось открыть запись";$("drawerBody").innerHTML='<div class="alert error">'+esc(error.message)+'</div>';}
 };
 const saveEdit = async (event,type,id) => {
@@ -144,10 +145,72 @@ const saveEdit = async (event,type,id) => {
  try{await api("/api/v1/admin/catalog/"+(type==="casting"?"castings/":"releases/")+encodeURIComponent(id),{method:"PATCH",body:JSON.stringify(payload)});toast("Изменения сохранены");await openDetail(type,id);if(type==="casting")await loadCastings();else await loadReleases();await loadOverview();}
  catch(error){showAlert(error.message,"error");toast("Не удалось сохранить");button.disabled=false;button.textContent="Сохранить изменения";}
 };
+const openCreate = async type => {
+ openDrawer();
+ const isCasting=type==="casting";
+ $("drawerTitle").textContent=isCasting?"Новая отливка":"Новый выпуск";
+ $("drawerSub").textContent="Создание записи каталога";
+ $("drawerBody").innerHTML='<form class="edit-form" id="createForm"><div class="section-title">Основные данные</div>'+
+ (isCasting?
+  '<div class="field"><label>Название *</label><input name="name" maxlength="240" required autofocus></div><div class="field"><label>Первый известный год</label><input name="first_known_year" type="number" min="1968" max="2100"></div><div class="field"><label>Описание</label><textarea name="description"></textarea></div>':
+  '<div class="field"><label>Найти отливку *</label><input id="castingLookup" type="search" placeholder="Начни вводить название…" autocomplete="off"><select name="casting_id" id="castingSelect" required><option value="">Выбери отливку</option></select></div><div class="field"><label>Конструктивный вариант</label><select name="casting_variant_id" id="variantSelect"><option value="">Не определён</option></select></div><div class="field"><label>Год каталога</label><input name="catalog_year" type="number" min="1968" max="2100"></div><div class="field"><label>Название выпуска</label><input name="name" maxlength="240"></div><div class="field"><label>Номер ассортимента</label><input name="assortment_number" maxlength="80" placeholder="Например: 123/250"></div><div class="field"><label>Описание</label><textarea name="description"></textarea></div>')+
+ '<div class="field"><label>Статус</label><select name="status">'+Object.entries(statusLabel).map(([k,v])=>'<option value="'+k+'" '+(k==="candidate"?"selected":"")+'>'+v+'</option>').join("")+'</select></div><div class="field"><label>Причина создания *</label><textarea name="reason" required minlength="1" maxlength="4000" placeholder="Укажи источник или основание создания записи…"></textarea></div><div class="hint">Запись будет создана от твоего имени, а действие попадёт в журнал изменений.</div><div class="form-actions"><button type="button" class="btn" id="cancelCreate">Отмена</button><button type="submit" class="btn primary">Создать</button></div></form>';
+ $("cancelCreate").addEventListener("click",closeDrawer);
+ $("createForm").addEventListener("submit",event=>saveCreate(event,type));
+ if(!isCasting){
+  const loadCastingOptions=async q=>{
+   const params=new URLSearchParams({limit:"100"});
+   if(q.trim())params.set("q",q.trim());
+   const data=await api("/api/v1/admin/catalog/castings?"+params);
+   const select=$("castingSelect"),previous=select.value;
+   select.innerHTML='<option value="">Выбери отливку</option>'+data.items.map(x=>'<option value="'+esc(x.id)+'">'+esc(x.name)+'</option>').join("");
+   if(data.items.some(x=>x.id===previous))select.value=previous;
+   if(data.total>data.items.length)showAlert("Показаны первые 100 совпадений. Уточни поиск по названию.","info");
+  };
+  $("castingLookup").addEventListener("input",()=>{
+   clearTimeout(state.debounce);
+   state.debounce=setTimeout(()=>loadCastingOptions($("castingLookup").value).catch(e=>showAlert(e.message,"error")),250);
+  });
+  $("castingSelect").addEventListener("change",async()=>{
+   const select=$("variantSelect");select.innerHTML='<option value="">Не определён</option>';
+   if(!$("castingSelect").value)return;
+   try{const casting=await api("/api/v1/admin/catalog/castings/"+encodeURIComponent($("castingSelect").value));select.innerHTML='<option value="">Не определён</option>'+(casting.variants||[]).map(v=>'<option value="'+esc(v.id)+'">'+esc(v.name||"Без названия")+'</option>').join("");}
+   catch(error){showAlert(error.message,"error");}
+  });
+  try{await loadCastingOptions("");}catch(error){showAlert(error.message,"error");}
+ }
+};
+const saveCreate = async (event,type) => {
+ event.preventDefault();
+ const form=event.currentTarget,fd=new FormData(form),payload={reason:String(fd.get("reason")||"").trim(),status:String(fd.get("status")||"candidate")};
+ const keys=type==="casting"?["name","description","first_known_year"]:["casting_id","casting_variant_id","catalog_year","name","assortment_number","description"];
+ keys.forEach(key=>{
+  if(!fd.has(key))return;
+  const value=String(fd.get(key)||"").trim();
+  if(["first_known_year","catalog_year"].includes(key))payload[key]=value?Number(value):null;
+  else payload[key]=value||null;
+ });
+ const button=form.querySelector('button[type="submit"]');button.disabled=true;button.textContent="Создаю…";
+ try{
+  const path=type==="casting"?"/api/v1/admin/catalog/castings":"/api/v1/admin/catalog/releases";
+  const created=await api(path,{method:"POST",body:JSON.stringify(payload)});
+  toast(type==="casting"?"Отливка создана":"Выпуск создан");closeDrawer();
+  if(type==="casting"){setView("castings");await loadCastings();await openDetail("casting",created.id);}
+  else{setView("releases");await loadReleases();await openDetail("release",created.id);}
+  await loadOverview();
+ }catch(error){showAlert(error.message,"error");button.disabled=false;button.textContent="Создать";}
+};
+const saveVariant = async (event,castingId) => {
+ event.preventDefault();const form=event.currentTarget,fd=new FormData(form);
+ const payload={name:String(fd.get("name")||"").trim()||null,description:String(fd.get("description")||"").trim()||null,reason:String(fd.get("reason")||"").trim()};
+ const button=form.querySelector('button[type="submit"]');button.disabled=true;button.textContent="Создаю…";
+ try{await api("/api/v1/admin/catalog/castings/"+encodeURIComponent(castingId)+"/variants",{method:"POST",body:JSON.stringify(payload)});toast("Вариант отливки создан");await openDetail("casting",castingId);await loadCastings();}
+ catch(error){showAlert(error.message,"error");button.disabled=false;button.textContent="Создать вариант";}
+};
 const bindSearch=(id,fn)=>$(id).addEventListener("input",()=>{clearTimeout(state.debounce);state.debounce=setTimeout(()=>{if(state.view===fn){if(fn==="castings")state.castingPage=0;else state.releasePage=0; (fn==="castings"?loadCastings:loadReleases)();}},250);});
 document.querySelectorAll(".nav button[data-view]").forEach(b=>b.addEventListener("click",()=>!b.disabled&&setView(b.dataset.view)));
 document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>setView(b.dataset.go)));
-$("refreshBtn").addEventListener("click",()=>{if(state.view==="overview")loadOverview();else if(state.view==="castings")loadCastings();else if(state.view==="releases")loadReleases();});
+$("newBtn").addEventListener("click",()=>openCreate(state.view==="releases"?"release":"casting"));$("refreshBtn").addEventListener("click",()=>{if(state.view==="overview")loadOverview();else if(state.view==="castings")loadCastings();else if(state.view==="releases")loadReleases();});
 $("castingSearch").addEventListener("input",()=>{clearTimeout(state.debounce);state.debounce=setTimeout(()=>{state.castingPage=0;loadCastings()},250)});
 $("releaseSearch").addEventListener("input",()=>{clearTimeout(state.debounce);state.debounce=setTimeout(()=>{state.releasePage=0;loadReleases()},250)});
 ["castingStatus"].forEach(id=>$(id).addEventListener("change",()=>{state.castingPage=0;loadCastings()}));
