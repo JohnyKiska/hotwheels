@@ -94,3 +94,36 @@ python .\tools\scrapling_pilot\extract_cards.py @htmlFiles --output .\tools\scra
 Нет production-зависимости, сетевого краулера, прокси-ротации, браузерной
 автоматизации, обхода ограничений доступа, записи в БД или интеграции
 импортёра. Любое извлечённое значение остаётся кандидатом до проверки.
+
+
+## Выгрузка фотографий для ручной проверки (v3)
+
+После того как `scrapling-pilot-v3.json` уже находится в `pilot-output`,
+запусти из корня репозитория:
+
+```powershell
+python .\tools\scrapling_pilot\pilot-output\export_images.py `
+  --input .\tools\scrapling_pilot\pilot-output\scrapling-pilot-v3.json `
+  --output-dir .\tools\scrapling_pilot\pilot-output\photos
+```
+
+Или из папки `tools\scrapling_pilot\pilot-output`:
+
+```powershell
+python .\export_images.py --input .\scrapling-pilot-v3.json --output-dir .\photos
+```
+
+Скрипт:
+- создаёт отдельные папки по страницам/моделям;
+- для прямых ссылок скачивает указанный ресурс;
+- для ссылок на Fandom File page пытается извлечь полноразмерный URL из HTML
+  страницы файла; если это не удаётся, скачивает сохранённую миниатюру;
+- не удаляет повторы и сомнительные изображения;
+- создаёт `photo_manifest.csv` рядом с папкой `photos`;
+- оставляет пустыми поля `photo_type_manual` и `quality_manual`, чтобы их
+  можно было заполнить после визуального просмотра;
+- сохраняет исходные URL, фактический URL загрузки, размер файла и ошибки.
+
+Выгрузка выполняет сетевые GET-запросы только к URL, уже записанным в JSON,
+с короткой паузой между изображениями. Учитывай условия использования Fandom.
+Она не меняет JSON-отчёт, исходный HTML, код импортёра или базу данных.
