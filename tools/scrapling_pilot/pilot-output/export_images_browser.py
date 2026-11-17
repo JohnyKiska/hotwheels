@@ -273,7 +273,13 @@ def main() -> int:
 
                     try:
                         if parent:
-                            image_url, url_source = resolve_full_image_url(page, parent, args.timeout)
+                            try:
+                                image_url, url_source = resolve_full_image_url(page, parent, args.timeout)
+                            except Exception as file_page_error:
+                                if not thumbnail:
+                                    raise
+                                print(f"[{index}/{len(records)}] File page unavailable, trying thumbnail: {file_page_error}")
+                                image_url, url_source = thumbnail, "thumbnail_fallback_after_file_page_error"
                         elif thumbnail:
                             image_url, url_source = thumbnail, "thumbnail_fallback"
                         else:
