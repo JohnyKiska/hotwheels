@@ -11,6 +11,7 @@ from .db import get_db
 from .casting_grouping_api import router as casting_grouping_router
 from .account_api import router as account_router
 from .admin_catalog_api import router as admin_catalog_router
+from .admin_users_api import router as admin_users_router
 from .oauth_api import router as oauth_router
 from .password_api import router as password_router
 from .importers.all_hot_wheels import preview_all_hot_wheels_html
@@ -35,6 +36,7 @@ app = FastAPI(
 app.include_router(casting_grouping_router)
 app.include_router(account_router)
 app.include_router(admin_catalog_router)
+app.include_router(admin_users_router)
 app.include_router(oauth_router)
 app.include_router(password_router)
 
