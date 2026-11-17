@@ -107,11 +107,13 @@ def wait_for_manual_challenge(page: Page, label: str) -> None:
 
 def navigate(page: Page, url: str, timeout_ms: int) -> None:
     response = page.goto(url, wait_until="domcontentloaded", timeout=timeout_ms)
+    challenge_was_present = is_cloudflare_challenge(page)
     wait_for_manual_challenge(page, url)
     if response is not None and response.status >= 400:
-        # A challenge may initially return an error status; after manual
-        # verification the page state is checked again by the image/file logic.
-        if not is_cloudflare_challenge(page):
+        # Cloudflare can return an initial 403 challenge response. If the user
+        # has just completed that challenge, do not treat the original status
+        # as the final result; the subsequent DOM/image check is authoritative.
+        if not challenge_was_present and not is_cloudflare_challenge(page):
             raise RuntimeError(f"HTTP {response.status} while opening {url}")
     page.wait_for_timeout(350)
 
