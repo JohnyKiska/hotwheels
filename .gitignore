@@ -22,3 +22,4 @@ venv/
 # Local catalog storage and backups
 /HW-CATALOG/
 /BACKUPS/
+/backend/media/
