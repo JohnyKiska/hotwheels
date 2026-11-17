@@ -61,3 +61,8 @@ A component's status is not a task status. Do not calculate project completion b
 ## Current implementation boundary
 
 The dashboard opens on a hierarchical project navigator with all component groups and their descendants, search, status filtering, expand/collapse controls, component details, linked tasks, and component progress/next-step fields. It also shows workstreams, tasks, components, decisions, blockers and changelog, and supports editing/creating tasks, components, decisions and blockers. Changes are validated against the embedded JSON Schema and cross-reference rules before being applied to page state. Blockers can be linked to existing tasks. Local drafts and JSON import/export are supported. Browser-level automated tests, GitHub write-back and external-drive synchronization remain follow-up work.
+
+
+## External-drive snapshot
+
+After the canonical Project Manager files have been reviewed and committed to `integration/catalog-foundation`, the approved portable snapshot may be copied as a complete directory to `HW-CATALOG-DATA/PROJECT-MANAGEMENT/` (including `index.html`, `project-state.json`, `project-state.schema.json`, and this README). Preserve the previous destination before replacement and verify SHA-256 after copying. Do not copy the repository wholesale, and do not touch `DATABASE`, `MEDIA`, `IMPORTS`, `EXPORTS`, `BACKUPS`, `LOGS`, `DEVICE_INFO.json`, or machine-specific settings as part of this Project Manager sync. The external copy is a portable snapshot, not the source of truth; GitHub remains canonical.
