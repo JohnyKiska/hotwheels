@@ -17,7 +17,7 @@ MEDIA_COLUMNS = (
     sa.Column("rights_notes", sa.Text(), nullable=True),
     sa.Column("contributor_name", sa.String(length=240), nullable=True),
     sa.Column("photographer_name", sa.String(length=240), nullable=True),
-    sa.Column("uploader_user_id", sa.String(length=36), sa.ForeignKey("users.id", ondelete="RESTRICT"), nullable=True),
+    sa.Column("uploader_user_id", sa.String(length=36), nullable=True),
     sa.Column("original_media_asset_id", sa.String(length=36), nullable=True),
     sa.Column("width", sa.Integer(), nullable=True),
     sa.Column("height", sa.Integer(), nullable=True),
