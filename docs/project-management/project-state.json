@@ -173,7 +173,7 @@
       "kind": "service",
       "status": "done",
       "description": "Разрешение DATABASE_URL и HW_CATALOG_DATA_DIR, проверка внешнего хранилища и DEVICE_INFO.json; локальная dev-БД используется только без явной внешней конфигурации.",
-      "notes": "Код централизован в backend/app/storage.py; проверяются существование каталога, UUID storage_id, layout_version и папка DATABASE. Runtime-проверка конкретного HDD в рамках GitHub-аудита не выполнялась.",
+      "notes": "Backend storage layer: backend/app/storage.py. На внешнем HDD HW-CATALOG-DATA (ADATA SH93, том E:, FAT32) подтверждены DEVICE_INFO.json и перенос ALLHW (60 файлов, SHA-256 60/60). Рабочая БД остаётся в DATABASE/catalog.db. Общая синхронизация репозитория не настроена; Project Manager будет копироваться отдельным ограниченным snapshot в PROJECT-MANAGEMENT, не затрагивая DATABASE, MEDIA, IMPORTS, EXPORTS, BACKUPS, LOGS и DEVICE_INFO.json.",
       "source_refs": [
         "backend/app/storage.py",
         "backend/app/init_storage.py",
@@ -322,7 +322,7 @@
       "kind": "directory",
       "status": "in_progress",
       "description": "Архив исходных HTML-страниц Hot Wheels Wiki / All Hot Wheels по годам в отдельном репозитории.",
-      "notes": "60 исходных HTML-файлов за 1968–2026 годы хранятся в JohnyKiska/hotwheels-fandom-archive/ALLHW. MANIFEST.csv содержит 60 записей с размерами и SHA-256. 2026-11-16 исправленный архив main проверен локально: 60 записей, 0 ошибок; затем все 60 файлов скопированы на внешний HDD в E:\\\\HW-CATALOG-DATA\\\\IMPORTS\\\\ALLHW и повторно сверены по размеру и SHA-256: 60/60, ошибок 0. Read-only importer остаётся в основном репозитории. Полноту исходного набора и корректность парсинга предстоит проверять отдельно.",
+      "notes": "60 исходных HTML-файлов за 1968–2026 годы хранятся в JohnyKiska/hotwheels-fandom-archive/ALLHW. MANIFEST.csv содержит 60 записей с размерами и SHA-256. 2026-11-16 исправленный архив main проверен локально: 60 записей, 0 ошибок; затем все 60 файлов скопированы на внешний HDD в E:\\HW-CATALOG-DATA\\IMPORTS\\ALLHW и повторно сверены по размеру и SHA-256: 60/60, ошибок 0. Read-only importer остаётся в основном репозитории. Полноту исходного набора и корректность парсинга предстоит проверять отдельно.",
       "source_refs": [
         "https://github.com/JohnyKiska/hotwheels-fandom-archive/tree/main/ALLHW",
         "https://github.com/JohnyKiska/hotwheels-fandom-archive/blob/main/MANIFEST.csv",
@@ -603,7 +603,7 @@
       "kind": "external_system",
       "status": "not_assessed",
       "description": "HW-CATALOG-DATA/ — внешнее хранилище данных, отделённое от Git-репозитория.",
-      "notes": "Внешнее хранилище HW-CATALOG-DATA на ADATA SH93, том E:, FAT32. 2026-11-16 подтверждён перенос ALLHW: 60 HTML-файлов в IMPORTS/ALLHW, SHA-256 проверен до и после копирования, ошибок 0. DATABASE/catalog.db и BACKUPS не изменялись. Остальные сведения о БД и структуре относятся к read-only проверке 2026-11-16; независимой физической резервной копии всё ещё нет.",
+      "notes": "Внешнее хранилище HW-CATALOG-DATA на ADATA SH93, том E:, FAT32. 2026-11-16 подтверждён перенос ALLHW: 60 HTML-файлов в IMPORTS/ALLHW, SHA-256 проверен до и после копирования, ошибок 0. DATABASE/catalog.db и BACKUPS не изменялись. Независимая физическая резервная копия всё ещё не подтверждена. Точечная копия Project Manager планируется в PROJECT-MANAGEMENT после слияния и проверки canonical state.",
       "source_refs": [
         "backend/app/storage.py",
         "docs/deployment/LOCAL-WINDOWS.md"
