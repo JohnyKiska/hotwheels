@@ -198,3 +198,86 @@ def test_release_list_and_detail_are_permission_protected_and_include_links(api_
 
     denied, _ = authenticated_client(api_factory, permissions=())
     assert denied.get("/api/v1/admin/catalog/releases").status_code == 403
+
+
+def test_release_patch_audits_changes_and_rejects_cross_casting_variant(api_factory):
+    from app.models import CastingVariant, Release
+
+    with api_factory() as db:
+        first = Casting(name="Custom Camaro")
+        second = Casting(name="BMW 323")
+        db.add_all([first, second])
+        db.flush()
+        valid_variant = CastingVariant(casting_id=first.id, name="Opening Hood")
+        foreign_variant = CastingVariant(casting_id=second.id, name="Different base")
+        db.add_all([valid_variant, foreign_variant])
+        db.flush()
+        release = Release(
+            casting_id=first.id, casting_variant_id=valid_variant.id,
+            catalog_year=2025, name="Custom Camaro", assortment_number="123/250",
+        )
+        db.add(release)
+        db.commit()
+        release_id = release.id
+        foreign_variant_id = foreign_variant.id
+
+    client, user_id = authenticated_client(api_factory)
+    headers = {
+        "Origin": "https://catalog.example.com",
+        "X-CSRF-Token": "csrf-test-token",
+    }
+    invalid = client.patch(
+        f"/api/v1/admin/catalog/releases/{release_id}",
+        json={"casting_variant_id": foreign_variant_id, "reason": "Wrong casting"},
+        headers=headers,
+    )
+    assert invalid.status_code == 422
+
+    updated = client.patch(
+        f"/api/v1/admin/catalog/releases/{release_id}",
+        json={"catalog_year": 2026, "name": "Custom Camaro (2026)", "reason": "Verified catalog"},
+        headers=headers,
+    )
+    assert updated.status_code == 200
+    assert updated.json()["catalog_year"] == 2026
+
+    with api_factory() as db:
+        event = db.scalar(select(ChangeLog).where(ChangeLog.entity_id == release_id))
+        assert event is not None
+        assert event.entity_type == "release"
+        assert event.actor_id == user_id
+        assert event.old_values == {"catalog_year": 2025, "name": "Custom Camaro"}
+        assert event.new_values == {"catalog_year": 2026, "name": "Custom Camaro (2026)"}
+
+
+def test_casting_variant_patch_is_permissioned_and_audited(api_factory):
+    from app.models import CastingVariant
+
+    with api_factory() as db:
+        casting = Casting(name="Custom Camaro")
+        db.add(casting)
+        db.flush()
+        variant = CastingVariant(casting_id=casting.id, name="Opening Hood")
+        db.add(variant)
+        db.commit()
+        variant_id = variant.id
+
+    client, user_id = authenticated_client(api_factory)
+    response = client.patch(
+        f"/api/v1/admin/catalog/variants/{variant_id}",
+        json={"status": "confirmed", "reason": "Physical comparison completed"},
+        headers={
+            "Origin": "https://catalog.example.com",
+            "X-CSRF-Token": "csrf-test-token",
+        },
+    )
+    assert response.status_code == 200
+    assert response.json()["status"] == "confirmed"
+
+    with api_factory() as db:
+        event = db.scalar(select(ChangeLog).where(ChangeLog.entity_id == variant_id))
+        assert event is not None
+        assert event.entity_type == "casting_variant"
+        assert event.actor_id == user_id
+        assert event.old_values == {"status": "candidate"}
+        assert event.new_values == {"status": "confirmed"}
