@@ -151,3 +151,50 @@ def test_casting_patch_rejects_empty_reason_and_unknown_fields(api_factory):
 
     with api_factory() as db:
         assert db.scalar(select(ChangeLog).where(ChangeLog.entity_id == casting_id)) is None
+
+
+
+def test_release_list_and_detail_are_permission_protected_and_include_links(api_factory):
+    from app.models import CastingVariant, Release, Series, ReleaseSeries
+
+    with api_factory() as db:
+        casting = Casting(name="Custom Camaro", status="confirmed")
+        db.add(casting)
+        db.flush()
+        variant = CastingVariant(
+            casting_id=casting.id, name="Opening Hood", status="confirmed"
+        )
+        series = Series(name="Then and Now", status="confirmed")
+        db.add_all([variant, series])
+        db.flush()
+        release = Release(
+            casting_id=casting.id,
+            casting_variant_id=variant.id,
+            catalog_year=2025,
+            name="Custom Camaro",
+            assortment_number="123/250",
+            status="confirmed",
+        )
+        db.add(release)
+        db.flush()
+        db.add(ReleaseSeries(release_id=release.id, series_id=series.id))
+        release_id = release.id
+        db.commit()
+
+    client, _ = authenticated_client(api_factory)
+    listed = client.get(
+        "/api/v1/admin/catalog/releases?q=camaro&catalog_year=2025"
+    )
+    assert listed.status_code == 200
+    assert listed.json()["total"] == 1
+    item = listed.json()["items"][0]
+    assert item["casting_name"] == "Custom Camaro"
+    assert item["casting_variant_name"] == "Opening Hood"
+    assert item["series"] == [{"id": series.id, "name": "Then and Now"}]
+
+    detail = client.get(f"/api/v1/admin/catalog/releases/{release_id}")
+    assert detail.status_code == 200
+    assert detail.json()["assortment_number"] == "123/250"
+
+    denied, _ = authenticated_client(api_factory, permissions=())
+    assert denied.get("/api/v1/admin/catalog/releases").status_code == 403
