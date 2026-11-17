@@ -110,6 +110,7 @@ def list_users(
         )
         filters.append(or_(
             User.display_name.ilike(term),
+            User.id.ilike(term),
             User.id.in_(matching_email_ids),
         ))
     total = db.scalar(select(func.count(User.id)).where(*filters)) or 0
@@ -272,6 +273,15 @@ def patch_user_status(
         raise HTTPException(status_code=409, detail="You cannot suspend your own account.")
     if _is_super_admin(db, target.id):
         raise HTTPException(status_code=403, detail="Super Admin accounts cannot be suspended here.")
+    target_is_admin = db.scalar(
+        select(UserRole.id).join(Role, Role.id == UserRole.role_id).where(
+            UserRole.user_id == target.id, Role.code == "admin",
+            UserRole.revoked_at.is_(None),
+            or_(UserRole.expires_at.is_(None), UserRole.expires_at > utc_now()),
+        ).limit(1)
+    ) is not None
+    if target_is_admin and not _is_super_admin(db, actor.id):
+        raise HTTPException(status_code=403, detail="Only a Super Admin can suspend an Administrator.")
     if target.status not in {"active", "suspended"}:
         raise HTTPException(status_code=409, detail="Only active or suspended accounts can change status.")
     if target.status == body.status:
