@@ -206,3 +206,13 @@
 - Endpoint проверен тестами на отсутствие записей SourceRecord/Evidence/Conflict и отсутствие catalog mutations.
 
 - Backend API deployment target, persistent database hosting, and API authentication are not configured. The current backend includes write-capable conflict resolution endpoints, so public browser access/CORS must not be enabled until authentication and deployment boundaries are designed.
+
+## Media storage and upload · 2026-11-17
+
+- PR #116 (Media Library metadata/API) merged into `integration/catalog-foundation`; merge commit `c6512c0e31e0722f17c425aa9dbf9a43014419ce`.
+- PR #117 (filesystem upload + thumbnails) is open against `integration/catalog-foundation`. Latest head: `bc7acfbab18c0ffb7f09da0558fafe5ba4db799c`. GitHub Actions checks for this head completed successfully, including backend tests, clean/repeat SQLite and PostgreSQL migrations, PostgreSQL append-only enforcement and staging Compose validation. Confirmed image build/check conclusion through the run before merge; do not treat an open PR as merged.
+- Upload API accepts JPEG/PNG/WEBP up to 15 MiB and 40 MP, preserves original bytes, computes SHA-256, rejects exact duplicates, and creates separate 640 px WEBP thumbnails.
+- File routes are authenticated; upload requires catalog.create, CSRF and audit reason. Rights default to unknown. No public image publishing.
+- Media files are outside Git and database. Local root: `HW_CATALOG_MEDIA_DIR`; external-drive mode: `HW_CATALOG_DATA_DIR/MEDIA`; development fallback: `backend/media`. Explicit external storage configuration fails closed if its initialized media directory is unavailable.
+- Staging Compose declares persistent `media_data` volume. The volume still needs to be included in backup/restore operations.
+- The upload UI and physical HDD round-trip test are deliberately deferred to the next work session. External drive contents were not modified or verified by this GitHub-side work.

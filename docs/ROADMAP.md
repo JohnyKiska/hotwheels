@@ -398,3 +398,17 @@ Production deployment: предпочтительно same-origin HTTPS для �
 - [ ] Перейти на PostgreSQL только при появлении постоянно работающего сервера или необходимости многопользовательского доступа.
 
 Инструкция: docs/deployment/LOCAL-WINDOWS.md. Рабочая SQLite-база и пользовательские данные остаются вне Git.
+
+### Media library: filesystem upload and external storage · 2026-11-17
+
+- [x] Merge metadata foundation: PR #116 (Media Library, metadata, source/evidence links, audit).
+- [x] Implement protected image upload API in PR #117: JPEG/PNG/WEBP, 15 MiB / 40 MP limits, content validation, SHA-256 deduplication, original preservation, separate WebP thumbnails, authenticated file routes.
+- [x] Add persistent staging Docker volume for media and document storage configuration.
+- [x] Verify latest PR #117 CI: backend tests, SQLite/PostgreSQL clean and repeat migrations, append-only enforcement and Compose validation passed.
+- [ ] Merge PR #117 into `integration/catalog-foundation` after final review.
+- [ ] Add upload controls and thumbnail previews to the Media Library admin UI.
+- [ ] Run a physical read/write/hash round-trip against the external HDD on Windows; do not assume GitHub CI proves local-drive availability.
+- [ ] Include MEDIA in backup/restore and test restore to a disposable directory.
+- [ ] Pilot eBay listing/photo ingestion after API access and rights/terms review.
+
+Original images are never overwritten by thumbnail generation. Unknown image rights do not permit public publication.

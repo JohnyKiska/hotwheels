@@ -1,59 +1,21 @@
 # HW Catalog · передача контекста
 
-**Обновлено:** 2026-11-16  
+**Обновлено:** 2026-11-17  
 **Рабочая ветка:** `integration/catalog-foundation`
 
 ## Самое важное сейчас
 
-GitHub выбран главным источником истины для кода, документации и состояния Project Manager. Внешний диск будет отдельной синхронизируемой копией и местом хранения данных, исключённых из Git. Не добавлять внешнюю SQLite БД или секреты в репозиторий.
+GitHub остаётся каноническим источником кода, документации и Project Manager. Внешний диск `E:\HW-CATALOG-DATA` содержит рабочие данные, которые не зеркалируются в Git. Не копировать репозиторий целиком и не затрагивать `DATABASE`, `MEDIA`, `IMPORTS`, `EXPORTS`, `BACKUPS`, `LOGS` или `DEVICE_INFO.json` при синхронизации Project Manager.
 
-### Project Manager: актуальные файлы
+### Последнее состояние · 2026-11-17
 
-- `docs/project-management/index.html` — dashboard.
-- `docs/project-management/project-state.json` — canonical состояние.
-- `docs/project-management/project-state.schema.json` — JSON Schema v1.
-- `docs/project-management/README.md` — инструкция запуска и workflow.
+- PR #116 Media Library metadata/API merged в integration: `c6512c0e31e0722f17c425aa9dbf9a43014419ce`.
+- PR #117 Secure media uploads открыт в integration; актуальный head на момент handoff: `bc7acfbab18c0ffb7f09da0558fafe5ba4db799c`. CI завершился успешно: backend tests, SQLite/PostgreSQL migrations (clean + repeat), append-only enforcement и staging Compose.
+- PR #117 ещё не смержен. UI загрузки отложен до следующей сессии.
+- Подготовлен `scripts/windows/sync-project-manager-to-external.ps1` и инструкция `docs/deployment/EXTERNAL_STORAGE_SYNC.md`. Они синхронизируют только четыре файла Project Manager в `PROJECT-MANAGEMENT`, с staging, SHA-256 и сохранением предыдущей версии. Физический запуск ожидает merge документации и обновления локальной integration-ветки.
+- Физический внешний HDD этой сессией не проверялся и не изменялся. Скрипт синхронизации не запускался. Не считать snapshot скопированным.
+- `main` не изменялся.
 
-Историческое дерево старого dashboard перенесено в 56 компонентов. Оно ещё не прошло полную сверку с текущим репозиторием. Старые заметки и статусы не считать подтверждением актуальной реализации.
-
-### Как открыть dashboard локально
-
-Из корня репозитория в PowerShell:
-
-```powershell
-py -m http.server 8000
-```
-
-Открыть `http://localhost:8000/docs/project-management/`.
-
-Не открывать HTML напрямую через `file://`: dashboard загружает `project-state.json` через fetch.
-
-### Workflow редактирования
-
-1. Dashboard загружает canonical JSON из GitHub.
-2. Изменения в интерфейсе сначала существуют в памяти страницы.
-3. **Save draft** сохраняет черновик только в localStorage текущего браузера.
-4. **Export JSON** выгружает полный файл состояния.
-5. Перед коммитом проверить экспорт, затем обновить `docs/project-management/project-state.json` в GitHub.
-6. После коммита перезагрузить dashboard и убедиться, что загружена новая версия.
-
-Прямой GitHub write-back не реализован намеренно. Не помещать GitHub token в статический HTML.
-
-### Следующие задачи
-
-1. Проверить 56 компонентов по фактическому дереву репозитория и актуализировать пути/статусы.
-2. Полная проверка по JSON Schema, уникальности ID и связей сущностей реализована. Следующий шаг: браузерное тестирование интерфейса.
-3. Протестировать dashboard в браузере: загрузка, редактирование, черновик, импорт, экспорт, повреждённый JSON, узкий экран.
-4. Создание и редактирование компонентов, решений и блокеров реализовано; у блокеров есть привязка к задачам. Следующий этап: браузерное тестирование.
-5. Спроектировать синхронизацию внешнего диска отдельно от кода и БД.
-
-### Остальные важные ограничения проекта
-
-- Не делать полный merge старых веток без выборочного аудита.
-- Не направлять изменения в `main` без отдельной проверки и согласования.
-- Import preview pipeline остаётся read-only: никаких автоматических записей или auto-select Release.
-- Backend deployment, постоянное хранилище и API authentication требуют отдельного staging/E2E review.
-- Пользовательская БД и данные на внешнем диске остаются вне Git.
 
 ## Исторические handoff-записи
 
