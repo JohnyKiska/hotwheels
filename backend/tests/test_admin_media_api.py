@@ -73,7 +73,7 @@ def test_media_source_record_and_asset_creation_are_audited(api_factory):
     client, user_id, headers = authenticated_client(api_factory)
     source = client.post(
         "/api/v1/admin/media/sources",
-        json={"name": "eBay", "source_type": "marketplace", "base_url": "https://www.ebay.com"},
+        json={"name": "eBay", "source_type": "marketplace", "base_url": "https://www.ebay.com", "reason": "Register eBay as a source"},
         headers=headers,
     )
     assert source.status_code == 200
@@ -218,7 +218,7 @@ def test_media_asset_can_link_to_evidence(api_factory):
     client, _, headers = authenticated_client(api_factory)
     linked = client.post(
         f"/api/v1/admin/media/assets/{asset_id}/evidence",
-        json={"evidence_id": evidence_id, "role": "supports"},
+        json={"evidence_id": evidence_id, "role": "supports", "reason": "This image supports the observed number"},
         headers=headers,
     )
     assert linked.status_code == 200
