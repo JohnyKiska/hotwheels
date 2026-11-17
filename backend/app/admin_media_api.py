@@ -95,7 +95,7 @@ class EvidenceLinkCreate(BaseModel):
 
 
 def _safe_storage_key(value: str) -> str:
-    if "\\" in value or value.startswith("/") or re.match(r"^[A-Za-z]:", value):
+    if not value.strip() or "\\" in value or value.startswith("/") or re.match(r"^[A-Za-z]:", value):
         raise HTTPException(status_code=422, detail="storage_key must be a relative POSIX path.")
     path = PurePosixPath(value)
     if not path.parts or any(part in ("", ".", "..") for part in path.parts):
