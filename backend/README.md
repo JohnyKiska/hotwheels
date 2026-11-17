@@ -232,3 +232,8 @@ Set `HW_FRONTEND_URL` to the public static-site origin. OAuth callback results,
 invitation links, email-verification links and password-reset links return to
 `/login.html` with short-lived status/token query parameters. Token-bearing
 emails remain encrypted in the transactional outbox.
+
+
+## Media file storage and uploads
+
+The media library stores binary files outside Git and outside the database. Configure `HW_CATALOG_MEDIA_DIR` to an absolute writable directory for media files. If it is omitted, the backend uses `HW_CATALOG_DATA_DIR/MEDIA` when external catalog storage is configured, or `backend/media` for local development. The upload API accepts JPEG, PNG and WEBP images up to 15 MB and 40 megapixels. It preserves the original bytes, computes SHA-256, rejects exact duplicate uploads, and creates a separate 640 px WebP thumbnail. Original files and thumbnails are served only through authenticated media API routes. The staging Compose deployment uses the persistent `media_data` Docker volume; include that volume in backup and restore procedures.
