@@ -281,3 +281,154 @@ def test_casting_variant_patch_is_permissioned_and_audited(api_factory):
         assert event.actor_id == user_id
         assert event.old_values == {"status": "candidate"}
         assert event.new_values == {"status": "confirmed"}
+
+
+
+def test_casting_create_requires_create_permission_csrf_and_audits(api_factory):
+    client, user_id = authenticated_client(
+        api_factory, permissions=("catalog.read", "catalog.create")
+    )
+    payload = {
+        "name": "  Custom Camaro  ",
+        "description": "  First verified description  ",
+        "first_known_year": 1968,
+        "reason": "Verified against the reference catalog",
+    }
+    denied_csrf = client.post("/api/v1/admin/catalog/castings", json=payload)
+    assert denied_csrf.status_code == 403
+
+    response = client.post(
+        "/api/v1/admin/catalog/castings",
+        json=payload,
+        headers={
+            "Origin": "https://catalog.example.com",
+            "X-CSRF-Token": "csrf-test-token",
+        },
+    )
+    assert response.status_code == 201
+    assert response.json()["name"] == "Custom Camaro"
+    assert response.json()["description"] == "First verified description"
+    casting_id = response.json()["id"]
+
+    with api_factory() as db:
+        event = db.scalar(select(ChangeLog).where(ChangeLog.entity_id == casting_id))
+        assert event is not None
+        assert event.entity_type == "casting"
+        assert event.action == "create"
+        assert event.actor_type == "user"
+        assert event.actor_id == user_id
+        assert event.reason == payload["reason"]
+        assert event.old_values is None
+        assert event.new_values["name"] == "Custom Camaro"
+
+    viewer, _ = authenticated_client(api_factory, permissions=("catalog.read",))
+    forbidden = viewer.post(
+        "/api/v1/admin/catalog/castings",
+        json=payload,
+        headers={
+            "Origin": "https://catalog.example.com",
+            "X-CSRF-Token": "csrf-test-token",
+        },
+    )
+    assert forbidden.status_code == 403
+
+
+def test_variant_create_is_scoped_to_existing_casting_and_audited(api_factory):
+    with api_factory() as db:
+        casting = Casting(name="Custom Camaro")
+        db.add(casting)
+        db.commit()
+        casting_id = casting.id
+
+    client, user_id = authenticated_client(
+        api_factory, permissions=("catalog.read", "catalog.create")
+    )
+    response = client.post(
+        f"/api/v1/admin/catalog/castings/{casting_id}/variants",
+        json={
+            "name": "Opening Hood",
+            "description": "Hood opens",
+            "reason": "Physical sample inspected",
+        },
+        headers={
+            "Origin": "https://catalog.example.com",
+            "X-CSRF-Token": "csrf-test-token",
+        },
+    )
+    assert response.status_code == 201
+    assert response.json()["casting_id"] == casting_id
+    variant_id = response.json()["id"]
+
+    with api_factory() as db:
+        event = db.scalar(select(ChangeLog).where(ChangeLog.entity_id == variant_id))
+        assert event is not None
+        assert event.entity_type == "casting_variant"
+        assert event.action == "create"
+        assert event.actor_id == user_id
+        assert event.new_values["casting_id"] == casting_id
+
+    missing = client.post(
+        "/api/v1/admin/catalog/castings/missing/variants",
+        json={"reason": "Test missing parent"},
+        headers={
+            "Origin": "https://catalog.example.com",
+            "X-CSRF-Token": "csrf-test-token",
+        },
+    )
+    assert missing.status_code == 404
+
+
+def test_release_create_validates_variant_and_prevents_duplicate_key(api_factory):
+    from app.models import CastingVariant
+
+    with api_factory() as db:
+        casting = Casting(name="Custom Camaro")
+        other = Casting(name="BMW 323")
+        db.add_all([casting, other])
+        db.flush()
+        variant = CastingVariant(casting_id=casting.id, name="Opening Hood")
+        foreign_variant = CastingVariant(casting_id=other.id, name="Foreign variant")
+        db.add_all([variant, foreign_variant])
+        db.commit()
+        casting_id = casting.id
+        variant_id = variant.id
+        foreign_variant_id = foreign_variant.id
+
+    client, user_id = authenticated_client(
+        api_factory, permissions=("catalog.read", "catalog.create")
+    )
+    headers = {
+        "Origin": "https://catalog.example.com",
+        "X-CSRF-Token": "csrf-test-token",
+    }
+    payload = {
+        "casting_id": casting_id,
+        "casting_variant_id": variant_id,
+        "catalog_year": 2025,
+        "name": "Custom Camaro",
+        "assortment_number": "123/250",
+        "reason": "Verified against the 2025 catalog",
+    }
+    invalid = client.post(
+        "/api/v1/admin/catalog/releases",
+        json={**payload, "casting_variant_id": foreign_variant_id},
+        headers=headers,
+    )
+    assert invalid.status_code == 422
+
+    created = client.post("/api/v1/admin/catalog/releases", json=payload, headers=headers)
+    assert created.status_code == 201
+    assert created.json()["casting_name"] == "Custom Camaro"
+    assert created.json()["casting_variant_name"] == "Opening Hood"
+    release_id = created.json()["id"]
+
+    duplicate = client.post("/api/v1/admin/catalog/releases", json=payload, headers=headers)
+    assert duplicate.status_code == 409
+
+    with api_factory() as db:
+        event = db.scalar(select(ChangeLog).where(ChangeLog.entity_id == release_id))
+        assert event is not None
+        assert event.entity_type == "release"
+        assert event.action == "create"
+        assert event.actor_id == user_id
+        assert event.new_values["assortment_number"] == "123/250"
