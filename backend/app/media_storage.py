@@ -80,6 +80,7 @@ def store_image(data: bytes) -> StoredImage:
         with Image.open(io.BytesIO(data)) as source:
             image = ImageOps.exif_transpose(source)
             image.load()
+            width, height = image.size
             if image.mode not in ("RGB", "RGBA"):
                 image = image.convert("RGBA" if "transparency" in image.info else "RGB")
             thumb = image.copy()
