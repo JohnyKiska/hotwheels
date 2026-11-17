@@ -302,7 +302,7 @@ class MediaAsset(TimestampMixin, Base):
     contributor_name: Mapped[str | None] = mapped_column(String(240))
     photographer_name: Mapped[str | None] = mapped_column(String(240))
     uploader_user_id: Mapped[str | None] = mapped_column(ForeignKey("users.id", ondelete="RESTRICT"), index=True)
-    original_media_asset_id: Mapped[str | None] = mapped_column(ForeignKey("media_assets.id", ondelete="RESTRICT"), index=True)
+    original_media_asset_id: Mapped[str | None] = mapped_column(String(36), index=True)
     width: Mapped[int | None] = mapped_column(Integer)
     height: Mapped[int | None] = mapped_column(Integer)
     byte_size: Mapped[int | None] = mapped_column(Integer)
@@ -319,8 +319,7 @@ class MediaAsset(TimestampMixin, Base):
     )
     source_record: Mapped[SourceRecord] = relationship(back_populates="media_assets")
     evidence_links: Mapped[list[MediaAssetEvidence]] = relationship(back_populates="media_asset", cascade="all, delete-orphan")
-    original: Mapped[MediaAsset | None] = relationship(remote_side="MediaAsset.id", foreign_keys=[original_media_asset_id])
-
+ 
 
 class MediaAssetEvidence(Base):
     __tablename__ = "media_asset_evidence"
