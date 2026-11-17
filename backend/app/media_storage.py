@@ -39,7 +39,11 @@ def media_root() -> Path:
         return Path(configured).expanduser().resolve()
     data_dir = os.environ.get("HW_CATALOG_DATA_DIR")
     if data_dir:
-        return (Path(data_dir).expanduser() / "MEDIA").resolve()
+        storage_root = Path(data_dir).expanduser().resolve()
+        media_path = storage_root / "MEDIA"
+        if not storage_root.is_dir() or not (storage_root / "DEVICE_INFO.json").is_file() or not media_path.is_dir():
+            raise RuntimeError("Configured external catalog media storage is unavailable; refusing to create a fallback directory.")
+        return media_path.resolve()
     return (BACKEND_DIR / "media").resolve()
 
 
