@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>HW Catalog · Администрирование</title>
+<style>
+:root{--navy:#17283d;--navy2:#20364f;--ink:#1d2d43;--muted:#718198;--line:#e2e9f1;--bg:#f5f8fc;--panel:#fff;--blue:#2869bd;--blue-soft:#eaf3ff;--orange:#f45b2a;--green:#16835b;--green-soft:#e8f6ef;--amber:#a96a08;--amber-soft:#fff4dc;--red:#b83e38;--red-soft:#fff0ef;--shadow:0 5px 22px rgba(26,48,77,.06)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 Inter,"Segoe UI",Arial,sans-serif}button,input,select,textarea{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #9ac4ff;outline-offset:2px}
+header{height:68px;background:var(--navy);color:#fff;display:flex;align-items:center;padding:0 26px;gap:18px;border-bottom:3px solid var(--orange);position:sticky;top:0;z-index:10}.logo{width:38px;height:38px;border-radius:9px;background:var(--orange);display:grid;place-items:center;font-weight:900;font-size:20px}.brand strong{display:block;font-size:16px}.brand small{color:#aab8ca}.head-right{margin-left:auto;display:flex;align-items:center;gap:10px}.head-link{color:#d8e5f5;text-decoration:none;padding:8px 10px;border:1px solid #43546b;border-radius:8px}.head-link:hover{background:#263b54}.who{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:#dce8f5;color:#344c6a;font-weight:800}
+.shell{display:grid;grid-template-columns:238px minmax(0,1fr);min-height:calc(100vh - 68px)}aside{background:#fff;border-right:1px solid var(--line);padding:22px 14px}.nav-caption{font-size:10px;font-weight:800;letter-spacing:1.1px;color:#8b9ab0;padding:0 10px 10px}.nav{display:grid;gap:5px}.nav button{border:0;background:transparent;text-align:left;padding:11px 12px;border-radius:9px;color:#536780;display:flex;gap:10px;align-items:center}.nav button:hover{background:#f2f6fb}.nav button.active{background:var(--blue-soft);color:#185cae;font-weight:750}.nav-icon{width:22px;text-align:center;font-size:16px}.nav-count{margin-left:auto;color:#8999ad;font-size:11px}.aside-note{margin:25px 5px 0;padding:13px;border:1px solid var(--line);border-radius:10px;background:#f9fbfe;color:var(--muted);font-size:11px}.aside-note b{display:block;color:#425771;margin-bottom:4px}
+main{padding:28px clamp(16px,3vw,42px) 55px;max-width:1600px;width:100%;margin:0 auto;min-width:0}.crumb{font-size:12px;color:#8796aa;margin-bottom:10px}.title-row{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:22px}.eyebrow{color:var(--orange);font-size:10px;font-weight:850;letter-spacing:1.3px;text-transform:uppercase}.title-row h1{margin:3px 0 6px;font-size:29px;line-height:1.2;letter-spacing:-.7px}.subtitle{margin:0;color:var(--muted)}.actions{display:flex;gap:8px;flex-wrap:wrap}.btn{border:1px solid var(--line);background:#fff;color:#40546e;border-radius:8px;padding:9px 13px;font-weight:650}.btn:hover{border-color:#b8c8da}.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}.btn.primary:hover{background:#1d59a4}.btn:disabled{opacity:.5;cursor:not-allowed}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:21px}.stat{background:#fff;border:1px solid var(--line);border-radius:11px;padding:15px 17px;box-shadow:var(--shadow)}.stat-label{font-size:12px;color:var(--muted)}.stat-value{font-size:25px;font-weight:850;margin:5px 0 0;letter-spacing:-.7px}.stat-note{font-size:11px;color:#93a0b0}
+.panel{background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);overflow:hidden}.panel-head{padding:15px 18px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px}.panel-head h2{font-size:15px;margin:0}.panel-head small{color:var(--muted)}.panel-body{padding:16px 18px}
+.toolbar{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-bottom:13px}.search{position:relative;flex:1;min-width:220px;max-width:440px}.search input{width:100%;height:40px;border:1px solid #dce5ef;border-radius:8px;padding:0 12px 0 35px;background:#fff}.search span{position:absolute;left:12px;top:9px;color:#91a0b3}.toolbar select{height:40px;border:1px solid #dce5ef;border-radius:8px;background:#fff;color:#4c6079;padding:0 28px 0 10px}.spacer{flex:1}.result-count{font-size:12px;color:var(--muted)}
+table{width:100%;border-collapse:collapse}th{text-align:left;font-size:10px;letter-spacing:.7px;text-transform:uppercase;color:#8796a9;font-weight:800;padding:11px 13px;background:#f9fbfd;border-bottom:1px solid var(--line)}td{padding:13px;border-bottom:1px solid #edf1f5;vertical-align:middle}tbody tr{cursor:pointer}tbody tr:hover{background:#f8fbff}tbody tr:last-child td{border-bottom:0}.primary-cell{font-weight:750;color:#2c405a}.secondary{display:block;color:#8a99ac;font-size:11px;margin-top:2px}.status{display:inline-flex;align-items:center;border-radius:20px;padding:4px 8px;font-size:10px;font-weight:750;white-space:nowrap}.s-confirmed{background:var(--green-soft);color:var(--green)}.s-under_review{background:var(--amber-soft);color:var(--amber)}.s-candidate{background:var(--blue-soft);color:var(--blue)}.s-rejected{background:var(--red-soft);color:var(--red)}.row-action{color:var(--blue);font-size:12px;font-weight:700}.pagination{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-top:1px solid var(--line);color:var(--muted);font-size:12px}.pager{display:flex;gap:6px}.pager button{border:1px solid var(--line);background:white;border-radius:7px;padding:6px 10px;color:#50637c}.pager button:disabled{opacity:.4;cursor:default}
+.welcome{padding:25px;background:linear-gradient(120deg,#fff 0%,#f1f7ff 100%);border:1px solid #dce8f5;border-radius:12px;margin-bottom:18px}.welcome h2{margin:0 0 6px;font-size:18px}.welcome p{margin:0;color:var(--muted)}.quick-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.quick{padding:17px;border:1px solid var(--line);border-radius:11px;background:white;text-align:left;color:inherit}.quick:hover{border-color:#b8cce4;transform:translateY(-1px)}.quick .q-icon{font-size:21px}.quick b{display:block;margin:7px 0 3px}.quick small{color:var(--muted)}
+.drawer-backdrop{position:fixed;inset:0;background:#12233b66;z-index:30;opacity:0;pointer-events:none;transition:opacity .18s}.drawer-backdrop.open{opacity:1;pointer-events:auto}.drawer{padding:0;border:0;position:fixed;right:0;top:0;bottom:0;width:min(610px,100%);background:#fff;z-index:31;box-shadow:-15px 0 50px #15294224;transform:translateX(102%);transition:transform .22s;overflow:auto}.drawer.open{transform:translateX(0)}.drawer-head{display:flex;align-items:flex-start;gap:12px;padding:21px 23px 17px;border-bottom:1px solid var(--line);position:sticky;top:0;background:#fff;z-index:2}.drawer-head h2{font-size:21px;margin:0 0 5px;line-height:1.2}.drawer-head p{margin:0;color:var(--muted);font-size:12px}.close{margin-left:auto;width:35px;height:35px;border:1px solid var(--line);border-radius:8px;background:#fff;color:#65778e}.drawer-body{padding:21px 23px 40px}.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.detail-field{padding:11px;border:1px solid var(--line);border-radius:8px;min-width:0}.detail-field label{display:block;color:#8b9aab;font-size:10px;margin-bottom:4px}.detail-field strong{font-size:13px;overflow-wrap:anywhere}.section-title{font-size:12px;font-weight:800;margin:22px 0 10px}.variant{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px;border:1px solid var(--line);border-radius:8px;margin-bottom:7px}.variant small{display:block;color:var(--muted);margin-top:2px}.edit-form{display:grid;gap:11px;margin-top:15px;padding:14px;background:#f8fafc;border:1px solid var(--line);border-radius:10px}.edit-form[hidden]{display:none}.field{display:grid;gap:5px}.field label{font-size:11px;color:#667991;font-weight:700}.field input,.field select,.field textarea{width:100%;border:1px solid #dce5ef;border-radius:8px;padding:9px 10px;background:white;color:var(--ink)}.field textarea{min-height:74px;resize:vertical}.form-actions{display:flex;justify-content:flex-end;gap:8px}.hint{font-size:11px;color:var(--muted)}
+.alert{padding:12px 14px;border-radius:9px;margin-bottom:14px;font-size:12px}.alert.info{background:#edf5ff;color:#315b8b;border:1px solid #d7e7fb}.alert.error{background:var(--red-soft);color:var(--red);border:1px solid #f1d2d0}.alert[hidden]{display:none}.empty{padding:45px 20px;text-align:center;color:var(--muted)}.empty b{display:block;color:#465c76;margin-bottom:4px}.toast{position:fixed;bottom:20px;left:50%;transform:translate(-50%,15px);opacity:0;transition:.2s;background:var(--navy);color:#fff;padding:11px 16px;border-radius:8px;z-index:50;pointer-events:none}.toast.show{opacity:1;transform:translate(-50%,0)}
+@media(max-width:1050px){.shell{grid-template-columns:205px minmax(0,1fr)}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.quick-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:760px){header{padding:0 14px}.shell{display:block}aside{position:sticky;top:68px;z-index:8;padding:8px 10px;border-right:0;border-bottom:1px solid var(--line);overflow:auto}.nav{display:flex;min-width:max-content}.nav-caption,.aside-note{display:none}.nav button{padding:8px 11px}.nav-count{display:none}main{padding:20px 13px 40px}.title-row{display:block}.title-row .actions{margin-top:13px}.title-row h1{font-size:25px}.quick-grid{grid-template-columns:1fr 1fr}.table-wrap{overflow-x:auto}table{min-width:700px}}
+@media(max-width:480px){.brand small{display:none}.head-link{font-size:11px;padding:7px}.stats{gap:8px}.stat{padding:12px}.stat-value{font-size:22px}.quick-grid{grid-template-columns:1fr}.detail-grid{grid-template-columns:1fr}.drawer-head,.drawer-body{padding-left:16px;padding-right:16px}}
+</style>
+</head>
+<body>
+<header><div class="logo">HW</div><div class="brand"><strong>Hot Wheels Catalog</strong><small>Административная панель</small></div><div class="head-right"><a class="head-link" href="./">← В каталог</a><a class="head-link" href="./login.html">Войти</a><div class="who">A</div></div></header>
+<div class="shell">
+<aside><div class="nav-caption">УПРАВЛЕНИЕ КАТАЛОГОМ</div><nav class="nav" aria-label="Разделы админки">
+<button class="active" data-view="overview"><span class="nav-icon">▦</span>Обзор</button>
+<button data-view="castings"><span class="nav-icon">◈</span>Отливки <span class="nav-count" id="castingCount">…</span></button>
+<button data-view="releases"><span class="nav-icon">▤</span>Выпуски <span class="nav-count" id="releaseCount">…</span></button>
+<button data-view="series" disabled title="Следующий этап"><span class="nav-icon">▱</span>Серии <span class="nav-count">скоро</span></button>
+<button data-view="history" disabled title="Следующий этап"><span class="nav-icon">◷</span>История <span class="nav-count">скоро</span></button>
+</nav><div class="aside-note"><b>Защита изменений</b>Все правки проходят через серверный API, проверку прав и CSRF. Причина изменения обязательна, история формируется автоматически.</div></aside>
+<main>
+<div class="crumb">Администрирование / <span id="crumbCurrent">Обзор</span></div>
+<div class="title-row"><div><div class="eyebrow">CONTROL CENTER</div><h1 id="pageTitle">Обзор каталога</h1><p class="subtitle" id="pageSubtitle">Рабочее пространство для управления отливками и выпусками.</p></div><div class="actions"><button class="btn" id="refreshBtn">↻ Обновить</button><button class="btn primary" id="newBtn" disabled title="Создание подключим следующим этапом">＋ Новая запись</button></div></div>
+<div id="alert" class="alert info" hidden></div>
+<section id="view-overview">
+<div class="welcome"><h2>Администрирование каталога</h2><p>Здесь собраны основные сущности каталога. Выбирай раздел слева, открывай карточку и редактируй данные с обязательной фиксацией причины.</p></div>
+<div class="stats"><div class="stat"><div class="stat-label">Всего отливок</div><div class="stat-value" id="statCastings">—</div><div class="stat-note">Уникальные конструкции</div></div><div class="stat"><div class="stat-label">Всего выпусков</div><div class="stat-value" id="statReleases">—</div><div class="stat-note">Каталожные записи по годам</div></div><div class="stat"><div class="stat-label">На проверке</div><div class="stat-value" id="statReview">—</div><div class="stat-note">Отливки и выпуски</div></div><div class="stat"><div class="stat-label">Подтверждено</div><div class="stat-value" id="statConfirmed">—</div><div class="stat-note">Отливки и выпуски</div></div></div>
+<div class="quick-grid"><button class="quick" data-go="castings"><span class="q-icon">◈</span><b>Отливки</b><small>Поиск базовых конструкций, варианты и статусы.</small></button><button class="quick" data-go="releases"><span class="q-icon">▤</span><b>Выпуски</b><small>Год, номер ассортимента, серия и привязка к отливке.</small></button><button class="quick" data-go="history"><span class="q-icon">◷</span><b>История изменений</b><small>Журналирование уже работает на уровне API. Интерфейс подключим следующим шагом.</small></button></div>
+</section>
+<section id="view-castings" hidden><div class="toolbar"><label class="search"><span>⌕</span><input id="castingSearch" type="search" placeholder="Название или описание отливки…"></label><select id="castingStatus"><option value="">Все статусы</option><option value="candidate">Кандидат</option><option value="under_review">На проверке</option><option value="confirmed">Подтверждено</option><option value="rejected">Отклонено</option></select><span class="spacer"></span><span class="result-count" id="castingResults">—</span></div><div class="panel"><div class="panel-head"><h2>Реестр отливок</h2><small>Нажми на строку, чтобы открыть карточку</small></div><div class="table-wrap" id="castingTable"><div class="empty">Загружаю каталог…</div></div><div class="pagination"><span id="castingPageInfo">—</span><div class="pager"><button id="castingPrev">←</button><button id="castingNext">→</button></div></div></div></section>
+<section id="view-releases" hidden><div class="toolbar"><label class="search"><span>⌕</span><input id="releaseSearch" type="search" placeholder="Название, номер или отливка…"></label><select id="releaseYear"><option value="">Все годы</option></select><select id="releaseStatus"><option value="">Все статусы</option><option value="candidate">Кандидат</option><option value="under_review">На проверке</option><option value="confirmed">Подтверждено</option><option value="rejected">Отклонено</option></select><span class="spacer"></span><span class="result-count" id="releaseResults">—</span></div><div class="panel"><div class="panel-head"><h2>Реестр выпусков</h2><small>Нажми на строку, чтобы открыть карточку</small></div><div class="table-wrap" id="releaseTable"><div class="empty">Загружаю каталог…</div></div><div class="pagination"><span id="releasePageInfo">—</span><div class="pager"><button id="releasePrev">←</button><button id="releaseNext">→</button></div></div></div></section>
+<section id="view-series" hidden><div class="panel"><div class="empty"><b>Управление сериями</b>Подключим после базового CRUD отливок и выпусков.</div></div></section>
+<section id="view-history" hidden><div class="panel"><div class="empty"><b>История изменений</b>События уже записываются в ChangeLog. Следующий этап добавит API чтения и удобную ленту аудита.</div></div></section>
+</main></div>
+<div class="drawer-backdrop" id="backdrop"></div><aside class="drawer" id="drawer" aria-label="Карточка записи"><div class="drawer-head"><div><h2 id="drawerTitle">Карточка</h2><p id="drawerSub"></p></div><button class="close" id="drawerClose" aria-label="Закрыть">✕</button></div><div class="drawer-body" id="drawerBody"></div></aside><div class="toast" id="toast"></div>
+<script>
+(() => {
+const $ = id => document.getElementById(id);
+const state = {view:"overview",castingPage:0,releasePage:0,pageSize:25,castingTotal:0,releaseTotal:0,castingRows:[],releaseRows:[],selected:null,debounce:null};
+const statusLabel = {candidate:"Кандидат",under_review:"На проверке",confirmed:"Подтверждено",rejected:"Отклонено"};
+const esc = value => String(value ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const cookie = name => document.cookie.split(";").map(v=>v.trim()).find(v=>v.startsWith(name+"="))?.slice(name.length+1) || "";
+const api = async (path, options={}) => {
+ const headers = new Headers(options.headers || {});
+ if(options.body) headers.set("Content-Type","application/json");
+ if(options.method && options.method !== "GET"){const csrf=cookie("hw_csrf");if(csrf)headers.set("X-CSRF-Token",decodeURIComponent(csrf));}
+ const response = await fetch(path,{...options,headers,credentials:"include"});
+ let data={};try{data=await response.json()}catch{}
+ if(!response.ok){const message=typeof data.detail==="string"?data.detail:(response.status===401?"Требуется вход в систему.":response.status===403?"Недостаточно прав или не пройдена CSRF-проверка.":`Ошибка HTTP ${response.status}`);throw new Error(message);}
+ return data;
+};
+const showAlert=(message,type="info")=>{const el=$("alert");el.textContent=message;el.className="alert "+type;el.hidden=!message;};
+const toast=message=>{const el=$("toast");el.textContent=message;el.classList.add("show");setTimeout(()=>el.classList.remove("show"),2400)};
+const setView = view => {
+ state.view=view;document.querySelectorAll(".nav button[data-view]").forEach(b=>b.classList.toggle("active",b.dataset.view===view));
+ ["overview","castings","releases","series","history"].forEach(v=>$("view-"+v).hidden=v!==view);
+ const titles={overview:["Обзор каталога","Рабочее пространство для управления отливками и выпусками."],castings:["Отливки","Базовые конструкции Hot Wheels и их конструктивные варианты."],releases:["Выпуски","Каталожные выпуски с годом, номером и связями."],series:["Серии","Управление сериями каталога."],history:["История изменений","Аудит действий пользователей и изменений каталога."]};
+ $("pageTitle").textContent=titles[view][0];$("pageSubtitle").textContent=titles[view][1];$("crumbCurrent").textContent=titles[view][0];
+ $("newBtn").disabled=true;$("newBtn").title="Создание подключим следующим этапом";
+ if(view==="castings")loadCastings();if(view==="releases")loadReleases();
+};
+const status = value=>'<span class="status s-'+esc(value)+'">'+esc(statusLabel[value]||value||"Не указан")+'</span>';
+const emptyTable = message=>'<div class="empty"><b>Нет записей</b>'+esc(message)+'</div>';
+const loadOverview = async () => {
+ try{
+  const [c,r]=await Promise.all([api("/api/v1/admin/catalog/castings?limit=1"),api("/api/v1/admin/catalog/releases?limit=1")]);
+  $("statCastings").textContent=c.total.toLocaleString("ru-RU");$("statReleases").textContent=r.total.toLocaleString("ru-RU");
+  $("castingCount").textContent=c.total.toLocaleString("ru-RU");$("releaseCount").textContent=r.total.toLocaleString("ru-RU");
+  const [cr,rr]=await Promise.all([api("/api/v1/admin/catalog/castings?limit=1&status=under_review"),api("/api/v1/admin/catalog/releases?limit=1&status=under_review"),]);
+  const [cc,rc]=await Promise.all([api("/api/v1/admin/catalog/castings?limit=1&status=confirmed"),api("/api/v1/admin/catalog/releases?limit=1&status=confirmed")]);
+  $("statReview").textContent=(cr.total+rr.total).toLocaleString("ru-RU");$("statConfirmed").textContent=(cc.total+rc.total).toLocaleString("ru-RU");
+  showAlert("Подключено к каталогу. Данные загружены из серверной БД.","info");
+ }catch(error){["statCastings","statReleases","statReview","statConfirmed"].forEach(id=>$(id).textContent="—");showAlert(error.message+" Проверь, что API доступен на этом домене и ты вошёл под учётной записью с правом catalog.read.","error");}
+};
+const loadCastings = async () => {
+ $("castingTable").innerHTML='<div class="empty">Загружаю отливки…</div>';
+ const params=new URLSearchParams({limit:state.pageSize,offset:state.castingPage*state.pageSize});
+ if($("castingSearch").value.trim())params.set("q",$("castingSearch").value.trim());if($("castingStatus").value)params.set("status",$("castingStatus").value);
+ try{
+  const data=await api("/api/v1/admin/catalog/castings?"+params);state.castingRows=data.items;state.castingTotal=data.total;
+  $("castingResults").textContent=data.total.toLocaleString("ru-RU")+" записей";$("castingPageInfo").textContent=data.total? `Страница ${state.castingPage+1} из ${Math.max(1,Math.ceil(data.total/state.pageSize))}`:"Нет результатов";
+  $("castingPrev").disabled=state.castingPage===0;$("castingNext").disabled=(state.castingPage+1)*state.pageSize>=data.total;
+  $("castingTable").innerHTML=data.items.length?'<table><thead><tr><th>Название</th><th>Первый год</th><th>Статус</th><th>Изменено</th><th></th></tr></thead><tbody>'+data.items.map(x=>'<tr data-id="'+esc(x.id)+'"><td><span class="primary-cell">'+esc(x.name)+'</span><span class="secondary">'+esc(x.id)+'</span></td><td>'+esc(x.first_known_year??"Не указан")+'</td><td>'+status(x.status)+'</td><td>'+esc(x.updated_at?new Date(x.updated_at).toLocaleDateString("ru-RU"):"—")+'</td><td><span class="row-action">Открыть →</span></td></tr>').join("")+'</tbody></table>':emptyTable("Попробуй изменить запрос или фильтр.");
+  $("castingTable").querySelectorAll("tbody tr").forEach(row=>row.addEventListener("click",()=>openDetail("casting",row.dataset.id)));
+ }catch(error){$("castingTable").innerHTML=emptyTable(error.message);showAlert(error.message,"error");}
+};
+const loadReleases = async () => {
+ $("releaseTable").innerHTML='<div class="empty">Загружаю выпуски…</div>';
+ const params=new URLSearchParams({limit:state.pageSize,offset:state.releasePage*state.pageSize});
+ if($("releaseSearch").value.trim())params.set("q",$("releaseSearch").value.trim());if($("releaseStatus").value)params.set("status",$("releaseStatus").value);if($("releaseYear").value)params.set("catalog_year",$("releaseYear").value);
+ try{
+  const data=await api("/api/v1/admin/catalog/releases?"+params);state.releaseRows=data.items;state.releaseTotal=data.total;
+  $("releaseResults").textContent=data.total.toLocaleString("ru-RU")+" записей";$("releasePageInfo").textContent=data.total?`Страница ${state.releasePage+1} из ${Math.max(1,Math.ceil(data.total/state.pageSize))}`:"Нет результатов";
+  $("releasePrev").disabled=state.releasePage===0;$("releaseNext").disabled=(state.releasePage+1)*state.pageSize>=data.total;
+  $("releaseTable").innerHTML=data.items.length?'<table><thead><tr><th>Выпуск</th><th>Год</th><th>Номер</th><th>Статус</th><th></th></tr></thead><tbody>'+data.items.map(x=>'<tr data-id="'+esc(x.id)+'"><td><span class="primary-cell">'+esc(x.name||x.casting_name||"Без названия")+'</span><span class="secondary">'+esc(x.casting_name||"Отливка не указана")+'</span></td><td>'+esc(x.catalog_year??"—")+'</td><td>'+esc(x.assortment_number||"—")+'</td><td>'+status(x.status)+'</td><td><span class="row-action">Открыть →</span></td></tr>').join("")+'</tbody></table>':emptyTable("Попробуй изменить запрос или фильтр.");
+  $("releaseTable").querySelectorAll("tbody tr").forEach(row=>row.addEventListener("click",()=>openDetail("release",row.dataset.id)));
+ }catch(error){$("releaseTable").innerHTML=emptyTable(error.message);showAlert(error.message,"error");}
+};
+const openDrawer=()=>{$("backdrop").classList.add("open");$("drawer").classList.add("open")};
+const closeDrawer=()=>{$("backdrop").classList.remove("open");$("drawer").classList.remove("open");state.selected=null};
+const field=(label,value)=>'<div class="detail-field"><label>'+esc(label)+'</label><strong>'+esc(value??"Не указано")+'</strong></div>';
+const openDetail = async (type,id) => {
+ openDrawer();$("drawerTitle").textContent="Загружаю карточку…";$("drawerSub").textContent=id;$("drawerBody").innerHTML='<div class="empty">Получаю данные…</div>';
+ try{
+  const item=await api("/api/v1/admin/catalog/"+(type==="casting"?"castings/":"releases/")+encodeURIComponent(id));state.selected={type,item};
+  $("drawerTitle").textContent=item.name||item.casting_name||"Карточка выпуска";$("drawerSub").textContent=(type==="casting"?"Отливка":"Выпуск")+" · "+item.id;
+  let html='<div class="detail-grid">';
+  if(type==="casting"){html+=field("Статус",statusLabel[item.status]||item.status)+field("Первый известный год",item.first_known_year)+field("Создано",item.created_at?new Date(item.created_at).toLocaleString("ru-RU"):"—")+field("Изменено",item.updated_at?new Date(item.updated_at).toLocaleString("ru-RU"):"—")+field("Выпусков",item.releases_count);}
+  else{html+=field("Отливка",item.casting_name)+field("Вариант отливки",item.casting_variant_name)+field("Год каталога",item.catalog_year)+field("Номер ассортимента",item.assortment_number)+field("Статус",statusLabel[item.status]||item.status)+field("Создано",item.created_at?new Date(item.created_at).toLocaleDateString("ru-RU"):"—");}
+  html+='</div>';
+  if(item.description)html+='<div class="section-title">Описание</div><p>'+esc(item.description)+'</p>';
+  if(type==="casting"){html+='<div class="section-title">Конструктивные варианты ('+(item.variants||[]).length+')</div>';html+=(item.variants||[]).length?item.variants.map(v=>'<div class="variant"><div><b>'+esc(v.name||"Без названия")+'</b><small>'+esc(v.description||"Описание отсутствует")+'</small></div>'+status(v.status)+'</div>').join(""):'<p class="hint">Варианты пока не заведены.</p>';}
+  else{html+='<div class="section-title">Серии</div><p class="hint">'+((item.series||[]).map(s=>esc(s.name)).join(", ")||"Связанные серии не указаны.")+'</p>';}
+  html+='<button class="btn primary" id="toggleEdit">✎ Редактировать</button><form class="edit-form" id="editForm" hidden><div class="section-title" style="margin:0">Изменение записи</div>';
+  if(type==="casting"){html+='<div class="field"><label>Название</label><input name="name" maxlength="240" required value="'+esc(item.name)+'"></div><div class="field"><label>Описание</label><textarea name="description">'+esc(item.description||"")+'</textarea></div><div class="field"><label>Первый известный год</label><input name="first_known_year" type="number" min="1968" max="2100" value="'+esc(item.first_known_year??"")+'"></div>';}
+  else{html+='<div class="field"><label>Название выпуска</label><input name="name" maxlength="240" value="'+esc(item.name||"")+'"></div><div class="field"><label>Номер ассортимента</label><input name="assortment_number" maxlength="80" value="'+esc(item.assortment_number||"")+'"></div><div class="field"><label>Год каталога</label><input name="catalog_year" type="number" min="1968" max="2100" value="'+esc(item.catalog_year??"")+'"></div><div class="field"><label>Описание</label><textarea name="description">'+esc(item.description||"")+'</textarea></div>';}
+  html+='<div class="field"><label>Статус</label><select name="status">'+Object.entries(statusLabel).map(([k,v])=>'<option value="'+k+'" '+(item.status===k?"selected":"")+'>'+v+'</option>').join("")+'</select></div><div class="field"><label>Причина изменения *</label><textarea name="reason" required minlength="1" maxlength="4000" placeholder="Например: сверено с официальным каталогом…"></textarea></div><div class="hint">Сохранение проверит права доступа и CSRF. В журнал попадут только реально изменённые поля.</div><div class="form-actions"><button type="button" class="btn" id="cancelEdit">Отмена</button><button type="submit" class="btn primary">Сохранить изменения</button></div></form>';
+  $("drawerBody").innerHTML=html;
+  $("toggleEdit").addEventListener("click",()=>{$("editForm").hidden=!$("editForm").hidden;$("toggleEdit").hidden=true;});
+  $("cancelEdit").addEventListener("click",()=>{$("editForm").hidden=true;$("toggleEdit").hidden=false;});
+  $("editForm").addEventListener("submit",event=>saveEdit(event,type,id));
+ }catch(error){$("drawerTitle").textContent="Не удалось открыть запись";$("drawerBody").innerHTML='<div class="alert error">'+esc(error.message)+'</div>';}
+};
+const saveEdit = async (event,type,id) => {
+ event.preventDefault();const form=event.currentTarget;const fd=new FormData(form);const payload={reason:String(fd.get("reason")||"").trim()};
+ const fields=type==="casting"?["name","description","first_known_year","status"]:["name","assortment_number","catalog_year","description","status"];
+ fields.forEach(key=>{if(fd.has(key)){let value=String(fd.get(key));if(["first_known_year","catalog_year"].includes(key))payload[key]=value===""?null:Number(value);else payload[key]=value===""&&["description","name","assortment_number"].includes(key)?null:value;}});
+ const button=form.querySelector('button[type="submit"]');button.disabled=true;button.textContent="Сохраняю…";
+ try{await api("/api/v1/admin/catalog/"+(type==="casting"?"castings/":"releases/")+encodeURIComponent(id),{method:"PATCH",body:JSON.stringify(payload)});toast("Изменения сохранены");await openDetail(type,id);if(type==="casting")await loadCastings();else await loadReleases();await loadOverview();}
+ catch(error){showAlert(error.message,"error");toast("Не удалось сохранить");button.disabled=false;button.textContent="Сохранить изменения";}
+};
+const bindSearch=(id,fn)=>$(id).addEventListener("input",()=>{clearTimeout(state.debounce);state.debounce=setTimeout(()=>{if(state.view===fn){if(fn==="castings")state.castingPage=0;else state.releasePage=0; (fn==="castings"?loadCastings:loadReleases)();}},250);});
+document.querySelectorAll(".nav button[data-view]").forEach(b=>b.addEventListener("click",()=>!b.disabled&&setView(b.dataset.view)));
+document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>setView(b.dataset.go)));
+$("refreshBtn").addEventListener("click",()=>{if(state.view==="overview")loadOverview();else if(state.view==="castings")loadCastings();else if(state.view==="releases")loadReleases();});
+$("castingSearch").addEventListener("input",()=>{clearTimeout(state.debounce);state.debounce=setTimeout(()=>{state.castingPage=0;loadCastings()},250)});
+$("releaseSearch").addEventListener("input",()=>{clearTimeout(state.debounce);state.debounce=setTimeout(()=>{state.releasePage=0;loadReleases()},250)});
+["castingStatus"].forEach(id=>$(id).addEventListener("change",()=>{state.castingPage=0;loadCastings()}));
+["releaseStatus","releaseYear"].forEach(id=>$(id).addEventListener("change",()=>{state.releasePage=0;loadReleases()}));
+$("castingPrev").addEventListener("click",()=>{state.castingPage=Math.max(0,state.castingPage-1);loadCastings()});$("castingNext").addEventListener("click",()=>{state.castingPage++;loadCastings()});
+$("releasePrev").addEventListener("click",()=>{state.releasePage=Math.max(0,state.releasePage-1);loadReleases()});$("releaseNext").addEventListener("click",()=>{state.releasePage++;loadReleases()});
+$("drawerClose").addEventListener("click",closeDrawer);$("backdrop").addEventListener("click",closeDrawer);document.addEventListener("keydown",e=>{if(e.key==="Escape")closeDrawer()});
+loadOverview();
+})();
+</script>
+</body>
+</html>
