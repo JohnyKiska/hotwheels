@@ -115,6 +115,8 @@ def patch_casting(
         raise HTTPException(status_code=422, detail="At least one casting field must be supplied.")
     if "name" in changes and (changes["name"] is None or not changes["name"].strip()):
         raise HTTPException(status_code=422, detail="Casting name cannot be empty.")
+    if "status" in changes and changes["status"] is None:
+        raise HTTPException(status_code=422, detail="Casting status cannot be null.")
     if "name" in changes:
         changes["name"] = changes["name"].strip()
 
