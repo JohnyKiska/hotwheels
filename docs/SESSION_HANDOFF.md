@@ -5,14 +5,14 @@
 
 ## Самое важное сейчас
 
-GitHub остаётся каноническим источником кода, документации и Project Manager. Внешний диск `E:\\HW-CATALOG-DATA` содержит рабочие данные, которые не зеркалируются в Git. Не копировать репозиторий целиком и не затрагивать `DATABASE`, `MEDIA`, `IMPORTS`, `EXPORTS`, `BACKUPS`, `LOGS` или `DEVICE_INFO.json` при синхронизации Project Manager.
+GitHub остаётся каноническим источником кода, документации и Project Manager. Внешний диск `E:\HW-CATALOG-DATA` содержит рабочие данные, которые не зеркалируются в Git. Не копировать репозиторий целиком и не затрагивать `DATABASE`, `MEDIA`, `IMPORTS`, `EXPORTS`, `BACKUPS`, `LOGS` или `DEVICE_INFO.json` при синхронизации Project Manager.
 
 ### Последнее состояние · 2026-11-17
 
 - PR #116 Media Library metadata/API merged в integration: `c6512c0e31e0722f17c425aa9dbf9a43014419ce`.
 - PR #117 Secure media uploads открыт в integration; актуальный head на момент handoff: `bc7acfbab18c0ffb7f09da0558fafe5ba4db799c`. CI завершился успешно: backend tests, SQLite/PostgreSQL migrations (clean + repeat), append-only enforcement и staging Compose.
 - PR #117 ещё не смержен. UI загрузки отложен до следующей сессии.
-- Подготовлен `scripts/windows/sync-project-manager-to-external.ps1` и инструкция `docs/deployment/EXTERNAL_STORAGE_SYNC.md`. Они синхронизируют только четыре файла Project Manager в `PROJECT-MANAGEMENT`, с staging, SHA-256 и сохранением предыдущей версии.
+- Подготовлен `scripts/windows/sync-project-manager-to-external.ps1` и инструкция `docs/deployment/EXTERNAL_STORAGE_SYNC.md`. Они синхронизируют только четыре файла Project Manager в `PROJECT-MANAGEMENT`, с staging, SHA-256 и сохранением предыдущей версии. Физический запуск ожидает merge документации и обновления локальной integration-ветки.
 - Физический внешний HDD этой сессией не проверялся и не изменялся. Скрипт синхронизации не запускался. Не считать snapshot скопированным.
 - `main` не изменялся.
 
