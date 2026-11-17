@@ -1344,7 +1344,9 @@
       "component_id": "media",
       "owner": "user-and-assistant",
       "due_date": null,
-      "dependencies": [],
+      "dependencies": [
+        "pm-014"
+      ],
       "acceptance_criteria": [
         "Администратор может выбрать или создать SourceRecord для фотографии.",
         "UI принимает поддерживаемые изображения и показывает понятные ошибки лимита/формата/дубликата.",
@@ -1358,7 +1360,33 @@
         "docs/architecture/MEDIA_AND_EVIDENCE_METADATA.md"
       ],
       "created_at": "2026-11-17T16:30:00+07:00",
-      "updated_at": "2026-11-17T16:30:00+07:00",
+      "updated_at": "2026-11-17T16:35:00+07:00",
+      "completed_at": null
+    },
+    {
+      "id": "pm-014",
+      "title": "Проверить и влить PR #117: безопасная загрузка медиа",
+      "description": "Завершить review PR #117 после зелёного CI и влить его в integration/catalog-foundation; main не менять.",
+      "status": "review",
+      "priority": "high",
+      "workstream_id": "backend",
+      "component_id": "mediaUploadStorage",
+      "owner": "user-and-assistant",
+      "due_date": null,
+      "dependencies": [],
+      "acceptance_criteria": [
+        "Проверен актуальный PR head и все обязательные CI checks зелёные.",
+        "Проверены ограничения форматов/размера, SHA-256 dedup, сохранение оригинала и генерация thumbnail.",
+        "Проверены CSRF, RBAC, audit reason и отсутствие публичной выдачи.",
+        "PR #117 merged в integration/catalog-foundation; main не затронут.",
+        "Обновлены canonical Project Manager и SESSION_HANDOFF после merge."
+      ],
+      "source_refs": [
+        "https://github.com/JohnyKiska/hotwheels/pull/117",
+        "docs/architecture/MEDIA_AND_EVIDENCE_METADATA.md"
+      ],
+      "created_at": "2026-11-17T16:35:00+07:00",
+      "updated_at": "2026-11-17T16:35:00+07:00",
       "completed_at": null
     }
   ],
