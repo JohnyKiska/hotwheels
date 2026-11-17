@@ -151,19 +151,47 @@ def resolve_full_image_url(page: Page, parent_url: str, timeout_ms: int) -> tupl
 
 
 def fetch_image_bytes(page: Page, image_url: str, timeout_ms: int) -> tuple[bytes, str, str, int, int]:
-    navigate(page, image_url, timeout_ms)
+    """Navigate Chrome directly to the image and read its response body.
+
+    This deliberately avoids page-side fetch(), which is subject to CORS when
+    the Fandom article and static.wikia image are on different origins.
+    """
+    response = page.goto(image_url, wait_until="load", timeout=timeout_ms)
+    challenge_was_present = is_cloudflare_challenge(page)
     wait_for_manual_challenge(page, image_url)
-    result = page.evaluate(IMAGE_FETCH_JS)
-    data = base64.b64decode(result["base64"])
+
+    # After a manual Cloudflare clearance, repeat the navigation so Chrome
+    # requests the actual image using the now-established browser session.
+    if challenge_was_present:
+        response = page.reload(wait_until="load", timeout=timeout_ms)
+        if is_cloudflare_challenge(page):
+            wait_for_manual_challenge(page, image_url)
+            response = page.reload(wait_until="load", timeout=timeout_ms)
+
+    if response is None:
+        raise RuntimeError("Chrome did not return an image response")
+
+    content_type = response.headers.get("content-type", "")
+    if response.status >= 400:
+        raise RuntimeError(f"Image navigation returned HTTP {response.status}")
+    if not content_type.lower().startswith("image/"):
+        raise RuntimeError(f"Expected image response, got Content-Type: {content_type or 'unknown'}")
+
+    data = response.body()
     if not data:
         raise RuntimeError("Empty image response")
-    return (
-        data,
-        result.get("content_type", ""),
-        result.get("image_url", image_url),
-        int(result.get("width", 0)),
-        int(result.get("height", 0)),
-    )
+
+    # A direct image document exposes its intrinsic dimensions through img.
+    try:
+        dimensions = page.locator("img").first.evaluate(
+            "(img) => ({width: img.naturalWidth, height: img.naturalHeight})"
+        )
+        width = int(dimensions.get("width", 0))
+        height = int(dimensions.get("height", 0))
+    except Exception:
+        width = height = 0
+
+    return data, content_type, response.url, width, height
 
 
 def image_records(report: list[dict]) -> list[tuple[str, dict]]:
