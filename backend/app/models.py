@@ -301,7 +301,7 @@ class MediaAsset(TimestampMixin, Base):
     rights_notes: Mapped[str | None] = mapped_column(Text)
     contributor_name: Mapped[str | None] = mapped_column(String(240))
     photographer_name: Mapped[str | None] = mapped_column(String(240))
-    uploader_user_id: Mapped[str | None] = mapped_column(ForeignKey("users.id", ondelete="RESTRICT"), index=True)
+    uploader_user_id: Mapped[str | None] = mapped_column(String(36), index=True)
     original_media_asset_id: Mapped[str | None] = mapped_column(String(36), index=True)
     width: Mapped[int | None] = mapped_column(Integer)
     height: Mapped[int | None] = mapped_column(Integer)
