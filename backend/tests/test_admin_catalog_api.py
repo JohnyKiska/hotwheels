@@ -434,3 +434,113 @@ def test_release_create_validates_variant_and_prevents_duplicate_key(api_factory
         assert event.action == "create"
         assert event.actor_id == user_id
         assert event.new_values["assortment_number"] == "123/250"
+
+
+
+def test_series_crud_is_permissioned_and_audited(api_factory):
+    client, user_id = authenticated_client(
+        api_factory, permissions=("catalog.read", "catalog.create", "catalog.update")
+    )
+    headers = {"Origin": "https://catalog.example.com", "X-CSRF-Token": "csrf-test-token"}
+    denied = client.post("/api/v1/admin/catalog/series", json={
+        "name": "Then and Now", "reason": "Verified series"
+    })
+    assert denied.status_code == 403
+
+    created = client.post("/api/v1/admin/catalog/series", json={
+        "name": "  Then and Now  ", "series_type": "Mainline",
+        "description": "  Multi-generation pairings  ", "reason": "Verified against catalog"
+    }, headers=headers)
+    assert created.status_code == 201
+    assert created.json()["name"] == "Then and Now"
+    assert created.json()["description"] == "Multi-generation pairings"
+    series_id = created.json()["id"]
+
+    listed = client.get("/api/v1/admin/catalog/series?q=Then")
+    assert listed.status_code == 200
+    assert listed.json()["total"] == 1
+    assert listed.json()["items"][0]["id"] == series_id
+
+    updated = client.patch(f"/api/v1/admin/catalog/series/{series_id}", json={
+        "status": "confirmed", "reason": "Reviewed by catalog editor"
+    }, headers=headers)
+    assert updated.status_code == 200
+    assert updated.json()["status"] == "confirmed"
+
+    with api_factory() as db:
+        events = db.scalars(select(ChangeLog).where(
+            ChangeLog.entity_id == series_id
+        ).order_by(ChangeLog.created_at)).all()
+        assert len(events) == 2
+        assert events[0].action == "create"
+        assert events[0].actor_id == user_id
+        assert events[1].action == "update"
+        assert events[1].old_values == {"status": "candidate"}
+        assert events[1].new_values == {"status": "confirmed"}
+
+
+def test_release_series_assignment_is_validated_and_audited(api_factory):
+    from app.models import Release, Series
+
+    with api_factory() as db:
+        casting = Casting(name="Custom Camaro")
+        db.add(casting)
+        db.flush()
+        release = Release(casting_id=casting.id, catalog_year=2025, name="Custom Camaro")
+        series_a = Series(name="Then and Now")
+        series_b = Series(name="HW Dream Garage")
+        db.add_all([release, series_a, series_b])
+        db.commit()
+        release_id = release.id
+        series_a_id = series_a.id
+        series_b_id = series_b.id
+
+    client, user_id = authenticated_client(
+        api_factory, permissions=("catalog.read", "catalog.update")
+    )
+    headers = {"Origin": "https://catalog.example.com", "X-CSRF-Token": "csrf-test-token"}
+    invalid = client.put(f"/api/v1/admin/catalog/releases/{release_id}/series", json={
+        "series_ids": ["missing"], "reason": "Test invalid series"
+    }, headers=headers)
+    assert invalid.status_code == 422
+
+    response = client.put(f"/api/v1/admin/catalog/releases/{release_id}/series", json={
+        "series_ids": [series_a_id, series_b_id], "reason": "Matched to annual catalog"
+    }, headers=headers)
+    assert response.status_code == 200
+    assert set(response.json()["series_ids"]) == {series_a_id, series_b_id}
+
+    detail = client.get(f"/api/v1/admin/catalog/releases/{release_id}")
+    assert {item["id"] for item in detail.json()["series"]} == {series_a_id, series_b_id}
+
+    with api_factory() as db:
+        event = db.scalar(select(ChangeLog).where(
+            ChangeLog.entity_id == release_id, ChangeLog.action == "update_series"
+        ))
+        assert event is not None
+        assert event.actor_id == user_id
+        assert set(event.new_values["series_ids"]) == {series_a_id, series_b_id}
+
+
+def test_change_history_is_read_permission_protected_and_filterable(api_factory):
+    from app.models import Series
+
+    with api_factory() as db:
+        series = Series(name="HW Dream Garage")
+        db.add(series)
+        db.flush()
+        db.add(ChangeLog(
+            entity_type="series", entity_id=series.id, action="create",
+            old_values=None, new_values={"name": series.name},
+            reason="Test audit event", actor_type="system",
+        ))
+        db.commit()
+
+    client, _ = authenticated_client(api_factory, permissions=("catalog.read",))
+    response = client.get("/api/v1/admin/catalog/history?entity_type=series&action=create")
+    assert response.status_code == 200
+    assert response.json()["total"] == 1
+    assert response.json()["items"][0]["entity_id"] == series.id
+
+    viewer, _ = authenticated_client(api_factory, permissions=())
+    assert viewer.get("/api/v1/admin/catalog/history").status_code == 403

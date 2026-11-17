@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session, selectinload
 
 from .account_api import _require_csrf, _require_permission
 from .db import get_db
-from .models import Casting, CastingVariant, ChangeLog, Release, User
+from .models import Casting, CastingVariant, ChangeLog, Release, ReleaseSeries, Series, User
 
 router = APIRouter(prefix="/api/v1/admin/catalog", tags=["admin-catalog"])
 
@@ -601,3 +601,234 @@ def create_release(
         db.rollback()
         raise
     return _release_payload(release)
+
+
+class SeriesCreate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    name: str = Field(min_length=1, max_length=240)
+    description: str | None = None
+    series_type: str | None = Field(default=None, max_length=80)
+    status: CastingStatus = "candidate"
+    reason: str = Field(min_length=1, max_length=4000)
+
+
+class SeriesPatch(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    name: str | None = Field(default=None, min_length=1, max_length=240)
+    description: str | None = None
+    series_type: str | None = Field(default=None, max_length=80)
+    status: CastingStatus | None = None
+    reason: str = Field(min_length=1, max_length=4000)
+
+
+class ReleaseSeriesUpdate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    series_ids: list[str] = Field(default_factory=list, max_length=100)
+    reason: str = Field(min_length=1, max_length=4000)
+
+
+def _series_payload(series: Series) -> dict:
+    return {
+        "id": series.id,
+        "name": series.name,
+        "description": series.description,
+        "series_type": series.series_type,
+        "status": series.status,
+        "release_count": len(series.release_links),
+        "created_at": series.created_at.isoformat(),
+        "updated_at": series.updated_at.isoformat(),
+    }
+
+
+@router.get("/series")
+def list_series(
+    q: str | None = Query(default=None, max_length=240),
+    status: CastingStatus | None = None,
+    limit: int = Query(default=50, ge=1, le=100),
+    offset: int = Query(default=0, ge=0),
+    _user: User = Depends(_require_permission("catalog.read")),
+    db: Session = Depends(get_db),
+) -> dict:
+    filters = []
+    if q and q.strip():
+        term = f"%{q.strip()}%"
+        filters.append(or_(Series.name.ilike(term), Series.description.ilike(term),
+                           Series.series_type.ilike(term)))
+    if status:
+        filters.append(Series.status == status)
+    total = db.scalar(select(func.count(Series.id)).where(*filters)) or 0
+    rows = db.scalars(
+        select(Series).where(*filters)
+        .options(selectinload(Series.release_links))
+        .order_by(func.lower(Series.name), Series.id)
+        .limit(limit).offset(offset)
+    ).all()
+    return {"items": [_series_payload(item) for item in rows],
+            "total": total, "limit": limit, "offset": offset}
+
+
+@router.get("/series/{series_id}")
+def get_series(
+    series_id: str,
+    _user: User = Depends(_require_permission("catalog.read")),
+    db: Session = Depends(get_db),
+) -> dict:
+    series = db.scalar(
+        select(Series).where(Series.id == series_id)
+        .options(selectinload(Series.release_links).selectinload(ReleaseSeries.release))
+    )
+    if series is None:
+        raise HTTPException(status_code=404, detail="Series not found.")
+    payload = _series_payload(series)
+    payload["releases"] = [
+        {"id": link.release.id, "name": link.release.name,
+         "catalog_year": link.release.catalog_year,
+         "assortment_number": link.release.assortment_number}
+        for link in sorted(series.release_links,
+                           key=lambda item: (item.release.catalog_year or 0,
+                                             item.release.name or "", item.release.id),
+                           reverse=True)
+    ]
+    return payload
+
+
+@router.post("/series", status_code=201)
+def create_series(
+    body: SeriesCreate,
+    request: Request,
+    user: User = Depends(_require_permission("catalog.create")),
+    db: Session = Depends(get_db),
+) -> dict:
+    _require_csrf(request)
+    name = body.name.strip()
+    reason = body.reason.strip()
+    if not name or not reason:
+        raise HTTPException(status_code=422, detail="Series name and creation reason are required.")
+    series = Series(name=name, description=_clean_optional_text(body.description),
+                    series_type=_clean_optional_text(body.series_type), status=body.status)
+    try:
+        db.add(series)
+        db.flush()
+        db.add(ChangeLog(entity_type="series", entity_id=series.id, action="create",
+                         old_values=None,
+                         new_values={"name": series.name, "description": series.description,
+                                     "series_type": series.series_type, "status": series.status},
+                         reason=reason, actor_type="user", actor_id=user.id))
+        db.commit()
+        db.refresh(series)
+    except Exception:
+        db.rollback()
+        raise
+    return _series_payload(series)
+
+
+@router.patch("/series/{series_id}")
+def patch_series(
+    series_id: str,
+    body: SeriesPatch,
+    request: Request,
+    user: User = Depends(_require_permission("catalog.update")),
+    db: Session = Depends(get_db),
+) -> dict:
+    _require_csrf(request)
+    reason = body.reason.strip()
+    if not reason:
+        raise HTTPException(status_code=422, detail="A non-empty change reason is required.")
+    changes = body.model_dump(exclude_unset=True)
+    changes.pop("reason", None)
+    if not changes:
+        raise HTTPException(status_code=422, detail="At least one series field must be supplied.")
+    if "status" in changes and changes["status"] is None:
+        raise HTTPException(status_code=422, detail="Series status cannot be null.")
+    if "name" in changes:
+        if changes["name"] is None or not changes["name"].strip():
+            raise HTTPException(status_code=422, detail="Series name cannot be empty.")
+        changes["name"] = changes["name"].strip()
+    series = db.get(Series, series_id)
+    if series is None:
+        raise HTTPException(status_code=404, detail="Series not found.")
+    try:
+        _apply_audited_patch(db, entity=series, entity_type="series",
+                             changes=changes, reason=reason, user=user)
+        db.commit()
+        db.refresh(series)
+    except Exception:
+        db.rollback()
+        raise
+    return _series_payload(series)
+
+
+@router.put("/releases/{release_id}/series")
+def update_release_series(
+    release_id: str,
+    body: ReleaseSeriesUpdate,
+    request: Request,
+    user: User = Depends(_require_permission("catalog.update")),
+    db: Session = Depends(get_db),
+) -> dict:
+    _require_csrf(request)
+    reason = body.reason.strip()
+    if not reason:
+        raise HTTPException(status_code=422, detail="A non-empty change reason is required.")
+    if len(set(body.series_ids)) != len(body.series_ids):
+        raise HTTPException(status_code=422, detail="Duplicate series IDs are not allowed.")
+    release = db.get(Release, release_id)
+    if release is None:
+        raise HTTPException(status_code=404, detail="Release not found.")
+    selected = db.scalars(select(Series).where(Series.id.in_(body.series_ids))).all() if body.series_ids else []
+    if len(selected) != len(body.series_ids):
+        raise HTTPException(status_code=422, detail="One or more selected series do not exist.")
+    current_links = db.scalars(select(ReleaseSeries).where(ReleaseSeries.release_id == release_id)).all()
+    old_ids = sorted(link.series_id for link in current_links)
+    new_ids = sorted(body.series_ids)
+    if old_ids == new_ids:
+        return {"release_id": release_id, "series_ids": old_ids}
+    try:
+        for link in current_links:
+            db.delete(link)
+        for series_id in new_ids:
+            db.add(ReleaseSeries(release_id=release_id, series_id=series_id))
+        db.add(ChangeLog(entity_type="release", entity_id=release_id,
+                         action="update_series", old_values={"series_ids": old_ids},
+                         new_values={"series_ids": new_ids}, reason=reason,
+                         actor_type="user", actor_id=user.id))
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+    return {"release_id": release_id, "series_ids": new_ids}
+
+
+@router.get("/history")
+def list_change_history(
+    entity_type: str | None = Query(default=None, max_length=40),
+    entity_id: str | None = Query(default=None, max_length=36),
+    action: str | None = Query(default=None, max_length=40),
+    limit: int = Query(default=50, ge=1, le=100),
+    offset: int = Query(default=0, ge=0),
+    _user: User = Depends(_require_permission("catalog.read")),
+    db: Session = Depends(get_db),
+) -> dict:
+    filters = []
+    if entity_type:
+        filters.append(ChangeLog.entity_type == entity_type)
+    if entity_id:
+        filters.append(ChangeLog.entity_id == entity_id)
+    if action:
+        filters.append(ChangeLog.action == action)
+    total = db.scalar(select(func.count(ChangeLog.id)).where(*filters)) or 0
+    rows = db.scalars(select(ChangeLog).where(*filters)
+                      .order_by(ChangeLog.created_at.desc(), ChangeLog.id.desc())
+                      .limit(limit).offset(offset)).all()
+    return {
+        "items": [{
+            "id": item.id, "entity_type": item.entity_type, "entity_id": item.entity_id,
+            "action": item.action, "old_values": item.old_values, "new_values": item.new_values,
+            "reason": item.reason, "actor_type": item.actor_type, "actor_id": item.actor_id,
+            "created_at": item.created_at.isoformat(),
+        } for item in rows],
+        "total": total, "limit": limit, "offset": offset,
+    }
