@@ -1,6 +1,8 @@
+from pathlib import Path
 from typing import Literal
 
 from fastapi import FastAPI, Depends, HTTPException, Query
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field, model_validator
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -35,6 +37,13 @@ app.include_router(account_router)
 app.include_router(admin_catalog_router)
 app.include_router(oauth_router)
 app.include_router(password_router)
+
+
+@app.get("/admin", include_in_schema=False)
+def admin_panel():
+    """Serve the catalog administration interface from the repository root."""
+    admin_page = Path(__file__).resolve().parents[2] / "admin.html"
+    return FileResponse(admin_page, media_type="text/html")
 
 
 @app.get("/health", tags=["system"])
