@@ -37,7 +37,8 @@ if (-not (Test-Path -LiteralPath $markerPath -PathType Leaf)) {
     throw "Storage identity marker is missing: $markerPath"
 }
 $marker = Get-Content -LiteralPath $markerPath -Raw | ConvertFrom-Json
-if (-not $marker.storage_id -or $marker.layout_version -ne 1) {
+$storageId = [guid]::Empty
+if (-not [guid]::TryParse([string]$marker.storage_id, [ref]$storageId) -or $marker.layout_version -ne 1) {
     throw 'External storage identity or layout version is invalid.'
 }
 foreach ($required in @('DATABASE', 'MEDIA', 'IMPORTS', 'EXPORTS', 'BACKUPS')) {
@@ -93,12 +94,25 @@ try {
         throw
     }
 
-    foreach ($entry in $manifest) {
-        $targetFile = Join-Path $destination $entry.file
-        $targetHash = (Get-FileHash -LiteralPath $targetFile -Algorithm SHA256).Hash
-        if ($targetHash -ne $entry.sha256) {
-            throw "SHA-256 mismatch in final destination: $($entry.file)"
+    try {
+        foreach ($entry in $manifest) {
+            $targetFile = Join-Path $destination $entry.file
+            $targetHash = (Get-FileHash -LiteralPath $targetFile -Algorithm SHA256).Hash
+            if ($targetHash -ne $entry.sha256) {
+                throw "SHA-256 mismatch in final destination: $($entry.file)"
+            }
         }
+    }
+    catch {
+        if (Test-Path -LiteralPath $previous) {
+            $failed = Join-Path $data "PROJECT-MANAGEMENT.failed.$stamp"
+            if (Test-Path -LiteralPath $failed) {
+                throw "Verification failed and recovery path already exists: $failed"
+            }
+            Move-Item -LiteralPath $destination -Destination $failed
+            Move-Item -LiteralPath $previous -Destination $destination
+        }
+        throw
     }
 
     Write-Host "Project Manager snapshot synchronized successfully."
