@@ -8,7 +8,8 @@ import re
 from pathlib import PurePosixPath
 from typing import Literal
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, Request, UploadFile
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import func, or_, select
 from sqlalchemy.exc import IntegrityError
@@ -16,6 +17,7 @@ from sqlalchemy.orm import Session, selectinload
 
 from .account_api import _require_csrf, _require_permission
 from .db import get_db
+from .media_storage import InvalidImage, MAX_IMAGE_BYTES, remove_stored_image, resolve_media_file, resolve_thumbnail, store_image
 from .models import (
     ChangeLog, Evidence, EvidenceRelease, MediaAsset, MediaAssetEvidence, Release,
     Source, SourceRecord, User,
@@ -127,6 +129,8 @@ def _asset_payload(asset: MediaAsset) -> dict:
         "original_media_asset_id": asset.original_media_asset_id,
         "width": asset.width, "height": asset.height, "byte_size": asset.byte_size,
         "is_featured": asset.is_featured, "release_ids": release_ids,
+        "file_url": f"/api/v1/admin/media/assets/{asset.id}/file",
+        "thumbnail_url": f"/api/v1/admin/media/assets/{asset.id}/thumbnail",
         "created_at": asset.created_at.isoformat(), "updated_at": asset.updated_at.isoformat(),
         "evidence": [{
             "id": link.evidence.id, "attribute_name": link.evidence.attribute_name,
@@ -295,6 +299,125 @@ def create_asset(
         db.rollback()
         raise HTTPException(status_code=409, detail="Asset storage key or checksum conflicts with an existing record.")
     return {"id": asset.id, "created": True}
+
+
+
+@router.post("/upload")
+async def upload_asset(
+    request: Request,
+    file: UploadFile = File(...),
+    source_record_id: str = Form(...),
+    category: Category = Form("reference_photo"),
+    angle: Angle | None = Form(default=None),
+    rights_status: RightsStatus = Form("unknown"),
+    reason: str = Form(..., min_length=1, max_length=4000),
+    actor: User = Depends(_require_permission("catalog.create")),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Upload an image, preserve its original bytes and generate a WebP thumbnail."""
+    import hashlib
+    import re
+
+    _require_csrf(request)
+    reason = reason.strip()
+    if not reason:
+        raise HTTPException(status_code=422, detail="A non-empty reason is required.")
+    record = db.get(SourceRecord, source_record_id)
+    if record is None:
+        raise HTTPException(status_code=404, detail="Source record not found.")
+
+    data = await file.read(MAX_IMAGE_BYTES + 1)
+    if len(data) > MAX_IMAGE_BYTES:
+        raise HTTPException(status_code=413, detail="Image exceeds the 15 MB limit.")
+    checksum = hashlib.sha256(data).hexdigest()
+    duplicate = db.scalar(select(MediaAsset).where(MediaAsset.checksum_sha256 == checksum))
+    if duplicate:
+        raise HTTPException(status_code=409, detail={"message": "Duplicate file checksum.", "existing_asset_id": duplicate.id})
+
+    try:
+        stored = store_image(data)
+    except InvalidImage as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+    declared_type = (file.content_type or "").lower()
+    if declared_type and declared_type not in ("application/octet-stream", stored.mime_type):
+        remove_stored_image(stored.storage_key, stored.checksum_sha256)
+        raise HTTPException(status_code=415, detail="Declared content type does not match the image bytes.")
+
+    original_filename = re.split(r"[/\\\\]", file.filename or "upload")[ -1][:255] or "upload"
+    asset = MediaAsset(
+        source_record_id=record.id,
+        storage_key=stored.storage_key,
+        original_filename=original_filename,
+        mime_type=stored.mime_type,
+        checksum_sha256=stored.checksum_sha256,
+        category=category,
+        angle=angle,
+        rights_status=rights_status,
+        uploader_user_id=actor.id,
+        width=stored.width,
+        height=stored.height,
+        byte_size=stored.byte_size,
+    )
+    db.add(asset)
+    try:
+        db.flush()
+        _audit(
+            db, actor, asset.id, "upload", {},
+            {
+                "source_record_id": record.id,
+                "storage_key": stored.storage_key,
+                "checksum_sha256": stored.checksum_sha256,
+                "byte_size": stored.byte_size,
+                "mime_type": stored.mime_type,
+                "category": category,
+                "angle": angle,
+                "rights_status": rights_status,
+            },
+            reason,
+        )
+        db.commit()
+    except Exception:
+        db.rollback()
+        remove_stored_image(stored.storage_key, stored.checksum_sha256)
+        raise
+    return {"id": asset.id, "created": True, **_asset_payload(asset)}
+
+
+@router.get("/assets/{asset_id}/file")
+def get_asset_file(
+    asset_id: str,
+    _actor: User = Depends(_require_permission("catalog.read")),
+    db: Session = Depends(get_db),
+):
+    asset = db.get(MediaAsset, asset_id)
+    if asset is None:
+        raise HTTPException(status_code=404, detail="Media asset not found.")
+    try:
+        path = resolve_media_file(asset.storage_key)
+    except ValueError as exc:
+        raise HTTPException(status_code=500, detail="Stored media path is invalid.") from exc
+    if not path.is_file():
+        raise HTTPException(status_code=404, detail="Media file is missing from storage.")
+    return FileResponse(path, media_type=asset.mime_type or "application/octet-stream", headers={"X-Content-Type-Options": "nosniff", "Cache-Control": "private, max-age=300"})
+
+
+@router.get("/assets/{asset_id}/thumbnail")
+def get_asset_thumbnail(
+    asset_id: str,
+    _actor: User = Depends(_require_permission("catalog.read")),
+    db: Session = Depends(get_db),
+):
+    asset = db.get(MediaAsset, asset_id)
+    if asset is None:
+        raise HTTPException(status_code=404, detail="Media asset not found.")
+    try:
+        path = resolve_thumbnail(asset.checksum_sha256)
+    except ValueError as exc:
+        raise HTTPException(status_code=500, detail="Stored thumbnail path is invalid.") from exc
+    if not path.is_file():
+        raise HTTPException(status_code=404, detail="Thumbnail is missing from storage.")
+    return FileResponse(path, media_type="image/webp", headers={"X-Content-Type-Options": "nosniff", "Cache-Control": "private, max-age=300"})
 
 
 @router.patch("/assets/{asset_id}")
