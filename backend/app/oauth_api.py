@@ -387,9 +387,9 @@ def oauth_callback(
 
     response = _oauth_finish(provider, state, "success")
     expires_at = session.expires_at
-# SQLite may return naive datetimes even for DateTime(timezone=True) columns.
-if expires_at.tzinfo is None:
-    expires_at = expires_at.replace(tzinfo=timezone.utc)
-lifetime = int((expires_at - utc_now()).total_seconds())
+    # SQLite may return naive datetimes even for DateTime(timezone=True) columns.
+    if expires_at.tzinfo is None:
+        expires_at = expires_at.replace(tzinfo=timezone.utc)
+    lifetime = int((expires_at - utc_now()).total_seconds())
     _set_session_cookies(response, raw_session_token, lifetime)
     return response
