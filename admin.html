@@ -257,7 +257,7 @@ const openMediaUpload=async()=>{
       sourceId=source.id;
      }
      const record=await api("/api/v1/admin/media/records",{method:"POST",body:JSON.stringify({source_id:sourceId,external_id:String(fd.get("external_id")||"").trim()||null,record_url:String(fd.get("record_url")||"").trim()||null,record_type:"listing",reason})});
-     const upload=new FormData();upload.append("file",file);upload.append("source_record_id",record.id);upload.append("category",String(fd.get("category")));upload.append("angle",String(fd.get("angle")||""));upload.append("rights_status",String(fd.get("rights_status")));upload.append("reason",reason);
+     const upload=new FormData();upload.append("file",file);upload.append("source_record_id",record.id);upload.append("category",String(fd.get("category")));const angle=String(fd.get("angle")||"");if(angle)upload.append("angle",angle);upload.append("rights_status",String(fd.get("rights_status")));upload.append("reason",reason);
      const asset=await api("/api/v1/admin/media/upload",{method:"POST",body:upload});
      toast("Фотография загружена");closeDrawer();state.mediaPage=0;await loadMedia();await openMediaDetail(asset.id);
     }catch(error){showAlert(error.message,"error");button.disabled=false;button.textContent="Загрузить и сохранить";}
