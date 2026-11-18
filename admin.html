@@ -67,8 +67,8 @@ table{width:100%;border-collapse:collapse}th{text-align:left;font-size:10px;lett
   <select id="mediaRights"><option value="">Любой статус прав</option><option value="unknown">Неизвестны</option><option value="permission_requested">Запрошены</option><option value="permitted">Разрешены</option><option value="restricted">Ограничены</option><option value="denied">Запрещены</option></select>
   <span class="spacer"></span><span class="result-count" id="mediaResults">—</span>
  </div>
- <div class="panel"><div class="panel-head"><h2>Фотографии и материалы</h2><small>Оригиналы, происхождение, ракурсы и права использования</small></div><div class="table-wrap" id="mediaTable"><div class="empty">Загружаю медиатеку…</div></div><div class="pagination"><span id="mediaPageInfo">—</span><div class="pager"><button id="mediaPrev">←</button><button id="mediaNext">→</button></div></div></div>
- <p class="hint">На этом этапе админка управляет метаданными. Загрузка файлов и генерация миниатюр подключаются отдельным безопасным этапом.</p>
+ <div class="panel"><div class="panel-head"><h2>Фотографии и материалы</h2><small>Оригиналы, происхождение, ракурсы и права использования</small><span class="spacer"></span><button class="btn primary" id="mediaUploadBtn">＋ Загрузить фото</button></div><div class="table-wrap" id="mediaTable"><div class="empty">Загружаю медиатеку…</div></div><div class="pagination"><span id="mediaPageInfo">—</span><div class="pager"><button id="mediaPrev">←</button><button id="mediaNext">→</button></div></div></div>
+ <p class="hint">Оригиналы сохраняются без изменений. Для просмотра используются защищённые миниатюры.</p>
 </section>
 </main></div>
 <div class="drawer-backdrop" id="backdrop"></div><aside class="drawer" id="drawer" aria-label="Карточка записи"><div class="drawer-head"><div><h2 id="drawerTitle">Карточка</h2><p id="drawerSub"></p></div><button class="close" id="drawerClose" aria-label="Закрыть">✕</button></div><div class="drawer-body" id="drawerBody"></div></aside><div class="toast" id="toast"></div>
@@ -81,7 +81,7 @@ const esc = value => String(value ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;",
 const cookie = name => document.cookie.split(";").map(v=>v.trim()).find(v=>v.startsWith(name+"="))?.slice(name.length+1) || "";
 const api = async (path, options={}) => {
  const headers = new Headers(options.headers || {});
- if(options.body) headers.set("Content-Type","application/json");
+ if(options.body && !(options.body instanceof FormData)) headers.set("Content-Type","application/json");
  if(options.method && options.method !== "GET"){const csrf=cookie("hw_csrf");if(csrf)headers.set("X-CSRF-Token",decodeURIComponent(csrf));}
  const response = await fetch(path,{...options,headers,credentials:"include"});
  let data={};try{data=await response.json()}catch{}
@@ -218,7 +218,53 @@ const loadMedia=async()=>{
   $("mediaTable").querySelectorAll("tbody tr").forEach(row=>row.addEventListener("click",()=>openMediaDetail(row.dataset.id)));
  }catch(error){$("mediaTable").innerHTML=emptyTable(error.message);showAlert(error.message,"error");}
 };
-const openMediaDetail=async id=>{
+const openMediaUpload=async()=>{
+  openDrawer();$("drawerTitle").textContent="Загрузить фотографию";$("drawerSub").textContent="Оригинал + автоматическая миниатюра WebP";
+  $("drawerBody").innerHTML='<div class="empty">Загружаю список источников…</div>';
+  try{
+   const sources=await api("/api/v1/admin/media/sources");
+   const options=(sources.items||[]).map(s=>'<option value="'+esc(s.id)+'">'+esc(s.name)+' · '+esc(s.source_type)+'</option>').join("");
+   $("drawerBody").innerHTML='<form class="edit-form" id="mediaUploadForm">'+
+    '<div class="field"><label>Файл изображения * (JPEG, PNG или WEBP, до 15 МБ)</label><input type="file" name="file" accept="image/jpeg,image/png,image/webp" required></div>'+
+    '<div id="mediaUploadPreview" class="hint">Предпросмотр появится после выбора файла.</div>'+
+    '<div class="field"><label>Источник *</label><select name="source_id"><option value="">＋ Создать новый источник</option>'+options+'</select></div>'+
+    '<div id="mediaNewSourceFields"><div class="field"><label>Название источника *</label><input name="source_name" maxlength="240" placeholder="Например, eBay, Hot Wheels Wiki или личная коллекция"></div>'+
+    '<div class="field"><label>Тип источника *</label><input name="source_type" maxlength="40" value="website" required></div>'+
+    '<div class="field"><label>Базовый URL источника</label><input name="base_url" type="url" maxlength="4000" placeholder="https://…"></div></div>'+
+    '<div class="field"><label>Ссылка на конкретную страницу / объявление</label><input name="record_url" type="url" maxlength="4000" placeholder="https://…"></div>'+
+    '<div class="field"><label>Внешний ID объявления / записи</label><input name="external_id" maxlength="240" placeholder="Необязательно"></div>'+
+    '<div class="field"><label>Категория *</label><select name="category">'+Object.entries(mediaLabels).map(([k,v])=>'<option value="'+k+'" '+(k==="package_photo"?"selected":"")+'>'+v+'</option>').join("")+'</select></div>'+
+    '<div class="field"><label>Ракурс *</label><select name="angle"><option value="package_front">Блистер спереди</option><option value="package_back">Блистер сзади</option><option value="front">Спереди</option><option value="rear">Сзади</option><option value="left">Слева</option><option value="right">Справа</option><option value="top">Сверху</option><option value="bottom">Снизу</option><option value="detail">Деталь</option><option value="other">Другой</option><option value="">Не указан</option></select></div>'+
+    '<div class="field"><label>Права использования</label><select name="rights_status">'+Object.entries(rightsLabels).map(([k,v])=>'<option value="'+k+'" '+(k==="unknown"?"selected":"")+'>'+v+'</option>').join("")+'</select></div>'+
+    '<div class="field"><label>Причина регистрации *</label><textarea name="reason" required minlength="3" maxlength="4000" placeholder="Например: добавление фото лицевой стороны блистера для подтверждения выпуска."></textarea></div>'+
+    '<p class="hint">Источник и запись страницы будут созданы автоматически, если выбран пункт «Создать новый источник». Права по умолчанию остаются неизвестными.</p>'+
+    '<div class="form-actions"><button type="button" class="btn" id="cancelMediaUpload">Отмена</button><button type="submit" class="btn primary">Загрузить и сохранить</button></div></form>';
+   const form=$("mediaUploadForm"),sourceSelect=form.elements.source_id,newFields=$("mediaNewSourceFields"),fileInput=form.elements.file,preview=$("mediaUploadPreview");
+   const syncSource=()=>{const isNew=!sourceSelect.value;newFields.hidden=!isNew;form.elements.source_name.required=isNew;form.elements.source_type.required=isNew;};
+   sourceSelect.addEventListener("change",syncSource);syncSource();
+   fileInput.addEventListener("change",()=>{const file=fileInput.files[0];if(!file){preview.textContent="Предпросмотр появится после выбора файла.";return;}if(preview.dataset.url)URL.revokeObjectURL(preview.dataset.url);const url=URL.createObjectURL(file);preview.dataset.url=url;preview.innerHTML='<img src="'+url+'" alt="Предпросмотр" style="display:block;max-width:100%;max-height:260px;object-fit:contain;border:1px solid var(--line);border-radius:8px;margin:8px 0"><span class="hint">'+esc(file.name)+' · '+(file.size/1024/1024).toFixed(2)+' МБ</span>';});
+   $("cancelMediaUpload").addEventListener("click",closeDrawer);
+   form.addEventListener("submit",async event=>{
+    event.preventDefault();const fd=new FormData(form),file=fd.get("file"),button=form.querySelector('button[type="submit"]');
+    if(!file||!file.size){showAlert("Выбери файл изображения.","error");return;}
+    if(file.size>15*1024*1024){showAlert("Файл превышает ограничение 15 МБ.","error");return;}
+    if(!["image/jpeg","image/png","image/webp"].includes(file.type)){showAlert("Поддерживаются только JPEG, PNG и WEBP.","error");return;}
+    button.disabled=true;button.textContent="Загружаю…";
+    try{
+     const reason=String(fd.get("reason")||"").trim();let sourceId=String(fd.get("source_id")||"");
+     if(!sourceId){
+      const source=await api("/api/v1/admin/media/sources",{method:"POST",body:JSON.stringify({name:String(fd.get("source_name")||"").trim(),source_type:String(fd.get("source_type")||"").trim(),base_url:String(fd.get("base_url")||"").trim()||null,reason})});
+      sourceId=source.id;
+     }
+     const record=await api("/api/v1/admin/media/records",{method:"POST",body:JSON.stringify({source_id:sourceId,external_id:String(fd.get("external_id")||"").trim()||null,record_url:String(fd.get("record_url")||"").trim()||null,record_type:"listing",reason})});
+     const upload=new FormData();upload.append("file",file);upload.append("source_record_id",record.id);upload.append("category",String(fd.get("category")));upload.append("angle",String(fd.get("angle")||""));upload.append("rights_status",String(fd.get("rights_status")));upload.append("reason",reason);
+     const asset=await api("/api/v1/admin/media/upload",{method:"POST",body:upload});
+     toast("Фотография загружена");closeDrawer();state.mediaPage=0;await loadMedia();await openMediaDetail(asset.id);
+    }catch(error){showAlert(error.message,"error");button.disabled=false;button.textContent="Загрузить и сохранить";}
+   });
+  }catch(error){$("drawerBody").innerHTML='<div class="alert error">'+esc(error.message)+'</div>';}
+ };
+ const openMediaDetail=async id=>{
  openDrawer();$("drawerTitle").textContent="Загружаю материал…";$("drawerSub").textContent=id;$("drawerBody").innerHTML='<div class="empty">Получаю метаданные…</div>';
  try{
   const x=await api("/api/v1/admin/media/assets/"+encodeURIComponent(id));
@@ -408,7 +454,7 @@ $("releaseSearch").addEventListener("input",()=>{clearTimeout(state.debounce);st
 ["releaseStatus","releaseYear"].forEach(id=>$(id).addEventListener("change",()=>{state.releasePage=0;loadReleases()}));
 $("castingPrev").addEventListener("click",()=>{state.castingPage=Math.max(0,state.castingPage-1);loadCastings()});$("castingNext").addEventListener("click",()=>{state.castingPage++;loadCastings()});
 $("releasePrev").addEventListener("click",()=>{state.releasePage=Math.max(0,state.releasePage-1);loadReleases()});$("releaseNext").addEventListener("click",()=>{state.releasePage++;loadReleases()});
-["moderationStatus","moderationSeverity"].forEach(id=>$(id).addEventListener("change",()=>{state.moderationPage=0;loadModeration()}));$("moderationType").addEventListener("input",()=>{clearTimeout(state.debounce);state.debounce=setTimeout(()=>{state.moderationPage=0;loadModeration()},300)});$("moderationPrev").addEventListener("click",()=>{state.moderationPage=Math.max(0,state.moderationPage-1);loadModeration()});$("moderationNext").addEventListener("click",()=>{state.moderationPage++;loadModeration()});$("seriesSearch").addEventListener("input",()=>{clearTimeout(state.debounce);state.debounce=setTimeout(()=>{state.seriesPage=0;loadSeries()},250)});$("seriesStatus").addEventListener("change",()=>{state.seriesPage=0;loadSeries()});$("seriesPrev").addEventListener("click",()=>{state.seriesPage=Math.max(0,state.seriesPage-1);loadSeries()});$("seriesNext").addEventListener("click",()=>{state.seriesPage++;loadSeries()});["historyEntityType","historyAction"].forEach(id=>$(id).addEventListener("change",()=>{state.historyPage=0;loadHistory()}));$("userSearch").addEventListener("input",()=>{clearTimeout(state.debounce);state.debounce=setTimeout(()=>{state.userPage=0;loadUsers()},250)});$("userStatus").addEventListener("change",()=>{state.userPage=0;loadUsers()});$("userPrev").addEventListener("click",()=>{state.userPage=Math.max(0,state.userPage-1);loadUsers()});$("userNext").addEventListener("click",()=>{state.userPage++;loadUsers()});$("historyPrev").addEventListener("click",()=>{state.historyPage=Math.max(0,state.historyPage-1);loadHistory()});$("historyNext").addEventListener("click",()=>{state.historyPage++;loadHistory()});$("mediaSearch").addEventListener("input",()=>{clearTimeout(state.debounce);state.debounce=setTimeout(()=>{state.mediaPage=0;loadMedia()},250)});["mediaCategory","mediaAngle","mediaRights"].forEach(id=>$(id).addEventListener("change",()=>{state.mediaPage=0;loadMedia()}));$("mediaPrev").addEventListener("click",()=>{state.mediaPage=Math.max(0,state.mediaPage-1);loadMedia()});$("mediaNext").addEventListener("click",()=>{state.mediaPage++;loadMedia()});$("drawerClose").addEventListener("click",closeDrawer);$("backdrop").addEventListener("click",closeDrawer);document.addEventListener("keydown",e=>{if(e.key==="Escape")closeDrawer()});
+["moderationStatus","moderationSeverity"].forEach(id=>$(id).addEventListener("change",()=>{state.moderationPage=0;loadModeration()}));$("moderationType").addEventListener("input",()=>{clearTimeout(state.debounce);state.debounce=setTimeout(()=>{state.moderationPage=0;loadModeration()},300)});$("moderationPrev").addEventListener("click",()=>{state.moderationPage=Math.max(0,state.moderationPage-1);loadModeration()});$("moderationNext").addEventListener("click",()=>{state.moderationPage++;loadModeration()});$("seriesSearch").addEventListener("input",()=>{clearTimeout(state.debounce);state.debounce=setTimeout(()=>{state.seriesPage=0;loadSeries()},250)});$("seriesStatus").addEventListener("change",()=>{state.seriesPage=0;loadSeries()});$("seriesPrev").addEventListener("click",()=>{state.seriesPage=Math.max(0,state.seriesPage-1);loadSeries()});$("seriesNext").addEventListener("click",()=>{state.seriesPage++;loadSeries()});["historyEntityType","historyAction"].forEach(id=>$(id).addEventListener("change",()=>{state.historyPage=0;loadHistory()}));$("userSearch").addEventListener("input",()=>{clearTimeout(state.debounce);state.debounce=setTimeout(()=>{state.userPage=0;loadUsers()},250)});$("userStatus").addEventListener("change",()=>{state.userPage=0;loadUsers()});$("userPrev").addEventListener("click",()=>{state.userPage=Math.max(0,state.userPage-1);loadUsers()});$("userNext").addEventListener("click",()=>{state.userPage++;loadUsers()});$("historyPrev").addEventListener("click",()=>{state.historyPage=Math.max(0,state.historyPage-1);loadHistory()});$("historyNext").addEventListener("click",()=>{state.historyPage++;loadHistory()});$("mediaSearch").addEventListener("input",()=>{clearTimeout(state.debounce);state.debounce=setTimeout(()=>{state.mediaPage=0;loadMedia()},250)});["mediaCategory","mediaAngle","mediaRights"].forEach(id=>$(id).addEventListener("change",()=>{state.mediaPage=0;loadMedia()}));$("mediaUploadBtn").addEventListener("click",openMediaUpload);$("mediaPrev").addEventListener("click",()=>{state.mediaPage=Math.max(0,state.mediaPage-1);loadMedia()});$("mediaNext").addEventListener("click",()=>{state.mediaPage++;loadMedia()});$("drawerClose").addEventListener("click",closeDrawer);$("backdrop").addEventListener("click",closeDrawer);document.addEventListener("keydown",e=>{if(e.key==="Escape")closeDrawer()});
 loadOverview();
 })();
 </script>
