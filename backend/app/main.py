@@ -44,6 +44,12 @@ def admin_panel():
     admin_page = Path(__file__).resolve().parents[2] / "admin.html"
     return FileResponse(admin_page, media_type="text/html")
 
+@app.get("/login.html", include_in_schema=False)
+def login_page():
+    """Serve the account login interface from the repository root."""
+    login_file = Path(__file__).resolve().parents[2] / "login.html"
+    return FileResponse(login_file, media_type="text/html")
+
 
 @app.get("/health", tags=["system"])
 def health_check() -> dict[str, str]:
