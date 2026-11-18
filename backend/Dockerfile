@@ -7,6 +7,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 WORKDIR /app
 
 RUN addgroup --system hwcatalog && adduser --system --ingroup hwcatalog hwcatalog
+RUN mkdir -p /var/lib/hw-catalog/MEDIA/images /var/lib/hw-catalog/MEDIA/thumbnails && chown -R hwcatalog:hwcatalog /var/lib/hw-catalog
 
 COPY requirements.txt ./
 RUN python -m pip install --upgrade pip && python -m pip install -r requirements.txt

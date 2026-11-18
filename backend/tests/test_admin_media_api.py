@@ -227,3 +227,129 @@ def test_media_asset_can_link_to_evidence(api_factory):
         link = db.get(MediaAssetEvidence, {"media_asset_id": asset_id, "evidence_id": evidence_id})
         assert link is not None
         assert link.role == "supports"
+
+from io import BytesIO
+from pathlib import Path
+
+from PIL import Image
+
+
+def _png_image_bytes(size=(800, 600)):
+    output = BytesIO()
+    Image.new("RGB", size, (220, 40, 30)).save(output, format="PNG")
+    return output.getvalue()
+
+
+def test_media_upload_preserves_original_and_generates_thumbnail(api_factory, tmp_path, monkeypatch):
+    monkeypatch.setenv("HW_CATALOG_MEDIA_DIR", str(tmp_path / "media"))
+    with api_factory() as db:
+        source = Source(name="eBay", source_type="marketplace")
+        record = SourceRecord(source=source, external_id="listing-upload-1", record_type="listing")
+        db.add(record)
+        db.commit()
+        record_id = record.id
+
+    client, user_id, headers = authenticated_client(api_factory)
+    original = _png_image_bytes()
+    response = client.post(
+        "/api/v1/admin/media/upload",
+        data={
+            "source_record_id": record_id,
+            "category": "package_photo",
+            "angle": "package_front",
+            "rights_status": "unknown",
+            "reason": "Add eBay blister-front reference image",
+        },
+        files={"file": ("blister-front.png", original, "image/png")},
+        headers=headers,
+    )
+    assert response.status_code == 200, response.text
+    payload = response.json()
+    assert payload["mime_type"] == "image/png"
+    assert payload["byte_size"] == len(original)
+    assert payload["category"] == "package_photo"
+    assert payload["angle"] == "package_front"
+    assert payload["rights_status"] == "unknown"
+    assert payload["uploader_user_id"] == user_id
+
+    original_response = client.get(payload["file_url"])
+    assert original_response.status_code == 200
+    assert original_response.content == original
+    assert original_response.headers["content-type"] == "image/png"
+
+    thumbnail_response = client.get(payload["thumbnail_url"])
+    assert thumbnail_response.status_code == 200
+    assert thumbnail_response.headers["content-type"] == "image/webp"
+    with Image.open(BytesIO(thumbnail_response.content)) as thumbnail:
+        assert thumbnail.format == "WEBP"
+        assert thumbnail.width <= 640
+        assert thumbnail.height <= 640
+
+    duplicate = client.post(
+        "/api/v1/admin/media/upload",
+        data={
+            "source_record_id": record_id,
+            "reason": "Try to add the same image twice",
+        },
+        files={"file": ("duplicate.png", original, "image/png")},
+        headers=headers,
+    )
+    assert duplicate.status_code == 409
+    assert duplicate.json()["detail"]["existing_asset_id"] == payload["id"]
+
+    with api_factory() as db:
+        stored = db.get(MediaAsset, payload["id"])
+        assert stored is not None
+        assert stored.uploader_user_id == user_id
+        audit = db.scalar(select(ChangeLog).where(ChangeLog.entity_id == payload["id"]))
+        assert audit.action == "upload"
+        assert audit.actor_id == user_id
+
+
+def test_media_upload_rejects_invalid_and_mismatched_content(api_factory, tmp_path, monkeypatch):
+    monkeypatch.setenv("HW_CATALOG_MEDIA_DIR", str(tmp_path / "media"))
+    with api_factory() as db:
+        source = Source(name="Local", source_type="user_upload")
+        record = SourceRecord(source=source, record_type="photo")
+        db.add(record)
+        db.commit()
+        record_id = record.id
+
+    client, _, headers = authenticated_client(api_factory)
+    invalid = client.post(
+        "/api/v1/admin/media/upload",
+        data={"source_record_id": record_id, "reason": "Reject non-image payload"},
+        files={"file": ("payload.txt", b"not an image", "text/plain")},
+        headers=headers,
+    )
+    assert invalid.status_code == 422
+
+    mismatch = client.post(
+        "/api/v1/admin/media/upload",
+        data={"source_record_id": record_id, "reason": "Reject incorrect content type"},
+        files={"file": ("payload.png", _png_image_bytes(), "image/jpeg")},
+        headers=headers,
+    )
+    assert mismatch.status_code == 415
+    assert not list((tmp_path / "media").rglob("*.png"))
+
+
+def test_media_upload_enforces_size_limit(api_factory, tmp_path, monkeypatch):
+    from app.media_storage import MAX_IMAGE_BYTES
+
+    monkeypatch.setenv("HW_CATALOG_MEDIA_DIR", str(tmp_path / "media"))
+    with api_factory() as db:
+        source = Source(name="Local", source_type="user_upload")
+        record = SourceRecord(source=source, record_type="photo")
+        db.add(record)
+        db.commit()
+        record_id = record.id
+
+    client, _, headers = authenticated_client(api_factory)
+    response = client.post(
+        "/api/v1/admin/media/upload",
+        data={"source_record_id": record_id, "reason": "Reject oversized image"},
+        files={"file": ("large.png", b"x" * (MAX_IMAGE_BYTES + 1), "image/png")},
+        headers=headers,
+    )
+    assert response.status_code == 413

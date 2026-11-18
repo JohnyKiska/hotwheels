@@ -24,6 +24,7 @@ services:
       HW_PUBLIC_BASE_URL: ${HW_PUBLIC_BASE_URL}
       HW_FRONTEND_URL: ${HW_FRONTEND_URL}
       HW_ALLOWED_ORIGINS: ${HW_ALLOWED_ORIGINS}
+      HW_CATALOG_MEDIA_DIR: /var/lib/hw-catalog/MEDIA
       HW_COOKIE_SECURE: "true"
       HW_EMAIL_ENCRYPTION_KEY: ${HW_EMAIL_ENCRYPTION_KEY}
       HW_OAUTH_ENCRYPTION_KEY: ${HW_OAUTH_ENCRYPTION_KEY}
@@ -34,6 +35,8 @@ services:
       HW_GOOGLE_CLIENT_ID: ${HW_GOOGLE_CLIENT_ID:-}
       HW_GOOGLE_CLIENT_SECRET: ${HW_GOOGLE_CLIENT_SECRET:-}
       HW_GOOGLE_REDIRECT_URI: ${HW_GOOGLE_REDIRECT_URI:-}
+    volumes:
+      - media_data:/var/lib/hw-catalog/MEDIA
     depends_on:
       db:
         condition: service_healthy
@@ -91,5 +94,6 @@ services:
 
 volumes:
   postgres_data:
+  media_data:
   caddy_data:
   caddy_config:
