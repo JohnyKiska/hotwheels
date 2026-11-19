@@ -6,6 +6,7 @@ import logging
 import os
 import time
 
+from . import config
 from .db import SessionLocal
 from .email_delivery import dispatch_outbox_batch
 from .smtp_email_provider import SMTPEmailProvider

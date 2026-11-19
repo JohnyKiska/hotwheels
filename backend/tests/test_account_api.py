@@ -118,6 +118,69 @@ def test_invitation_api_requires_csrf_and_queues_encrypted_email(api_factory):
         assert queued.status == "pending"
 
 
+
+def test_authenticated_user_can_add_primary_email_and_queue_verification(api_factory):
+    client, user_id = create_authenticated_client(api_factory)
+
+    denied = client.post(
+        "/api/v1/account/email",
+        json={"email": "Owner@Example.com"},
+        headers={"Origin": "https://catalog.example.com"},
+    )
+    assert denied.status_code == 403
+
+    response = client.post(
+        "/api/v1/account/email",
+        json={"email": "Owner@Example.com"},
+        headers={
+            "Origin": "https://catalog.example.com",
+            "X-CSRF-Token": "csrf-test-token",
+        },
+    )
+    assert response.status_code == 201
+    assert response.json() == {
+        "email": "owner@example.com",
+        "primary": True,
+        "verification": "queued",
+    }
+
+    with api_factory() as db:
+        email = db.scalar(select(EmailAddress).where(EmailAddress.user_id == user_id))
+        queued = db.scalar(select(OutboundEmail))
+        assert email is not None
+        assert email.email_normalized == "owner@example.com"
+        assert email.is_primary is True
+        assert email.verified_at is None
+        assert queued is not None
+        assert queued.recipient_email == "owner@example.com"
+        assert queued.status == "pending"
+
+
+def test_email_address_cannot_be_claimed_by_another_account(api_factory):
+    client, _user_id = create_authenticated_client(api_factory)
+    with api_factory() as db:
+        other = User(status="active", display_name="Other")
+        db.add(other)
+        db.flush()
+        db.add(EmailAddress(
+            user_id=other.id,
+            email_normalized="taken@example.com",
+            email_display="taken@example.com",
+            is_primary=True,
+        ))
+        db.commit()
+
+    response = client.post(
+        "/api/v1/account/email",
+        json={"email": "taken@example.com"},
+        headers={
+            "Origin": "https://catalog.example.com",
+            "X-CSRF-Token": "csrf-test-token",
+        },
+    )
+    assert response.status_code == 409
+    assert response.json()["detail"] == "Email address is already registered."
+
 def test_invitation_acceptance_creates_session_cookie_and_me(api_factory):
     with api_factory() as db:
         inviter = User(status="active", display_name="Admin")

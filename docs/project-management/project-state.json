@@ -2,7 +2,7 @@
   "schema_version": 1,
   "metadata": {
     "project_id": "hw-catalog",
-    "updated_at": "2026-11-17T16:32:49+07:00",
+    "updated_at": "2026-11-19T14:04:34+07:00",
     "source_of_truth": "github",
     "working_branch": "integration/catalog-foundation",
     "last_verified_commit": "c6512c0e31e0722f17c425aa9dbf9a43014419ce",
@@ -231,6 +231,36 @@
       "sort_order": 90
     },
     {
+      "id": "ebayIntegration",
+      "parent_id": "app",
+      "workstream_id": "backend",
+      "title": "eBay Integration",
+      "path": "backend/app/ebay_notifications_api.py",
+      "kind": "service",
+      "status": "review",
+      "description": "Sandbox OAuth/Browse API probes and isolated Account Deletion Notifications API with ECDSA verification, idempotent processing, seller anonymization, and dedicated Alembic tables.",
+      "notes": "Локальная интеграция и миграция проверялись на временных SQLite-БД. Постоянные pytest-тесты backend/tests/test_ebay_account_deletion_api.py: 9 passed. После исправления изоляции последний полный python -m pytest -q tests: 298 passed, 1 skipped, 30 warnings; migration tests: 7 passed, 23 warnings. OAuth: 5 passed; Password: 6 passed. Предыдущие шесть CSRF-отказов из полного прогона 292 passed, 6 failed, 1 skipped устранены изоляцией HW_ALLOWED_ORIGINS и HW_FRONTEND_URL в фикстурах; добавлены проверки запрещённого Origin с корректной CSRF-парой. Ранее прогон без migration-тестов дал 287 passed, 1 skipped, 4 deselected. Production CSRF и eBay-реализация не ослаблялись и не менялись. Последний полный прогон использовал тестовые БД, без Production/Sandbox-сетевых запросов и без обращения к основной БД. Реальные eBay notifications не получались; Production отключён, публичного HTTPS endpoint пока нет.",
+      "source_refs": [
+        "backend/app/ebay_notifications_api.py",
+        "backend/app/main.py",
+        "backend/app/models.py",
+        "backend/app/config.py",
+        "backend/migrations/versions/20261119_ebay_notifications.py",
+        "backend/tests/test_ebay_migration.py",
+        "backend/tests/test_ebay_account_deletion_api.py",
+        "backend/test_ebay_notification_processing.py",
+        "backend/test_ebay_official_vector.py",
+        "backend/test_ebay_signature_suite.py",
+        "backend/test_ebay_signature_header.py",
+        "backend/test_ebay_article_search.py",
+        "backend/test_ebay_item_details.py",
+        "docs/integrations/EBAY_INTEGRATION.md"
+      ],
+      "sort_order": 95,
+      "completed_work": "Реализованы GET challenge validation и POST account-deletion processing с ECDSA signature verification; Sandbox/Production OAuth и public-key caches раздельны; повторные notificationId проверяются по payload hash; обработчик обезличивает eBay seller data, не удаляя общие данные каталога. Добавлена Alembic-миграция трёх eBay-таблиц с безопасным сохранением ранее существовавших таблиц. Постоянные pytest-тесты GET challenge и проверки подписи: 9 passed. OAuth/Password тестовые фикстуры изолированы от локальных HW_ALLOWED_ORIGINS и HW_FRONTEND_URL; OAuth 5 passed, Password 6 passed, запрещённый Origin остаётся отклонённым. Последний полный pytest: 298 passed, 1 skipped; migration tests: 7 passed.",
+      "next_step": "После локальной проверки и успешного полного suite поддерживать review; после появления публичного HTTPS endpoint провести Sandbox end-to-end delivery. Production не включать до выполнения требований eBay или получения exemption."
+    },
+    {
       "id": "services",
       "parent_id": "app",
       "workstream_id": "backend",
@@ -322,7 +352,7 @@
       "kind": "directory",
       "status": "in_progress",
       "description": "Архив исходных HTML-страниц Hot Wheels Wiki / All Hot Wheels по годам в отдельном репозитории.",
-      "notes": "60 исходных HTML-файлов за 1968–2026 годы хранятся в JohnyKiska/hotwheels-fandom-archive/ALLHW. MANIFEST.csv содержит 60 записей с размерами и SHA-256. 2026-11-16 исправленный архив main проверен локально: 60 записей, 0 ошибок; затем все 60 файлов скопированы на внешний HDD в E:\\HW-CATALOG-DATA\\IMPORTS\\ALLHW и повторно сверены по размеру и SHA-256: 60/60, ошибок 0. Read-only importer остаётся в основном репозитории. Полноту исходного набора и корректность парсинга предстоит проверять отдельно.",
+      "notes": "60 исходных HTML-файлов за 1968–2026 годы хранятся в JohnyKiska/hotwheels-fandom-archive/ALLHW. MANIFEST.csv содержит 60 записей с размерами и SHA-256. 2026-11-16 исправленный архив main проверен локально: 60 записей, 0 ошибок; затем все 60 файлов скопированы во внешнее хранилище HW-CATALOG-DATA/IMPORTS/ALLHW и повторно сверены по размеру и SHA-256: 60/60, ошибок 0. Read-only importer остаётся в основном репозитории. Полноту исходного набора и корректность парсинга предстоит проверять отдельно.",
       "source_refs": [
         "https://github.com/JohnyKiska/hotwheels-fandom-archive/tree/main/ALLHW",
         "https://github.com/JohnyKiska/hotwheels-fandom-archive/blob/main/MANIFEST.csv",
@@ -619,7 +649,7 @@
       "kind": "other",
       "status": "done",
       "description": "DEVICE_INFO.json — маркер внешнего хранилища.",
-      "notes": "Проверено read-only 2026-11-16 на внешнем HDD E:\\HW-CATALOG-DATA: DEVICE_INFO.json существует и является валидным JSON; присутствуют storage_id и layout_version = 1. Сам machine-specific storage_id не дублируется в Project Manager.",
+      "notes": "Проверено read-only 2026-11-16 во внешнем хранилище HW-CATALOG-DATA: DEVICE_INFO.json существует и является валидным JSON; присутствуют storage_id и layout_version = 1. Сам machine-specific storage_id не дублируется в Project Manager.",
       "source_refs": [
         "backend/app/storage.py",
         "backend/app/init_storage.py"
@@ -997,7 +1027,7 @@
       "kind": "file",
       "status": "done",
       "description": "Ограниченная копия четырёх canonical Project Manager файлов на внешний диск с staging и SHA-256 проверкой.",
-      "notes": "Физический запуск подтверждён пользователем 2026-11-17: sync script успешно синхронизировал snapshot на E:\\\\HW-CATALOG-DATA\\\\PROJECT-MANAGEMENT. Проверены SHA-256 всех четырёх файлов (index.html, project-state.json, project-state.schema.json, README.md); предыдущая версия сохранена как PROJECT-MANAGEMENT.previous.20261117-163249. Скрипт завершился успешно. Предупреждение Git commit-graph не повлияло на результат.",
+      "notes": "Физический запуск подтверждён пользователем 2026-11-17: sync script успешно синхронизировал snapshot во внешнее хранилище HW-CATALOG-DATA/PROJECT-MANAGEMENT. Проверены SHA-256 всех четырёх файлов (index.html, project-state.json, project-state.schema.json, README.md); предыдущая версия сохранена как PROJECT-MANAGEMENT.previous.20261117-163249. Скрипт завершился успешно. Предупреждение Git commit-graph не повлияло на результат.",
       "source_refs": [
         "scripts/windows/sync-project-manager-to-external.ps1",
         "docs/deployment/EXTERNAL_STORAGE_SYNC.md",
@@ -1388,6 +1418,94 @@
       "created_at": "2026-11-17T16:35:00+07:00",
       "updated_at": "2026-11-17T16:35:00+07:00",
       "completed_at": null
+    },
+    {
+      "id": "ebay-local-verification",
+      "title": "Завершить локальную проверку eBay Integration",
+      "description": "Сохранить результаты локальной проверки eBay Account Deletion Notifications, Sandbox OAuth/Browse API и безопасной миграции без доступа к основной БД или включения Production.",
+      "status": "review",
+      "priority": "high",
+      "workstream_id": "backend",
+      "component_id": "ebayIntegration",
+      "owner": "user-and-assistant",
+      "due_date": null,
+      "dependencies": [],
+      "acceptance_criteria": [
+        "GET challenge и локальные HTTP-сценарии POST проверены на loopback с отдельной временной БД.",
+        "Проверены подписи, notificationId idempotency, ошибки, retry, seller anonymization и изоляция от Hot Wheels catalog data.",
+        "Добавлены постоянные pytest-тесты Account Deletion API: 9 passed; покрыты GET challenge/SHA-256, отсутствующая конфигурация, некорректный запрос и подписи.",
+        "Изоляция OAuth/Password-тестов исправлена: фикстуры явно задают HW_ALLOWED_ORIGINS, password fixture задаёт HW_FRONTEND_URL; добавлены проверки запрещённого Origin с корректной CSRF-парой. OAuth: 5 passed; Password: 6 passed.",
+        "Прогон остальных тестов без migration-тестов ранее: 287 passed, 1 skipped, 4 deselected. До исправления полный прогон был 292 passed, 6 failed, 1 skipped; шесть CSRF-отказов устранены фиксацией test environment.",
+        "Последний полный python -m pytest -q tests: 298 passed, 1 skipped, 30 warnings; migration tests: 7 passed, 23 warnings. OAuth: 5 passed; Password: 6 passed.",
+        "Production CSRF и eBay-реализация не ослаблялись и не менялись; в последнем прогоне использовались тестовые БД, сеть и основная БД не использовались.",
+        "Зафиксировано, что HTTP-тестирование не является доставкой реальных eBay notifications.",
+        "Основная БД не открывалась; Production не включался."
+      ],
+      "source_refs": [
+        "docs/integrations/EBAY_INTEGRATION.md",
+        "EBAY_LOCAL_COMPLETION_REPORT.md",
+        "backend/tests/test_ebay_migration.py",
+        "backend/tests/test_ebay_account_deletion_api.py",
+        "backend/test_ebay_notification_processing.py",
+        "backend/tests/test_oauth_api.py",
+        "backend/tests/test_password_api.py"
+      ],
+      "created_at": "2026-11-19T12:48:52+07:00",
+      "updated_at": "2026-11-19T14:04:34+07:00",
+      "completed_at": null
+    },
+    {
+      "id": "ebay-public-sandbox",
+      "title": "Провести публичное Sandbox-тестирование eBay Notifications",
+      "description": "После появления домена и публичного HTTPS endpoint зарегистрировать endpoint в eBay Developer Portal и проверить реальные Sandbox GET challenge и account-deletion notification delivery.",
+      "status": "blocked",
+      "priority": "high",
+      "workstream_id": "backend",
+      "component_id": "ebayIntegration",
+      "owner": "user-and-assistant",
+      "due_date": null,
+      "dependencies": [
+        "ebay-local-verification"
+      ],
+      "acceptance_criteria": [
+        "Для backend доступен публичный HTTPS endpoint с валидной TLS-конфигурацией.",
+        "Endpoint и verification settings зарегистрированы в Sandbox Developer Portal без раскрытия секретов.",
+        "Успешно проверены eBay Sandbox challenge и фактическая тестовая доставка уведомления.",
+        "Подтверждено, что account deletion затрагивает только eBay-таблицы и не удаляет данные общего каталога."
+      ],
+      "source_refs": [
+        "docs/integrations/EBAY_INTEGRATION.md",
+        "backend/app/ebay_notifications_api.py",
+        "backend/app/main.py"
+      ],
+      "created_at": "2026-11-19T12:48:52+07:00",
+      "updated_at": "2026-11-19T12:48:52+07:00",
+      "completed_at": null
+    },
+    {
+      "id": "ebay-production-compliance",
+      "title": "Выполнить требования eBay перед включением Production",
+      "description": "До активации Production подтвердить применимые требования eBay к Account Deletion Notifications и выполнить их либо получить официальное exemption.",
+      "status": "planned",
+      "priority": "critical",
+      "workstream_id": "backend",
+      "component_id": "ebayIntegration",
+      "owner": "user-and-assistant",
+      "due_date": null,
+      "dependencies": [],
+      "acceptance_criteria": [
+        "Текущие требования eBay к уведомлениям об удалении аккаунта документально подтверждены.",
+        "Требования выполнены либо от eBay получено применимое официальное exemption.",
+        "Публичный HTTPS endpoint и Production-конфигурация прошли отдельную проверку безопасности.",
+        "Production keyset остаётся отключённым до подтверждения всех условий и отдельного решения пользователя."
+      ],
+      "source_refs": [
+        "docs/integrations/EBAY_INTEGRATION.md",
+        "backend/app/ebay_notifications_api.py"
+      ],
+      "created_at": "2026-11-19T12:48:52+07:00",
+      "updated_at": "2026-11-19T12:48:52+07:00",
+      "completed_at": null
     }
   ],
   "decisions": [
@@ -1418,6 +1536,18 @@
       "status": "accepted",
       "source_refs": [
         "docs/project-management/project-state.json"
+      ]
+    },
+    {
+      "id": "decision-ebay-production-gate",
+      "title": "Оставить eBay Production отключённым до выполнения требований",
+      "decision": "Production keyset остаётся отключённым; Production не включается до выполнения применимых требований eBay по Account Deletion Notifications либо получения официального exemption и отдельного подтверждения готовности публичного HTTPS endpoint.",
+      "rationale": "Локальные тесты и Sandbox credentials не подтверждают публичную доставку. У проекта пока нет домена и хостинга; реальные eBay notifications не получались.",
+      "date": "2026-11-19",
+      "status": "accepted",
+      "source_refs": [
+        "docs/integrations/EBAY_INTEGRATION.md",
+        "backend/app/ebay_notifications_api.py"
       ]
     }
   ],
@@ -1496,6 +1626,26 @@
     {
       "date": "2026-11-17T16:32:49+07:00",
       "summary": "Физическая синхронизация Project Manager snapshot на внешний HDD успешно выполнена: 4 файла проверены по SHA-256, предыдущий snapshot сохранён. Пользователь подтвердил успешный вывод sync script.",
+      "commit": null
+    },
+    {
+      "date": "2026-11-19T12:48:52+07:00",
+      "summary": "Документировано подтверждённое состояние eBay Integration; в Project Manager добавлены компонент, задачи локальной проверки, публичного Sandbox-тестирования и требований перед Production, а также принятое решение оставить Production отключённым до выполнения требований eBay.",
+      "commit": null
+    },
+    {
+      "date": "2026-11-19T13:37:32+07:00",
+      "summary": "Добавлены постоянные pytest-тесты eBay Account Deletion API (9 passed) и обновлены результаты: полный suite — 292 passed, 6 существующих OAuth/Password-тестов с HTTP 403 failed, 1 skipped; отказы воспроизводятся отдельно. В этом этапе API, модели и миграция не менялись, сеть и основная БД не использовались.",
+      "commit": null
+    },
+    {
+      "date": "2026-11-19T13:54:48+07:00",
+      "summary": "Изолированы OAuth/Password-тесты от локальных HW_ALLOWED_ORIGINS и HW_FRONTEND_URL; добавлены проверки запрещённого Origin. OAuth: 5 passed, Password: 6 passed; остальные тесты без migration-тестов: 287 passed, 1 skipped, 4 deselected. Полный suite после исправления не запускался; production CSRF и eBay-реализация не менялись.",
+      "commit": null
+    },
+    {
+      "date": "2026-11-19T14:04:34+07:00",
+      "summary": "Зафиксирован полный успешный прогон после изоляции тестового окружения: 298 passed, 1 skipped, 30 warnings; migration tests: 7 passed, 23 warnings; OAuth 5 passed, Password 6 passed. Шесть предыдущих CSRF-отказов устранены; production CSRF и eBay API не ослаблялись.",
       "commit": null
     }
   ]

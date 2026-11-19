@@ -21,11 +21,13 @@ from .account_services import (
     authenticate_session,
     consume_email_verification,
     create_session,
+    normalize_email,
     revoke_session,
 )
 from .db import get_db
 from .email_delivery import EmailOutboxError
 from .models import (
+    AuditEvent,
     EmailAddress,
     ExternalIdentity,
     PasswordCredential,
@@ -55,8 +57,10 @@ class InvitationAcceptRequest(BaseModel):
     display_name: str | None = Field(default=None, max_length=240)
 
 
-class EmailVerificationRequest(BaseModel):
-    pass
+class EmailAddressCreateRequest(BaseModel):
+    email: str = Field(min_length=3, max_length=320)
+
+
 
 
 class EmailVerificationConfirmRequest(BaseModel):
@@ -311,6 +315,70 @@ def accept_account_invitation(
         },
         "email": email.email_normalized,
         "email_verified": email.verified_at is not None,
+    }
+
+
+@router.post("/email", status_code=201)
+def add_account_email(
+    body: EmailAddressCreateRequest,
+    request: Request,
+    user: User = Depends(_current_user),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Add an email to the signed-in account and queue ownership verification."""
+    _require_csrf(request)
+    try:
+        normalized = normalize_email(body.email)
+    except AccountServiceError as exc:
+        raise HTTPException(status_code=422, detail=exc.code) from exc
+
+    existing = db.scalar(
+        select(EmailAddress).where(EmailAddress.email_normalized == normalized)
+    )
+    if existing is not None:
+        raise HTTPException(status_code=409, detail="Email address is already registered.")
+
+    has_primary = db.scalar(
+        select(EmailAddress.id).where(
+            EmailAddress.user_id == user.id,
+            EmailAddress.is_primary.is_(True),
+            EmailAddress.disabled_at.is_(None),
+        ).limit(1)
+    ) is not None
+    email = EmailAddress(
+        user_id=user.id,
+        email_normalized=normalized,
+        email_display=body.email.strip(),
+        is_primary=not has_primary,
+    )
+    db.add(email)
+    db.flush()
+    db.add(AuditEvent(
+        actor_user_id=user.id,
+        action="auth.email_address.added",
+        target_type="email_address",
+        target_id=email.id,
+        result="success",
+        event_metadata={"primary": email.is_primary},
+    ))
+    try:
+        create_email_verification_and_queue_email(
+            db,
+            email_address_id=email.id,
+            public_base_url=_public_base_url(),
+        )
+        db.commit()
+    except (AccountServiceError, EmailOutboxError, ValueError) as exc:
+        db.rollback()
+        raise HTTPException(
+            status_code=503,
+            detail="Unable to queue email verification. Check email delivery configuration.",
+        ) from exc
+
+    return {
+        "email": email.email_normalized,
+        "primary": email.is_primary,
+        "verification": "queued",
     }
 
 

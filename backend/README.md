@@ -187,6 +187,8 @@ this endpoint.
 
 Endpoints:
 
+- `POST /api/v1/account/email`: add an email to the authenticated account; the first active address becomes primary and an encrypted verification message is queued. The address is not trusted until its one-time verification link is consumed.
+- `POST /api/v1/account/email-verification/confirm`: consume the one-time verification token.
 - `POST /api/v1/account/password/login`: email/password login; returns a
   generic error for unknown, unverified, disabled, suspended or invalid accounts.
 - `POST /api/v1/account/password/set`: configure the first password for the

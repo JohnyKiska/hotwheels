@@ -45,6 +45,8 @@ def password_api(monkeypatch):
     app.dependency_overrides[get_db] = override_get_db
     monkeypatch.setenv("HW_COOKIE_SECURE", "false")
     monkeypatch.setenv("HW_PUBLIC_BASE_URL", "https://catalog.example.com")
+    monkeypatch.setenv("HW_ALLOWED_ORIGINS", "https://catalog.example.com")
+    monkeypatch.setenv("HW_FRONTEND_URL", "https://catalog.example.com")
     monkeypatch.setenv("HW_AUTH_RATE_LIMIT_KEY", "test-rate-limit-secret-" + "x" * 32)
     monkeypatch.setenv("HW_EMAIL_ENCRYPTION_KEY", Fernet.generate_key().decode())
 
@@ -269,6 +271,20 @@ def test_change_password_requires_csrf(password_api):
         json={"password": "initial password phrase"},
         headers={"Origin": "https://catalog.example.com", "X-CSRF-Token": "csrf-token"},
     ).status_code == 200
+    forbidden_origin = client.post(
+        "/api/v1/account/password/change",
+        json={
+            "current_password": "initial password phrase",
+            "new_password": "a different secure password",
+        },
+        headers={
+            "Origin": "https://attacker.example.invalid",
+            "X-CSRF-Token": "csrf-token",
+        },
+    )
+    assert forbidden_origin.status_code == 403
+    assert forbidden_origin.json()["detail"] == "CSRF validation failed."
+
     response = client.post(
         "/api/v1/account/password/change",
         json={

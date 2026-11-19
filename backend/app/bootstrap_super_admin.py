@@ -103,6 +103,7 @@ def main() -> int:
                 github_id=github_id,
                 github_username=github_username,
             )
+            user_id = user.id
             session.commit()
         except BootstrapError as exc:
             session.rollback()
@@ -112,7 +113,7 @@ def main() -> int:
             session.rollback()
             raise
 
-    print(f"Created first Super Admin account {user.id} linked to GitHub ID {github_id}.")
+    print(f"Created first Super Admin account {user_id} linked to GitHub ID {github_id}.")
     print("The user can now sign in through GitHub OAuth. No password or session was created.")
     return 0
 

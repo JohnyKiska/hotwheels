@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field, model_validator
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from . import config
 from .db import get_db
 from .casting_grouping_api import router as casting_grouping_router
 from .account_api import router as account_router
@@ -22,6 +23,7 @@ from .importers.observations import preview_to_observations
 from .importers.matcher import match_import_observation
 from .importers.preview_diff import build_release_claim_diff
 from .models import Casting, Release, ReleaseSeries, Series
+from .ebay_notifications_api import router as ebay_notifications_router
 
 app = FastAPI(
     title="Hot Wheels Catalog API",
@@ -36,6 +38,7 @@ app.include_router(admin_moderation_router)
 app.include_router(admin_media_router)
 app.include_router(oauth_router)
 app.include_router(password_router)
+app.include_router(ebay_notifications_router)
 
 
 @app.get("/admin", include_in_schema=False)
@@ -43,6 +46,12 @@ def admin_panel():
     """Serve the catalog administration interface from the repository root."""
     admin_page = Path(__file__).resolve().parents[2] / "admin.html"
     return FileResponse(admin_page, media_type="text/html")
+
+@app.get("/login.html", include_in_schema=False)
+def login_page():
+    """Serve the account login interface from the repository root."""
+    login_file = Path(__file__).resolve().parents[2] / "login.html"
+    return FileResponse(login_file, media_type="text/html")
 
 
 @app.get("/health", tags=["system"])

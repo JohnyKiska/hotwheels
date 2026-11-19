@@ -16,6 +16,7 @@ from sqlalchemy import (
     ForeignKey,
     ForeignKeyConstraint,
     Integer,
+    Numeric,
     String,
     Text,
     UniqueConstraint,
@@ -64,7 +65,6 @@ class Casting(TimestampMixin, Base):
             name="ck_castings_first_known_year",
         ),
     )
-
     variants: Mapped[list[CastingVariant]] = relationship(
         back_populates="casting", cascade="all, delete-orphan"
     )
@@ -812,5 +812,160 @@ class OutboundEmail(TimestampMixin, Base):
         CheckConstraint(
             "(status != 'sent') OR sent_at IS NOT NULL",
             name="ck_outbound_emails_sent_at",
+        ),
+    )
+
+
+class EbaySeller(TimestampMixin, Base):
+    """eBay seller identity, stored separately from catalog records."""
+
+    __tablename__ = "ebay_sellers"
+
+    id: Mapped[str] = mapped_column(
+        String(36), primary_key=True, default=new_id
+    )
+    ebay_user_id: Mapped[str | None] = mapped_column(
+        String(120), unique=True, index=True
+    )
+    username: Mapped[str | None] = mapped_column(String(255))
+    display_name: Mapped[str | None] = mapped_column(String(255))
+    profile_url: Mapped[str | None] = mapped_column(Text)
+
+    status: Mapped[str] = mapped_column(
+        String(24), default="active", nullable=False, index=True
+    )
+    deleted_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True)
+    )
+
+    listings: Mapped[list["EbayListing"]] = relationship(
+        back_populates="seller"
+    )
+
+    __table_args__ = (
+        CheckConstraint(
+            "status IN ('active', 'anonymized')",
+            name="ck_ebay_sellers_status",
+        ),
+        CheckConstraint(
+            "(status != 'anonymized') OR deleted_at IS NOT NULL",
+            name="ck_ebay_sellers_anonymized_at",
+        ),
+    )
+
+
+class EbayListing(TimestampMixin, Base):
+    """An observed eBay listing, kept separate from catalog identities."""
+
+    __tablename__ = "ebay_listings"
+
+    id: Mapped[str] = mapped_column(
+        String(36), primary_key=True, default=new_id
+    )
+    ebay_item_id: Mapped[str] = mapped_column(
+        String(120), unique=True, nullable=False
+    )
+    seller_id: Mapped[str | None] = mapped_column(
+        ForeignKey("ebay_sellers.id", ondelete="SET NULL"),
+        index=True,
+    )
+
+    title: Mapped[str | None] = mapped_column(Text)
+    item_url: Mapped[str | None] = mapped_column(Text)
+
+    price_amount: Mapped[float | None] = mapped_column(Numeric(12, 2))
+    currency: Mapped[str | None] = mapped_column(String(3))
+    condition: Mapped[str | None] = mapped_column(String(80))
+
+    listing_status: Mapped[str] = mapped_column(
+        String(24), default="active", nullable=False, index=True
+    )
+
+    first_seen_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utc_now, nullable=False
+    )
+    last_seen_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utc_now, nullable=False
+    )
+    anonymized_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True)
+    )
+
+    seller: Mapped["EbaySeller | None"] = relationship(
+        back_populates="listings"
+    )
+
+    __table_args__ = (
+        CheckConstraint(
+            "listing_status IN ('active', 'ended', 'anonymized')",
+            name="ck_ebay_listings_status",
+        ),
+        CheckConstraint(
+            "price_amount IS NULL OR price_amount >= 0",
+            name="ck_ebay_listings_price_nonnegative",
+        ),
+        CheckConstraint(
+            "last_seen_at >= first_seen_at",
+            name="ck_ebay_listings_seen_order",
+        ),
+        CheckConstraint(
+            "(listing_status != 'anonymized') OR anonymized_at IS NOT NULL",
+            name="ck_ebay_listings_anonymized_at",
+        ),
+    )
+
+
+class EbayNotification(Base):
+    """Minimal audit record for verified eBay account-deletion notifications."""
+
+    __tablename__ = "ebay_notifications"
+
+    id: Mapped[str] = mapped_column(
+        String(36), primary_key=True, default=new_id
+    )
+    notification_id: Mapped[str] = mapped_column(
+        String(180), unique=True, nullable=False
+    )
+    topic: Mapped[str] = mapped_column(
+        String(100), nullable=False, index=True
+    )
+
+    event_date: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True)
+    )
+    publish_date: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True)
+    )
+    received_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utc_now, nullable=False
+    )
+    processed_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True)
+    )
+
+    status: Mapped[str] = mapped_column(
+        String(24), default="received", nullable=False, index=True
+    )
+    signature_valid: Mapped[bool] = mapped_column(
+        Boolean, default=False, nullable=False
+    )
+    attempt_count: Mapped[int] = mapped_column(
+        Integer, default=0, nullable=False
+    )
+    payload_sha256: Mapped[str | None] = mapped_column(String(64))
+    last_error: Mapped[str | None] = mapped_column(String(500))
+
+    __table_args__ = (
+        CheckConstraint(
+            "status IN ('received', 'processed', 'failed', 'ignored')",
+            name="ck_ebay_notifications_status",
+        ),
+        CheckConstraint(
+            "attempt_count >= 0",
+            name="ck_ebay_notifications_attempt_count",
+        ),
+        CheckConstraint(
+            "(status != 'processed') OR processed_at IS NOT NULL",
+            name="ck_ebay_notifications_processed_at",
         ),
     )
