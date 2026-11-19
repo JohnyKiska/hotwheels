@@ -538,13 +538,14 @@ def test_alembic_upgrade_is_safe_on_initialized_existing_database(tmp_path, monk
         assert "sources" in tables
         assert "evidence" in tables
         assert "media_asset_evidence" in tables
+        assert {"ebay_sellers", "ebay_listings", "ebay_notifications"} <= tables
         media_columns = {column["name"] for column in inspector.get_columns("media_assets")}
         assert {"category", "angle", "rights_status", "uploader_user_id", "original_media_asset_id"} <= media_columns
         with check_engine.connect() as connection:
             assert connection.execute(
                 text("SELECT name FROM castings WHERE id = :id"), {"id": casting_id}
             ).scalar_one() == "Existing record must survive"
-            assert connection.execute(text("SELECT version_num FROM alembic_version")).scalar_one() == "20261117_media_library"
+            assert connection.execute(text("SELECT version_num FROM alembic_version")).scalar_one() == "20261119_ebay_notifications"
             assert connection.execute(text("SELECT COUNT(*) FROM alembic_version")).scalar_one() == 1
     finally:
         check_engine.dispose()
