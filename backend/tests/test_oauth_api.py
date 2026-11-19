@@ -42,6 +42,7 @@ def oauth_factory(monkeypatch):
     app.dependency_overrides[get_db] = override_get_db
     monkeypatch.setenv("HW_COOKIE_SECURE", "false")
     monkeypatch.setenv("HW_PUBLIC_BASE_URL", "https://catalog.example.com")
+    monkeypatch.setenv("HW_ALLOWED_ORIGINS", "https://catalog.example.com")
     monkeypatch.setenv("HW_FRONTEND_URL", "https://catalog.example.com")
     monkeypatch.setenv("HW_OAUTH_ENCRYPTION_KEY", Fernet.generate_key().decode())
     monkeypatch.setenv("HW_GITHUB_CLIENT_ID", "github-client-id")
@@ -205,6 +206,17 @@ def test_oauth_link_requires_csrf_and_binds_to_current_session(
         follow_redirects=False,
     )
     assert denied.status_code == 403
+
+    forbidden_origin = client.post(
+        "/api/v1/account/oauth/github/link",
+        headers={
+            "Origin": "https://attacker.example.invalid",
+            "X-CSRF-Token": "csrf-value",
+        },
+        follow_redirects=False,
+    )
+    assert forbidden_origin.status_code == 403
+    assert forbidden_origin.json()["detail"] == "CSRF validation failed."
 
     json_started = client.post(
         "/api/v1/account/oauth/github/link",
