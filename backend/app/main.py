@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field, model_validator
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from . import config
 from .db import get_db
 from .casting_grouping_api import router as casting_grouping_router
 from .account_api import router as account_router
