@@ -24,6 +24,7 @@ from .importers.matcher import match_import_observation
 from .importers.preview_diff import build_release_claim_diff
 from .models import Casting, Release, ReleaseSeries, Series
 from .ebay_notifications_api import router as ebay_notifications_router
+from .import_apply_api import router as import_apply_router
 
 app = FastAPI(
     title="Hot Wheels Catalog API",
@@ -39,6 +40,7 @@ app.include_router(admin_media_router)
 app.include_router(oauth_router)
 app.include_router(password_router)
 app.include_router(ebay_notifications_router)
+app.include_router(import_apply_router)
 
 
 @app.get("/admin", include_in_schema=False)
