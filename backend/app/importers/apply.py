@@ -108,6 +108,7 @@ def apply_import_observation(session: Session, observation: dict[str, Any], *,
         record.last_seen_at = now
 
     evidence_created = 0
+    seen_claims: set[tuple[str, str]] = set()
     for claim in claims:
         if not isinstance(claim, dict):
             raise ValueError("Every claim must be an object.")
@@ -117,6 +118,10 @@ def apply_import_observation(session: Session, observation: dict[str, Any], *,
         if value is None:
             continue
         observed_value = _claim_value(value)
+        claim_key = (attribute.strip(), observed_value)
+        if claim_key in seen_claims:
+            continue
+        seen_claims.add(claim_key)
         existing = session.scalar(select(Evidence.id).where(
             Evidence.source_record_id == record.id,
             Evidence.attribute_name == attribute.strip(),
