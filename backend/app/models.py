@@ -16,6 +16,7 @@ from sqlalchemy import (
     ForeignKey,
     ForeignKeyConstraint,
     Integer,
+    Index,
     Numeric,
     String,
     Text,
@@ -204,6 +205,7 @@ class Source(TimestampMixin, Base):
     __tablename__ = "sources"
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    code: Mapped[str | None] = mapped_column(String(80), unique=True, index=True)
     name: Mapped[str] = mapped_column(String(240), nullable=False, index=True)
     source_type: Mapped[str] = mapped_column(String(40), nullable=False)
     base_url: Mapped[str | None] = mapped_column(Text)
@@ -230,6 +232,7 @@ class SourceRecord(TimestampMixin, Base):
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
     source_id: Mapped[str] = mapped_column(ForeignKey("sources.id", ondelete="RESTRICT"), nullable=False, index=True)
+    import_key: Mapped[str | None] = mapped_column(String(64))
     external_id: Mapped[str | None] = mapped_column(String(240), index=True)
     record_url: Mapped[str | None] = mapped_column(Text)
     record_type: Mapped[str] = mapped_column(String(40), nullable=False)
@@ -242,6 +245,7 @@ class SourceRecord(TimestampMixin, Base):
     __table_args__ = (
         CheckConstraint("status IN ('active', 'superseded', 'unavailable', 'rejected')",
                         name="ck_source_records_status"),
+        Index("uq_source_records_source_import_key", "source_id", "import_key", unique=True),
     )
     source: Mapped[Source] = relationship(back_populates="records")
     evidence: Mapped[list[Evidence]] = relationship(
