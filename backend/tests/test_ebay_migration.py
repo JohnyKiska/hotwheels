@@ -324,6 +324,6 @@ def test_downgrade_refuses_foreign_migration_state_table(tmp_path, monkeypatch):
             text("SELECT version_num FROM alembic_version")
         ).scalar_one()
     assert tuple(owner) == ("__owner__", 0, "another_revision")
-    assert version == "20261119_ebay_notifications"
+    assert version == "20261120_import_apply_foundation"
     assert EBAY_TABLES <= existing_tables(database_url)
     engine.dispose()
