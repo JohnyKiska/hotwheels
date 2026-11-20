@@ -16,6 +16,7 @@ from sqlalchemy import (
     ForeignKey,
     ForeignKeyConstraint,
     Integer,
+    Index,
     Numeric,
     String,
     Text,
@@ -244,7 +245,7 @@ class SourceRecord(TimestampMixin, Base):
     __table_args__ = (
         CheckConstraint("status IN ('active', 'superseded', 'unavailable', 'rejected')",
                         name="ck_source_records_status"),
-        UniqueConstraint("source_id", "import_key", name="uq_source_records_source_import_key"),
+        Index("uq_source_records_source_import_key", "source_id", "import_key", unique=True),
     )
     source: Mapped[Source] = relationship(back_populates="records")
     evidence: Mapped[list[Evidence]] = relationship(

@@ -137,7 +137,7 @@ def apply_import_observation(session: Session, observation: dict[str, Any], *,
             action="import_observation_applied", old_values=None,
             new_values={"source_code": code, "content_hash": content_hash,
                         "import_key": import_key, "evidence_created": evidence_created},
-            reason=(reason or "Apply reviewed import observation").strip(),
+            reason=(reason or "").strip() or "Apply reviewed import observation",
             actor_type="human", actor_id=actor_id))
         session.flush()
 
