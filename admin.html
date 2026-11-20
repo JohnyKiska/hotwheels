@@ -21,6 +21,76 @@ table{width:100%;border-collapse:collapse}th{text-align:left;font-size:10px;lett
 @media(max-width:1050px){.shell{grid-template-columns:205px minmax(0,1fr)}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.quick-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:760px){header{padding:0 14px}.shell{display:block}aside{position:sticky;top:68px;z-index:8;padding:8px 10px;border-right:0;border-bottom:1px solid var(--line);overflow:auto}.nav{display:flex;min-width:max-content}.nav-caption,.aside-note{display:none}.nav button{padding:8px 11px}.nav-count{display:none}main{padding:20px 13px 40px}.title-row{display:block}.title-row .actions{margin-top:13px}.title-row h1{font-size:25px}.quick-grid{grid-template-columns:1fr 1fr}.table-wrap{overflow-x:auto}table{min-width:700px}}
 @media(max-width:480px){.brand small{display:none}.head-link{font-size:11px;padding:7px}.stats{gap:8px}.stat{padding:12px}.stat-value{font-size:22px}.quick-grid{grid-template-columns:1fr}.detail-grid{grid-template-columns:1fr}.drawer-head,.drawer-body{padding-left:16px;padding-right:16px}}
+
+.import-detail{display:grid;gap:18px}
+.import-photos{display:grid;grid-template-columns:1.15fr .85fr;gap:12px}
+.import-photo-card{min-width:0;border:1px solid var(--line);border-radius:11px;background:#f8fafc;padding:10px}
+.import-photo-label{font-size:12px;font-weight:800;color:var(--ink);margin:0 0 9px}
+.import-photo-label span{display:block;font-size:10px;font-weight:500;color:var(--muted);margin-top:3px}
+.import-photo-card a{display:flex;align-items:center;justify-content:center;min-height:190px}
+.import-photo-card img{display:block;width:100%;height:280px;object-fit:contain}
+.import-photo-empty{height:190px;display:grid;place-items:center;color:var(--muted);font-size:12px}
+.import-note{margin:-7px 0 0;color:var(--muted);font-size:11px;line-height:1.5}
+.import-section{border:1px solid var(--line);border-radius:11px;padding:15px;background:#fff;min-width:0}
+.import-section h3{font-size:14px;margin:0 0 13px;color:var(--ink);display:flex;align-items:center;gap:8px}
+.import-count{font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px;background:#edf3fa;color:#536780}
+.import-facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.import-fact{padding:10px 11px;border-radius:8px;background:#f7f9fc;min-width:0}
+.import-fact span,.import-sources span{display:block;color:var(--muted);font-size:10px;margin-bottom:5px}
+.import-fact strong{display:block;font-size:12px;font-weight:700;overflow-wrap:anywhere;color:var(--ink)}
+.import-sources{display:grid;gap:10px}
+.import-sources>div{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-bottom:9px;border-bottom:1px solid #edf1f5}
+.import-sources>div:last-child{padding-bottom:0;border-bottom:0}
+.import-sources span{margin:0;font-size:11px}
+.import-sources a{font-size:12px;font-weight:700;color:var(--blue);text-decoration:none;text-align:right}
+.import-sources a:hover{text-decoration:underline}
+.import-evidence{overflow-x:auto}
+.import-evidence table{min-width:540px}
+.import-evidence th{font-size:9px;padding:9px}
+.import-evidence td{font-size:11px;padding:10px;overflow-wrap:anywhere}
+.import-raw{border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.import-raw summary{cursor:pointer;font-size:12px;font-weight:700;color:var(--muted)}
+.import-raw pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:420px;overflow:auto;font-size:10px;line-height:1.5}
+@media(max-width:480px){.import-photos{grid-template-columns:1fr}.import-photo-card img{height:240px}.import-facts{grid-template-columns:1fr}.import-section{padding:12px}}
+
+
+.import-filters{
+ display:grid;
+ grid-template-columns:minmax(220px,2fr) minmax(170px,1.3fr) 130px minmax(220px,1.5fr);
+ gap:12px;
+ align-items:center;
+ padding:16px;
+ margin:0 0 16px;
+ background:#f8fafc;
+ border:1px solid var(--line);
+ border-radius:10px;
+}
+.import-filters input,
+.import-filters select{
+ width:100%;
+ min-width:0;
+ height:42px;
+ box-sizing:border-box;
+ margin:0;
+ border:1px solid #dce5ef;
+ border-radius:8px;
+ background:#fff;
+ color:#4c6079;
+ padding:0 12px;
+}
+.import-filters input:focus,
+.import-filters select:focus{
+ outline:none;
+ border-color:#91afd2;
+ box-shadow:0 0 0 3px #eaf2fc;
+}
+@media(max-width:900px){
+ .import-filters{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:480px){
+ .import-filters{grid-template-columns:1fr;padding:12px;gap:10px}
+}
+
 </style>
 </head>
 <body>
@@ -34,6 +104,7 @@ table{width:100%;border-collapse:collapse}th{text-align:left;font-size:10px;lett
 <button data-view="moderation"><span class="nav-icon">⚑</span>Модерация <span class="nav-count" id="moderationCount">…</span></button>
 <button data-view="history"><span class="nav-icon">◷</span>История <span class="nav-count" id="historyCount">…</span></button>
 <button data-view="users"><span class="nav-icon">♙</span>Пользователи <span class="nav-count" id="userCount">…</span></button>
+<button data-view="imports"><span class="nav-icon">▣</span>Импортированные данные <span class="nav-count" id="importsCount">…</span></button>
 <button data-view="media"><span class="nav-icon">▧</span>Медиатека <span class="nav-count" id="mediaCount">…</span></button>
 </nav><div class="aside-note"><b>Защита изменений</b>Все правки проходят через серверный API, проверку прав и CSRF. Причина изменения обязательна, история формируется автоматически.</div></aside>
 <main>
@@ -59,6 +130,28 @@ table{width:100%;border-collapse:collapse}th{text-align:left;font-size:10px;lett
 </section>
 <section id="view-history" hidden><div class="toolbar"><select id="historyEntityType"><option value="">Все сущности</option><option value="casting">Отливки</option><option value="casting_variant">Варианты</option><option value="release">Выпуски</option><option value="series">Серии</option></select><select id="historyAction"><option value="">Все действия</option><option value="create">Создание</option><option value="update">Изменение</option><option value="update_series">Изменение серий</option></select><span class="spacer"></span><span class="result-count" id="historyResults">—</span></div><div class="panel"><div class="panel-head"><h2>Журнал аудита</h2><small>Записи доступны только для чтения</small></div><div class="table-wrap" id="historyTable"><div class="empty">Загружаю историю…</div></div><div class="pagination"><span id="historyPageInfo">—</span><div class="pager"><button id="historyPrev">←</button><button id="historyNext">→</button></div></div></div></section>
 <section id="view-users" hidden><div class="toolbar"><input id="userSearch" placeholder="Имя, email или ID пользователя"><select id="userStatus"><option value="">Все статусы</option><option value="pending">Ожидает</option><option value="active">Активен</option><option value="suspended">Приостановлен</option><option value="closed">Закрыт</option></select><span class="spacer"></span><span class="result-count" id="userResults">—</span></div><div class="panel"><div class="panel-head"><h2>Учётные записи</h2><small>Роли, статусы и приглашения</small></div><div class="table-wrap" id="userTable"><div class="empty">Загружаю пользователей…</div></div><div class="pagination"><span id="userPageInfo">—</span><div class="pager"><button id="userPrev">←</button><button id="userNext">→</button></div></div></div></section>
+<section id="view-imports" hidden>
+ <div class="panel">
+  <div class="toolbar import-filters">
+   <input id="importsSearch" type="search" placeholder="Поиск по SKU или названию">
+   <input id="importsSeries" type="search" placeholder="Фильтр по серии">
+   <select id="importsYear"><option value="">Все годы</option><option value="2025">2025</option></select>
+   <select id="importsReview">
+    <option value="">Любой статус проверки</option>
+    <option value="pending">Ожидает проверки</option>
+    <option value="auto_reviewed">Автопроверено</option>
+    <option value="manually_verified">Вручную проверено</option>
+    <option value="rejected">Отклонено</option>
+   </select>
+  </div>
+  <div id="importsTable" class="table-wrap"><div class="empty">Загружаю импорты…</div></div>
+  <div class="toolbar" style="justify-content:space-between">
+   <button id="importsPrev" class="btn secondary">← Назад</button>
+   <span id="importsPageInfo" class="hint"></span>
+   <button id="importsNext" class="btn secondary">Вперёд →</button>
+  </div>
+ </div>
+</section>
 <section id="view-media" hidden>
  <div class="toolbar">
   <label class="search"><span>⌕</span><input id="mediaSearch" type="search" placeholder="Имя файла, источник или ID объявления…"></label>
@@ -75,7 +168,7 @@ table{width:100%;border-collapse:collapse}th{text-align:left;font-size:10px;lett
 <script>
 (() => {
 const $ = id => document.getElementById(id);
-const state = {view:"overview",castingPage:0,releasePage:0,seriesPage:0,moderationPage:0,historyPage:0,userPage:0,mediaPage:0,pageSize:25,castingTotal:0,releaseTotal:0,seriesTotal:0,moderationTotal:0,historyTotal:0,userTotal:0,mediaTotal:0,castingRows:[],releaseRows:[],selected:null,debounce:null};
+const state = {view:"overview",castingPage:0,releasePage:0,seriesPage:0,moderationPage:0,historyPage:0,userPage:0,mediaPage:0,pageSize:25,castingTotal:0,releaseTotal:0,seriesTotal:0,moderationTotal:0,historyTotal:0,userTotal:0,mediaTotal:0,importsTotal:0,importsPage:0,castingRows:[],releaseRows:[],selected:null,debounce:null};
 const statusLabel = {candidate:"Кандидат",under_review:"На проверке",confirmed:"Подтверждено",rejected:"Отклонено"};
 const esc = value => String(value ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const cookie = name => document.cookie.split(";").map(v=>v.trim()).find(v=>v.startsWith(name+"="))?.slice(name.length+1) || "";
@@ -92,11 +185,11 @@ const showAlert=(message,type="info")=>{const el=$("alert");el.textContent=messa
 const toast=message=>{const el=$("toast");el.textContent=message;el.classList.add("show");setTimeout(()=>el.classList.remove("show"),2400)};
 const setView = view => {
  state.view=view;document.querySelectorAll(".nav button[data-view]").forEach(b=>b.classList.toggle("active",b.dataset.view===view));
- ["overview","castings","releases","series","moderation","history","users","media"].forEach(v=>$("view-"+v).hidden=v!==view);
- const titles={overview:["Обзор каталога","Рабочее пространство для управления отливками и выпусками."],castings:["Отливки","Базовые конструкции Hot Wheels и их конструктивные варианты."],releases:["Выпуски","Каталожные выпуски с годом, номером и связями."],series:["Серии","Управление сериями каталога."],moderation:["Модерация конфликтов","Проверка спорных данных, источников и доказательств."],history:["История изменений","Аудит действий пользователей и изменений каталога."],users:["Пользователи","Управление учётными записями, ролями и приглашениями."],media:["Медиатека","Фотографии, происхождение, ракурсы, доказательства и права использования."]};
+ ["overview","castings","releases","series","moderation","history","users","imports","media"].forEach(v=>$("view-"+v).hidden=v!==view);
+ const titles={overview:["Обзор каталога","Рабочее пространство для управления отливками и выпусками."],castings:["Отливки","Базовые конструкции Hot Wheels и их конструктивные варианты."],releases:["Выпуски","Каталожные выпуски с годом, номером и связями."],series:["Серии","Управление сериями каталога."],moderation:["Модерация конфликтов","Проверка спорных данных, источников и доказательств."],history:["История изменений","Аудит действий пользователей и изменений каталога."],users:["Пользователи","Управление учётными записями, ролями и приглашениями."],media:["Медиатека","Фотографии, происхождение, ракурсы, доказательства и права использования."],imports:["Импортированные данные","Read-only раздел импортированных SKU с доказательствами."]};
  $("pageTitle").textContent=titles[view][0];$("pageSubtitle").textContent=titles[view][1];$("crumbCurrent").textContent=titles[view][0];
  $("newBtn").disabled=!["castings","releases","series","users"].includes(view);$("newBtn").textContent=view==="users"?"＋ Пригласить пользователя":view==="releases"?"＋ Новый выпуск":view==="series"?"＋ Новая серия":"＋ Новая отливка";$("newBtn").title=$("newBtn").disabled?"Создание доступно в разделах каталога, приглашения в разделе «Пользователи»":"";
- if(view==="castings")loadCastings();if(view==="releases")loadReleases();if(view==="series")loadSeries();if(view==="moderation")loadModeration();if(view==="history")loadHistory();if(view==="users")loadUsers();if(view==="media")loadMedia();
+ if(view==="castings")loadCastings();if(view==="releases")loadReleases();if(view==="series")loadSeries();if(view==="moderation")loadModeration();if(view==="history")loadHistory();if(view==="users")loadUsers();if(view==="imports")loadImports();if(view==="media")loadMedia();
 };
 const status = value=>'<span class="status s-'+esc(value)+'">'+esc(statusLabel[value]||value||"Не указан")+'</span>';
 const emptyTable = message=>'<div class="empty"><b>Нет записей</b>'+esc(message)+'</div>';
@@ -202,6 +295,98 @@ const openInviteUser = async () => {
 const mediaLabels={package_photo:"Упаковка",evidence_photo:"Доказательство",reference_photo:"Справочное фото",physical_specimen:"Физический экземпляр",document:"Документ",other:"Другое"};
 const angleLabels={package_front:"Блистер спереди",package_back:"Блистер сзади",front:"Спереди",rear:"Сзади",left:"Слева",right:"Справа",top:"Сверху",bottom:"Снизу",detail:"Деталь",other:"Другой"};
 const rightsLabels={unknown:"Неизвестны",permission_requested:"Запрошены",permitted:"Разрешены",restricted:"Ограничены",denied:"Запрещены"};
+
+const importReviewLabels={pending:"Ожидает проверки",auto_reviewed:"Автопроверено",manually_verified:"Вручную проверено",rejected:"Отклонено"};
+const importValue=v=>v===null||v===undefined||v===""?"?":String(v);
+const importLink=(url,label)=>{const u=safeUrl(url);return u?'<a href="'+esc(u)+'" target="_blank" rel="noopener noreferrer">'+esc(label)+'</a>':"?";};
+
+const loadImports=async()=>{
+ const box=$("importsTable");
+ box.innerHTML='<div class="empty">Загружаю импортированные SKU…</div>';
+ const p=new URLSearchParams({limit:state.pageSize,offset:state.importsPage*state.pageSize});
+ const q=$("importsSearch").value.trim(),series=$("importsSeries").value.trim();
+ if(q)p.set("q",q);
+ if(series)p.set("series",series);
+ if($("importsYear").value)p.set("catalog_year",$("importsYear").value);
+ if($("importsReview").value)p.set("review_status",$("importsReview").value);
+ try{
+  const data=await api("/api/v1/admin/imports?"+p.toString());
+  state.importsTotal=data.total||0;
+  $("importsCount").textContent=state.importsTotal.toLocaleString("ru-RU");
+  $("importsPageInfo").textContent=state.importsTotal?`${state.importsPage*state.pageSize+1}–${Math.min((state.importsPage+1)*state.pageSize,state.importsTotal)} из ${state.importsTotal}`:"Нет записей";
+  $("importsPrev").disabled=state.importsPage===0;
+  $("importsNext").disabled=(state.importsPage+1)*state.pageSize>=state.importsTotal;
+  if(!data.items?.length){box.innerHTML=emptyTable("Импортированные данные не найдены.");return;}
+  box.innerHTML='<table><thead><tr><th>Фото</th><th>SKU / модель</th><th>Серия</th><th>Год</th><th>Цвет</th><th>Проверка</th><th>Evidence</th></tr></thead><tbody>'+
+   data.items.map(x=>{
+    const img=safeUrl(x.image_blister_url);
+    const review=x.review_counts||{};
+    const reviewText=Object.entries(review).map(([k,v])=>(importReviewLabels[k]||k)+": "+v).join(", ")||"нет";
+    return '<tr data-import-id="'+esc(x.id)+'" style="cursor:pointer">'+
+     '<td>'+(img?'<img src="'+esc(img)+'" alt="" style="width:58px;height:76px;object-fit:contain">':'?')+'</td>'+
+     '<td><b>'+esc(importValue(x.toy_number))+'</b><br>'+esc(importValue(x.model_name))+'</td>'+
+     '<td>'+esc(importValue(x.series_name))+'<br><span class="hint">'+esc(importValue(x.series_number))+'</span></td>'+
+     '<td>'+esc(importValue(x.catalog_year))+'</td>'+
+     '<td>'+esc(importValue(x.body_color))+'</td>'+
+     '<td>'+esc(reviewText)+'</td>'+
+     '<td>'+esc(importValue(x.evidence_count))+'</td></tr>';
+   }).join("")+'</tbody></table>';
+  box.querySelectorAll("tr[data-import-id]").forEach(row=>row.addEventListener("click",()=>openImportedDetail(row.dataset.importId)));
+ }catch(e){box.innerHTML=emptyTable("Ошибка загрузки: "+e.message);}
+};
+
+const openImportedDetail=async id=>{
+ try{
+  const x=await api("/api/v1/admin/imports/"+encodeURIComponent(id));
+  const claims=x.raw_data?.claims||[];
+  const claim=k=>{
+    if(Array.isArray(claims))return claims.find(c=>c.attribute===k)?.value??null;
+    const v=claims?.[k];
+    return v&&typeof v==="object"&&"value" in v?v.value:v??null;
+  };
+  const blister=safeUrl(x.image_blister_url),loose=safeUrl(x.image_loose_url);
+  const evidence=x.evidence||[];
+  const sourceUrl=x.record_url||x.source?.base_url;
+  const html=`
+   <div class="import-detail">
+    <section class="import-photos">
+     <div class="import-photo-card import-photo-main">
+      <div class="import-photo-label">\u0411\u043b\u0438\u0441\u0442\u0435\u0440 <span>\u041e\u0441\u043d\u043e\u0432\u043d\u043e\u0439 \u0440\u0430\u043a\u0443\u0440\u0441</span></div>
+      ${blister?'<a href="'+esc(blister)+'" target="_blank" rel="noopener"><img src="'+esc(blister)+'" alt="Blister"></a>':'<div class="import-photo-empty">\u0424\u043e\u0442\u043e \u043d\u0435\u0442</div>'}
+     </div>
+     <div class="import-photo-card">
+      <div class="import-photo-label">\u0411\u0435\u0437 \u0443\u043f\u0430\u043a\u043e\u0432\u043a\u0438 <span>\u0414\u043e\u043f\u043e\u043b\u043d\u0438\u0442\u0435\u043b\u044c\u043d\u044b\u0439</span></div>
+      ${loose?'<a href="'+esc(loose)+'" target="_blank" rel="noopener"><img src="'+esc(loose)+'" alt="Loose"></a>':'<div class="import-photo-empty">\u0424\u043e\u0442\u043e \u043d\u0435\u0442</div>'}
+     </div>
+    </section>
+    <p class="import-note">\u0414\u0430\u043d\u043d\u044b\u0435 \u0434\u043e\u0441\u0442\u0443\u043f\u043d\u044b \u0442\u043e\u043b\u044c\u043a\u043e \u0434\u043b\u044f \u043f\u0440\u043e\u0441\u043c\u043e\u0442\u0440\u0430. \u0412 \u043a\u0430\u043d\u043e\u043d\u0438\u0447\u0435\u0441\u043a\u0438\u0439 \u043a\u0430\u0442\u0430\u043b\u043e\u0433 \u043e\u043d\u0438 \u043f\u043e\u043a\u0430 \u043d\u0435 \u043f\u043e\u043f\u0430\u0434\u0430\u044e\u0442.</p>
+    <section class="import-section">
+     <h3>\u0425\u0430\u0440\u0430\u043a\u0442\u0435\u0440\u0438\u0441\u0442\u0438\u043a\u0438</h3>
+     <div class="import-facts">
+      ${[['SKU',x.toy_number],['\u041c\u043e\u0434\u0435\u043b\u044c',x.model_name],['\u0413\u043e\u0434',x.catalog_year],['\u0421\u0435\u0440\u0438\u044f',x.series_name],['\u041d\u043e\u043c\u0435\u0440 \u0432 \u0441\u0435\u0440\u0438\u0438',x.series_number],['\u041b\u0438\u043d\u0435\u0439\u043a\u0430',x.product_line],['\u0426\u0432\u0435\u0442',x.body_color],['\u0420\u0435\u0434\u043a\u043e\u0441\u0442\u044c',x.rarity],['\u0421\u0432\u044f\u0437\u044c \u0441 \u043e\u0442\u043b\u0438\u0432\u043a\u043e\u0439',x.casting_linkage],['\u0421\u0442\u0430\u0442\u0443\u0441',x.status]].map(([k,v])=>'<div class="import-fact"><span>'+esc(k)+'</span><strong>'+esc(importValue(v))+'</strong></div>').join('')}
+     </div>
+    </section>
+    <section class="import-section">
+     <h3>\u0418\u0441\u0442\u043e\u0447\u043d\u0438\u043a\u0438</h3>
+     <div class="import-sources">
+      <div><span>\u0418\u0441\u0445\u043e\u0434\u043d\u0430\u044f \u0437\u0430\u043f\u0438\u0441\u044c</span>${importLink(sourceUrl,"\u041e\u0442\u043a\u0440\u044b\u0442\u044c \u0441\u0442\u0440\u0430\u043d\u0438\u0446\u0443")}</div>
+      <div><span>AllHW</span>${importLink(claim("allhw_checklist_url"),"\u0427\u0435\u043a-\u043b\u0438\u0441\u0442")}</div>
+      <div><span>Fandom</span>${importLink(claim("fandom_crosscheck_url"),"\u041f\u0435\u0440\u0435\u043a\u0440\u0451\u0441\u0442\u043d\u0430\u044f \u043f\u0440\u043e\u0432\u0435\u0440\u043a\u0430")}</div>
+     </div>
+    </section>
+    <section class="import-section">
+     <h3>Evidence <span class="import-count">${evidence.length}</span></h3>
+     <div class="table-wrap import-evidence"><table><thead><tr><th>\u0410\u0442\u0440\u0438\u0431\u0443\u0442</th><th>\u0417\u043d\u0430\u0447\u0435\u043d\u0438\u0435</th><th>\u0422\u0438\u043f</th><th>\u041e\u0446\u0435\u043d\u043a\u0430</th><th>\u041f\u0440\u043e\u0432\u0435\u0440\u043a\u0430</th></tr></thead><tbody>
+      ${evidence.map(e=>'<tr><td>'+esc(importValue(e.attribute_name))+'</td><td>'+esc(importValue(e.observed_value))+'</td><td>'+esc(importValue(e.evidence_type))+'</td><td>'+esc(importValue(e.assessment))+'</td><td>'+esc(importReviewLabels[e.review_status]||importValue(e.review_status))+'</td></tr>').join('')}
+     </tbody></table></div>
+    </section>
+    <details class="import-raw"><summary>\u0418\u0441\u0445\u043e\u0434\u043d\u044b\u0435 \u0434\u0430\u043d\u043d\u044b\u0435 raw_data</summary><pre>${esc(JSON.stringify(x.raw_data,null,2))}</pre></details>
+   </div>`;
+openDrawer();
+  $("drawerTitle").textContent="\u0418\u043c\u043f\u043e\u0440\u0442\u0438\u0440\u0443\u0435\u043c\u0430\u044f \u0437\u0430\u043f\u0438\u0441\u044c";$("drawerSub").textContent=importValue(x.toy_number)+" \u00b7 "+importValue(x.model_name);$("drawerBody").innerHTML=html;
+ }catch(e){showAlert("Не удалось открыть запись: "+e.message,"error");}
+};
+
 const loadMedia=async()=>{
  $("mediaTable").innerHTML='<div class="empty">Загружаю медиатеку…</div>';
  const params=new URLSearchParams({limit:state.pageSize,offset:state.mediaPage*state.pageSize});
@@ -447,14 +632,19 @@ const saveVariant = async (event,castingId) => {
 const bindSearch=(id,fn)=>$(id).addEventListener("input",()=>{clearTimeout(state.debounce);state.debounce=setTimeout(()=>{if(state.view===fn){if(fn==="castings")state.castingPage=0;else state.releasePage=0; (fn==="castings"?loadCastings:loadReleases)();}},250);});
 document.querySelectorAll(".nav button[data-view]").forEach(b=>b.addEventListener("click",()=>!b.disabled&&setView(b.dataset.view)));
 document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>setView(b.dataset.go)));
-$("newBtn").addEventListener("click",()=>{if(state.view==="users")openInviteUser();else if(state.view==="series")openCreateSeries();else openCreate(state.view==="releases"?"release":"casting")});$("refreshBtn").addEventListener("click",()=>{if(state.view==="overview")loadOverview();else if(state.view==="castings")loadCastings();else if(state.view==="releases")loadReleases();else if(state.view==="series")loadSeries();else if(state.view==="moderation")loadModeration();else if(state.view==="history")loadHistory();else if(state.view==="users")loadUsers();else if(state.view==="media")loadMedia();});
+$("newBtn").addEventListener("click",()=>{if(state.view==="users")openInviteUser();else if(state.view==="series")openCreateSeries();else openCreate(state.view==="releases"?"release":"casting")});$("refreshBtn").addEventListener("click",()=>{if(state.view==="overview")loadOverview();else if(state.view==="castings")loadCastings();else if(state.view==="releases")loadReleases();else if(state.view==="series")loadSeries();else if(state.view==="moderation")loadModeration();else if(state.view==="history")loadHistory();else if(state.view==="users")loadUsers();else if(state.view==="imports")loadImports();else if(state.view==="media")loadMedia();});
 $("castingSearch").addEventListener("input",()=>{clearTimeout(state.debounce);state.debounce=setTimeout(()=>{state.castingPage=0;loadCastings()},250)});
 $("releaseSearch").addEventListener("input",()=>{clearTimeout(state.debounce);state.debounce=setTimeout(()=>{state.releasePage=0;loadReleases()},250)});
 ["castingStatus"].forEach(id=>$(id).addEventListener("change",()=>{state.castingPage=0;loadCastings()}));
 ["releaseStatus","releaseYear"].forEach(id=>$(id).addEventListener("change",()=>{state.releasePage=0;loadReleases()}));
 $("castingPrev").addEventListener("click",()=>{state.castingPage=Math.max(0,state.castingPage-1);loadCastings()});$("castingNext").addEventListener("click",()=>{state.castingPage++;loadCastings()});
 $("releasePrev").addEventListener("click",()=>{state.releasePage=Math.max(0,state.releasePage-1);loadReleases()});$("releaseNext").addEventListener("click",()=>{state.releasePage++;loadReleases()});
-["moderationStatus","moderationSeverity"].forEach(id=>$(id).addEventListener("change",()=>{state.moderationPage=0;loadModeration()}));$("moderationType").addEventListener("input",()=>{clearTimeout(state.debounce);state.debounce=setTimeout(()=>{state.moderationPage=0;loadModeration()},300)});$("moderationPrev").addEventListener("click",()=>{state.moderationPage=Math.max(0,state.moderationPage-1);loadModeration()});$("moderationNext").addEventListener("click",()=>{state.moderationPage++;loadModeration()});$("seriesSearch").addEventListener("input",()=>{clearTimeout(state.debounce);state.debounce=setTimeout(()=>{state.seriesPage=0;loadSeries()},250)});$("seriesStatus").addEventListener("change",()=>{state.seriesPage=0;loadSeries()});$("seriesPrev").addEventListener("click",()=>{state.seriesPage=Math.max(0,state.seriesPage-1);loadSeries()});$("seriesNext").addEventListener("click",()=>{state.seriesPage++;loadSeries()});["historyEntityType","historyAction"].forEach(id=>$(id).addEventListener("change",()=>{state.historyPage=0;loadHistory()}));$("userSearch").addEventListener("input",()=>{clearTimeout(state.debounce);state.debounce=setTimeout(()=>{state.userPage=0;loadUsers()},250)});$("userStatus").addEventListener("change",()=>{state.userPage=0;loadUsers()});$("userPrev").addEventListener("click",()=>{state.userPage=Math.max(0,state.userPage-1);loadUsers()});$("userNext").addEventListener("click",()=>{state.userPage++;loadUsers()});$("historyPrev").addEventListener("click",()=>{state.historyPage=Math.max(0,state.historyPage-1);loadHistory()});$("historyNext").addEventListener("click",()=>{state.historyPage++;loadHistory()});$("mediaSearch").addEventListener("input",()=>{clearTimeout(state.debounce);state.debounce=setTimeout(()=>{state.mediaPage=0;loadMedia()},250)});["mediaCategory","mediaAngle","mediaRights"].forEach(id=>$(id).addEventListener("change",()=>{state.mediaPage=0;loadMedia()}));$("mediaUploadBtn").addEventListener("click",openMediaUpload);$("mediaPrev").addEventListener("click",()=>{state.mediaPage=Math.max(0,state.mediaPage-1);loadMedia()});$("mediaNext").addEventListener("click",()=>{state.mediaPage++;loadMedia()});$("drawerClose").addEventListener("click",closeDrawer);$("backdrop").addEventListener("click",closeDrawer);document.addEventListener("keydown",e=>{if(e.key==="Escape")closeDrawer()});
+["moderationStatus","moderationSeverity"].forEach(id=>$(id).addEventListener("change",()=>{state.moderationPage=0;loadModeration()}));$("moderationType").addEventListener("input",()=>{clearTimeout(state.debounce);state.debounce=setTimeout(()=>{state.moderationPage=0;loadModeration()},300)});$("moderationPrev").addEventListener("click",()=>{state.moderationPage=Math.max(0,state.moderationPage-1);loadModeration()});$("moderationNext").addEventListener("click",()=>{state.moderationPage++;loadModeration()});$("seriesSearch").addEventListener("input",()=>{clearTimeout(state.debounce);state.debounce=setTimeout(()=>{state.seriesPage=0;loadSeries()},250)});$("seriesStatus").addEventListener("change",()=>{state.seriesPage=0;loadSeries()});$("seriesPrev").addEventListener("click",()=>{state.seriesPage=Math.max(0,state.seriesPage-1);loadSeries()});$("seriesNext").addEventListener("click",()=>{state.seriesPage++;loadSeries()});["historyEntityType","historyAction"].forEach(id=>$(id).addEventListener("change",()=>{state.historyPage=0;loadHistory()}));$("userSearch").addEventListener("input",()=>{clearTimeout(state.debounce);state.debounce=setTimeout(()=>{state.userPage=0;loadUsers()},250)});$("userStatus").addEventListener("change",()=>{state.userPage=0;loadUsers()});$("userPrev").addEventListener("click",()=>{state.userPage=Math.max(0,state.userPage-1);loadUsers()});$("userNext").addEventListener("click",()=>{state.userPage++;loadUsers()});$("historyPrev").addEventListener("click",()=>{state.historyPage=Math.max(0,state.historyPage-1);loadHistory()});$("historyNext").addEventListener("click",()=>{state.historyPage++;loadHistory()});let importsTimer;
+["importsSearch","importsSeries"].forEach(id=>$(id).addEventListener("input",()=>{clearTimeout(importsTimer);importsTimer=setTimeout(()=>{state.importsPage=0;loadImports();},250);}));
+["importsYear","importsReview"].forEach(id=>$(id).addEventListener("change",()=>{state.importsPage=0;loadImports();}));
+$("importsPrev").addEventListener("click",()=>{if(state.importsPage>0){state.importsPage--;loadImports();}});
+$("importsNext").addEventListener("click",()=>{if((state.importsPage+1)*state.pageSize<state.importsTotal){state.importsPage++;loadImports();}});
+$("mediaSearch").addEventListener("input",()=>{clearTimeout(state.debounce);state.debounce=setTimeout(()=>{state.mediaPage=0;loadMedia()},250)});["mediaCategory","mediaAngle","mediaRights"].forEach(id=>$(id).addEventListener("change",()=>{state.mediaPage=0;loadMedia()}));$("mediaUploadBtn").addEventListener("click",openMediaUpload);$("mediaPrev").addEventListener("click",()=>{state.mediaPage=Math.max(0,state.mediaPage-1);loadMedia()});$("mediaNext").addEventListener("click",()=>{state.mediaPage++;loadMedia()});$("drawerClose").addEventListener("click",closeDrawer);$("backdrop").addEventListener("click",closeDrawer);document.addEventListener("keydown",e=>{if(e.key==="Escape")closeDrawer()});
 loadOverview();
 })();
 </script>
