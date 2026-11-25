@@ -1,5 +1,29 @@
 # HW Catalog · передача контекста
 
+**Обновлено:** 2026-11-17  
+**Рабочая ветка:** `integration/catalog-foundation`
+
+## Самое важное сейчас
+
+GitHub остаётся каноническим источником кода, документации и Project Manager. Внешний диск `E:\HW-CATALOG-DATA` содержит рабочие данные, которые не зеркалируются в Git. Не копировать репозиторий целиком и не затрагивать `DATABASE`, `MEDIA`, `IMPORTS`, `EXPORTS`, `BACKUPS`, `LOGS` или `DEVICE_INFO.json` при синхронизации Project Manager.
+
+### Последнее состояние · 2026-11-17
+
+- PR #116 Media Library metadata/API merged в integration: `c6512c0e31e0722f17c425aa9dbf9a43014419ce`.
+- PR #117 Secure media uploads открыт в integration; актуальный head на момент handoff: `bc7acfbab18c0ffb7f09da0558fafe5ba4db799c`. CI завершился успешно: backend tests, SQLite/PostgreSQL migrations (clean + repeat), append-only enforcement и staging Compose.
+- PR #117 ещё не смержен. UI загрузки отложен до следующей сессии.
+- Подготовлен `scripts/windows/sync-project-manager-to-external.ps1` и инструкция `docs/deployment/EXTERNAL_STORAGE_SYNC.md`. Они синхронизируют только четыре файла Project Manager в `PROJECT-MANAGEMENT`, с staging, SHA-256 и сохранением предыдущей версии. Физический запуск ожидает merge документации и обновления локальной integration-ветки.
+- Физический внешний HDD этой сессией не проверялся и не изменялся. Скрипт синхронизации не запускался. Не считать snapshot скопированным.
+- `main` не изменялся.
+
+
+## Исторические handoff-записи
+
+Ниже сохранены предыдущие записи передачи контекста. Они описывают состояние на свои даты, а актуальные действия и ограничения указаны выше.
+
+---
+
+
 Дата: 2026-11-04.
 
 ## Главная договорённость
@@ -39,10 +63,136 @@
 - Созданы 82 архивные копии исторических веток: `archive/2026-11-04/<исходное-имя-ветки>`.
 - Все 82 копии сверены с исходными SHA; пропусков и несовпадений нет.
 - `prototype/catalog-visual-v1` и `integration/catalog-foundation` оставлены рабочими.
-- `main` оставлен без изменений и совпадает с `archive/gemini-main-2026-11-04`.
+- В ходе консолидации `main` не изменялся; HEAD при проверке — `b315431d279c42d94a76766d89dd18187278039c`. `archive/gemini-main-2026-11-04` является историческим снимком, но сейчас diverged от `main` (29/90 commits по GitHub compare), не считать его точной копией текущей ветки.
 - Исходные refs пока не удалялись. GitHub default branch и Pages остаются на `main`.
 - Визуальный прототип представляет собой статическую страницу без внешних CSS/JS-зависимостей и без подключения backend/API.
 
 ## Ближайший практический шаг
 
 Запустить `integration/catalog-foundation` локально из корня репозитория командой `py -m http.server 8000`, открыть `http://localhost:8000/` и пройти визуальную проверку. Зафиксировать отсутствующие и неработающие функции. После этого проверить исторические ветки по конкретному списку недостающих возможностей, не переносить их целиком.
+
+## Выборочный перенос backend из PR #72 и #73 · 2026-11-04
+
+Создана рабочая ветка `integration/import-idempotency-conflict-traceability` от `integration/catalog-foundation` и черновой PR [#80](https://github.com/JohnyKiska/hotwheels/pull/80). PR открыт в draft, не смержен.
+
+Перенесено:
+- Идемпотентная регистрация Evidence: повторная обработка одного `SourceRecord` с тем же нормализованным identifier claim повторно использует Evidence.
+- Разные `SourceRecord` остаются разными наблюдениями; один Evidence может быть связан с несколькими Release без дублирования.
+- Добавлена сущность `ConflictRelease` и миграция `20261104_conflict_releases`, построенная непосредственно поверх текущей цепочки миграций integration и не зависящая от PR #74.
+- Конфликты идентификаторов связываются с затронутыми Release и только с релевантными Evidence.
+- Очередь/детали конфликтов показывают Release и provenance; история решений поддерживает отдельное аудируемое действие пересмотра.
+- Страница `catalog/conflicts.html` обновлена для отображения Release и истории решений.
+
+Проверки GitHub Actions для HEAD `a44c17abed1319162b08ad3a332dd66ebf9d36ff`:
+- Backend tests: success, `92 passed`, 4 warnings.
+- Catalog UI checks: success.
+- PR #80 mergeable, draft, открыт.
+
+В процессе CI выявили и исправили две интеграционные несовместимости: импорт отсутствующего `catalog_tree_api` из PR #74 в `main.py` и безопасное создание `conflict_releases`, когда ORM уже создал таблицу. Также обновлено ожидание текущей Alembic head в тесте.
+
+Следующее: вручную проверить diff PR #80 и миграционную цепочку, затем согласовать снятие draft/merge. Не переносить PR #74 целиком. После принятия PR #80 продолжить выборочный перенос backend и импортеров #74/#75.
+
+## Follow-up after PR #80 merge · 2026-11-04
+
+PR #80 was merged into `integration/catalog-foundation` with merge commit `c5909c995eb17b16af80710eb1d10849cafd9b9a`. `main` remains untouched.
+
+A new isolated branch, `integration/importers-safe-preview`, was created from that integration head. It selectively restores the following from PR #74:
+
+- `backend/app/importers/mainline.py`: Mainline TSV and local Fandom yearly HTML parsers.
+- `backend/app/importers/all_hot_wheels.py`: parser for saved All Hot Wheels model-card HTML.
+- Preview-only API routes for all three input formats.
+- Synthetic parser and API tests.
+- Mainline importer specification and synthetic fixture/test plan, plus All Hot Wheels importer documentation.
+
+Safety boundary: these routes only parse user-supplied text/HTML and return candidates. They do not write to the database, fetch pages, or confirm catalog identity. No Fandom network access is enabled. No old PR #74 ORM models, Catalog Tree API, or risky migration chain were copied.
+
+GitHub Actions run #179 completed successfully on the importer code: `113 passed`, 4 warnings. A later documentation-only commit added the historical hierarchy design reference; it did not change backend code. After CI, inspect parser behavior using local saved HTML fixtures if available. Next architecture step is a shared observation/preview/matching contract, not a direct importer-to-canonical-record write path.
+
+## Latest handoff · 2026-11-04
+
+The current working branch is `integration/catalog-foundation`. PR #80 and PR #81 are merged into it. The latest backend code validation is GitHub Actions run #179 (`113 passed`, 4 warnings).
+
+The read-only Mainline TSV, local Fandom yearly HTML, and All Hot Wheels saved-card HTML preview endpoints are available. They do not write to the database or fetch network pages. The visual catalog frontend is not yet connected to these endpoints.
+
+Useful design documents recovered and retained:
+- `docs/importers/MAINLINE_IMPORTER_SPEC.md`
+- `docs/importers/MAINLINE_FIXTURE_TEST_PLAN.md`
+- `docs/ALL_HOT_WHEELS_IMPORTER.md`
+- `docs/architecture/CATALOG_HIERARCHY_DESIGN.md`
+- `docs/architecture/RELEASE_LINEAGE_RULES.md`
+- `docs/architecture/SCHEMA_ALIGNMENT_2026-10-29.md` (historical snapshot; not current schema truth)
+
+Superseded PRs #1, #29, #59, #70, #71, #72, #73, #74, #78 and #79 are closed. Their useful code/docs were retained where relevant, and archive refs were left intact. No historical branches were deleted. `main` and GitHub Pages remain untouched.
+
+PR #82 added and merged a pure in-memory `preview_to_observations()` adapter. It normalizes all three source-specific previews into a versioned observation envelope, keeps catalog year distinct from release year, preserves source provenance/raw values, and emits only identifier hints. It does not access the database or network. GitHub Actions run #183: `118 passed`, 4 warnings.
+
+Next: design a read-only matcher and explainable preview diff over the shared observation contract. Continue to prohibit direct catalog writes, automatic entity merges, and network fetching until separately designed and explicitly reviewed.
+
+
+## Matcher implementation · 2026-11-04
+
+Создана feature-ветка `feature/read-only-import-matcher` от `integration/catalog-foundation`.
+
+Добавлено:
+- `backend/app/importers/matcher.py`: read-only `match_import_observation(session, observation, source_snapshot=None)`.
+- `backend/tests/test_importer_matcher.py`: проверки exact name/year, exact identifier, collision, неизвестного namespace и exact source replay.
+- Обновлён `docs/importers/IMPORTER_OBSERVATION_CONTRACT.md`.
+
+Matcher использует существующие Release/Casting/Identifier/SourceRecord модели и только SELECT-запросы. Он не создаёт Evidence, SourceRecord или Conflict, не вызывает `register_identifier()`, не подтверждает и не объединяет сущности. Exact replay возможен только при явном `source_id` и `content_hash`; текущий adapter пока не поставляет эти значения, поэтому обычный observation не классифицируется как replay по одному URL/SKU.
+
+PR #83 merged: https://github.com/JohnyKiska/hotwheels/pull/83, squash commit `c9f01d45dedc3e856486388cb910d8ed11dbacfd`. GitHub Actions run #184: `124 passed`, 4 warnings. `integration/catalog-foundation` проверена как identical merge commit. `main` по-прежнему на `b315431d279c42d94a76766d89dd18187278039c`; GitHub Pages и архивные ветки не затрагивались. Следующий шаг: реализовать explainable attribute preview diff.
+
+
+## Claim preview diff · 2026-11-04
+
+Создана ветка `feature/import-claim-preview-diff` от `integration/catalog-foundation`.
+
+Добавлено:
+- `backend/app/importers/preview_diff.py`: pure `build_release_claim_diff(observation, release_snapshot)`.
+- `backend/tests/test_importer_preview_diff.py`: тесты на same, new evidence, conflicting value, evidence-only, insufficient evidence, series name и обязательный Release ID.
+- В контракт добавлено описание diff статусов и ограниченной карты canonical fields.
+
+Diff не использует БД и не пишет значения. Прямое сравнение пока только для `model_name`, `catalog_year`, `assortment_number`, `series_name`. Wheels/colors/scale и другие поля идут как `evidence_only`, так как текущая canonical schema не содержит для них соответствующих полей. Конфликт никогда не перезаписывает выбранный Release.
+
+Следующий шаг: проверить diff tests в GitHub Actions через PR в `integration/catalog-foundation`. После успешного CI объединить; затем проектировать read-only preview API, который свяжет parser → observation → matcher → diff. `main` и GitHub Pages не менять.
+
+
+## Claim preview diff merge · 2026-11-04
+
+PR #84 merged в `integration/catalog-foundation`: https://github.com/JohnyKiska/hotwheels/pull/84. Squash commit: `058ac4ffc6da11284dc2f97414203e3299b4459b`. GitHub Actions run #187: `131 passed`, 4 warnings.
+
+В integration теперь есть:
+- read-only source parsers + observation adapter;
+- SELECT-only Release matcher;
+- pure in-memory claim preview diff с безопасным разделением canonical comparisons и evidence-only claims.
+
+Никаких новых миграций, SourceRecord/Evidence/Conflict writes, auto-confirmation или merge logic не добавлено. Следующая задача: спроектировать read-only preview API orchestration parser → observation → matcher → diff. Проверить контракт endpoint и payload tests; только после этого обсуждать UI. `main`, GitHub Pages и архивные ветки не менять.
+
+
+## Read-only pipeline preview API · 2026-11-04
+
+Создана ветка `feature/read-only-import-preview-api` от `integration/catalog-foundation`.
+
+Добавлено:
+- `POST /imports/preview` в `backend/app/main.py`.
+- Поддержка `mainline_tsv`, `fandom_html`, `all_hot_wheels_html`.
+- Orchestration parser → observation adapter → matcher → optional diff.
+- `record_index` выбирает одну запись из multi-record parser output; `selected_release_id` задаёт явный Release для diff. Никакого auto-select.
+- API tests покрывают три источника, strong candidate, explicit diff, index bounds, missing Release, required catalog year и отсутствие DB writes.
+
+Endpoint read-only: никаких network fetch, SourceRecord/Evidence/Conflict writes, identifier registration, catalog updates или migrations. HTML sources передаются локальным текстом. CI ещё не запущен/не подтверждён на момент handoff.
+
+Следующий шаг: открыть PR в `integration/catalog-foundation`, дождаться GitHub Actions, исправить regressions. После успешной проверки оценить response contract и подготовить UI workflow. `main`, GitHub Pages и архивные ветки не менять.
+
+
+## Pipeline preview API merge · 2026-11-04
+
+PR #85 merged: https://github.com/JohnyKiska/hotwheels/pull/85, squash commit `c787696e9dc25abfc985de485710fd8f2569d0aa`. GitHub Actions run #188: `138 passed`, 4 warnings.
+
+В integration добавлен `POST /imports/preview`: parser → observation → matcher → optional claim diff. Поддерживаются Mainline TSV, локальный Fandom yearly HTML и локальный All Hot Wheels HTML. Multi-record parser result требует явного `record_index`; diff требует явного `selected_release_id`. Endpoint read-only, без network fetch, DB writes, migrations, SourceRecord/Evidence/Conflict creation, identifier registration или auto-select.
+
+Следующий шаг: изучить frontend admin structure и спроектировать read-only importer preview UI, используя существующие компоненты и API patterns. Не добавлять apply/persistence до отдельного решения. `main`, GitHub Pages и archive branches не трогать.
+
+
+### Current integration blocker
+The preview API is implemented and CI-verified, but there is no backend deployment target or persistent database hosting configuration in the repository. The existing API also contains write-capable conflict-resolution endpoints. Therefore do not wire the public GitHub Pages UI to an arbitrary backend origin or enable broad CORS yet. Next decision required before browser integration: choose backend hosting + persistent DB, and define API authentication/authorization and explicit allowed origins. Local API tests are green; remote end-to-end browser testing is not possible until that infrastructure exists.
