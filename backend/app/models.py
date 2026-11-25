@@ -89,6 +89,10 @@ class CastingTranslation(TimestampMixin, Base):
             "language_code IN ('en', 'ru', 'ja')",
             name="ck_casting_translations_language",
         ),
+        CheckConstraint(
+            "length(trim(description)) > 0",
+            name="ck_casting_translations_description_nonempty",
+        ),
     )
 
     casting: Mapped[Casting] = relationship(back_populates="translations")
