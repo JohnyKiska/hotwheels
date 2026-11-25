@@ -7,6 +7,7 @@ from app.db import Base, get_db
 from app.main import app
 from app.models import (
     Casting,
+    CastingTranslation,
     CatalogIdentifier,
     Evidence,
     EvidenceRelease,
@@ -168,12 +169,34 @@ def test_catalog_admin_summary_and_release_search_are_read_only():
         app.dependency_overrides.pop(get_db, None)
 
 
-def test_catalog_admin_release_detail_includes_evidence_and_source_provenance():
+def test_catalog_admin_release_detail_includes_evidence_and_localized_casting_description():
     engine = make_engine()
     seed_catalog(engine)
+    with Session(engine) as session:
+        casting = session.scalar(select(Casting).where(Casting.name == "Mazda Autozam"))
+        session.add_all([
+            CastingTranslation(
+                casting_id=casting.id,
+                language_code="ru",
+                description="Русское описание отливки",
+            ),
+            CastingTranslation(
+                casting_id=casting.id,
+                language_code="en",
+                description="English casting description",
+            ),
+            CastingTranslation(
+                casting_id=casting.id,
+                language_code="ja",
+                description="日本語の説明",
+            ),
+        ])
+        session.commit()
     override_database(engine)
     try:
-        response = TestClient(app).get("/catalog/admin/releases/release-auto")
+        client = TestClient(app)
+        response = client.get("/catalog/admin/releases/release-auto?language=ja")
+        fallback = client.get("/catalog/admin/releases/release-auto?language=fr")
     finally:
         app.dependency_overrides.pop(get_db, None)
 
@@ -181,6 +204,14 @@ def test_catalog_admin_release_detail_includes_evidence_and_source_provenance():
     payload = response.json()
     assert payload["release"]["name"] == "Mazda Autozam"
     assert payload["casting"]["name"] == "Mazda Autozam"
+    assert payload["casting"]["description"] == "日本語の説明"
+    assert payload["casting"]["description_language"] == "ja"
+    assert payload["casting"]["descriptions"] == {
+        "en": "English casting description",
+        "ja": "日本語の説明",
+        "ru": "Русское описание отливки",
+    }
+    assert fallback.status_code == 422
     assert payload["identifiers"][0]["type"] in {"catalog_number", "sku"}
     assert payload["series"] == ["HW J-Imports"]
     assert len(payload["evidence"]) == 1
