@@ -82,7 +82,7 @@ class CastingTranslation(TimestampMixin, Base):
         ForeignKey("castings.id", ondelete="CASCADE"), primary_key=True
     )
     language_code: Mapped[str] = mapped_column(String(5), primary_key=True)
-    description: Mapped[str | None] = mapped_column(Text)
+    description: Mapped[str] = mapped_column(Text, nullable=False)
 
     __table_args__ = (
         CheckConstraint(
