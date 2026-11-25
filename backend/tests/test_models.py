@@ -4,7 +4,19 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.db import Base
-from app.models import Casting, CastingVariant, Release, ReleaseSeries, Series
+from app.models import (
+    Casting,
+    CastingVariant,
+    Evidence,
+    EvidenceProductLine,
+    ProductLine,
+    Release,
+    ReleaseProductLine,
+    ReleaseSeries,
+    Series,
+    Source,
+    SourceRecord,
+)
 
 
 @pytest.fixture
@@ -545,7 +557,7 @@ def test_alembic_upgrade_is_safe_on_initialized_existing_database(tmp_path, monk
             assert connection.execute(
                 text("SELECT name FROM castings WHERE id = :id"), {"id": casting_id}
             ).scalar_one() == "Existing record must survive"
-            assert connection.execute(text("SELECT version_num FROM alembic_version")).scalar_one() == "20261120_import_apply_foundation"
+            assert connection.execute(text("SELECT version_num FROM alembic_version")).scalar_one() == "20261123_product_line_tables"
             assert connection.execute(text("SELECT COUNT(*) FROM alembic_version")).scalar_one() == 1
     finally:
         check_engine.dispose()
@@ -928,3 +940,320 @@ def test_alembic_upgrade_bootstraps_clean_database(tmp_path, monkeypatch):
             assert all(item.is_globally_unique is False for item in seeded_types)
     finally:
         engine.dispose()
+
+
+def _assert_sqlite_foreign_keys_enabled(session):
+    assert session.connection().exec_driver_sql("PRAGMA foreign_keys").scalar_one() == 1
+
+
+def _add_release_product_line_with_evidence(session):
+    release = Release(casting=Casting(name="Product-line test casting"))
+    product_line = ProductLine(
+        code="premium",
+        name="Premium",
+        normalized_name="premium",
+    )
+    assignment = ReleaseProductLine(release=release, product_line=product_line)
+    evidence = Evidence(
+        source_record=SourceRecord(
+            source=Source(name="Product-line test source", source_type="test"),
+            record_type="catalog_entry",
+        ),
+        attribute_name="product_line",
+        observed_value="Premium",
+    )
+    evidence_link = EvidenceProductLine(release_product_line=assignment)
+    evidence.product_line_links.append(evidence_link)
+    session.add_all([release, product_line, evidence])
+    session.commit()
+    return release, product_line, assignment, evidence
+
+
+def test_product_line_code_must_be_unique(session):
+    session.add_all([
+        ProductLine(code="premium", name="Premium", normalized_name="premium"),
+        ProductLine(code="premium", name="Premium Collectibles", normalized_name="premium-collectibles"),
+    ])
+    with pytest.raises(IntegrityError):
+        session.commit()
+    session.rollback()
+
+
+def test_product_line_normalized_name_must_be_unique(session):
+    session.add_all([
+        ProductLine(code="premium", name="Premium", normalized_name="premium"),
+        ProductLine(code="premium-line", name="Premium Line", normalized_name="premium"),
+    ])
+    with pytest.raises(IntegrityError):
+        session.commit()
+    session.rollback()
+
+
+@pytest.mark.parametrize(
+    "status", ["candidate", "under_review", "confirmed", "rejected"]
+)
+def test_product_line_accepts_catalog_statuses(session, status):
+    product_line = ProductLine(
+        code=f"line-{status}",
+        name=f"Line {status}",
+        normalized_name=f"line-{status}",
+        status=status,
+    )
+    session.add(product_line)
+    session.commit()
+    assert session.get(ProductLine, product_line.id).status == status
+
+
+def test_product_line_rejects_unknown_status(session):
+    session.add(ProductLine(
+        code="invalid",
+        name="Invalid",
+        normalized_name="invalid",
+        status="published",
+    ))
+    with pytest.raises(IntegrityError):
+        session.commit()
+    session.rollback()
+
+
+def test_product_line_cannot_be_its_own_parent(session):
+    product_line = ProductLine(
+        code="self",
+        name="Self",
+        normalized_name="self",
+    )
+    session.add(product_line)
+    session.commit()
+
+    with pytest.raises(IntegrityError):
+        session.execute(
+            update(ProductLine)
+            .where(ProductLine.id == product_line.id)
+            .values(parent_product_line_id=product_line.id)
+        )
+        session.commit()
+    session.rollback()
+
+
+def test_product_line_parent_relationship_persists(session):
+    parent = ProductLine(
+        code="premium",
+        name="Premium",
+        normalized_name="premium",
+    )
+    child = ProductLine(
+        code="car-culture",
+        name="Car Culture",
+        normalized_name="car culture",
+        parent=parent,
+    )
+    session.add(child)
+    session.commit()
+    session.expire_all()
+
+    loaded_child = session.get(ProductLine, child.id)
+    loaded_parent = session.get(ProductLine, parent.id)
+    assert loaded_child.parent.id == parent.id
+    assert [item.id for item in loaded_parent.children] == [child.id]
+
+
+def test_release_product_line_can_assign_multiple_lines_to_one_release(session):
+    release = Release(casting=Casting(name="Multi-line casting"))
+    lines = [
+        ProductLine(code="mainline", name="Mainline", normalized_name="mainline"),
+        ProductLine(code="premium", name="Premium", normalized_name="premium"),
+    ]
+    session.add_all([
+        ReleaseProductLine(release=release, product_line=line)
+        for line in lines
+    ])
+    session.commit()
+    session.expire_all()
+
+    loaded = session.get(Release, release.id)
+    assert {link.product_line.code for link in loaded.product_line_links} == {
+        "mainline",
+        "premium",
+    }
+
+
+def test_release_product_line_pair_must_be_unique(session):
+    release = Release(casting=Casting(name="Duplicate assignment casting"))
+    product_line = ProductLine(
+        code="premium",
+        name="Premium",
+        normalized_name="premium",
+    )
+    session.add_all([
+        ReleaseProductLine(release=release, product_line=product_line),
+        ReleaseProductLine(release=release, product_line=product_line),
+    ])
+    with pytest.raises(IntegrityError):
+        session.commit()
+    session.rollback()
+
+
+def test_release_product_line_supports_active_and_withdrawn(session):
+    assignment = ReleaseProductLine(
+        release=Release(casting=Casting(name="Status casting")),
+        product_line=ProductLine(
+            code="premium",
+            name="Premium",
+            normalized_name="premium",
+        ),
+    )
+    session.add(assignment)
+    session.commit()
+    assert assignment.membership_status == "active"
+
+    assignment.membership_status = "withdrawn"
+    session.commit()
+    assert session.get(ReleaseProductLine, assignment.id).membership_status == "withdrawn"
+
+
+def test_release_product_line_rejects_unknown_membership_status(session):
+    session.add(ReleaseProductLine(
+        release=Release(casting=Casting(name="Invalid status casting")),
+        product_line=ProductLine(
+            code="premium",
+            name="Premium",
+            normalized_name="premium",
+        ),
+        membership_status="deleted",
+    ))
+    with pytest.raises(IntegrityError):
+        session.commit()
+    session.rollback()
+
+
+def test_release_with_loaded_product_line_assignment_cannot_be_deleted(session):
+    release, _, _, _ = _add_release_product_line_with_evidence(session)
+    release_id = release.id
+    _assert_sqlite_foreign_keys_enabled(session)
+
+    session.expire_all()
+    loaded_release = session.get(Release, release_id)
+    assert len(loaded_release.product_line_links) == 1
+    session.delete(loaded_release)
+    with pytest.raises(IntegrityError):
+        session.commit()
+    session.rollback()
+    assert session.get(Release, release_id) is not None
+
+
+def test_product_line_with_loaded_assignment_cannot_be_deleted(session):
+    _, product_line, _, _ = _add_release_product_line_with_evidence(session)
+    product_line_id = product_line.id
+    _assert_sqlite_foreign_keys_enabled(session)
+
+    session.expire_all()
+    loaded_line = session.get(ProductLine, product_line_id)
+    assert len(loaded_line.release_links) == 1
+    session.delete(loaded_line)
+    with pytest.raises(IntegrityError):
+        session.commit()
+    session.rollback()
+    assert session.get(ProductLine, product_line_id) is not None
+
+
+def test_product_line_with_loaded_child_cannot_be_deleted(session):
+    parent = ProductLine(
+        code="premium",
+        name="Premium",
+        normalized_name="premium",
+    )
+    child = ProductLine(
+        code="car-culture",
+        name="Car Culture",
+        normalized_name="car culture",
+        parent=parent,
+    )
+    session.add(child)
+    session.commit()
+    parent_id = parent.id
+    child_id = child.id
+    _assert_sqlite_foreign_keys_enabled(session)
+
+    session.expire_all()
+    loaded_parent = session.get(ProductLine, parent_id)
+    assert [item.id for item in loaded_parent.children] == [child_id]
+    session.delete(loaded_parent)
+    with pytest.raises(IntegrityError):
+        session.commit()
+    session.rollback()
+    assert session.get(ProductLine, parent_id) is not None
+    assert session.get(ProductLine, child_id) is not None
+
+
+def test_evidence_product_line_points_to_specific_assignment(session):
+    release, product_line, assignment, evidence = _add_release_product_line_with_evidence(session)
+    session.expire_all()
+
+    loaded = session.get(Evidence, evidence.id)
+    assert len(loaded.product_line_links) == 1
+    link = loaded.product_line_links[0]
+    assert link.release_product_line.id == assignment.id
+    assert link.release_product_line.release_id == release.id
+    assert link.release_product_line.product_line_id == product_line.id
+
+
+def test_evidence_product_line_pair_must_be_unique(session):
+    _, _, assignment, evidence = _add_release_product_line_with_evidence(session)
+    session.add(EvidenceProductLine(
+        evidence_id=evidence.id,
+        release_product_line_id=assignment.id,
+    ))
+    with pytest.raises(IntegrityError):
+        session.commit()
+    session.rollback()
+
+
+def test_release_product_line_with_loaded_evidence_cannot_be_deleted(session):
+    _, _, assignment, _ = _add_release_product_line_with_evidence(session)
+    assignment_id = assignment.id
+    _assert_sqlite_foreign_keys_enabled(session)
+
+    session.expire_all()
+    loaded_assignment = session.get(ReleaseProductLine, assignment_id)
+    assert len(loaded_assignment.evidence_links) == 1
+    session.delete(loaded_assignment)
+    with pytest.raises(IntegrityError):
+        session.commit()
+    session.rollback()
+    assert session.get(ReleaseProductLine, assignment_id) is not None
+
+
+def test_deleting_evidence_removes_only_its_product_line_link(session):
+    _, _, assignment, evidence = _add_release_product_line_with_evidence(session)
+    assignment_id = assignment.id
+    evidence_id = evidence.id
+
+    session.expire_all()
+    loaded_evidence = session.get(Evidence, evidence_id)
+    assert len(loaded_evidence.product_line_links) == 1
+    session.delete(loaded_evidence)
+    session.commit()
+
+    assert session.get(Evidence, evidence_id) is None
+    assert session.get(EvidenceProductLine, (evidence_id, assignment_id)) is None
+    assert session.get(ReleaseProductLine, assignment_id) is not None
+
+
+def test_withdrawing_release_product_line_preserves_evidence_link(session):
+    _, _, assignment, evidence = _add_release_product_line_with_evidence(session)
+    assignment_id = assignment.id
+    evidence_id = evidence.id
+    _assert_sqlite_foreign_keys_enabled(session)
+
+    session.expire_all()
+    loaded_assignment = session.get(ReleaseProductLine, assignment_id)
+    assert len(loaded_assignment.evidence_links) == 1
+    loaded_assignment.membership_status = "withdrawn"
+    session.commit()
+
+    assert session.get(
+        EvidenceProductLine, (evidence_id, assignment_id)
+    ) is not None
+    assert session.get(
+        ReleaseProductLine, assignment_id
+    ).membership_status == "withdrawn"

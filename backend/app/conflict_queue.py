@@ -90,8 +90,8 @@ def list_conflicts(
             "release_name": link.release.name,
             "catalog_year": link.release.catalog_year,
             "status": link.release.status,
-            "casting_id": link.release.casting.id,
-            "casting_name": link.release.casting.name,
+            "casting_id": link.release.casting_id,
+            "casting_name": link.release.casting.name if link.release.casting else None,
             "role": link.role,
             "note": link.note,
         } for link in sorted(conflict.release_links, key=lambda item: item.release_id)]
@@ -117,6 +117,9 @@ def get_conflict_detail(session: Session, conflict_id: str) -> dict | None:
         select(Conflict)
         .where(Conflict.id == conflict_id)
         .options(
+            selectinload(Conflict.release_links)
+            .joinedload(ConflictRelease.release)
+            .joinedload(Release.casting),
             selectinload(Conflict.evidence_links)
             .joinedload(ConflictEvidence.evidence)
             .joinedload(Evidence.source_record)
@@ -159,8 +162,8 @@ def get_conflict_detail(session: Session, conflict_id: str) -> dict | None:
         "release_name": link.release.name,
         "catalog_year": link.release.catalog_year,
         "status": link.release.status,
-        "casting_id": link.release.casting.id,
-        "casting_name": link.release.casting.name,
+        "casting_id": link.release.casting_id,
+        "casting_name": link.release.casting.name if link.release.casting else None,
         "role": link.role,
         "note": link.note,
     } for link in sorted(conflict.release_links, key=lambda item: item.release_id)]

@@ -189,3 +189,78 @@ def test_identifier_with_conflicting_catalog_year_stays_ambiguous():
 
         assert result["status"] == "ambiguous"
         assert result["matched_entities"][0]["strength"] == "weak"
+
+
+def test_unassigned_release_matches_exact_name_and_catalog_year():
+    with make_session() as session:
+        release = Release(
+            casting_id=None,
+            catalog_year=2025,
+            name="Unassigned casting",
+            status="candidate",
+        )
+        session.add(release)
+        session.flush()
+
+        result = match_import_observation(
+            session, observation(name="Unassigned casting", year=2025)
+        )
+
+        assert result["status"] == "strong_candidate"
+        assert len(result["matched_entities"]) == 1
+        matched = result["matched_entities"][0]
+        assert matched["entity_id"] == release.id
+        assert matched["name"] == "Unassigned casting"
+        assert matched["catalog_year"] == 2025
+        assert matched["casting_id"] is None
+        assert matched["casting_name"] is None
+        assert matched["strength"] == "strong"
+        assert result["writes_to_catalog"] is False
+
+
+def test_unassigned_release_matches_its_release_identifier():
+    with make_session() as session:
+        session.add(IdentifierType(code="sku", label="SKU"))
+        release = Release(
+            casting_id=None,
+            catalog_year=2025,
+            name="Unassigned casting",
+            status="candidate",
+        )
+        session.add(release)
+        session.flush()
+
+        identifier_type = session.scalar(
+            select(IdentifierType).where(IdentifierType.code == "sku")
+        )
+        identifier = CatalogIdentifier(
+            identifier_type_id=identifier_type.id,
+            value="UNASSIGNED-123",
+            normalized_value="UNASSIGNED-123",
+        )
+        session.add(identifier)
+        session.flush()
+        session.add(
+            ReleaseIdentifier(release_id=release.id, identifier_id=identifier.id)
+        )
+        session.flush()
+
+        result = match_import_observation(
+            session,
+            observation(hints=[
+                {"type_code": "sku", "raw_value": "UNASSIGNED-123"}
+            ]),
+        )
+
+        assert result["status"] == "strong_candidate"
+        assert len(result["matched_entities"]) == 1
+        matched = result["matched_entities"][0]
+        assert matched["entity_id"] == release.id
+        assert matched["casting_id"] is None
+        assert matched["casting_name"] is None
+        assert matched["strength"] == "strong"
+        assert any(
+            signal["kind"] == "release_identifier"
+            for signal in matched["signals"]
+        )
+        assert result["writes_to_catalog"] is False

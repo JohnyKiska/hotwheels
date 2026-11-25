@@ -69,7 +69,7 @@ class Casting(TimestampMixin, Base):
     variants: Mapped[list[CastingVariant]] = relationship(
         back_populates="casting", cascade="all, delete-orphan"
     )
-    releases: Mapped[list[Release]] = relationship(back_populates="casting")
+    releases: Mapped[list[Release]] = relationship(back_populates="casting", passive_deletes="all")
 
 
 class CastingVariant(TimestampMixin, Base):
@@ -100,6 +100,45 @@ class CastingVariant(TimestampMixin, Base):
         foreign_keys="Release.casting_variant_id",
         # Let the database RESTRICT constraint protect referenced variants.
         passive_deletes="all",
+    )
+
+
+class ProductLine(TimestampMixin, Base):
+    """A normalized product-line identity with an optional parent line."""
+
+    __tablename__ = "product_lines"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    code: Mapped[str] = mapped_column(String(80), nullable=False)
+    name: Mapped[str] = mapped_column(String(240), nullable=False)
+    normalized_name: Mapped[str] = mapped_column(String(240), nullable=False)
+    description: Mapped[str | None] = mapped_column(Text)
+    parent_product_line_id: Mapped[str | None] = mapped_column(
+        ForeignKey("product_lines.id", ondelete="RESTRICT"), index=True
+    )
+    status: Mapped[str] = mapped_column(String(24), default="candidate", nullable=False)
+
+    __table_args__ = (
+        UniqueConstraint("code", name="uq_product_lines_code"),
+        UniqueConstraint("normalized_name", name="uq_product_lines_normalized_name"),
+        CheckConstraint(
+            "status IN ('candidate', 'under_review', 'confirmed', 'rejected')",
+            name="ck_product_lines_status",
+        ),
+        CheckConstraint(
+            "parent_product_line_id IS NULL OR parent_product_line_id != id",
+            name="ck_product_lines_not_own_parent",
+        ),
+    )
+
+    parent: Mapped[ProductLine | None] = relationship(
+        back_populates="children", remote_side="ProductLine.id"
+    )
+    children: Mapped[list[ProductLine]] = relationship(
+        back_populates="parent", passive_deletes="all"
+    )
+    release_links: Mapped[list[ReleaseProductLine]] = relationship(
+        back_populates="product_line", passive_deletes="all"
     )
 
 
@@ -149,14 +188,47 @@ class ReleaseSeries(Base):
     series: Mapped[Series] = relationship(back_populates="release_links")
 
 
+class ReleaseProductLine(TimestampMixin, Base):
+    """An explicit product-line assignment for a release."""
+
+    __tablename__ = "release_product_lines"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    release_id: Mapped[str] = mapped_column(
+        ForeignKey("releases.id", ondelete="RESTRICT"), nullable=False
+    )
+    product_line_id: Mapped[str] = mapped_column(
+        ForeignKey("product_lines.id", ondelete="RESTRICT"), nullable=False, index=True
+    )
+    membership_status: Mapped[str] = mapped_column(
+        String(24), default="active", nullable=False
+    )
+
+    __table_args__ = (
+        UniqueConstraint(
+            "release_id", "product_line_id", name="uq_release_product_lines_pair"
+        ),
+        CheckConstraint(
+            "membership_status IN ('active', 'withdrawn')",
+            name="ck_release_product_lines_membership_status",
+        ),
+    )
+
+    release: Mapped[Release] = relationship(back_populates="product_line_links")
+    product_line: Mapped[ProductLine] = relationship(back_populates="release_links")
+    evidence_links: Mapped[list[EvidenceProductLine]] = relationship(
+        back_populates="release_product_line", passive_deletes="all"
+    )
+
+
 class Release(TimestampMixin, Base):
     """A distinct catalog-year release of a casting."""
 
     __tablename__ = "releases"
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
-    casting_id: Mapped[str] = mapped_column(
-        ForeignKey("castings.id", ondelete="RESTRICT"), nullable=False, index=True
+    casting_id: Mapped[str | None] = mapped_column(
+        ForeignKey("castings.id", ondelete="RESTRICT"), nullable=True, index=True
     )
     # Nullable until the particular construction variant has enough evidence.
     casting_variant_id: Mapped[str | None] = mapped_column(String(36), nullable=True, index=True)
@@ -188,7 +260,7 @@ class Release(TimestampMixin, Base):
         ),
     )
 
-    casting: Mapped[Casting] = relationship(back_populates="releases", foreign_keys=[casting_id])
+    casting: Mapped[Casting | None] = relationship(back_populates="releases", foreign_keys=[casting_id])
     casting_variant: Mapped[CastingVariant | None] = relationship(
         back_populates="releases", foreign_keys=[casting_variant_id]
     )
@@ -197,6 +269,9 @@ class Release(TimestampMixin, Base):
     )
     series: Mapped[list[Series]] = relationship(
         secondary="release_series", back_populates="releases", viewonly=True
+    )
+    product_line_links: Mapped[list[ReleaseProductLine]] = relationship(
+        back_populates="release", passive_deletes="all"
     )
 
 
@@ -282,6 +357,9 @@ class Evidence(TimestampMixin, Base):
     variant_links: Mapped[list[EvidenceCastingVariant]] = relationship(back_populates="evidence", cascade="all, delete-orphan")
     release_links: Mapped[list[EvidenceRelease]] = relationship(back_populates="evidence", cascade="all, delete-orphan")
     series_links: Mapped[list[EvidenceSeries]] = relationship(back_populates="evidence", cascade="all, delete-orphan")
+    product_line_links: Mapped[list[EvidenceProductLine]] = relationship(
+        back_populates="evidence", cascade="all, delete-orphan"
+    )
     media_links: Mapped[list[MediaAssetEvidence]] = relationship(back_populates="evidence", cascade="all, delete-orphan")
 
 
@@ -350,6 +428,28 @@ class EvidenceRelease(Base):
     role: Mapped[str] = mapped_column(String(32), default="about", nullable=False)
     evidence: Mapped[Evidence] = relationship(back_populates="release_links")
     release: Mapped[Release] = relationship()
+
+
+class EvidenceProductLine(Base):
+    """Evidence attached to one specific release-product-line assignment."""
+
+    __tablename__ = "evidence_product_lines"
+
+    evidence_id: Mapped[str] = mapped_column(
+        ForeignKey("evidence.id", ondelete="CASCADE"), primary_key=True
+    )
+    release_product_line_id: Mapped[str] = mapped_column(
+        ForeignKey("release_product_lines.id", ondelete="RESTRICT"),
+        primary_key=True,
+        index=True,
+    )
+    role: Mapped[str] = mapped_column(String(32), default="about", nullable=False)
+    note: Mapped[str | None] = mapped_column(Text)
+
+    evidence: Mapped[Evidence] = relationship(back_populates="product_line_links")
+    release_product_line: Mapped[ReleaseProductLine] = relationship(
+        back_populates="evidence_links"
+    )
 
 
 class EvidenceSeries(Base):

@@ -183,10 +183,10 @@ def match_import_observation(
     catalog_year = subject.get("catalog_year")
     if observed_name:
         rows = session.execute(
-            select(Release, Casting).join(Casting, Release.casting_id == Casting.id)
+            select(Release, Casting).outerjoin(Casting, Release.casting_id == Casting.id)
         ).all()
         for release, casting in rows:
-            catalog_name = _name_key(release.name) or _name_key(casting.name)
+            catalog_name = _name_key(release.name) or (_name_key(casting.name) if casting else None)
             if catalog_name != observed_name:
                 continue
             if catalog_year is not None and release.catalog_year == catalog_year:
@@ -208,7 +208,7 @@ def match_import_observation(
     for release_id, candidate in sorted(candidates.items()):
         row = session.execute(
             select(Release, Casting)
-            .join(Casting, Release.casting_id == Casting.id)
+            .outerjoin(Casting, Release.casting_id == Casting.id)
             .where(Release.id == release_id)
         ).first()
         if row is None:
@@ -222,10 +222,10 @@ def match_import_observation(
         ) or has_exact_name_year
         enriched.append({
             **candidate,
-            "name": release.name or casting.name,
+            "name": release.name or (casting.name if casting else None),
             "catalog_year": release.catalog_year,
-            "casting_id": casting.id,
-            "casting_name": casting.name,
+            "casting_id": release.casting_id,
+            "casting_name": casting.name if casting else None,
             "signals": signals,
             "strength": "strong" if strong else "weak",
         })
