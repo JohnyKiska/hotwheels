@@ -13,7 +13,7 @@ The legacy `castings.description` column remains for compatibility during the
 transition. Its contents are not copied automatically because the language may
 be unknown and previously corrupted text must not be propagated.
 
-The catalog Release detail endpoint accepts `?language=ru|en|ja` and returns:
+The Casting detail endpoint (`/catalog/admin/castings/{casting_id}`) and Release detail endpoint accept `?language=ru|en|ja` and return:
 
 - `casting.description`: selected translation, falling back to Russian;
 - `casting.description_language`: language code actually returned, or null;
