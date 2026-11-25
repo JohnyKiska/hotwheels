@@ -44,4 +44,13 @@ py -m http.server 8000
 
 Остановка локального сервера: Ctrl+C в окне PowerShell.
 
-Важно: это запуск фронтенд-прототипа. Backend/API и постоянное хранение данных пока не подключены.
+Важно: это запуск фронтенд-прототипа. Backend уже предоставляет read-only preview API для Mainline TSV, локального Fandom HTML и All Hot Wheels HTML, но визуальный каталог пока не подключён к этим endpoint и постоянному хранению данных.
+
+
+## Backend importer status · 2026-11-04
+
+Backend уже содержит read-only source parsers, общий observation adapter и read-only Release matcher, интегрированный в `integration/catalog-foundation` через PR #83. Matcher только ищет кандидатов и объясняет сигналы; он не пишет в БД и не объединяет записи. См. `docs/importers/IMPORTER_OBSERVATION_CONTRACT.md` и `docs/SESSION_HANDOFF.md`.
+
+The importer pipeline also includes a read-only Release matcher and a pure in-memory claim preview diff. The diff distinguishes unchanged values, new evidence candidates, conflicting values, evidence-only attributes, and insufficient evidence. It does not write to the catalog. See `docs/importers/IMPORTER_OBSERVATION_CONTRACT.md`.
+
+The read-only orchestration endpoint is `POST /imports/preview`. It accepts Mainline TSV, locally supplied Fandom yearly HTML, or locally supplied All Hot Wheels car HTML and returns parser issues, normalized observation, matching signals, and an optional claim diff for an explicitly selected Release. It does not write to the catalog.

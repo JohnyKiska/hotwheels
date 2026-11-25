@@ -51,6 +51,15 @@
 - Созданы архивные копии 82 исторических веток в пространстве `archive/2026-11-04/<исходное-имя-ветки>`.
 - SHA каждой архивной копии проверен на совпадение с соответствующей исходной веткой.
 - Две рабочие ветки сохранены: `prototype/catalog-visual-v1` и `integration/catalog-foundation`.
-- `main` не изменён; его состояние совпадает с `archive/gemini-main-2026-11-04`.
+- В ходе текущей консолидации `main` не изменялся; его проверенный HEAD — `b315431d279c42d94a76766d89dd18187278039c`. Ветка `archive/gemini-main-2026-11-04` является историческим снимком, но текущий `main` и этот архивный ref сейчас diverged (29/90 commits по GitHub compare), поэтому не считать их идентичными.
 - Исходные имена исторических веток пока оставлены. Удаление исходных refs не выполнялось.
 - GitHub default branch по-прежнему `main`; GitHub Pages пока не переключался.
+
+## Backend status · 2026-11-04
+
+- `integration/catalog-foundation` includes the merged identifier idempotency/conflict traceability work from PR #80 and the read-only import previews from PR #81.
+- Preview endpoints accept user-supplied Mainline TSV, local Fandom yearly HTML, and saved All Hot Wheels card HTML. They do not fetch network pages or write to the catalog.
+- The importer parsers and shared in-memory observation adapter are covered by GitHub Actions run #183: 118 passed, 4 warnings. PR #82 is merged into `integration/catalog-foundation`.
+- The current backend model set does not yet include ProductLine/CatalogNode, Package, Manufacturer/Brand, or Origin entities. These remain separate design/model tasks; no old PR #74 migrations were imported.
+- Mainline's complete observation/matching/confirmation/apply pipeline is not implemented. Current endpoints are parser previews only.
+- PRs #1, #29, #59, #70, #71, #72, #73, #74, #78 and #79 were closed after preserving useful importer code, fixtures, specifications, and architecture notes in the active integration branch or archive refs. No historical branches were deleted.
