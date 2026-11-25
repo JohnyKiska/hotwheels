@@ -1,5 +1,50 @@
 # HW Catalog · дорожная карта консолидации
 
+## Актуализация дорожной карты · 2026-11-25
+
+Текущая рабочая точка: `integration/catalog-foundation`, опубликованный commit `d6fc574`. Этот блок имеет приоритет над более ранними историческими handoff-записями ниже.
+
+### Завершено в текущем цикле
+
+- [x] Доработать административный API для Casting, Release, Variant, Series и ProductLine.
+- [x] Добавить административный раздел ProductLine в `admin.html` с поиском, фильтрацией, просмотром и редактированием.
+- [x] Добавить прямые связи Release–ProductLine и связи Evidence с конкретным назначением ProductLine.
+- [x] Добавить миграцию `20261123_product_line_tables` с FK, unique/check constraints, индексами, проверкой совместимости существующих таблиц и защитой от потери данных при downgrade.
+- [x] Добавить миграцию `20261123_release_nullable_casting`, чтобы Release мог существовать до подтверждения Casting.
+- [x] Исправить ORM delete behavior для Casting и stale revision assertion в eBay migration test.
+- [x] Добавить/обновить тесты admin API, моделей, matcher и ProductLine migration.
+- [x] Опубликовать commit `d6fc574` в `origin/integration/catalog-foundation`.
+- [x] Запустить полный локальный backend suite: **360 passed, 47 warnings**. GitHub Actions для этого commit отдельно не подтверждался.
+
+### В процессе / ближайшая проверка
+
+- [ ] Ручная проверка административного UI `/admin` на desktop/mobile и сценариев CRUD/связей.
+- [ ] Предметная проверка ProductLine taxonomy; ADR-001 пока имеет статус **Proposed**, не считать его утверждённым.
+- [ ] Проверка read-only importer preview на репрезентативных сохранённых ALLHW HTML.
+- [ ] Ручная проверка media upload/storage на физическом внешнем HDD; проверка backup/restore MEDIA.
+- [ ] Подтверждение реального OAuth/SMTP/webhook E2E в HTTPS staging.
+
+### Следующие этапы разработки
+
+1. **Admin UI validation:** пройти все разделы, проверить права, ошибки API, пустые состояния, мобильную раскладку и целостность связей.
+2. **Catalog taxonomy:** утвердить определения ProductLine / Assortment / Series / Distribution Assortment / Collector Designation / Exclusivity; только после этого готовить контролируемое заполнение.
+3. **Importer quality:** прогнать Mainline TSV, Fandom HTML и ALLHW HTML preview на реальных сохранённых файлах; записать найденные ошибки парсеров и matching.
+4. **Import apply workflow:** спроектировать отдельный подтверждаемый pipeline с source snapshot, SourceRecord, Evidence, FieldClaim/Conflict, review и changelog. Не разрешать автоматическую перезапись подтверждённых полей или автоматическое объединение Casting.
+5. **Media:** добавить upload/thumbnail controls в admin UI, выполнить HDD round-trip, добавить MEDIA в backup/restore и проверить восстановление.
+6. **Deployment/security:** развернуть staging с HTTPS и постоянным хранилищем; проверить OAuth, email, RBAC, CSRF, rate limiting, webhook и резервное копирование.
+7. **Frontend integration:** подключать публичный каталог к backend только после проверки auth, API origin, CORS и прав доступа.
+8. **Release to main:** после UI/API/data audit открыть PR из integration в main. Default branch и GitHub Pages менять только после отдельного согласования.
+
+### Не делать без отдельного решения
+
+- Не выполнять массовый import apply или автоматическое слияние Casting.
+- Не изменять production SQLite DB и `collection.json`.
+- Не включать внешнюю БД, media, backups, secrets и локальные скрипты в Git.
+- Не переключать default branch / GitHub Pages и не удалять исторические ветки.
+- Не считать локальные 360 passed эквивалентом GitHub Actions или ручного E2E.
+
+---
+
 ## Этап 0. Project Manager и управление состоянием · 2026-11-16
 
 - [x] Выбрать GitHub главным источником состояния проекта.
