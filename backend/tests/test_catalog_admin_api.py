@@ -174,6 +174,7 @@ def test_catalog_admin_release_detail_includes_evidence_and_localized_casting_de
     seed_catalog(engine)
     with Session(engine) as session:
         casting = session.scalar(select(Casting).where(Casting.name == "Mazda Autozam"))
+        casting_id = casting.id
         session.add_all([
             CastingTranslation(
                 casting_id=casting.id,
@@ -196,6 +197,7 @@ def test_catalog_admin_release_detail_includes_evidence_and_localized_casting_de
     try:
         client = TestClient(app)
         response = client.get("/catalog/admin/releases/release-auto?language=ja")
+        casting_detail = client.get(f"/catalog/admin/castings/{casting_id}?language=en")
         fallback = client.get("/catalog/admin/releases/release-auto?language=fr")
     finally:
         app.dependency_overrides.pop(get_db, None)
@@ -211,6 +213,9 @@ def test_catalog_admin_release_detail_includes_evidence_and_localized_casting_de
         "ja": "日本語の説明",
         "ru": "Русское описание отливки",
     }
+    assert casting_detail.status_code == 200
+    assert casting_detail.json()["casting"]["description"] == "English casting description"
+    assert casting_detail.json()["casting"]["description_language"] == "en"
     assert fallback.status_code == 422
     assert payload["identifiers"][0]["type"] in {"catalog_number", "sku"}
     assert payload["series"] == ["HW J-Imports"]
