@@ -910,6 +910,7 @@ def test_alembic_upgrade_from_existing_core_schema_revision_preserves_catalog_da
         tables = set(inspector.get_table_names())
         assert "casting_grouping_review_sessions" in tables
         assert "casting_grouping_review_decisions" in tables
+        assert "casting_translations" in tables
         assert "conflict_releases" in tables
         with check_engine.connect() as connection:
             assert connection.execute(
