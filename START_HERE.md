@@ -1,3 +1,13 @@
+> **Актуализация состояния · 2026-11-25 · commit `d6fc574`**
+>
+> - Рабочая ветка `integration/catalog-foundation` обновлена на GitHub; `main` не изменялась.
+> - Backend admin доступен локально по `/admin`: управление Casting, Release, Series и ProductLine через API.
+> - ProductLine schema и связи Release–ProductLine–Evidence добавлены миграцией `20261123_product_line_tables`; отдельная миграция разрешает Release без назначенного Casting до подтверждения идентичности.
+> - Последний локальный полный прогон: **360 passed, 47 warnings**. Это локальный результат; CI на этом commit отдельно не подтверждался.
+> - Подробные статусы и ближайшие задачи: `docs/CURRENT_STATE.md`, `docs/ROADMAP.md`, `docs/SESSION_HANDOFF.md`.
+>
+> Корневой `index.html` по-прежнему является визуальным каталогом-прототипом и пока не подключён к backend. Это не следует путать с отдельной административной страницей `/admin`.
+>
 # HW Catalog · старт проекта
 
 ## Текущая рабочая основа
