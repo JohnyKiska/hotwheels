@@ -68,6 +68,34 @@ class Casting(TimestampMixin, Base):
         back_populates="casting", cascade="all, delete-orphan"
     )
     releases: Mapped[list[Release]] = relationship(back_populates="casting")
+    translations: Mapped[list[CastingTranslation]] = relationship(
+        back_populates="casting", cascade="all, delete-orphan"
+    )
+
+
+class CastingTranslation(TimestampMixin, Base):
+    """Human-reviewed localized text for one stable Casting identity."""
+
+    __tablename__ = "casting_translations"
+
+    casting_id: Mapped[str] = mapped_column(
+        ForeignKey("castings.id", ondelete="CASCADE"), primary_key=True
+    )
+    language_code: Mapped[str] = mapped_column(String(5), primary_key=True)
+    description: Mapped[str] = mapped_column(Text, nullable=False)
+
+    __table_args__ = (
+        CheckConstraint(
+            "language_code IN ('en', 'ru', 'ja')",
+            name="ck_casting_translations_language",
+        ),
+        CheckConstraint(
+            "length(trim(description)) > 0",
+            name="ck_casting_translations_description_nonempty",
+        ),
+    )
+
+    casting: Mapped[Casting] = relationship(back_populates="translations")
 
 
 class CastingVariant(TimestampMixin, Base):

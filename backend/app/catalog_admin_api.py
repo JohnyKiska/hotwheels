@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 from .db import get_db
 from .models import (
     Casting,
+    CastingTranslation,
     CatalogIdentifier,
     Evidence,
     EvidenceRelease,
@@ -200,9 +201,47 @@ def catalog_admin_releases(
     }
 
 
+@router.get("/catalog/admin/castings/{casting_id}")
+def catalog_admin_casting_detail(
+    casting_id: str,
+    language: str = Query(default="ru", pattern="^(en|ru|ja)$"),
+    session: Session = Depends(get_db),
+) -> dict:
+    """Return a Casting and its available localized descriptions."""
+    casting = session.get(Casting, casting_id)
+    if casting is None:
+        raise HTTPException(status_code=404, detail="Casting not found.")
+
+    translation_rows = session.scalars(
+        select(CastingTranslation)
+        .where(CastingTranslation.casting_id == casting.id)
+        .order_by(CastingTranslation.language_code)
+    ).all()
+    descriptions = {
+        item.language_code: item.description for item in translation_rows
+    }
+    selected_language = language if descriptions.get(language) else "ru"
+    selected_description = descriptions.get(selected_language)
+
+    return {
+        "mode": "read_only",
+        "writes_to_catalog": False,
+        "casting": {
+            "id": casting.id,
+            "name": casting.name,
+            "status": casting.status,
+            "first_known_year": casting.first_known_year,
+            "description": selected_description,
+            "description_language": selected_language if selected_description else None,
+            "descriptions": descriptions,
+        },
+    }
+
+
 @router.get("/catalog/admin/releases/{release_id}")
 def catalog_admin_release_detail(
     release_id: str,
+    language: str = Query(default="ru", pattern="^(en|ru|ja)$"),
     session: Session = Depends(get_db),
 ) -> dict:
     """Return a Release, its Casting, identifiers, series and source evidence."""
@@ -215,6 +254,16 @@ def catalog_admin_release_detail(
         raise HTTPException(status_code=404, detail="Release not found.")
 
     release, casting = row
+    translation_rows = session.scalars(
+        select(CastingTranslation)
+        .where(CastingTranslation.casting_id == casting.id)
+        .order_by(CastingTranslation.language_code)
+    ).all()
+    descriptions = {
+        item.language_code: item.description for item in translation_rows
+    }
+    selected_language = language if descriptions.get(language) else "ru"
+    selected_description = descriptions.get(selected_language)
     identifiers = session.execute(
         select(IdentifierType.code, CatalogIdentifier.value, ReleaseIdentifier.role,
                ReleaseIdentifier.source_note)
@@ -255,6 +304,9 @@ def catalog_admin_release_detail(
             "name": casting.name,
             "status": casting.status,
             "first_known_year": casting.first_known_year,
+            "description": selected_description,
+            "description_language": selected_language if selected_description else None,
+            "descriptions": descriptions,
         },
         "identifiers": [
             {"type": code, "value": value, "role": role, "source_note": note}

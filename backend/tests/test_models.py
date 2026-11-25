@@ -541,7 +541,7 @@ def test_alembic_upgrade_is_safe_on_initialized_existing_database(tmp_path, monk
             assert connection.execute(
                 text("SELECT name FROM castings WHERE id = :id"), {"id": casting_id}
             ).scalar_one() == "Existing record must survive"
-            assert connection.execute(text("SELECT version_num FROM alembic_version")).scalar_one() == "20261105_casting_grouping_review"
+            assert connection.execute(text("SELECT version_num FROM alembic_version")).scalar_one() == "20261125_casting_i18n"
             assert connection.execute(text("SELECT COUNT(*) FROM alembic_version")).scalar_one() == 1
     finally:
         check_engine.dispose()
@@ -910,6 +910,7 @@ def test_alembic_upgrade_from_existing_core_schema_revision_preserves_catalog_da
         tables = set(inspector.get_table_names())
         assert "casting_grouping_review_sessions" in tables
         assert "casting_grouping_review_decisions" in tables
+        assert "casting_translations" in tables
         assert "conflict_releases" in tables
         with check_engine.connect() as connection:
             assert connection.execute(
@@ -920,7 +921,7 @@ def test_alembic_upgrade_from_existing_core_schema_revision_preserves_catalog_da
             ).scalar_one() == "product_line"
             assert connection.execute(
                 text("SELECT version_num FROM alembic_version")
-            ).scalar_one() == "20261105_casting_grouping_review"
+            ).scalar_one() == "20261125_casting_i18n"
             assert connection.execute(
                 text("SELECT COUNT(*) FROM alembic_version")
             ).scalar_one() == 1
