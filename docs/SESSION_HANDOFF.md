@@ -1,21 +1,56 @@
 # HW Catalog · передача контекста
 
-**Обновлено:** 2026-11-17  
-**Рабочая ветка:** `integration/catalog-foundation`
+**Обновлено:** 2026-11-25  
+**Рабочая ветка:** `integration/catalog-foundation`  
+**Последний опубликованный commit:** `d6fc574`
 
-## Самое важное сейчас
+## Текущее состояние
 
-GitHub остаётся каноническим источником кода, документации и Project Manager. Внешний диск `E:\HW-CATALOG-DATA` содержит рабочие данные, которые не зеркалируются в Git. Не копировать репозиторий целиком и не затрагивать `DATABASE`, `MEDIA`, `IMPORTS`, `EXPORTS`, `BACKUPS`, `LOGS` или `DEVICE_INFO.json` при синхронизации Project Manager.
+GitHub — канонический источник кода и документации. Commit `d6fc574` отправлен в `origin/integration/catalog-foundation`. Ветка `main` не изменялась. Полный локальный прогон backend tests на этом commit: **360 passed, 47 warnings, 0 failed**. Отдельный GitHub Actions run для этого commit не подтверждён.
 
-### Последнее состояние · 2026-11-17
+### Что сделано в последнем цикле
 
-- PR #116 Media Library metadata/API merged в integration: `c6512c0e31e0722f17c425aa9dbf9a43014419ce`.
-- PR #117 Secure media uploads открыт в integration; актуальный head на момент handoff: `bc7acfbab18c0ffb7f09da0558fafe5ba4db799c`. CI завершился успешно: backend tests, SQLite/PostgreSQL migrations (clean + repeat), append-only enforcement и staging Compose.
-- PR #117 ещё не смержен. UI загрузки отложен до следующей сессии.
-- Подготовлен `scripts/windows/sync-project-manager-to-external.ps1` и инструкция `docs/deployment/EXTERNAL_STORAGE_SYNC.md`. Они синхронизируют только четыре файла Project Manager в `PROJECT-MANAGEMENT`, с staging, SHA-256 и сохранением предыдущей версии. Физический запуск ожидает merge документации и обновления локальной integration-ветки.
-- Физический внешний HDD этой сессией не проверялся и не изменялся. Скрипт синхронизации не запускался. Не считать snapshot скопированным.
-- `main` не изменялся.
+- Расширен `backend/app/admin_catalog_api.py`: административные операции с Casting, Release, Variant, Series и ProductLine, включая назначение ProductLine выпуску и привязку Evidence.
+- Расширен `admin.html`: ProductLine section, поиск/фильтры, карточки/редактирование, searchable Casting picker и управление связями.
+- Добавлены модели `ProductLine`, `ReleaseProductLine`, `EvidenceProductLine`.
+- Добавлена миграция `20261123_product_line_tables`; она проверяет структуру существующих таблиц, ограничения и индексы, поддерживает повторный upgrade и отказывается терять данные при downgrade.
+- Добавлена миграция `20261123_release_nullable_casting`: Release не обязан иметь Casting до подтверждения физической идентичности.
+- Исправлена ORM relationship `Casting.releases` через `passive_deletes="all"`, чтобы FK RESTRICT обрабатывался базой данных.
+- Исправлено ожидание версии в `test_downgrade_refuses_foreign_migration_state_table`: после отказа downgrade Alembic version остаётся на исходной head.
+- Добавлен тест обработки eBay notifications; добавлены/расширены тесты admin API, ProductLine migration, models и importer matcher.
+- Добавлен ADR-001 по предметной модели каталога. Его статус — **Proposed**; он требует согласования и не является разрешением на дальнейшие изменения схемы сам по себе.
 
+### Что в процессе
+
+- Ручной browser QA для `/admin` (desktop/mobile) ещё не завершён.
+- ProductLine taxonomy и ADR-001 требуют предметной проверки и утверждения.
+- Casting grouping review остаётся preview/review механизмом; предложения не применяются автоматически.
+- eBay notification tests не подтверждают реальный production webhook/E2E.
+- Media upload UI, физическая проверка внешнего HDD и backup/restore MEDIA ещё требуют завершения.
+
+### Следующие конкретные действия
+
+1. Открыть локальный backend и проверить `http://127.0.0.1:8000/admin`: ProductLine, Casting, Release, Series, редактирование и связи; затем проверить desktop/mobile.
+2. Сверить ProductLine/Assortment/Series terminology с официальными источниками и утвердить либо исправить ADR-001.
+3. Прогнать read-only importer preview на репрезентативных сохранённых ALLHW HTML и записать parser/matcher issues.
+4. Спроектировать import apply отдельно: preview → candidate → review → explicit confirmation → write с Evidence/Conflict/changelog. Без auto-merge и без overwrite confirmed fields.
+5. Завершить Media Library upload UI, HDD round-trip и backup/restore.
+6. Настроить HTTPS staging и провести ручные OAuth/SMTP/RBAC/CSRF/webhook E2E.
+7. После проверки подготовить PR в `main`; не менять `main`, Pages или default branch без согласования.
+
+## Рабочие ограничения
+
+- Не трогать рабочую БД `E:\HW-CATALOG-DATA\DATABASE\catalog.db` без явного разрешения.
+- Не коммитить `.env`, реальные секреты, SQLite, media, backups и machine-specific files.
+- Не запускать общую синхронизацию всего внешнего HDD с GitHub.
+- Не считать commit локально протестированным в GitHub Actions: текущая цифра 360 passed получена локальным `pytest`.
+- Не делать force-push: текущий commit опубликован обычным push.
+
+## Исторические handoff-записи
+
+Ниже сохранены прежние handoff-записи. Они описывают состояние на свои даты и не заменяют актуальный статус выше.
+
+---
 
 ## Исторические handoff-записи
 
